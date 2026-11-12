@@ -1530,6 +1530,7 @@ function kt_sugestao(i){ const js=kt_jogadores(); if(!js.length) return '';
   if(i===0) return melhor(js,eff);
   if(i===1) return melhor(js,p=>(+p.s.pts||0)+0.001*(+p.s.eff||0));
   if(i===2) return melhor(js,p=>(+p.s.reb||0)+0.001*(+p.s.eff||0));
+  if(i===3) return melhor(js,p=>(+p.s.reb||0)+(+p.s.stl||0)+(+p.s.blk||0)+0.001*(+p.s.eff||0));
   return ''; }
 function kt_premOpcoes(l){ const sp=l.querySelector('.pP'), sj=l.querySelector('.pJ'); const vp=sp.value, vj=sj.value;
   const nomes=kt_premNomes(); sp.innerHTML=nomes.map((n,i)=>'<option value="'+i+'">'+n.replace(/</g,'&lt;')+'</option>').join('')+'<option value="novo">Novo prêmio…</option>';
@@ -1547,7 +1548,7 @@ function kt_premLinha(ini){ const l=document.createElement('div'); l.className='
   document.getElementById('ktPremLista').appendChild(l); kt_premOpcoes(l); }
 [0,1,2,3,4,5].forEach(i=>kt_premLinha(i));
 let kt_premT=null;
-function kt_premAuto(){ clearTimeout(kt_premT); kt_premT=setTimeout(()=>document.querySelectorAll('.ktPremL').forEach(l=>{ const v=l.querySelector('.pP').value; if((v==='0'||v==='1'||v==='2') && l.querySelector('.pJ').dataset.manual!=='1') kt_premOpcoes(l); }),150); }
+function kt_premAuto(){ clearTimeout(kt_premT); kt_premT=setTimeout(()=>document.querySelectorAll('.ktPremL').forEach(l=>{ const v=l.querySelector('.pP').value; if((v==='0'||v==='1'||v==='2'||v==='3') && l.querySelector('.pJ').dataset.manual!=='1') kt_premOpcoes(l); }),150); }
 if(typeof atualizarTotaisEquipe==='function'){ const _atz=atualizarTotaisEquipe; atualizarTotaisEquipe=function(){ const r=_atz.apply(this,arguments); kt_premAuto(); kt_rascSalvar(); return r; }; }
 /* ---------- PDF e imagem ---------- */
 function kt_carregarLib(src){ return new Promise((ok,erro)=>{ if(document.querySelector('script[src="'+src+'"]')) return ok(); const e=document.createElement('script'); e.src=src; e.onload=ok; e.onerror=erro; document.head.appendChild(e); }); }
