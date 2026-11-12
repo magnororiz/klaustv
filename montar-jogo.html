@@ -62,6 +62,7 @@ button:hover{background:#0f6fd1;}
 .atl:hover{background:#17263d;}
 .atl label{cursor:pointer;min-width:0;}
 .atl .reg{color:#5fa8ff;font-size:11px;text-align:right;font-variant-numeric:tabular-nums;}
+.atl.camJogo input.num{border:2px solid #ff9f43 !important;background:#4a2a00 !important;color:#ffd8a8 !important;}
 .atl .semCam{text-align:center;font-size:15px;cursor:help;}
 .atl.semCamisa input.num{border:2px solid #ffb300 !important;background:#3a2a00 !important;}
 .atl .bEdit{width:44px;height:24px;border:1px solid #2a3b55;border-radius:6px;background:#16243a;color:#cfd8e3;font-size:12px;cursor:pointer;padding:0;}
@@ -424,7 +425,7 @@ function kt_listarAtletas(t){
     if(!sig){ document.getElementById('roster'+t).innerHTML=''; kt_montarGinasios(); if(document.getElementById('infoFed')) kt_jogoFed(); return; }
     document.getElementById('rosterTitle'+t).innerText = 'Time '+t+': '+kt_nomeEquipe(sig);
     document.getElementById('roster'+t).innerHTML = lista.map((a,i)=>
-        `<div class="atl" id="atl${t}_${a[0]}"><input type="checkbox" id="cb${t}_${i}" data-reg="${a[0]}" data-nome="${kt_esc(a[1])}" onchange="kt_contar('${t}',this)"><input class="num" readonly placeholder="#" maxlength="2" inputmode="numeric" title="Número da camisa"><label for="cb${t}_${i}">${a[1]}</label><input class="apelido" readonly placeholder="" value="${kt_esc((KT_APS[a[0]]!==undefined?KT_APS[a[0]]:kt_apelidos()[a[0]])||'')}" title="Apelido (vem do Banco de dados)"><span class="reg">${a[0]}</span><span class="semCam"></span><span></span></div>`
+        `<div class="atl" id="atl${t}_${a[0]}"><input type="checkbox" id="cb${t}_${i}" data-reg="${a[0]}" data-nome="${kt_esc(a[1])}" onchange="kt_contar('${t}',this)"><input class="num" readonly placeholder="#" maxlength="2" inputmode="numeric" title="Número da camisa"><label for="cb${t}_${i}">${a[1]}</label><input class="apelido" readonly placeholder="" value="${kt_esc((KT_APS[a[0]]!==undefined?KT_APS[a[0]]:kt_apelidos()[a[0]])||'')}" title="Apelido (vem do Banco de dados)"><span class="reg">${a[0]}</span><span class="semCam"></span><button type="button" class="bEdit" title="Trocar a camisa só neste jogo" onclick="kt_editarLinha(this)">✏️</button></div>`
     ).join('');
     const tecRow = '<div class="atl tec" id="tec'+t+'"><span class="tecLab">Técnico</span><input class="apelido tecNome" readonly placeholder="Nome do técnico" value="Técnico do '+sig+'" title="Nome do técnico"><input class="apelido tecApelido" readonly placeholder="" title="Apelido do técnico"><span></span><span></span><span></span></div>';
     document.getElementById('roster'+t).innerHTML = lista.length ? '<div class="atlHead"><span></span><span class="c">Nº</span><span>Nome</span><span>Apelido</span><span style="text-align:right;">FBERJ</span><span class="c"></span><span class="c"></span></div>' + tecRow + document.getElementById('roster'+t).innerHTML : '<div class="vazio">Nenhum atleta inscrito.</div>';
@@ -447,17 +448,19 @@ function kt_larguraNomes(t){
 function kt_editarLinha(btn){
     const row=btn.closest('.atl'); const on=!row.classList.contains('editando');
     row.classList.toggle('editando',on);
-    row.querySelectorAll('input.num,input.tecNome,input.tecApelido').forEach(i=>{ i.readOnly=!on; });
-    btn.textContent = on ? '✔' : '✏️'; btn.title = on ? 'Travar edição' : 'Editar';
-    if(on) row.querySelector('input.num,input.tecNome').focus();
+    const n=row.querySelector('input.num'); if(!n) return; n.readOnly=!on;
+    btn.textContent = on ? '✔' : '✏️'; btn.title = on ? 'Travar a camisa' : 'Trocar a camisa só neste jogo';
+    if(on){ n.focus(); n.select(); n.oninput=()=>{ n.value=n.value.replace(/\D/g,'').slice(0,2); kt_marcarCamJogo(row); }; } else kt_marcarCamJogo(row);
 }
 let kt_abrindo=false;
 let KT_FOTOS={};
 function kt_btFoto(chave){ const u=KT_FOTOS[chave]; return '<button type="button" class="bFoto'+(u?' tem':'')+'" data-chave="'+chave+'" title="Salvar foto" onclick="kt_escolherFoto(this)">'+(u?'<img src="'+u+'" alt="">':'📷')+'</button>'; }
 let KT_CAMS={}, KT_APS={};
 try{ KT_CAMS=JSON.parse(localStorage.getItem('klaustv_camisas_v1')||'{}')||{}; KT_APS=JSON.parse(localStorage.getItem('klaustv_apelidos_v1')||'{}')||{}; }catch(e){}
+function kt_marcarCamJogo(row){ const cb=row.querySelector('input[data-reg]'), n=row.querySelector('input.num'); if(!cb||!n) return; const b=String(KT_CAMS[cb.dataset.reg]||'');
+  const dif = String(n.value||'')!==b; row.classList.toggle('camJogo',dif); n.title = dif ? ('Camisa só neste jogo (no banco: '+(b||'sem número')+')') : 'Número da camisa (do Banco de dados)'; kt_avisoCam(); }
 function kt_avisoCam(){ document.querySelectorAll('.atl:not(.tec)').forEach(row=>{ const cb=row.querySelector('input[data-reg]'), n=row.querySelector('input.num'), w=row.querySelector('.semCam'); const sem=!!(cb&&cb.checked&&!(n&&n.value)); row.classList.toggle('semCamisa',sem); if(w){ w.textContent=sem?'⚠️':''; w.title=sem?'Sem camisa no Banco de dados — cadastre em Banco de dados → Jogadores':''; } }); }
-function kt_aplicarBanco(){ document.querySelectorAll('.atl:not(.tec)').forEach(row=>{ const cb=row.querySelector('input[data-reg]'), n=row.querySelector('input.num'), ap=row.querySelector('input.apelido'); if(!cb) return; const r=cb.dataset.reg; if(n) n.value=KT_CAMS[r]||''; if(ap) ap.value=KT_APS[r]||''; });
+function kt_aplicarBanco(){ document.querySelectorAll('.atl:not(.tec)').forEach(row=>{ const cb=row.querySelector('input[data-reg]'), n=row.querySelector('input.num'), ap=row.querySelector('input.apelido'); if(!cb) return; const r=cb.dataset.reg; if(n && !row.classList.contains('camJogo')) n.value=KT_CAMS[r]||''; if(ap) ap.value=KT_APS[r]||''; });
   ['A','B'].forEach(t=>{ const tec=document.getElementById('tec'+t); if(!tec) return; const sig=document.getElementById('selTime'+t).value, cat=document.getElementById('selCategoria').value; const k='TEC-'+sig+'-'+String(cat).replace(/[^A-Za-z0-9]/g,''); const inp=tec.querySelector('.tecNome'); inp.value=KT_APS[k]||('Técnico do '+sig); const ta=tec.querySelector('.tecApelido'); if(ta) ta.value=''; }); kt_avisoCam(); }
 async function kt_carregarFotos(){ const r=await kt_api({acao:'listarFotos'}); if(!r.ok) return; KT_FOTOS=r.fotos||{}; KT_CAMS=r.camisas||{}; KT_APS=r.apelidos||{}; try{ localStorage.setItem('klaustv_camisas_v1',JSON.stringify(KT_CAMS)); }catch(e){} kt_aplicarBanco();
   if(r.apelidos){ try{ localStorage.setItem('klaustv_apelidos_v1',JSON.stringify(Object.assign(kt_apelidos(),r.apelidos))); }catch(e){} document.querySelectorAll('.atl:not(.tec)').forEach(row=>{ const cb=row.querySelector('input[data-reg]'), ap=row.querySelector('input.apelido'); if(cb&&ap&&r.apelidos[cb.dataset.reg]&&!ap.matches(':focus')) ap.value=r.apelidos[cb.dataset.reg]; }); }
@@ -481,14 +484,15 @@ function kt_aplicarUltimo(t){
         .sort((a,b)=>String(b.atualizadoEm||b.dataHora||'').localeCompare(String(a.atualizadoEm||a.dataHora||'')))[0];
     if(!ult) return;
     const tm=(ult.timeA.sigla===sig)?ult.timeA:ult.timeB;
-    kt_preencherTime(t,tm);
+    kt_preencherTime(t,tm,false);
 }
-function kt_preencherTime(t,tm){
+function kt_preencherTime(t,tm,manterCamisaJogo){
     (tm.atletas||[]).forEach(a=>{
         const row=document.getElementById('atl'+t+'_'+a.reg);
         if(row){ row.querySelector('input[type=checkbox]').checked=true; }
     });
     kt_aplicarBanco();
+    if(manterCamisaJogo!==false) (tm.atletas||[]).forEach(a=>{ const row=document.getElementById('atl'+t+'_'+a.reg); if(row && a.camisaJogo && a.numero){ row.querySelector('.num').value=a.numero; row.classList.add('camJogo'); kt_marcarCamJogo(row); } });
     kt_contar(t);
 }
 const _kt_contar0=kt_contar; kt_contar=function(t,c){ const r=_kt_contar0(t,c); kt_avisoCam(); return r; };
@@ -554,7 +558,7 @@ function kt_capturar(){
     const time = t => ({
         sigla: document.getElementById('selTime'+t).value,
         nome: kt_nomeEquipe(document.getElementById('selTime'+t).value),
-        atletas: kt_marcados(t).map(c=>({reg:c.dataset.reg, nome:c.dataset.nome, numero:c.closest('.atl').querySelector('.num').value.trim(), apelido:c.closest('.atl').querySelector('.apelido').value.trim()})),
+        atletas: kt_marcados(t).map(c=>({reg:c.dataset.reg, nome:c.dataset.nome, numero:c.closest('.atl').querySelector('.num').value.trim(), apelido:c.closest('.atl').querySelector('.apelido').value.trim(), camisaJogo: c.closest('.atl').classList.contains('camJogo')})),
         tecnico: { nome:((document.querySelector('#tec'+t+' .tecNome')||{}).value||'').trim(), apelido:((document.querySelector('#tec'+t+' .tecApelido')||{}).value||'').trim() }
     });
     return {
