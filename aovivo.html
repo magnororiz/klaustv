@@ -268,7 +268,7 @@ const ZERO={pts:0,reb:0,ast:0,blk:0,stl:0,eff:0,twoMade:0,twoMiss:0,threeMade:0,
 function jogadores(j,l){
   const t=(j.meta||{})['time'+l]||{atletas:[]}; const st=(j.stats||{})[l]||{};
   return (t.atletas||[]).map(a=>Object.assign({},ZERO,st[a.reg]||{},{reg:a.reg,nome:a.nome,numero:a.numero,apelido:a.apelido,foto:a.foto,lado:l,sig:t.sigla}))
-    .sort((x,y)=>((+y.pts||0)-(+x.pts||0)) || ((+y.eff||0)-(+x.eff||0)) || ((parseInt(x.numero)||999)-(parseInt(y.numero)||999)));
+    .sort((x,y)=>((+y.pts||0)-(+x.pts||0)) || ((parseInt(x.numero)||999)-(parseInt(y.numero)||999)));
 }
 function soma(js,k){ return js.reduce((s,p)=>s+(+p[k]||0),0); }
 function pct(m,a){ return a?Math.round(m*100/a):0; }
