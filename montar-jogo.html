@@ -294,7 +294,8 @@ const KT_API = 'https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8
 function kt_tok(){ try{ return localStorage.getItem('klaustv_token_v1')||''; }catch(e){ return ''; } }
 async function kt_api(d){ try{ const r=await fetch(KT_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({token:kt_tok()},d))}); return await r.json(); }catch(e){ return {ok:false,erro:'Sem conexão com a planilha.'}; } }
 const KT_STORE = 'klaustv_jogos_montados_v1';
-let kt_editandoId = null;
+let kt_editandoId = null; let KT_ASS = null;
+function kt_assin(j){ const n=t=>String((t&&(t.sigla||t.nome))||'').toUpperCase(); return [j.categoria||'', n(j.timeA), n(j.timeB), String(j.dataHora||'').slice(0,10)].join('|'); }
 
 function kt_aviso(msg){ const a=document.getElementById('kt_aviso'); a.innerText = msg+'  (toque para fechar)'; a.style.display='block'; clearTimeout(a._t); a._t=setTimeout(()=>a.style.display='none',6000); }
 function kt_nomeEquipe(sig){ return KT_DADOS.equipes[sig] || sig; }
@@ -552,6 +553,8 @@ function kt_salvarJogo(){
     if(j.timeA.sigla === j.timeB.sigla) return kt_aviso('Time A e Time B estão iguais.');
     const lista = kt_lerSalvos();
     const agora = new Date().toISOString();
+    if(kt_editandoId && KT_ASS && KT_ASS!==kt_assin(j)) kt_editandoId=null;
+    KT_ASS=kt_assin(j);
     if(kt_editandoId){
         const i = lista.findIndex(x=>x.id===kt_editandoId);
         if(i>=0){ lista[i] = {...lista[i], ...j, atualizadoEm: agora}; }
@@ -594,6 +597,7 @@ function kt_listarSalvos(){
 function kt_abrir(id){
     const j = kt_lerSalvos().find(x=>x.id===id);
     if(!j) return;
+    KT_ASS = kt_assin(j);
     if(j.avulso){ kt_trocarModo(true); kt_preencherAvulso(j,true); window.scrollTo({top:0,behavior:'smooth'}); kt_aviso('Jogo avulso aberto para edição. Depois clique em "Salvar jogo".'); return; }
     kt_trocarModo(false);
     kt_editandoId = id; kt_abrindo=true;
@@ -682,6 +686,8 @@ function kt_salvarAvulso(){
   if(j.timeA.nome.toLowerCase()===j.timeB.nome.toLowerCase()) return kt_aviso('Time A e Time B estão com o mesmo nome.');
   if(!j.timeA.atletas.length || !j.timeB.atletas.length) return kt_aviso('Digite pelo menos 1 atleta em cada time.');
   const lista=kt_lerSalvos(), agora=new Date().toISOString();
+  if(kt_editandoId && KT_ASS && KT_ASS!==kt_assin(j)) kt_editandoId=null;
+  KT_ASS=kt_assin(j);
   if(!kt_editandoId) kt_editandoId='M'+Date.now();
   const i=lista.findIndex(x=>x.id===kt_editandoId);
   if(i>=0) lista[i]={...lista[i],...j,atualizadoEm:agora}; else lista.push({id:kt_editandoId,...j,criadoEm:agora,atualizadoEm:agora});
