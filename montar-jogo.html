@@ -38,8 +38,9 @@ button:hover{background:#0f6fd1;}
 .atl label{cursor:pointer;min-width:0;}
 .atl .reg{color:#5fa8ff;font-size:11px;text-align:right;font-variant-numeric:tabular-nums;}
 .atl input.apelido{width:100%;box-sizing:border-box;padding:3px 6px;border-radius:6px;border:none;font-size:12px;background:#ffffff;color:#000;}
-.atl input.num{width:24px;height:24px;padding:0;border-radius:50%;border:2px solid #9fb3c8;font-size:12px;font-weight:700;text-align:center;background:#ffffff;color:#000;box-sizing:border-box;}
-.atl.marcado input.num{border-color:#1e90ff;}
+.atl input.num{width:24px;height:24px;padding:0;border-radius:50%;border:2px solid var(--borda,#9fb3c8);font-size:12px;font-weight:700;text-align:center;background:var(--c1,#1e90ff);color:var(--tx,#fff);box-sizing:border-box;}
+.atl input.num::placeholder{color:var(--tx,#fff);opacity:.6;}
+.atl.marcado input.num{box-shadow:0 0 0 2px #ffd54f;}
 .btnSalvar{background:#27ae60;font-size:14px;padding:10px 22px;}
 .btnSalvar:hover{background:#1e8c4d;}
 .dica{font-size:11px;color:#9fb3c8;text-align:center;margin-top:6px;}
@@ -172,6 +173,7 @@ function kt_pintar(t){
     document.getElementById('rosterTitle'+t).style.color = kt_textoSobre(c1);
     document.getElementById('cont'+t).style.color = kt_textoSobre(c1);
     document.getElementById('box'+t).style.borderColor = (c1==='#000000') ? c2 : c1;
+    const bx=document.getElementById('box'+t); bx.style.setProperty('--c1',c1); bx.style.setProperty('--tx',kt_textoSobre(c1)); bx.style.setProperty('--borda',(c1==='#000000'||c1==='#1A1A1A')?'#ffffff':kt_textoSobre(c1)==='#000000'?'#000000':'#ffffff');
     const esc = document.getElementById('esc'+t);
     const url = (KT_DADOS.escudos||{})[sig];
     esc.innerHTML = url ? `<img src="${url}" alt="${sig}">` : sig;
