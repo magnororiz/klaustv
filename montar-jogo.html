@@ -49,6 +49,15 @@ button:hover{background:#0f6fd1;}
 .jogoItem .meta{color:#9fb3c8;font-size:11px;}
 .vazio{color:#7f93a8;text-align:center;font-size:12px;padding:10px;}
 #kt_aviso{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#ffd54f;color:#000;padding:10px 16px;border-radius:10px;font-weight:bold;font-size:13px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.5);cursor:pointer;display:none;max-width:90%;text-align:center;}
+
+.ktFooter{margin:30px auto 0 auto;max-width:1200px;border-top:3px solid #1e90ff;padding:18px 10px 10px 10px;color:#cfd8e3;font-size:13px;}
+.ktFooter .cols{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between;}
+.ktFooter .col{flex:1;min-width:240px;}
+.ktFooter h4{color:#1e90ff;margin:0 0 8px 0;font-size:14px;}
+.ktFooter a{color:#ffd54f;text-decoration:none;}
+.ktFooter .mapa{width:100%;height:220px;border:0;border-radius:10px;background:#101826;}
+.ktFooter .local{font-size:12px;color:#fff;margin-bottom:6px;}
+.ktFooter .copy{text-align:center;color:#5f7389;font-size:11px;margin-top:14px;}
 </style>
 </head>
 <body>
@@ -216,6 +225,7 @@ function kt_mandante(){
     return null;
 }
 function kt_marcarMandante(){
+    if(typeof kt_mapaFooter==='function') kt_mapaFooter(document.getElementById('inGinasio').value);
     const m = kt_mandante();
     ['A','B'].forEach(t=>{
         const el = document.getElementById('selo'+t);
@@ -321,6 +331,35 @@ function kt_novo(){
 }
 
 kt_iniciar();
+</script>
+
+<footer class="ktFooter">
+  <div class="cols">
+    <div class="col">
+      <h4>🏀 Klaus TV</h4>
+      <div>Basquete do Rio de Janeiro com narração de Klaus Chagas.</div>
+      <div style="margin-top:8px;">▶️ <a href="https://www.youtube.com/@klauschagas" target="_blank" rel="noopener">YouTube: Klaus Basquete RJ TV</a></div>
+      <div>📰 <a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener">Blog: Basquete RJ por Klaus Chagas</a></div>
+      <div style="margin-top:8px;">🔗 <a href="index.html">Início</a> · <a href="montar-jogo.html">Montar Jogo</a> · <a href="scout.html">Scout</a></div>
+    </div>
+    <div class="col" style="flex:1.4;">
+      <h4>📍 Local do jogo</h4>
+      <div class="local" id="ktLocalNome">Cristo Redentor, Rio de Janeiro</div>
+      <iframe class="mapa" id="ktMapa" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q=Cristo%20Redentor%2C%20Rio%20de%20Janeiro&output=embed"></iframe>
+    </div>
+  </div>
+  <div class="copy">© 2026 Klaus TV · klaustv.com · Basket RJ Stats PRO 4.0</div>
+</footer>
+<script>
+function kt_mapaFooter(nome){
+  const n = (nome||'').trim();
+  const q = n ? n + ', Rio de Janeiro, RJ' : 'Cristo Redentor, Rio de Janeiro';
+  const el = document.getElementById('ktMapa'); if(!el) return;
+  const src = 'https://www.google.com/maps?q=' + encodeURIComponent(q) + '&output=embed';
+  if(el.dataset.q !== q){ el.src = src; el.dataset.q = q; }
+  document.getElementById('ktLocalNome').innerText = n ? n : 'Cristo Redentor, Rio de Janeiro';
+}
 </script>
 </body>
 </html>
