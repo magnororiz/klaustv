@@ -125,13 +125,14 @@ function listarUsuarios(token) {
 function criarUsuario(token, p) {
   const d = exigeDono(token); if (d.erro) return d.erro;
   const usuario = String(p.usuario || '').trim().toLowerCase();
-  const nome = String(p.nome || '').trim();
+  const nome = String(p.nome || '').trim() || usuario;
+  const senhaDada = String(p.senha || '');
   const email = String(p.email || '').trim();
   if (!/^[a-z0-9._-]{3,30}$/.test(usuario)) return { ok: false, erro: 'Login inválido: use de 3 a 30 letras minúsculas, números, ponto ou traço.' };
-  if (!nome) return { ok: false, erro: 'Informe o nome.' };
+  if (senhaDada && !senhaValida(senhaDada)) return { ok: false, erro: 'A senha provisória precisa ter pelo menos 6 caracteres.' };
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, erro: 'E-mail inválido.' };
   if (achar(usuario)) return { ok: false, erro: 'Já existe um usuário com esse login.' };
-  const prov = senhaProvisoria();
+  const prov = senhaDada || senhaProvisoria();
   aba().appendRow([usuario, nome, 'Operador', '', 'SIM', 'Scout, Ao vivo, Estatísticas', email, hashSenha(prov, gerarSal()), 'SIM', '']);
   MailApp.sendEmail({
     to: email,

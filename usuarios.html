@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<!--ktTrava--><style>html.ktTravado body{visibility:hidden;}/*ktMenuCSS*/
+html,body{overflow-x:hidden;}
+body{padding-top:0 !important;}
+.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
+  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#140f0a 100%);
+  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
+.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
+.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));}
+.ktMenu .bola{position:absolute;right:0;top:0;height:150px;width:auto;}
+.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
+.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
+.ktMenu .marca span{color:#1e90ff;}
+.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:150px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 70px,rgba(30,91,216,.95) 150px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
+  border-top:1px solid rgba(255,255,255,.12);}
+.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
+.ktFaixa a:hover{background:rgba(255,255,255,.12);}
+.ktFaixa a.soDono{display:none;}
+html.ktDono .ktFaixa a.soDono{display:flex;}
+.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;}
+@media(max-width:820px){.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:130px;}.ktMenu .marca{font-size:24px;}
+  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
+@media(max-width:480px){.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
+/*fim*/
+.ktFooter{margin:30px auto 0 auto;max-width:1200px;border-top:3px solid #1e90ff;padding:18px 10px 10px 10px;color:#cfd8e3;font-size:13px;}
+.ktFooter .cols{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between;}
+.ktFooter .col{flex:1;min-width:240px;}
+.ktFooter h4{color:#1e90ff;margin:0 0 8px 0;font-size:14px;}
+.ktFooter a{color:#ffd54f;text-decoration:none;}
+.ktFooter .mapa{width:100%;height:220px;border:0;border-radius:10px;background:#101826;}
+.ktFooter .local{font-size:12px;color:#fff;margin-bottom:6px;}
+.ktFooter .lema{text-align:center;color:#ffd54f;font-weight:800;font-size:16px;letter-spacing:.5px;margin:0 0 14px 0;text-transform:uppercase;}
+.ktFooter .contato div{margin-bottom:5px;}
+.ktFooter .patro{display:inline-block;background:#101826;border:1px solid #1e90ff;border-radius:10px;padding:8px 12px;color:#fff;margin:2px 4px 2px 0;}
+.ktFooter .patro b{color:#ffd54f;}
+.ktFooter .copy{text-align:center;color:#5f7389;font-size:11px;margin-top:14px;}
+</style>
+<script>
+(function(){
+ var d=document.documentElement; d.classList.add('ktTravado');
+ var pag=location.pathname.split('/').pop()||'index.html';
+ function fora(){ location.replace('index.html?voltar='+encodeURIComponent(pag)); }
+ var tok=''; try{ tok=localStorage.getItem('klaustv_token_v1')||''; }catch(e){}
+ if(!tok){ fora(); return; }
+ try{ var ok=sessionStorage.getItem('kt_ok'); if(ok && ok.split('|')[0]===tok && Date.now()<+ok.split('|')[1]){ var pf=localStorage.getItem('klaustv_perfil'); if(pag==='usuarios.html' && pf!=='Dono'){ location.replace('index.html'); return; } if(pf==='Dono') d.classList.add('ktDono'); d.classList.remove('ktTravado'); return; } }catch(e){}
+ fetch('https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({acao:'eu',token:tok})})
+  .then(function(r){return r.json();}).then(function(r){
+   if(r.ok && !r.usuario.trocarSenha){ try{ localStorage.setItem('klaustv_perfil',r.usuario.perfil); sessionStorage.setItem('kt_ok',tok+'|'+(Date.now()+10*60*1000)); }catch(e){}
+     if(pag==='usuarios.html' && r.usuario.perfil!=='Dono'){ location.replace('index.html'); return; }
+     if(r.usuario.perfil==='Dono') d.classList.add('ktDono'); d.classList.remove('ktTravado'); }
+   else { try{ if(!r.ok) localStorage.removeItem('klaustv_token_v1'); }catch(e){} fora(); }
+  }).catch(function(){ fora(); });
+})();
+</script><!--/ktTrava-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klaus TV · Usuários</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding:0 16px 16px 16px;}
+.pagina{max-width:1000px;margin:0 auto;}
+h1{font-family:'Oswald','Arial Narrow',Arial;font-size:34px;letter-spacing:2px;text-transform:uppercase;margin:6px 0 4px 0;}
+h1 span{color:#1e90ff;}
+.sub{color:#9fb3c8;font-size:14px;margin-bottom:18px;}
+.caixa{background:#0f1a2e;border:1px solid #1e3a66;border-radius:14px;padding:20px;margin-bottom:18px;}
+.caixa h3{font-family:'Oswald','Arial Narrow',Arial;text-transform:uppercase;letter-spacing:1px;margin:0 0 14px 0;color:#ffd54f;font-size:18px;}
+.novo{display:grid;grid-template-columns:1fr 1fr 1.4fr auto;gap:10px;align-items:end;}
+@media(max-width:760px){.novo{grid-template-columns:1fr;}}
+.novo label{font-size:12px;color:#cfd8e3;display:flex;flex-direction:column;gap:4px;}
+.novo input{padding:10px;border-radius:8px;border:none;font-size:15px;}
+.dica{font-size:12px;color:#7f93a8;margin-top:10px;}
+.bt{padding:10px 16px;border:none;border-radius:8px;background:#1e90ff;color:#fff;font-weight:700;font-size:14px;cursor:pointer;}
+.bt:hover{background:#3aa0ff;}.bt:disabled{opacity:.5;cursor:default;}
+.bt.perigo{background:#c62828;}.bt.perigo:hover{background:#e53935;}
+.bt.sec{background:#16243a;border:1px solid #2a3b55;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{text-align:left;color:#7f93a8;font-size:11px;text-transform:uppercase;padding:8px 6px;border-bottom:1px solid #2a3b55;}
+td{padding:10px 6px;border-bottom:1px solid #16243a;}
+tr.sel td{background:#17325a;}
+tr.linha{cursor:pointer;} tr.linha:hover td{background:#132640;}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:#16243a;border:1px solid #2a3b55;}
+.tag.dono{background:#ffd54f;color:#000;border-color:#ffd54f;}
+.acoes{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;}
+.msg{font-size:13px;min-height:16px;margin-top:10px;}
+.msg.erro{color:#ff8a80;}.msg.ok{color:#8be28b;}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<!--ktMenu-->
+<header class="ktMenu">
+<canvas id="ktMenuCanvas"></canvas>
+<img class="cristo" src="cristo.png" alt="Cristo Redentor">
+<img class="bola" src="bola.png" alt="Bola de basquete">
+<div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span></a></div>
+<nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="montar-jogo.html" class="">Montar Jogo</a><a href="scout.html" class="">Scout</a><a href="usuarios.html" class="ativo soDono">Usuários</a></nav>
+</header>
+<script>
+(function(){
+ const cv=document.getElementById('ktMenuCanvas'); if(!cv) return;
+ function mix(a,b,t){return a.map((v,i)=>Math.round(v+(b[i]-v)*t));}
+ const pedra=[222,228,238], laranja=[242,140,40];
+ function desenhar(){
+  const r=cv.getBoundingClientRect(), dpr=window.devicePixelRatio||1;
+  cv.width=r.width*dpr; cv.height=r.height*dpr; const c=cv.getContext('2d'); c.scale(dpr,dpr);
+  const W=r.width,H=r.height; let seed=7; const rnd=()=>((seed=(seed*9301+49297)%233280)/233280);
+  const ini=Math.min(80,W*0.12), fim=W-Math.min(60,W*0.1);
+  const g=c.createLinearGradient(0,0,W,0);
+  g.addColorStop(0,'rgba(222,228,238,0.10)'); g.addColorStop(0.5,'rgba(180,150,120,0.06)'); g.addColorStop(1,'rgba(242,140,40,0.16)');
+  c.fillStyle=g; c.fillRect(0,0,W,H);
+  const n=Math.round(W*0.9);
+  for(let i=0;i<n;i++){
+   const t=rnd(); const x=ini+(fim-ini)*t;
+   const dens=Math.max(1-t*1.6,0)+Math.max(t*1.6-0.6,0)+0.25; if(rnd()>dens) continue;
+   const y=H*0.5+(rnd()-0.5)*H*(0.35+0.6*Math.abs(t-0.5));
+   const col=mix(pedra,laranja,Math.min(1,Math.max(0,(t-0.15)/0.75)));
+   const a=0.25+0.55*(Math.abs(t-0.5)*1.6); const s=0.6+rnd()*2.2*(1-Math.abs(t-0.5));
+   c.fillStyle=`rgba(${col[0]},${col[1]},${col[2]},${Math.min(a,0.85)})`;
+   c.beginPath(); c.arc(x,y,s,0,Math.PI*2); c.fill();
+  }
+ }
+ desenhar(); let tm; window.addEventListener('resize',()=>{clearTimeout(tm);tm=setTimeout(desenhar,150);});
+})();
+</script>
+<!--/ktMenu-->
+<div class="pagina">
+  <h1>👥 Usuários do <span>Klaus TV</span></h1>
+  <div class="sub">Só o Klaus vê esta página. Aqui ele cria e exclui os acessos da equipe.</div>
+
+  <div class="caixa">
+    <h3>Novo usuário</h3>
+    <form class="novo" onsubmit="kt_criar(event)">
+      <label>Login<input id="nvLogin" required autocapitalize="none" autocomplete="off" placeholder="ex.: joao"></label>
+      <label>Senha provisória<input id="nvSenha" type="text" autocomplete="off" minlength="6" placeholder="mínimo 6 caracteres"></label>
+      <label>E-mail<input id="nvEmail" type="email" required placeholder="email@exemplo.com"></label>
+      <button class="bt" id="btCriar">➕ Criar e enviar</button>
+    </form>
+    <div class="dica">O usuário recebe por e-mail o login e a senha provisória. No primeiro acesso o site pede para ele criar a senha dele. Se deixar a senha em branco, o site cria uma automaticamente.</div>
+    <div class="msg" id="msgCriar"></div>
+  </div>
+
+  <div class="caixa">
+    <h3>Usuários cadastrados</h3>
+    <table><thead><tr><th></th><th>Login</th><th>E-mail</th><th>Perfil</th><th>Situação</th></tr></thead><tbody id="tbUsuarios"><tr><td colspan="5">Carregando...</td></tr></tbody></table>
+    <div class="acoes">
+      <button class="bt perigo" id="btExcluir" disabled onclick="kt_excluir()">🗑️ Excluir selecionado</button>
+      <button class="bt sec" onclick="kt_listar()">↻ Atualizar lista</button>
+      <span id="selNome" style="font-size:13px;color:#9fb3c8;"></span>
+    </div>
+    <div class="msg" id="msgLista"></div>
+  </div>
+</div>
+
+<script>
+const KT_API = 'https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
+function $(id){ return document.getElementById(id); }
+function tok(){ try{ return localStorage.getItem('klaustv_token_v1')||''; }catch(e){ return ''; } }
+function msg(id,t,c){ const m=$(id); m.textContent=t||''; m.className='msg '+(c||''); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+async function api(d){
+  try{ const r=await fetch(KT_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({token:tok()},d))}); return await r.json(); }
+  catch(e){ return {ok:false,erro:'Sem conexão com o servidor. Tente de novo.'}; }
+}
+let kt_sel=null;
+async function kt_listar(){
+  kt_sel=null; $('btExcluir').disabled=true; $('btExcluir').dataset.conf=''; $('btExcluir').textContent='🗑️ Excluir selecionado'; $('selNome').textContent='';
+  const r=await api({acao:'listarUsuarios'});
+  if(!r.ok){ $('tbUsuarios').innerHTML=''; return msg('msgLista',r.erro,'erro'); }
+  msg('msgLista','');
+  $('tbUsuarios').innerHTML=r.usuarios.map(u=>{
+    const dono=u.perfil==='Dono';
+    return `<tr class="${dono?'':'linha'}" data-u="${esc(u.usuario)}" ${dono?'':'onclick="kt_escolher(this)"'}>
+      <td>${dono?'🔒':'<input type="radio" name="sel">'}</td><td><b>${esc(u.usuario)}</b></td><td>${esc(u.email)||'—'}</td>
+      <td><span class="tag ${dono?'dono':''}">${esc(u.perfil)}</span></td><td>${u.trocarSenha?'aguardando 1º acesso':(u.ativo?'ativo':'inativo')}</td></tr>`;
+  }).join('');
+}
+function kt_escolher(tr){
+  document.querySelectorAll('#tbUsuarios tr').forEach(x=>x.classList.remove('sel'));
+  tr.classList.add('sel'); tr.querySelector('input').checked=true;
+  kt_sel=tr.dataset.u; $('btExcluir').disabled=false; $('btExcluir').dataset.conf=''; $('btExcluir').textContent='🗑️ Excluir selecionado';
+  $('selNome').textContent='Selecionado: '+kt_sel;
+}
+async function kt_excluir(){
+  const b=$('btExcluir'); if(!kt_sel) return;
+  if(!b.dataset.conf){ b.dataset.conf='1'; b.textContent='Confirmar exclusão de '+kt_sel+'?'; return; }
+  b.disabled=true; msg('msgLista','Excluindo...');
+  const r=await api({acao:'excluirUsuario',usuario:kt_sel});
+  if(!r.ok){ b.disabled=false; return msg('msgLista',r.erro,'erro'); }
+  await kt_listar(); msg('msgLista',r.msg,'ok');
+}
+async function kt_criar(ev){
+  ev.preventDefault(); $('btCriar').disabled=true; msg('msgCriar','Criando usuário e enviando e-mail...');
+  const r=await api({acao:'criarUsuario',usuario:$('nvLogin').value.trim(),senha:$('nvSenha').value,email:$('nvEmail').value.trim()});
+  $('btCriar').disabled=false;
+  if(!r.ok) return msg('msgCriar',r.erro,'erro');
+  ['nvLogin','nvSenha','nvEmail'].forEach(i=>$(i).value='');
+  msg('msgCriar',r.msg,'ok'); kt_listar();
+}
+kt_listar();
+</script>
+
+<footer class="ktFooter">
+  <div class="lema">🏀 No basquete, tudo pode acontecer!</div>
+  <div class="cols">
+    <div class="col">
+      <h4>🏀 Klaus TV</h4>
+      <div>Basquete do Rio de Janeiro com narração de Klaus Chagas.</div>
+      <div style="margin-top:8px;">▶️ <a href="https://www.youtube.com/@klauschagas" target="_blank" rel="noopener">YouTube: Klaus Basquete RJ TV</a></div>
+      <div>📰 <a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener">Blog: Basquete RJ por Klaus Chagas</a></div>
+      <div style="margin-top:8px;">🔗 <a href="index.html">Início</a> · <a href="montar-jogo.html">Montar Jogo</a> · <a href="scout.html">Scout</a></div>
+    </div>
+    <div class="col contato">
+      <h4>📞 Contato</h4>
+      <div>💬 <a href="https://wa.me/5521998092305" target="_blank" rel="noopener">WhatsApp: (21) 99809-2305</a></div>
+      <div>📸 <a href="https://www.instagram.com/basquete.rj/" target="_blank" rel="noopener">Instagram: @basquete.rj</a></div>
+      <div>✉️ <a href="mailto:klaustv.rj@gmail.com">klaustv.rj@gmail.com</a></div>
+      <h4 style="margin-top:12px;">🤝 Parceiros</h4>
+      <div class="patro"><b>Coach Márcia Santos</b><br><span style="font-size:11px;">Treinamento de basquete</span></div>
+    </div>
+    <div class="col" style="flex:1.4;">
+      <h4>📍 Local do jogo</h4>
+      <div class="local" id="ktLocalNome">Cristo Redentor, Rio de Janeiro</div>
+      <iframe class="mapa" id="ktMapa" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q=Cristo%20Redentor%2C%20Rio%20de%20Janeiro&output=embed"></iframe>
+    </div>
+  </div>
+  <div class="copy">© 2026 Klaus TV · klaustv.com · Basket RJ Stats PRO 4.0</div>
+</footer>
+<script>
+function kt_mapaFooter(nome){
+  const n = (nome||'').trim();
+  const q = n ? n + ', Rio de Janeiro, RJ' : 'Cristo Redentor, Rio de Janeiro';
+  const el = document.getElementById('ktMapa'); if(!el) return;
+  const src = 'https://www.google.com/maps?q=' + encodeURIComponent(q) + '&output=embed';
+  if(el.dataset.q !== q){ el.src = src; el.dataset.q = q; }
+  document.getElementById('ktLocalNome').innerText = n ? n : 'Cristo Redentor, Rio de Janeiro';
+}
+</script>
+</body>
+</html>
