@@ -1,18 +1,77 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Klaus TV</title>
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Klaus TV · Basquete do Rio de Janeiro</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <style>
-body{font-family:Arial;background:#0b0b0b;color:#fff;margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;padding:20px;box-sizing:border-box;}
-h1{color:#1e90ff;margin:0 0 6px 0;font-size:34px;}
-p{color:#9fb3c8;margin:0 0 28px 0;}
-a.bt{display:block;width:260px;margin:10px auto;padding:16px;border-radius:12px;background:#1e90ff;color:#fff;text-decoration:none;font-weight:bold;font-size:17px;}
-a.bt.am{background:#27ae60;}
-small{color:#5f7389;margin-top:30px;}
-
+body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding:0 16px 16px 16px;}
+.hero{position:relative;max-width:1200px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid #1e3a66;}
+.hero .fundo{position:absolute;inset:0;background:url('https://commons.wikimedia.org/wiki/Special:FilePath/Rio_de_Janeiro_night.jpg?width=1920') center/cover no-repeat;filter:saturate(1.1);}
+.hero .veu{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,12,26,.90) 0%,rgba(6,12,26,.78) 55%,rgba(6,12,26,.55) 100%);}
+.hero .grade{position:relative;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:28px;padding:34px;}
+@media(max-width:900px){.hero .grade{grid-template-columns:1fr;padding:22px;}}
+.olho{font-family:'Oswald','Arial Narrow',Arial;color:#ffd54f;letter-spacing:2px;text-transform:uppercase;font-size:13px;font-weight:600;}
+.titulo{font-family:'Oswald','Arial Narrow',Arial;font-weight:700;font-size:44px;line-height:1.05;margin:8px 0 16px 0;text-transform:uppercase;}
+.titulo span{color:#1e90ff;}
+@media(max-width:560px){.titulo{font-size:32px;}}
+.texto p{font-size:16px;line-height:1.6;color:#dbe4ee;margin:0 0 12px 0;}
+.texto b{color:#fff;}
+.marcos{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0;}
+.marco{background:rgba(30,91,216,.18);border:1px solid rgba(30,144,255,.45);border-radius:10px;padding:8px 12px;font-size:13px;}
+.marco b{display:block;font-family:'Oswald','Arial Narrow',Arial;color:#ffd54f;font-size:18px;letter-spacing:1px;}
+.missao{margin:6px 0 0 0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;}
+@media(max-width:560px){.missao{grid-template-columns:1fr;}}
+.missao li{font-size:14px;color:#dbe4ee;}
+.missao li:before{content:'🏀 ';}
+.redes{margin-top:16px;font-size:14px;}
+.redes a{color:#ffd54f;text-decoration:none;margin-right:14px;}
+.cartao{background:rgba(9,18,36,.92);border:1px solid #1e90ff;border-radius:14px;padding:22px;align-self:start;box-shadow:0 10px 30px rgba(0,0,0,.4);}
+.cartao h3{font-family:'Oswald','Arial Narrow',Arial;margin:0 0 4px 0;font-size:22px;letter-spacing:1px;text-transform:uppercase;}
+.cartao .sub{color:#9fb3c8;font-size:13px;margin-bottom:14px;}
+.cartao label{display:block;font-size:12px;color:#cfd8e3;margin:10px 0 4px 0;}
+.cartao input{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #2a3b55;background:#fff;color:#000;font-size:15px;}
+.bt{display:inline-block;width:100%;margin-top:14px;padding:11px;border:none;border-radius:8px;background:#1e90ff;color:#fff;font-weight:700;font-size:15px;cursor:pointer;}
+.bt:hover{background:#3aa0ff;}.bt:disabled{opacity:.6;cursor:wait;}
+.bt.sec{background:#16243a;border:1px solid #2a3b55;}
+.bt.mini{width:auto;margin:0;padding:6px 12px;font-size:12px;}
+.msg{margin-top:10px;font-size:13px;min-height:16px;}
+.msg.erro{color:#ff8a80;}.msg.ok{color:#8be28b;}
+.oculto{display:none !important;}
+.usuarios{max-width:1200px;margin:18px auto 0 auto;background:#0f1a2e;border:1px solid #1e3a66;border-radius:14px;padding:20px;}
+.usuarios h3{font-family:'Oswald','Arial Narrow',Arial;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px 0;}
+.usuarios table{width:100%;border-collapse:collapse;font-size:14px;}
+.usuarios th{text-align:left;color:#7f93a8;font-size:11px;text-transform:uppercase;padding:6px;border-bottom:1px solid #2a3b55;}
+.usuarios td{padding:8px 6px;border-bottom:1px solid #16243a;}
+.novo{display:grid;grid-template-columns:1fr 1fr 1.4fr auto;gap:8px;align-items:end;margin-top:16px;}
+@media(max-width:760px){.novo{grid-template-columns:1fr;}}
+.novo label{font-size:12px;color:#cfd8e3;display:flex;flex-direction:column;gap:4px;}
+.novo input{padding:9px;border-radius:8px;border:none;font-size:14px;}
+.credito{max-width:1200px;margin:6px auto 0 auto;font-size:10px;color:#5f7389;text-align:right;}
+.credito a{color:#5f7389;}
+/*ktMenuCSS*/
+html,body{overflow-x:hidden;}
+body{padding-top:0 !important;}
+.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
+  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#140f0a 100%);
+  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
+.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
+.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));}
+.ktMenu .bola{position:absolute;right:0;top:50%;transform:translateY(-50%);height:180px;width:auto;}
+.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
+.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
+.ktMenu .marca span{color:#1e90ff;}
+.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:150px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 70px,rgba(30,91,216,.95) 150px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
+  border-top:1px solid rgba(255,255,255,.12);}
+.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
+.ktFaixa a:hover{background:rgba(255,255,255,.12);}
+.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;}
+@media(max-width:820px){.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:140px;}.ktMenu .marca{font-size:24px;}
+  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
+@media(max-width:480px){.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
+/*fim*/
 .ktFooter{margin:30px auto 0 auto;max-width:1200px;border-top:3px solid #1e90ff;padding:18px 10px 10px 10px;color:#cfd8e3;font-size:13px;}
 .ktFooter .cols{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between;}
 .ktFooter .col{flex:1;min-width:240px;}
@@ -25,27 +84,7 @@ small{color:#5f7389;margin-top:30px;}
 .ktFooter .patro{display:inline-block;background:#101826;border:1px solid #1e90ff;border-radius:10px;padding:8px 12px;color:#fff;margin:2px 4px 2px 0;}
 .ktFooter .patro b{color:#ffd54f;}
 .ktFooter .copy{text-align:center;color:#5f7389;font-size:11px;margin-top:14px;}
-.ktMenu{left:0 !important;margin-left:0 !important;flex-shrink:0;}/*ktMenuCSS*/
-html,body{overflow-x:hidden;}
-body{padding-top:0 !important;}
-.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:140px;margin-bottom:18px;overflow:hidden;
-  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#140f0a 100%);border-bottom:3px solid #1e90ff;
-  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
-.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
-.ktMenu .cristo{position:absolute;left:0;top:0;height:140px;width:auto;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));}
-.ktMenu .bola{position:absolute;right:0;top:50%;transform:translateY(-50%);height:170px;width:auto;}
-.ktMenu .miolo{position:relative;z-index:2;height:100%;display:flex;align-items:center;justify-content:center;gap:28px;padding:0 120px 0 130px;}
-.ktMenu .marca{font-weight:700;font-size:30px;letter-spacing:2px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 8px rgba(0,0,0,.6);}
-.ktMenu .marca span{color:#1e90ff;}
-.ktMenu nav{display:flex;gap:8px;flex-wrap:wrap;}
-.ktMenu nav a{font-weight:500;font-size:15px;letter-spacing:1px;text-transform:uppercase;color:#e6edf5;text-decoration:none;
-  padding:7px 16px;border-radius:999px;background:rgba(10,20,40,.55);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(4px);transition:.2s;}
-.ktMenu nav a:hover{background:rgba(30,144,255,.35);border-color:#1e90ff;}
-.ktMenu nav a.ativo{background:#1e90ff;border-color:#1e90ff;color:#fff;}
-@media(max-width:820px){.ktMenu .miolo{padding:0 70px 0 130px;gap:12px;flex-direction:column;}
-  .ktMenu .cristo{height:140px;}.ktMenu .bola{height:110px;}.ktMenu .marca{font-size:22px;}.ktMenu nav a{font-size:12px;padding:5px 11px;}}
-@media(max-width:480px){.ktMenu .miolo{padding:0 46px 0 92px;}.ktMenu .cristo{height:120px;}.ktMenu .bola{height:90px;}}
-/*fim*/</style>
+</style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -68,7 +107,8 @@ body{padding-top:0 !important;}
  </g>
 </g>
 </svg>
-<div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span></a><nav><a href="index.html" class="ativo">Início</a><a href="montar-jogo.html">Montar Jogo</a><a href="scout.html">Scout</a></nav></div>
+<div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span></a></div>
+<nav class="ktFaixa"><a href="index.html" class="ativo">Início</a><a href="montar-jogo.html">Montar Jogo</a><a href="scout.html">Scout</a></nav>
 </header>
 <script>
 (function(){
@@ -98,12 +138,158 @@ body{padding-top:0 !important;}
 })();
 </script>
 <!--/ktMenu-->
-<h1>🏀 Klaus TV</h1>
-<p>Basket RJ Stats PRO 4.0</p>
-<a class="bt am" href="montar-jogo.html">🏟️ Montar Jogo</a>
-<a class="bt" href="scout.html">📊 Scout do Klaus</a>
-<small>Versão de teste</small>
+<section class="hero">
+  <div class="fundo"></div><div class="veu"></div>
+  <div class="grade">
+    <div class="texto">
+      <div class="olho">Basquete do Rio de Janeiro · desde 2007</div>
+      <div class="titulo">Klaus <span>Chagas</span><br>a voz da base carioca</div>
+      <p>Narrador e criador do canal <b>Klaus Basquete RJ TV</b> e do blog <b>Basquete RJ por Klaus Chagas</b>, Klaus dedica quase 20 anos a registrar o basquete do Rio de Janeiro, com atenção especial às categorias de base e ao Campeonato Estadual da FBERJ.</p>
+      <p>Tudo começou em <b>4 de novembro de 2007</b>, com um vídeo de família no YouTube, feito só para guardar memórias. Em <b>2009</b> o basquete entrou no canal, acompanhando a torcida Flabasquete. Em <b>2013</b>, com os filhos jogando, nasceu a missão de acompanhar e apoiar a base do basquete carioca.</p>
+      <p>Desde então foram incontáveis horas atrás da câmera: jogos, campeonatos e torneios transmitidos com narração, atletas registrados nos primeiros passos na quadra e meninos que cresceram diante das lentes. Essas histórias são também dos atletas, pais, treinadores, clubes e torcidas.</p>
+      <div class="marcos">
+        <div class="marco"><b>2007</b>primeiro vídeo no YouTube</div>
+        <div class="marco"><b>2009</b>o basquete chega ao canal</div>
+        <div class="marco"><b>2013</b>foco nas categorias de base</div>
+        <div class="marco"><b>Full HD</b>transmissões com narração</div>
+      </div>
+      <div class="olho" style="margin-top:6px;">Os compromissos do canal</div>
+      <ul class="missao">
+        <li>Dar visibilidade ao basquete</li>
+        <li>Registrar histórias</li>
+        <li>Valorizar os atletas</li>
+        <li>Apoiar as categorias de base</li>
+        <li>Incentivar o futuro do basquete brasileiro</li>
+      </ul>
+      <p style="margin-top:14px;">Quer o jogo do seu filho transmitido? Famílias podem contratar a transmissão com narração e imagem Full HD, com agendamento antecipado.</p>
+      <div class="redes">
+        <a href="https://www.youtube.com/@klauschagas" target="_blank" rel="noopener">▶️ YouTube</a>
+        <a href="https://www.instagram.com/klauschagas/" target="_blank" rel="noopener">📸 Instagram</a>
+        <a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener">📰 Blog</a>
+        <a href="https://wa.me/5521998092305" target="_blank" rel="noopener">💬 WhatsApp</a>
+      </div>
+    </div>
 
+    <div class="cartao" id="cxLogin">
+      <h3>Área da equipe</h3>
+      <div class="sub">Acesso do Klaus e da equipe de transmissão.</div>
+      <form onsubmit="kt_entrar(event)">
+        <label>Usuário<input id="lgUsuario" autocomplete="username" autocapitalize="none" required></label>
+        <label>Senha<input id="lgSenha" type="password" autocomplete="current-password" required></label>
+        <button class="bt" id="btEntrar">Entrar</button>
+      </form>
+      <div class="msg" id="msgLogin"></div>
+    </div>
+
+    <div class="cartao oculto" id="cxTroca">
+      <h3>Crie sua senha</h3>
+      <div class="sub">Este é o seu primeiro acesso. Troque a senha provisória por uma senha só sua.</div>
+      <form onsubmit="kt_trocar(event)">
+        <label>Senha provisória (atual)<input id="trAtual" type="password" autocomplete="current-password" required></label>
+        <label>Nova senha (mínimo 6 caracteres)<input id="trNova" type="password" autocomplete="new-password" required minlength="6"></label>
+        <label>Repita a nova senha<input id="trNova2" type="password" autocomplete="new-password" required minlength="6"></label>
+        <button class="bt" id="btTrocar">Salvar nova senha</button>
+      </form>
+      <div class="msg" id="msgTroca"></div>
+    </div>
+
+    <div class="cartao oculto" id="cxLogado">
+      <h3 id="lgOla">Olá!</h3>
+      <div class="sub" id="lgPerfil"></div>
+      <a class="bt" href="montar-jogo.html" style="text-align:center;text-decoration:none;box-sizing:border-box;">Ir para Montar Jogo</a>
+      <button class="bt sec" onclick="kt_mostrarTroca(false)">Trocar minha senha</button>
+      <button class="bt sec" onclick="kt_sair()">Sair</button>
+    </div>
+  </div>
+</section>
+<div class="credito">Foto de fundo: “Rio de Janeiro night”, Mark Goble, <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener">CC BY 2.0</a>, via Wikimedia Commons.</div>
+
+<section class="usuarios oculto" id="cxUsuarios">
+  <h3>👥 Usuários do site (só o Klaus vê)</h3>
+  <table><thead><tr><th>Login</th><th>Nome</th><th>Perfil</th><th>E-mail</th><th>Situação</th><th></th></tr></thead><tbody id="tbUsuarios"></tbody></table>
+  <form class="novo" onsubmit="kt_criar(event)">
+    <label>Nome<input id="nvNome" required></label>
+    <label>Login<input id="nvLogin" required autocapitalize="none" placeholder="ex.: joao.silva"></label>
+    <label>E-mail<input id="nvEmail" type="email" required></label>
+    <button class="bt mini" id="btCriar" style="height:38px;">➕ Criar e enviar e-mail</button>
+  </form>
+  <div class="msg" id="msgUsuarios">O novo usuário recebe por e-mail o login e uma senha provisória, e troca a senha no primeiro acesso.</div>
+</section>
+
+<script>
+const KT_API = '';
+const KT_TOKEN = 'klaustv_token_v1';
+function $(id){ return document.getElementById(id); }
+function kt_msg(id, txt, tipo){ const m=$(id); m.textContent=txt||''; m.className='msg '+(tipo||''); }
+function kt_tok(){ try{ return localStorage.getItem(KT_TOKEN)||''; }catch(e){ return ''; } }
+function kt_setTok(t){ try{ t ? localStorage.setItem(KT_TOKEN,t) : localStorage.removeItem(KT_TOKEN); }catch(e){} }
+async function kt_api(dados){
+  if(!KT_API) return {ok:false, erro:'O login ainda está sendo configurado. Volte em breve.'};
+  try{
+    const r = await fetch(KT_API, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(dados)});
+    return await r.json();
+  }catch(e){ return {ok:false, erro:'Sem conexão com o servidor. Tente de novo.'}; }
+}
+function kt_tela(u){
+  ['cxLogin','cxTroca','cxLogado'].forEach(id=>$(id).classList.add('oculto'));
+  $('cxUsuarios').classList.add('oculto');
+  if(!u){ $('cxLogin').classList.remove('oculto'); return; }
+  if(u.trocarSenha){ kt_mostrarTroca(true); return; }
+  $('cxLogado').classList.remove('oculto');
+  $('lgOla').textContent = 'Olá, '+u.nome+'!';
+  $('lgPerfil').textContent = u.perfil==='Dono' ? 'Perfil: Dono · pode criar e excluir usuários' : 'Perfil: '+u.perfil;
+  if(u.podeGerenciar){ $('cxUsuarios').classList.remove('oculto'); kt_listar(); }
+}
+function kt_mostrarTroca(obrigatoria){
+  ['cxLogin','cxLogado'].forEach(id=>$(id).classList.add('oculto'));
+  $('cxTroca').classList.remove('oculto');
+  $('cxTroca').querySelector('.sub').textContent = obrigatoria ? 'Este é o seu primeiro acesso. Troque a senha provisória por uma senha só sua.' : 'Digite a senha atual e escolha a nova.';
+  $('cxTroca').querySelector('label').firstChild.textContent = obrigatoria ? 'Senha provisória (atual)' : 'Senha atual';
+  $('trAtual').focus();
+}
+async function kt_entrar(ev){
+  ev.preventDefault(); $('btEntrar').disabled=true; kt_msg('msgLogin','Entrando...');
+  const r = await kt_api({acao:'login', usuario:$('lgUsuario').value.trim(), senha:$('lgSenha').value});
+  $('btEntrar').disabled=false;
+  if(!r.ok) return kt_msg('msgLogin', r.erro, 'erro');
+  kt_setTok(r.token); kt_msg('msgLogin',''); $('lgSenha').value='';
+  if(r.usuario.trocarSenha) $('trAtual').value='';
+  kt_tela(r.usuario);
+}
+async function kt_trocar(ev){
+  ev.preventDefault();
+  if($('trNova').value !== $('trNova2').value) return kt_msg('msgTroca','As duas senhas novas não são iguais.','erro');
+  $('btTrocar').disabled=true; kt_msg('msgTroca','Salvando...');
+  const r = await kt_api({acao:'trocarSenha', token:kt_tok(), senhaAtual:$('trAtual').value, senhaNova:$('trNova').value});
+  $('btTrocar').disabled=false;
+  if(!r.ok) return kt_msg('msgTroca', r.erro, 'erro');
+  ['trAtual','trNova','trNova2'].forEach(id=>$(id).value='');
+  kt_msg('msgTroca',''); kt_tela(r.usuario);
+}
+async function kt_sair(){ const t=kt_tok(); kt_setTok(''); kt_tela(null); if(t) kt_api({acao:'sair', token:t}); }
+async function kt_listar(){
+  const r = await kt_api({acao:'listarUsuarios', token:kt_tok()});
+  if(!r.ok) return kt_msg('msgUsuarios', r.erro, 'erro');
+  $('tbUsuarios').innerHTML = r.usuarios.map(u=>`<tr><td>${esc(u.usuario)}</td><td>${esc(u.nome)}</td><td>${esc(u.perfil)}</td><td>${esc(u.email)}</td><td>${u.trocarSenha?'aguardando 1º acesso':(u.ativo?'ativo':'inativo')}</td><td>${u.perfil==='Dono'?'':`<button class="bt mini sec" onclick="kt_excluir(this,'${esc(u.usuario)}')">Excluir</button>`}</td></tr>`).join('');
+}
+async function kt_criar(ev){
+  ev.preventDefault(); $('btCriar').disabled=true; kt_msg('msgUsuarios','Criando usuário e enviando e-mail...');
+  const r = await kt_api({acao:'criarUsuario', token:kt_tok(), nome:$('nvNome').value.trim(), usuario:$('nvLogin').value.trim(), email:$('nvEmail').value.trim()});
+  $('btCriar').disabled=false;
+  if(!r.ok) return kt_msg('msgUsuarios', r.erro, 'erro');
+  ['nvNome','nvLogin','nvEmail'].forEach(id=>$(id).value='');
+  kt_msg('msgUsuarios', r.msg, 'ok'); kt_listar();
+}
+async function kt_excluir(bt, usuario){
+  if(!bt.dataset.conf){ bt.dataset.conf='1'; bt.textContent='Confirmar?'; setTimeout(()=>{ bt.dataset.conf=''; bt.textContent='Excluir'; },4000); return; }
+  bt.disabled=true;
+  const r = await kt_api({acao:'excluirUsuario', token:kt_tok(), usuario});
+  if(!r.ok){ bt.disabled=false; return kt_msg('msgUsuarios', r.erro, 'erro'); }
+  kt_msg('msgUsuarios', r.msg, 'ok'); kt_listar();
+}
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+(async function(){ const t=kt_tok(); if(!t){ kt_tela(null); return; } const r=await kt_api({acao:'eu', token:t}); if(r.ok) kt_tela(r.usuario); else { kt_setTok(''); kt_tela(null); } })();
+</script>
 
 <footer class="ktFooter">
   <div class="lema">🏀 No basquete, tudo pode acontecer!</div>

@@ -180,23 +180,24 @@ hr{
 /*ktMenuCSS*/
 html,body{overflow-x:hidden;}
 body{padding-top:0 !important;}
-.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:140px;margin-bottom:18px;overflow:hidden;
-  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#140f0a 100%);border-bottom:3px solid #1e90ff;
+.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
+  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#140f0a 100%);
   font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
 .ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
-.ktMenu .cristo{position:absolute;left:0;top:0;height:140px;width:auto;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));}
-.ktMenu .bola{position:absolute;right:0;top:50%;transform:translateY(-50%);height:170px;width:auto;}
-.ktMenu .miolo{position:relative;z-index:2;height:100%;display:flex;align-items:center;justify-content:center;gap:28px;padding:0 120px 0 130px;}
-.ktMenu .marca{font-weight:700;font-size:30px;letter-spacing:2px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 8px rgba(0,0,0,.6);}
+.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));}
+.ktMenu .bola{position:absolute;right:0;top:50%;transform:translateY(-50%);height:180px;width:auto;}
+.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
+.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
 .ktMenu .marca span{color:#1e90ff;}
-.ktMenu nav{display:flex;gap:8px;flex-wrap:wrap;}
-.ktMenu nav a{font-weight:500;font-size:15px;letter-spacing:1px;text-transform:uppercase;color:#e6edf5;text-decoration:none;
-  padding:7px 16px;border-radius:999px;background:rgba(10,20,40,.55);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(4px);transition:.2s;}
-.ktMenu nav a:hover{background:rgba(30,144,255,.35);border-color:#1e90ff;}
-.ktMenu nav a.ativo{background:#1e90ff;border-color:#1e90ff;color:#fff;}
-@media(max-width:820px){.ktMenu .miolo{padding:0 70px 0 130px;gap:12px;flex-direction:column;}
-  .ktMenu .cristo{height:140px;}.ktMenu .bola{height:110px;}.ktMenu .marca{font-size:22px;}.ktMenu nav a{font-size:12px;padding:5px 11px;}}
-@media(max-width:480px){.ktMenu .miolo{padding:0 46px 0 92px;}.ktMenu .cristo{height:120px;}.ktMenu .bola{height:90px;}}
+.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:150px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 70px,rgba(30,91,216,.95) 150px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
+  border-top:1px solid rgba(255,255,255,.12);}
+.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
+.ktFaixa a:hover{background:rgba(255,255,255,.12);}
+.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;}
+@media(max-width:820px){.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:140px;}.ktMenu .marca{font-size:24px;}
+  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
+@media(max-width:480px){.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
 /*fim*/</style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
@@ -222,7 +223,8 @@ body{padding-top:0 !important;}
  </g>
 </g>
 </svg>
-<div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span></a><nav><a href="index.html">Início</a><a href="montar-jogo.html">Montar Jogo</a><a href="scout.html" class="ativo">Scout</a></nav></div>
+<div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span></a></div>
+<nav class="ktFaixa"><a href="index.html">Início</a><a href="montar-jogo.html">Montar Jogo</a><a href="scout.html" class="ativo">Scout</a></nav>
 </header>
 <script>
 (function(){
