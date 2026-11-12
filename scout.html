@@ -36,7 +36,17 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .ktJM label{color:#ffd54f;font-weight:700;font-size:15px;}
 .ktJM select{flex:1;min-width:260px;max-width:640px;padding:9px;border-radius:8px;border:none;font-size:14px;}
 .ktFim{text-align:center;margin:26px auto 10px;}
-.ktFim button{font-size:15px;padding:12px 26px;}
+.ktFim{max-width:1100px;}
+.ktPrem{border:2px solid #ffd54f;border-radius:12px;background:#101826;padding:12px 14px;text-align:left;}
+.ktPremTit{color:#ffd54f;font-weight:700;font-size:16px;text-align:center;margin-bottom:8px;}
+.ktPremCab,.ktPremL{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) 40px;gap:8px;align-items:center;}
+.ktPremCab{font-size:11px;color:#9fb3c8;text-transform:uppercase;margin-bottom:4px;}
+.ktPremL{margin-bottom:6px;}
+.ktPremL select{width:100%;padding:8px;border-radius:8px;border:none;font-size:13px;}
+.ktFimBt{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.ktFimBt button{font-size:15px;padding:12px 18px;width:280px;max-width:46%;}
+@media(max-width:560px){.ktFimBt button{max-width:100%;width:100%;}}
+#ktSumula{position:absolute;left:-10000px;top:0;}
 /*fimJM*/
 </style>
 <script>
@@ -1661,7 +1671,14 @@ if(win){
 
 
 
-<!--ktFimJogo--><div class="ktFim"><button onclick="gerarPDF()">🧾 Gerar PDF</button></div><!--/ktFimJogo-->
+<!--ktFimJogo--><div class="ktFim">
+<div class="ktPrem"><div class="ktPremTit">🏆 Prêmios do jogo</div>
+<div class="ktPremCab"><span>Prêmio</span><span>Jogador</span><span></span></div>
+<div id="ktPremLista"></div>
+<button type="button" onclick="kt_premLinha()">➕ Adicionar prêmio</button></div>
+<div class="ktFimBt"><button type="button" onclick="kt_exportar('pdf')">📄 Baixar PDF do jogo</button><button type="button" onclick="kt_exportar('img')">🖼️ Baixar imagem para WhatsApp</button></div>
+<div id="ktSumula"></div>
+</div><!--/ktFimJogo-->
 <!--ktJMjs--><script>
 const KT_API_SC='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
 const KT_CURTO={"BSA": "Basquete S.A.", "BFR": "Botafogo", "CRF": "Flamengo", "CFCSN": "Funcionários", "FFC": "Fluminense", "TTC": "Tijuca", "NBC": "Niterói", "CCL": "Leopoldinense", "IG": "Iguaba Grande", "ABIG": "Jequiá", "ACEAR": "Irajá", "CESC": "Suzano Costa", "EEPZ": "Passo Zero", "IDEC": "IDEC", "ITDA": "Atitude", "KE": "K. Esportes", "MB": "Mesquita", "JTC": "Jacarepaguá", "TKA": "Team Klun", "ASPCM": "Municipal", "CK": "Carioca King's", "IB": "Itaipu", "NBR": "NBR Campos"};
@@ -1675,7 +1692,7 @@ function kt_abrev(n){ const w=String(n||'').trim().split(/\s+/); const core=w.ma
 function kt_nomeTime(t){ return t.avulso? (t.nome||t.sigla) : (KT_CURTO[t.sigla]||t.nome||t.sigla); }
 function kt_rotuloJM(j){ const d=String(j.dataHora||''); const dt=d.slice(8,10)+'/'+d.slice(5,7)+(d.length>11?' '+d.slice(11,16):'');
   const m=j.meta||{}; const a=m.timeA||{}, b=m.timeB||{};
-  return dt+' · '+(j.categoria||'')+' · '+kt_nomeTime(Object.assign({avulso:m.avulso},a))+' x '+kt_nomeTime(Object.assign({avulso:m.avulso},b))+(m.avulso?' · avulso':'')+(j.status==='FINAL'?' · FINAL':''); }
+  return dt+' · '+(j.categoria||'')+' · '+kt_nomeTime(Object.assign({avulso:m.avulso},a))+' x '+kt_nomeTime(Object.assign({avulso:m.avulso},b))+(j.jogoFed?' · Jogo '+j.jogoFed:'')+(m.avulso?' · avulso':'')+(j.status==='FINAL'?' · FINAL':''); }
 async function kt_listarMontados(){
   const sel=document.getElementById('ktSelJogo'); const atual=sel.value;
   const r=await kt_apiSc({acao:'listarJogos'});
@@ -1708,6 +1725,78 @@ function kt_abrirMontado(id){
   KT_JOGO_ID=id;
 }
 kt_listarMontados();
+/* ---------- Prêmios do jogo ---------- */
+const KT_PREM_BASE=['MVP do jogo','Cestinha do jogo','Defensor do jogo','Reboteiro do jogo','Destaque do Time A','Destaque do Time B'];
+function kt_premExtras(){ try{ return JSON.parse(localStorage.getItem('klaustv_premios_v1')||'[]'); }catch(e){ return []; } }
+function kt_premNomes(){ const ta=document.getElementById('titleA').innerText.trim()||'Time A', tb=document.getElementById('titleB').innerText.trim()||'Time B';
+  return KT_PREM_BASE.map(p=>p.replace('Time A',ta).replace('Time B',tb)).concat(kt_premExtras()); }
+function kt_jogadores(){ const out=[]; ['A','B'].forEach(t=>{ const tn=document.getElementById('title'+t).innerText.trim()||('Time '+t);
+  const ls=document.querySelectorAll('#table'+t+' tr'); for(let i=1;i<=12;i++){ const c=ls[i].querySelectorAll('td'); const nome=c[1].innerText.trim(); if(!nome||/^Jogador \d+$/.test(nome)&&!kt_tem(t+'-'+i)) continue;
+    out.push({k:t+'-'+i,t,tn,num:c[0].innerText.trim(),nome,s:stats[t+'-'+i]}); } }); return out; }
+function kt_tem(k){ const s=stats[k]||{}; return ['pts','reb','ast','stl','blk','to','foul','twoMiss','threeMiss','ftMiss'].some(c=>+s[c]); }
+function kt_sugestao(i){ const js=kt_jogadores(); if(!js.length) return '';
+  const melhor=(lista,f)=>{ let b=null; lista.forEach(p=>{ if(f(p)>0 && (!b||f(p)>f(b))) b=p; }); return b?b.k:''; };
+  const eff=p=>(+p.s.eff||0)+0.001*(+p.s.pts||0);
+  return [melhor(js,eff), melhor(js,p=>+p.s.pts||0), melhor(js,p=>(+p.s.blk||0)+(+p.s.stl||0)), melhor(js,p=>+p.s.reb||0),
+          melhor(js.filter(p=>p.t==='A'),eff), melhor(js.filter(p=>p.t==='B'),eff)][i]||''; }
+function kt_premOpcoes(l){ const sp=l.querySelector('.pP'), sj=l.querySelector('.pJ'); const vp=sp.value, vj=sj.value;
+  const nomes=kt_premNomes(); sp.innerHTML=nomes.map((n,i)=>'<option value="'+i+'">'+n.replace(/</g,'&lt;')+'</option>').join('')+'<option value="novo">Novo prêmio…</option>';
+  sp.value=(vp!==''&&+vp<nomes.length)?vp:(l.dataset.ini||'0');
+  sj.innerHTML='<option value="">— escolha o jogador —</option>'+kt_jogadores().map(p=>'<option value="'+p.k+'">'+(p.num?'#'+p.num+' ':'')+p.nome.replace(/</g,'&lt;')+' · '+p.tn.replace(/</g,'&lt;')+'</option>').join('');
+  if(sj.dataset.manual==='1') sj.value=vj; else { const sug=+sp.value<6?kt_sugestao(+sp.value):''; sj.value=sug||vj||''; } }
+function kt_premLinha(ini){ const l=document.createElement('div'); l.className='ktPremL'; if(ini!==undefined) l.dataset.ini=String(ini);
+  l.innerHTML='<select class="pP"></select><select class="pJ"></select><button type="button" title="Tirar prêmio">🗑️</button>';
+  const sp=l.querySelector('.pP'), sj=l.querySelector('.pJ');
+  sp.onchange=()=>{ if(sp.value==='novo'){ const n=(prompt('Nome do novo prêmio:')||'').trim(); if(n){ const ex=kt_premExtras(); if(!ex.includes(n)){ ex.push(n); try{ localStorage.setItem('klaustv_premios_v1',JSON.stringify(ex)); }catch(e){} } l.dataset.ini=String(kt_premNomes().indexOf(n)); sp.value=''; } else sp.value=l.dataset.ini||'0'; }
+    sj.dataset.manual=''; document.querySelectorAll('.ktPremL').forEach(kt_premOpcoes); };
+  sj.onchange=()=>{ sj.dataset.manual='1'; };
+  sj.onmousedown=sj.onfocus=()=>kt_premOpcoes(l);
+  l.querySelector('button').onclick=()=>l.remove();
+  document.getElementById('ktPremLista').appendChild(l); kt_premOpcoes(l); }
+[0,1,2,3,4,5].forEach(i=>kt_premLinha(i));
+/* ---------- PDF e imagem ---------- */
+function kt_carregarLib(src){ return new Promise((ok,erro)=>{ if(document.querySelector('script[src="'+src+'"]')) return ok(); const e=document.createElement('script'); e.src=src; e.onload=ok; e.onerror=erro; document.head.appendChild(e); }); }
+function kt_esc2(x){ return String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function kt_montarSumula(){
+  const j=KT_MONTADOS.find(x=>x.id===KT_JOGO_ID)||{}; const m=j.meta||{};
+  const tn=t=>document.getElementById('title'+t).innerText.trim()||('Time '+t);
+  const js=kt_jogadores(); const tot=t=>js.filter(p=>p.t===t).reduce((a,p)=>a+(+p.s.pts||0),0);
+  const dt=String(j.dataHora||''); const data=dt?dt.slice(8,10)+'/'+dt.slice(5,7)+'/'+dt.slice(0,4)+(dt.length>11?' às '+dt.slice(11,16):''):new Date().toLocaleDateString('pt-BR');
+  const fr=(mk,ms)=>mk+'/'+(mk+ms);
+  const tab=t=>{ const ps=js.filter(p=>p.t===t).sort((a,b)=>(+b.s.pts||0)-(+a.s.pts||0)||(+b.s.eff||0)-(+a.s.eff||0));
+    const sum=k=>ps.reduce((a,p)=>a+(+p.s[k]||0),0);
+    return '<div class="sT">'+kt_esc2(tn(t))+'</div><table><tr><th>#</th><th class="l">Jogador</th><th>PTS</th><th>2P</th><th>3P</th><th>LL</th><th>REB</th><th>AST</th><th>ROU</th><th>TOC</th><th>ERR</th><th>FP</th><th>EF</th></tr>'+
+    ps.map(p=>{ const s=p.s; return '<tr><td>'+kt_esc2(p.num)+'</td><td class="l">'+kt_esc2(p.nome)+'</td><td><b>'+(+s.pts||0)+'</b></td><td>'+fr(+s.twoMade||0,+s.twoMiss||0)+'</td><td>'+fr(+s.threeMade||0,+s.threeMiss||0)+'</td><td>'+fr(+s.ftMade||0,+s.ftMiss||0)+'</td><td>'+(+s.reb||0)+'</td><td>'+(+s.ast||0)+'</td><td>'+(+s.stl||0)+'</td><td>'+(+s.blk||0)+'</td><td>'+(+s.to||0)+'</td><td>'+(+s.foul||0)+'</td><td><b>'+(+s.eff||0)+'</b></td></tr>'; }).join('')+
+    '<tr class="tot"><td colspan="2" class="l">Total</td><td>'+sum('pts')+'</td><td>'+fr(sum('twoMade'),sum('twoMiss'))+'</td><td>'+fr(sum('threeMade'),sum('threeMiss'))+'</td><td>'+fr(sum('ftMade'),sum('ftMiss'))+'</td><td>'+sum('reb')+'</td><td>'+sum('ast')+'</td><td>'+sum('stl')+'</td><td>'+sum('blk')+'</td><td>'+sum('to')+'</td><td>'+sum('foul')+'</td><td>'+sum('eff')+'</td></tr></table>'; };
+  const nomes=kt_premNomes(); const prem=[...document.querySelectorAll('.ktPremL')].map(l=>{ const p=nomes[+l.querySelector('.pP').value]; const k=l.querySelector('.pJ').value; const pl=js.find(x=>x.k===k); return (p&&pl)?{p,pl}:null; }).filter(Boolean);
+  const premHtml=prem.length?'<div class="sT">🏆 Prêmios do jogo</div><div class="prem">'+prem.map(x=>'<div><span>'+kt_esc2(x.p)+'</span><b>'+kt_esc2(x.pl.nome)+'</b><small>'+kt_esc2(x.pl.tn)+'</small></div>').join('')+'</div>':'';
+  const info=[j.categoria, data, j.ginasio||m.ginasio, j.jogoFed?'Jogo FBERJ nº '+j.jogoFed:''].filter(Boolean).map(kt_esc2).join(' · ');
+  const el=document.getElementById('ktSumula');
+  el.innerHTML='<div id="ktSumBox"><style>#ktSumBox{width:1000px;background:#fff;color:#111;font-family:Arial,sans-serif;padding:26px 30px;box-sizing:border-box}#ktSumBox .cab{display:flex;align-items:center;gap:18px;border-bottom:4px solid #1e5bd8;padding-bottom:14px}#ktSumBox .cab img{height:96px}#ktSumBox .pl{flex:1;text-align:center}#ktSumBox .pl .t{display:flex;align-items:center;justify-content:center;gap:18px;font-weight:900;font-size:24px}#ktSumBox .pl .n{font-size:54px;color:#1e5bd8;font-family:Oswald,Arial}#ktSumBox .pl .x{font-size:26px;color:#999}#ktSumBox .inf{color:#555;font-size:14px;margin-top:6px}#ktSumBox .sT{background:#1e5bd8;color:#fff;font-weight:800;font-size:17px;padding:7px 12px;margin-top:18px;border-radius:6px 6px 0 0}#ktSumBox table{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:fixed}#ktSumBox th:first-child{width:38px}#ktSumBox th:nth-child(2){width:300px}#ktSumBox th{background:#e8eefb;color:#1a2c55;padding:6px 4px;font-size:12px}#ktSumBox td{padding:5px 4px;text-align:center;border-bottom:1px solid #e4e7ec}#ktSumBox .l{text-align:left}#ktSumBox tr.tot td{background:#0d1a33;color:#ffd54f;font-weight:800}#ktSumBox .prem{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;background:#fff8e1;border:1px solid #ffd54f;border-top:none}#ktSumBox .prem div{display:flex;flex-direction:column;background:#fff;border-radius:8px;padding:8px 10px;border:1px solid #f0e2a8}#ktSumBox .prem span{font-size:12px;color:#8a6d00;font-weight:700;text-transform:uppercase}#ktSumBox .prem b{font-size:15px}#ktSumBox .prem small{color:#666}#ktSumBox .rod{margin-top:18px;border-top:2px solid #e4e7ec;padding-top:10px;display:flex;justify-content:space-between;color:#555;font-size:13px}</style>'+
+   '<div class="cab"><img src="logo_klaustv.png" alt=""><div class="pl"><div class="t"><span>'+kt_esc2(tn('A'))+'</span><span class="n">'+tot('A')+'</span><span class="x">x</span><span class="n">'+tot('B')+'</span><span>'+kt_esc2(tn('B'))+'</span></div><div class="inf">'+info+'</div></div></div>'+
+   tab('A')+tab('B')+premHtml+'<div class="rod"><span>📸 @basquete.rj</span><span>💬 (21) 99809-2305</span><span>🌐 klaustv.com</span></div></div>';
+  return {el:document.getElementById('ktSumBox'), nome:('KlausTV '+tn('A')+' x '+tn('B')+' '+data.slice(0,10)).replace(/[\/\\:*?"<>|]+/g,'-')};
+}
+async function kt_exportar(tipo){
+  try{
+    await kt_carregarLib('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    if(tipo==='pdf') await kt_carregarLib('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }catch(e){ alert('Não foi possível carregar o gerador. Confira a internet e tente de novo.'); return; }
+  const r=kt_montarSumula();
+  const cv=await html2canvas(r.el,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+  if(tipo==='img'){
+    cv.toBlob(async b=>{ const f=new File([b],r.nome+'.png',{type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[f]}) && /Android|iPhone|iPad/i.test(navigator.userAgent)){ try{ await navigator.share({files:[f],title:r.nome}); return; }catch(e){} }
+      const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=r.nome+'.png'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); },'image/png');
+  } else {
+    const {jsPDF}=window.jspdf; const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=200, H=cv.height*W/cv.width, pg=285; const img=cv.toDataURL('image/jpeg',0.92);
+    if(H<=pg) pdf.addImage(img,'JPEG',5,5,W,H);
+    else { let y=0; while(y<H){ pdf.addImage(img,'JPEG',5,5-y,W,H); y+=pg; if(y<H) pdf.addPage(); } }
+    pdf.save(r.nome+'.pdf');
+  }
+  document.getElementById('ktSumula').innerHTML='';
+}
 </script><!--/ktJMjs-->
 <footer class="ktFooter">
   <div class="lema">🏀 No basquete, <span>tudo pode acontecer!</span></div>
