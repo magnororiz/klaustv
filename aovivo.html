@@ -264,11 +264,14 @@ async function kt_carregar(primeira){
   kt_render(r.jogo);
   if(primeira) $('jogo').scrollIntoView({behavior:'smooth',block:'start'});
 }
+const CRIT=['pts','eff','reb','ast','blk','stl'];
+function ordem(k){ const ch=[k].concat(CRIT.filter(c=>c!==k));
+  return (x,y)=>{ for(const c of ch){ const d=(+y[c]||0)-(+x[c]||0); if(d) return d; } return (parseInt(x.numero)||999)-(parseInt(y.numero)||999); }; }
 const ZERO={pts:0,reb:0,ast:0,blk:0,stl:0,eff:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,to:0,foul:0};
 function jogadores(j,l){
   const t=(j.meta||{})['time'+l]||{atletas:[]}; const st=(j.stats||{})[l]||{};
   return (t.atletas||[]).map(a=>Object.assign({},ZERO,st[a.reg]||{},{reg:a.reg,nome:a.nome,numero:a.numero,apelido:a.apelido,foto:a.foto,lado:l,sig:t.sigla}))
-    .sort((x,y)=>((+y.pts||0)-(+x.pts||0)) || ((parseInt(x.numero)||999)-(parseInt(y.numero)||999)));
+    .sort(ordem('pts'));
 }
 function soma(js,k){ return js.reduce((s,p)=>s+(+p[k]||0),0); }
 function pct(m,a){ return a?Math.round(m*100/a):0; }
@@ -307,10 +310,10 @@ function kt_render(j){
     if(a.v===b.v && a.v!==0 && dir>0){ ga=gb=true; }
     return `<tr><td class="${ga?'ganha':''}" style="--c:${ca}">${ga?'<span class="trofeu">🏆</span>':''}${a.txt}</td><td class="m" title="${t}">${s}</td><td class="r ${gb?'ganhaR':''}" style="--c:${cb}">${b.txt}${gb?'<span class="trofeu">🏆</span>':''}</td></tr>`; }).join('');
   // líderes
-  const mvpTop=todos.slice().sort((x,y)=>(+y.eff||0)-(+x.eff||0))[0];
+  const mvpTop=todos.slice().sort(ordem('eff'))[0];
   const mvp=(mvpTop && (+mvpTop.eff||0)>0)?mvpTop.reg:null;
   const cats=[['eff','Eficiência'],['pts','Pontos'],['reb','Rebotes'],['ast','Assistências'],['blk','Tocos'],['stl','Roubos de bola']];
-  const top3=(js,k)=>js.filter(p=>(+p[k]||0)!==0).sort((x,y)=>(+y[k]||0)-(+x[k]||0)).slice(0,3);
+  const top3=(js,k)=>js.filter(p=>(+p[k]||0)!==0).sort(ordem(k)).slice(0,3);
   const nomeJ=p=>esc(p.apelido||p.nome);
   const lider=cats.map(([k,t])=>{ const a=top3(ja,k), b=top3(jb,k);
     const lado=(p,dir)=>p?`<div class="lado ${dir?'dir':''}"><img src="${foto(p.reg)}" alt="" onclick="kt_zoom(this.src,'${esc(p.nome).replace(/'/g,'')}')"><div class="n">${nomeJ(p)}${(k==='eff'&&p.reg===mvp)?'<br><span class="mvp"><span class="fogo"><i></i><i></i><i></i></span> MVP</span>':''}</div><div class="v">${+p[k]||0}</div></div>`:`<div class="lado ${dir?'dir':''}" style="color:#999;">—</div>`;
