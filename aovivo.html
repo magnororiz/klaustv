@@ -91,6 +91,7 @@ table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444
 @media(max-width:560px){table.jog .hm{display:none;}table.jog td.nm{max-width:96px;font-size:11px;}table.jog .rk,table.jog .rkh{display:none;}table.jog th,table.jog td{padding-left:2px;padding-right:2px;}table.jog .num{min-width:22px;padding:2px 3px;font-size:11px;}table.jog{font-size:11.5px;}table.jog th{font-size:10px;}table.jog{font-size:12px;}.lid .lado img{width:40px;height:40px;}.lid .lado{gap:6px;padding:8px;}.lid .lado .n{font-size:13px;}.lid .lado .v{font-size:24px;}.mvp{font-size:12px;padding:1px 8px;}}
 /* comparação */
 .comp table{width:100%;border-collapse:collapse;font-size:14px;}
+@media(min-width:1001px){.duas.iguais{align-items:stretch;}.duas.iguais>.box{display:flex;flex-direction:column;}.duas.iguais .comp table{flex:1;font-size:16px;}.duas.iguais .comp td{padding:6px 12px;}.duas.iguais .lid{justify-content:flex-start;}}
 .comp td{padding:8px 10px;border-bottom:1px solid #eef0f3;font-weight:700;}
 .comp td.m{text-align:center;width:90px;background:#fafbfc;border-left:1px solid #e4e7ec;border-right:1px solid #e4e7ec;}
 .comp td.r{text-align:right;}
@@ -112,8 +113,8 @@ table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444
 .lid .seg{display:grid;grid-template-columns:1fr 1fr;font-size:13px;font-weight:700;}
 .lid .seg div{display:flex;justify-content:space-between;padding:7px 12px;border-bottom:1px solid #eef0f3;}
 .lid .seg div.dir{flex-direction:row-reverse;border-left:1px solid #e4e7ec;}
-.mvp{display:inline-block;margin-top:4px;font-family:'Oswald','Arial Narrow',Arial;font-weight:700;font-size:15px;letter-spacing:2px;color:#fff;padding:2px 12px;border-radius:6px;
-  background:linear-gradient(180deg,#ffd54f 0%,#ff8f00 45%,#e53935 100%);text-shadow:0 1px 2px rgba(0,0,0,.6);box-shadow:0 0 10px rgba(255,120,0,.8),0 0 22px rgba(255,60,0,.45);animation:fogo 1.4s ease-in-out infinite alternate;}
+.mvp{display:inline-block;margin-top:4px;font-family:'Oswald','Arial Narrow',Arial;font-weight:700;font-size:15px;letter-spacing:2px;color:#fff;padding:7px 14px 3px;line-height:1.1;border-radius:7px;
+  background:linear-gradient(0deg,#1e5bd8 0%,#1e5bd8 42%,#ff8f00 78%,#ffd54f 100%);text-shadow:0 1px 2px rgba(0,0,0,.6);box-shadow:0 0 10px rgba(255,120,0,.8),0 0 22px rgba(255,60,0,.45);animation:fogo 1.4s ease-in-out infinite alternate;}
 @keyframes fogo{0%{box-shadow:0 0 8px rgba(255,140,0,.7),0 -2px 14px rgba(255,60,0,.4);transform:translateY(0);}100%{box-shadow:0 0 16px rgba(255,200,0,.95),0 -6px 24px rgba(255,60,0,.6);transform:translateY(-1px);}}
 .fogo{position:relative;display:inline-block;width:16px;height:20px;vertical-align:-4px;margin-right:2px;}
 .fogo i{position:absolute;bottom:0;left:50%;width:12px;height:18px;margin-left:-6px;border-radius:50% 50% 45% 45%/65% 65% 35% 35%;
@@ -386,7 +387,7 @@ function kt_render(j){
      <span><b>Detalhes do jogo</b> ${m.jogoFed?'Jogo nº '+esc(m.jogoFed)+' · ':''}${d?fmtData(d)+' às '+fmtHora(d):''}</span></div>
    <div class="abas"><span class="cond">Resumo</span></div>
    <div class="duas">${tabela(A,ja)}${tabela(B,jb)}</div>
-   <div class="duas" style="margin-top:14px;">
+   <div class="duas iguais" style="margin-top:14px;">
      <div class="box comp"><div class="cab" style="justify-content:space-between;"><span style="display:flex;gap:8px;align-items:center;"><img src="${escudo(sa)}" alt="">${esc(D.curto[sa]||sa)}</span><span style="display:flex;gap:8px;align-items:center;">${esc(D.curto[sb]||sb)}<img src="${escudo(sb)}" alt=""></span></div><table>${comp}</table></div>
      <div class="box lid">${lider}</div>
    </div>
