@@ -15,6 +15,8 @@ function doGet(e) { return responder({ ok: true, msg: 'Klaus TV backend ativo' }
 function doPost(e) {
   let p = {};
   try { p = JSON.parse(e.postData.contents || '{}'); } catch (err) { return responder({ ok: false, erro: 'Pedido inválido.' }); }
+  if (p.acao === 'aoVivoLista') return responder(aoVivoLista(p.categoria));
+  if (p.acao === 'aoVivoJogo') return responder(aoVivoJogo(p.id));
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     switch (p.acao) {
@@ -24,6 +26,12 @@ function doPost(e) {
       case 'listarUsuarios': return responder(listarUsuarios(p.token));
       case 'criarUsuario': return responder(criarUsuario(p.token, p));
       case 'excluirUsuario': return responder(excluirUsuario(p.token, p.usuario));
+      case 'salvarJogo': return responder(salvarJogo(p.token, p.jogo));
+      case 'listarJogos': return responder(listarJogos(p.token, p.data));
+      case 'excluirJogo': return responder(excluirJogo(p.token, p.id));
+      case 'salvarStats': return responder(salvarStats(p.token, p.id, p.stats, p.status));
+      case 'aoVivoLista': return responder(aoVivoLista(p.categoria));
+      case 'aoVivoJogo': return responder(aoVivoJogo(p.id));
       case 'sair': CacheService.getScriptCache().remove('s_' + p.token); return responder({ ok: true });
       default: return responder({ ok: false, erro: 'Ação desconhecida.' });
     }
@@ -155,3 +163,75 @@ function excluirUsuario(token, usuario) {
 
 /* Rode uma vez pelo editor para autorizar planilha e e-mail. */
 function autorizar() { protegerSenhas(); Logger.log(MailApp.getRemainingDailyQuota() + ' e-mails disponíveis hoje'); }
+
+
+/* ================= JOGOS (Montar Jogo / Scout / Ao vivo) ================= */
+const ABA_JOGOS = 'JogosKT';
+const COLS = ['id','categoria','dataHora','timeA','timeB','ginasio','jogoFed','meta','stats','status','placarA','placarB','atualizado','criadoPor'];
+function abaJogos() {
+  const ss = SpreadsheetApp.openById(PLANILHA_ID);
+  let sh = ss.getSheetByName(ABA_JOGOS);
+  if (!sh) { sh = ss.insertSheet(ABA_JOGOS); sh.getRange(1,1,1,COLS.length).setValues([COLS]); sh.setFrozenRows(1); }
+  return sh;
+}
+function lerJogos() {
+  const v = abaJogos().getDataRange().getValues();
+  return v.slice(1).map((r, i) => { const o = { linha: i + 2 }; COLS.forEach((c, j) => o[c] = r[j]); return o; }).filter(o => o.id);
+}
+function jsonOu(s, d) { try { return s ? JSON.parse(s) : d; } catch (e) { return d; } }
+function placarDe(stats) {
+  const t = (lado) => { let p = 0; const o = (stats && stats[lado]) || {}; Object.keys(o).forEach(k => p += Number(o[k].pts || 0)); return p; };
+  return [t('A'), t('B')];
+}
+function salvarJogo(token, j) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  if (!j || !j.timeA || !j.timeB || !j.categoria) return { ok: false, erro: 'Jogo incompleto.' };
+  const sh = abaJogos(); const todos = lerJogos();
+  const id = j.id || ('KT-' + Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'yyyyMMddHHmmss') + '-' + Math.floor(Math.random() * 1000));
+  const atual = todos.find(x => x.id === id);
+  const meta = { timeA: j.timeA, timeB: j.timeB, oficiais: j.oficiais || {}, ginasio: j.ginasio || '', mandante: j.mandante || '', jogoFed: j.jogoFed || '', dataFed: j.dataFed || '' };
+  const linha = [id, j.categoria, j.dataHora || '', j.timeA.sigla || '', j.timeB.sigla || '', j.ginasio || '', j.jogoFed || '', JSON.stringify(meta),
+    atual ? atual.stats : '', atual ? atual.status : '', atual ? atual.placarA : 0, atual ? atual.placarB : 0, new Date(), u.usuario];
+  if (atual) sh.getRange(atual.linha, 1, 1, COLS.length).setValues([linha]); else sh.appendRow(linha);
+  CacheService.getScriptCache().remove('j_' + id); CacheService.getScriptCache().remove('lista');
+  return { ok: true, id: id };
+}
+function listarJogos(token, data) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  let js = lerJogos();
+  if (data) js = js.filter(x => String(x.dataHora).slice(0, 10) === data);
+  return { ok: true, jogos: js.map(x => ({ id: x.id, categoria: x.categoria, dataHora: x.dataHora, ginasio: x.ginasio, jogoFed: x.jogoFed, meta: jsonOu(x.meta, {}), status: x.status, placarA: x.placarA, placarB: x.placarB })) };
+}
+function excluirJogo(token, id) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  const j = lerJogos().find(x => x.id === id); if (!j) return { ok: false, erro: 'Jogo não encontrado.' };
+  abaJogos().deleteRow(j.linha); CacheService.getScriptCache().remove('lista');
+  return { ok: true };
+}
+function salvarStats(token, id, stats, status) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  const j = lerJogos().find(x => x.id === id); if (!j) return { ok: false, erro: 'Jogo não encontrado.' };
+  const pl = placarDe(stats); const sh = abaJogos();
+  sh.getRange(j.linha, 9, 1, 5).setValues([[JSON.stringify(stats || {}), status || j.status || '', pl[0], pl[1], new Date()]]);
+  const c = CacheService.getScriptCache(); c.remove('j_' + id); c.remove('lista');
+  return { ok: true, placar: pl };
+}
+function aoVivoLista(categoria) {
+  const c = CacheService.getScriptCache(); let lista = jsonOu(c.get('lista'), null);
+  if (!lista) {
+    lista = lerJogos().map(x => ({ id: x.id, categoria: x.categoria, dataHora: x.dataHora instanceof Date ? x.dataHora.toISOString() : String(x.dataHora),
+      timeA: x.timeA, timeB: x.timeB, placarA: Number(x.placarA || 0), placarB: Number(x.placarB || 0), status: x.status, ginasio: x.ginasio }));
+    c.put('lista', JSON.stringify(lista), 20);
+  }
+  if (categoria) lista = lista.filter(x => x.categoria === categoria);
+  return { ok: true, jogos: lista, agora: new Date().toISOString() };
+}
+function aoVivoJogo(id) {
+  const c = CacheService.getScriptCache(); const k = 'j_' + id; const hit = c.get(k);
+  if (hit) return JSON.parse(hit);
+  const x = lerJogos().find(j => j.id === id); if (!x) return { ok: false, erro: 'Jogo não encontrado.' };
+  const r = { ok: true, jogo: { id: x.id, categoria: x.categoria, dataHora: x.dataHora instanceof Date ? x.dataHora.toISOString() : String(x.dataHora),
+    ginasio: x.ginasio, jogoFed: x.jogoFed, meta: jsonOu(x.meta, {}), stats: jsonOu(x.stats, {}), status: x.status }, agora: new Date().toISOString() };
+  c.put(k, JSON.stringify(r), 4);
+  return r;
+}
