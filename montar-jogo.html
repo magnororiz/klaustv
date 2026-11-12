@@ -79,13 +79,13 @@ button:hover{background:#0f6fd1;}
 /*ktMenuCSS*/
 html,body{overflow-x:hidden;}
 body{padding-top:0 !important;}
-.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:120px;margin-bottom:18px;overflow:hidden;
+.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:140px;margin-bottom:18px;overflow:hidden;
   background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#140f0a 100%);border-bottom:3px solid #1e90ff;
   font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
 .ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
-.ktMenu .cristo{position:absolute;left:0;bottom:0;height:120px;width:auto;}
-.ktMenu .bola{position:absolute;right:0;top:50%;transform:translateY(-50%);height:150px;width:auto;}
-.ktMenu .miolo{position:relative;z-index:2;height:100%;display:flex;align-items:center;justify-content:center;gap:28px;padding:0 120px 0 230px;}
+.ktMenu .cristo{position:absolute;left:0;top:0;height:140px;width:auto;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));}
+.ktMenu .bola{position:absolute;right:0;top:50%;transform:translateY(-50%);height:170px;width:auto;}
+.ktMenu .miolo{position:relative;z-index:2;height:100%;display:flex;align-items:center;justify-content:center;gap:28px;padding:0 120px 0 130px;}
 .ktMenu .marca{font-weight:700;font-size:30px;letter-spacing:2px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 8px rgba(0,0,0,.6);}
 .ktMenu .marca span{color:#1e90ff;}
 .ktMenu nav{display:flex;gap:8px;flex-wrap:wrap;}
@@ -94,8 +94,8 @@ body{padding-top:0 !important;}
 .ktMenu nav a:hover{background:rgba(30,144,255,.35);border-color:#1e90ff;}
 .ktMenu nav a.ativo{background:#1e90ff;border-color:#1e90ff;color:#fff;}
 @media(max-width:820px){.ktMenu .miolo{padding:0 70px 0 130px;gap:12px;flex-direction:column;}
-  .ktMenu .cristo{height:95px;}.ktMenu .bola{height:110px;}.ktMenu .marca{font-size:22px;}.ktMenu nav a{font-size:12px;padding:5px 11px;}}
-@media(max-width:480px){.ktMenu .miolo{padding:0 46px 0 92px;}.ktMenu .cristo{height:80px;}.ktMenu .bola{height:90px;}}
+  .ktMenu .cristo{height:140px;}.ktMenu .bola{height:110px;}.ktMenu .marca{font-size:22px;}.ktMenu nav a{font-size:12px;padding:5px 11px;}}
+@media(max-width:480px){.ktMenu .miolo{padding:0 46px 0 92px;}.ktMenu .cristo{height:120px;}.ktMenu .bola{height:90px;}}
 /*fim*/</style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
@@ -104,22 +104,7 @@ body{padding-top:0 !important;}
 <!--ktMenu-->
 <header class="ktMenu">
 <canvas id="ktMenuCanvas"></canvas>
-<svg class="cristo" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg" aria-label="Cristo Redentor">
-<defs>
- <linearGradient id="ktPedra" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f6f9"/><stop offset="1" stop-color="#9aa6b8"/></linearGradient>
- <linearGradient id="ktSome" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff"/><stop offset=".72" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
- <mask id="ktMascCristo"><rect width="240" height="120" fill="url(#ktSome)"/></mask>
-</defs>
-<g mask="url(#ktMascCristo)">
- <path d="M0 120 C25 112 55 104 90 101 L150 101 C185 104 215 112 240 120 Z" fill="#1b2d4f"/>
- <ellipse cx="120" cy="18" rx="9" ry="10.5" fill="url(#ktPedra)"/>
- <path d="M111 28 Q120 32 129 28 L133 33 L206 36 Q216 37 221 41 L220 49 L208 47 L142 48 L139 52 L101 52 L98 48 L32 47 L20 49 L19 41 Q24 37 34 36 L107 33 Z" fill="url(#ktPedra)"/>
- <path d="M103 50 L137 50 L144 102 L96 102 Z" fill="url(#ktPedra)"/>
- <path d="M116 50 L113 100 M124 50 L127 100 M120 48 L120 100" stroke="#7d8aa0" stroke-width="1.1" opacity=".55"/>
- <rect x="96" y="100" width="48" height="8" fill="#b9c2d0"/>
- <rect x="92" y="108" width="56" height="12" fill="#8f9bb0"/>
-</g>
-</svg>
+<img class="cristo" src="cristo.png" alt="Cristo Redentor">
 <svg class="bola" viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg" aria-label="Bola de basquete">
 <defs>
  <radialGradient id="ktLaranja" cx=".75" cy=".35" r=".9"><stop offset="0" stop-color="#ffb35c"/><stop offset=".6" stop-color="#f28c28"/><stop offset="1" stop-color="#b8560f"/></radialGradient>
@@ -146,7 +131,7 @@ body{padding-top:0 !important;}
   const r=cv.getBoundingClientRect(), dpr=window.devicePixelRatio||1;
   cv.width=r.width*dpr; cv.height=r.height*dpr; const c=cv.getContext('2d'); c.scale(dpr,dpr);
   const W=r.width,H=r.height; let seed=7; const rnd=()=>((seed=(seed*9301+49297)%233280)/233280);
-  const ini=Math.min(170,W*0.22), fim=W-Math.min(60,W*0.1);
+  const ini=Math.min(80,W*0.12), fim=W-Math.min(60,W*0.1);
   const g=c.createLinearGradient(0,0,W,0);
   g.addColorStop(0,'rgba(222,228,238,0.10)'); g.addColorStop(0.5,'rgba(180,150,120,0.06)'); g.addColorStop(1,'rgba(242,140,40,0.16)');
   c.fillStyle=g; c.fillRect(0,0,W,H);
