@@ -1584,7 +1584,7 @@ function kt_premAuto(){ clearTimeout(kt_premT); kt_premT=setTimeout(()=>{
   for(let k=extras.length;k<n;k++){ kt_premLinha(1); const l=ls.lastElementChild; l.dataset.extra=String(k+1); const ant=ls.querySelector('.ktPremL[data-extra="'+k+'"]')||main; ant.after(l); }
   ls.querySelectorAll('.ktPremL').forEach(l=>{ const v=l.querySelector('.pP').value; if(['0','1','2','3'].includes(v) && l.querySelector('.pJ').dataset.manual!=='1') kt_premOpcoes(l); });
  },150); }
-if(typeof atualizarTotaisEquipe==='function'){ const _atz=atualizarTotaisEquipe; atualizarTotaisEquipe=function(){ const r=_atz.apply(this,arguments); kt_premAuto(); kt_rascSalvar(); return r; }; }
+if(typeof atualizarTotaisEquipe==='function'){ const _atz=atualizarTotaisEquipe; atualizarTotaisEquipe=function(){ const r=_atz.apply(this,arguments); try{ const t=arguments[0]; let p=0; for(let i=1;i<=12;i++) p+=(+((stats[t+'-'+i]||{}).pts)||0); document.getElementById('score'+t).innerText=p; }catch(e){} kt_premAuto(); kt_rascSalvar(); return r; }; }
 /* ---------- PDF e imagem ---------- */
 function kt_carregarLib(src){ return new Promise((ok,erro)=>{ if(document.querySelector('script[src="'+src+'"]')) return ok(); const e=document.createElement('script'); e.src=src; e.onload=ok; e.onerror=erro; document.head.appendChild(e); }); }
 function kt_esc2(x){ return String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
