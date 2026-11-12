@@ -374,13 +374,10 @@ function fedNorm(x) { return String(x == null ? '' : x).replace(/\u00a0/g, ' ').
 function fedTitulo(x) { x = fedNorm(x); if (x && x === x.toUpperCase()) x = x.toLowerCase().replace(/(^|\s)(\S)/g, (m, a, b) => a + b.toUpperCase()); return x; }
 
 function fedConverterXlsx(id) {
-  const tk = ScriptApp.getOAuthToken();
-  const r = UrlFetchApp.fetch('https://www.googleapis.com/drive/v3/files/' + id + '/copy?supportsAllDrives=true', {
-    method: 'post', contentType: 'application/json', headers: { Authorization: 'Bearer ' + tk }, muteHttpExceptions: true,
-    payload: JSON.stringify({ name: 'Klaus TV - backup FBERJ (temporário)', mimeType: 'application/vnd.google-apps.spreadsheet' })
-  });
-  if (r.getResponseCode() !== 200) throw new Error('Não consegui copiar a planilha da FBERJ ' + id + ' (' + r.getResponseCode() + ').');
-  return JSON.parse(r.getContentText()).id;
+  // usa o serviço avançado do Drive (já autorizado pela conta); não precisa de UrlFetch
+  const c = Drive.Files.copy({ name: 'Klaus TV - backup FBERJ (temporário)', mimeType: 'application/vnd.google-apps.spreadsheet' }, id, { supportsAllDrives: true });
+  if (!c || !c.id) throw new Error('Não consegui copiar a planilha da FBERJ ' + id + '.');
+  return c.id;
 }
 
 function fedLerElenco() {
