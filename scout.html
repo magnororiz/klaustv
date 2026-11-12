@@ -35,8 +35,6 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .ktJM{max-width:1100px;margin:6px auto 16px;padding:12px 14px;border:2px solid #ffd54f;border-radius:12px;background:#101826;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:center;}
 .ktJM label{color:#ffd54f;font-weight:700;font-size:15px;}
 .ktJM select{flex:1;min-width:260px;max-width:640px;padding:9px;border-radius:8px;border:none;font-size:14px;}
-.ktJMinfo{flex-basis:100%;text-align:center;font-size:12.5px;color:#9fb3c8;}
-.ktJMinfo:empty{display:none;}
 .ktFim{text-align:center;margin:26px auto 10px;}
 .ktFim button{font-size:15px;padding:12px 26px;}
 /*fimJM*/
@@ -270,8 +268,6 @@ hr{
 <!--ktJogoMontado--><div class="ktJM">
 <label for="ktSelJogo">🏀 Jogo montado</label>
 <select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select>
-<button type="button" onclick="kt_listarMontados()" title="Atualizar a lista">🔄 Atualizar lista</button>
-<div id="ktJMinfo" class="ktJMinfo"></div>
 </div><!--/ktJogoMontado-->
 
 <!-- ================= PRÉ-JOGOS SALVOS 3.4 ================= -->
@@ -1689,7 +1685,7 @@ async function kt_listarMontados(){
   const futuros=KT_MONTADOS.filter(j=>j.dataHora.slice(0,10)>=h).sort((x,y)=>x.dataHora.localeCompare(y.dataHora));
   const passados=KT_MONTADOS.filter(j=>j.dataHora.slice(0,10)<h).sort((x,y)=>y.dataHora.localeCompare(x.dataHora));
   const op=j=>'<option value="'+j.id+'">'+kt_rotuloJM(j).replace(/</g,'&lt;')+'</option>';
-  sel.innerHTML='<option value="">— escolha o jogo montado ('+KT_MONTADOS.length+') —</option>'+(futuros.length?'<optgroup label="Hoje e próximos">'+futuros.map(op).join('')+'</optgroup>':'')+(passados.length?'<optgroup label="Jogos anteriores">'+passados.map(op).join('')+'</optgroup>':'');
+  sel.innerHTML='<option value="">— escolha o jogo montado ('+KT_MONTADOS.length+') —</option>'+(futuros.length?futuros.map(op).join(''):'')+(passados.length?passados.map(op).join(''):'');
   if(atual && KT_MONTADOS.some(j=>j.id===atual)) sel.value=atual;
 }
 function kt_temNumeros(){ return Object.keys(stats).some(k=>['pts','reb','ast','stl','blk','to','foul','twoMiss','threeMiss','ftMiss'].some(c=>+stats[k][c])); }
@@ -1697,23 +1693,19 @@ function kt_abrirMontado(id){
   const sel=document.getElementById('ktSelJogo');
   if(!id) return;
   const j=KT_MONTADOS.find(x=>x.id===id); if(!j) return;
-  if(KT_JOGO_ID!==id && kt_temNumeros() && !confirm('Abrir outro jogo vai zerar as estatísticas que estão na tela. Continuar?')){ sel.value=KT_JOGO_ID||''; return; }
   const m=j.meta||{};
   ['A','B'].forEach(t=>{
     const tm=m['time'+t]||{}; const atl=(tm.atletas||[]).slice(0,12);
     document.getElementById('title'+t).innerText=kt_nomeTime(Object.assign({avulso:m.avulso},tm));
     const linhas=document.querySelectorAll('#table'+t+' tr'); KT_REGS[t]=[];
     for(let i=1;i<=12;i++){ const a=atl[i-1]; const c=linhas[i].querySelectorAll('td'); const k=t+'-'+i;
-      c[0].innerText=a?(a.numero||''):''; c[1].innerText=a?(kt_abrev(a.nome)+(a.apelido?' ('+a.apelido+')':'')):'—';
+      c[0].innerText=a?(a.numero||''):''; c[1].innerText=a?(kt_abrev(a.nome)+(a.apelido?' ('+a.apelido+')':'')):'';
       KT_REGS[t][i]=a?a.reg:null;
       stats[k]={pts:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,reb:0,ast:0,stl:0,blk:0,to:0,foul:0,eff:0};
-      linhas[i].style.opacity=a?'':'.35'; }
+    }
   });
   if(typeof atualizarTodasAsLinhas==='function') atualizarTodasAsLinhas();
   KT_JOGO_ID=id;
-  const tec=t=>((m['time'+t]||{}).tecnico||{}).nome;
-  document.getElementById('ktJMinfo').textContent=(j.ginasio||m.ginasio||'ginásio não informado')+(j.jogoFed?' · Jogo FBERJ nº '+j.jogoFed:'')+(tec('A')?' · Téc. A: '+tec('A'):'')+(tec('B')?' · Téc. B: '+tec('B'):'');
-  if(typeof kt_mapaFooter==='function') kt_mapaFooter(j.ginasio||m.ginasio||'');
 }
 kt_listarMontados();
 </script><!--/ktJMjs-->
