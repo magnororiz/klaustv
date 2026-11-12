@@ -8,8 +8,8 @@ body{padding-top:0 !important;}
   background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#1d0f0a 100%);
   font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
 .ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
-.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 85%,rgba(0,0,0,.4));}
-.ktMenu .bola{position:absolute;right:14px;top:6px;height:136px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));z-index:1;}
+.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;z-index:4;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 85%,rgba(0,0,0,.4));}
+.ktMenu .bola{position:absolute;right:14px;top:6px;height:136px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));z-index:4;}
 .ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
 .ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
 .ktMenu .marca span{color:#1e90ff;}
@@ -89,6 +89,8 @@ button:hover{background:#0f6fd1;}
 .atl input[readonly]{cursor:default;}
 .atl input.apelido[readonly]{background:#e3e8ee;color:#333;}
 .atl.editando input.num,.atl.editando input.apelido{box-shadow:0 0 0 2px #ffd54f;}
+.atl.tec{background:#101c31;border-bottom:2px solid #2a3b55;}
+.atl.tec .tecLab{grid-column:1/3;font-size:10px;font-weight:700;color:#ffd54f;text-transform:uppercase;}
 .atl input.apelido{width:100%;box-sizing:border-box;padding:3px 6px;border-radius:6px;border:none;font-size:12px;background:#ffffff;color:#000;}
 .atl input.num{width:24px;height:24px;padding:0;border-radius:50%;border:2px solid var(--borda,#9fb3c8);font-size:12px;font-weight:700;text-align:center;background:var(--c1,#1e90ff);color:var(--tx,#fff);box-sizing:border-box;}
 .atl input.num::placeholder{color:var(--tx,#fff);opacity:.6;}
@@ -299,7 +301,9 @@ function kt_listarAtletas(t){
     document.getElementById('roster'+t).innerHTML = lista.map((a,i)=>
         `<div class="atl" id="atl${t}_${a[0]}"><input type="checkbox" id="cb${t}_${i}" data-reg="${a[0]}" data-nome="${kt_esc(a[1])}" onchange="kt_contar('${t}',this)"><input class="num" readonly placeholder="#" maxlength="2" inputmode="numeric" title="Número da camisa"><label for="cb${t}_${i}">${a[1]}</label><input class="apelido" readonly placeholder="" value="${kt_esc(kt_apelidos()[a[0]]||'')}" oninput="kt_salvarApelido('${a[0]}',this.value)" title="Apelido"><span class="reg">${a[0]}</span><button type="button" class="bEdit" title="Editar camisa e apelido" onclick="kt_editarLinha(this)">✏️</button></div>`
     ).join('');
-    document.getElementById('roster'+t).innerHTML = lista.length ? '<div class="atlHead"><span></span><span class="c">Nº</span><span>Nome</span><span>Apelido</span><span style="text-align:right;">FBERJ</span><span class="c">Editar</span></div>' + document.getElementById('roster'+t).innerHTML : '<div class="vazio">Nenhum atleta inscrito.</div>';
+    const tecRow = '<div class="atl tec" id="tec'+t+'"><span class="tecLab">Técnico</span><input class="apelido tecNome" readonly placeholder="Nome do técnico" title="Nome do técnico"><input class="apelido tecApelido" readonly placeholder="" title="Apelido do técnico"><span></span><button type="button" class="bEdit" title="Editar técnico" onclick="kt_editarLinha(this)">✏️</button></div>';
+    document.getElementById('roster'+t).innerHTML = lista.length ? '<div class="atlHead"><span></span><span class="c">Nº</span><span>Nome</span><span>Apelido</span><span style="text-align:right;">FBERJ</span><span class="c">Editar</span></div>' + tecRow + document.getElementById('roster'+t).innerHTML : '<div class="vazio">Nenhum atleta inscrito.</div>';
+    if(!kt_abrindo) kt_aplicarUltimo(t);
     kt_larguraNomes(t);
     kt_pintar(t);
     kt_montarGinasios();
@@ -318,14 +322,32 @@ function kt_editarLinha(btn){
     const row=btn.closest('.atl'); const on=!row.classList.contains('editando');
     row.classList.toggle('editando',on);
     row.querySelectorAll('input.num,input.apelido').forEach(i=>{ i.readOnly=!on; });
-    btn.textContent = on ? '✔' : '✏️'; btn.title = on ? 'Travar edição' : 'Editar camisa e apelido';
-    if(on) row.querySelector('input.num').focus();
+    btn.textContent = on ? '✔' : '✏️'; btn.title = on ? 'Travar edição' : 'Editar';
+    if(on) row.querySelector('input.num,input.tecNome').focus();
+}
+let kt_abrindo=false;
+function kt_aplicarUltimo(t){
+    const cat=document.getElementById('selCategoria').value, sig=document.getElementById('selTime'+t).value;
+    const ult=kt_lerSalvos().filter(j=>j.categoria===cat && ((j.timeA||{}).sigla===sig || (j.timeB||{}).sigla===sig))
+        .sort((a,b)=>String(b.atualizadoEm||b.dataHora||'').localeCompare(String(a.atualizadoEm||a.dataHora||'')))[0];
+    if(!ult) return;
+    const tm=(ult.timeA.sigla===sig)?ult.timeA:ult.timeB;
+    kt_preencherTime(t,tm);
+}
+function kt_preencherTime(t,tm){
+    (tm.atletas||[]).forEach(a=>{
+        const row=document.getElementById('atl'+t+'_'+a.reg);
+        if(row){ row.querySelector('input[type=checkbox]').checked=true; row.querySelector('.num').value=a.numero||''; if(a.apelido) row.querySelector('.apelido').value=a.apelido; }
+    });
+    const tec=document.getElementById('tec'+t);
+    if(tec && tm.tecnico){ tec.querySelector('.tecNome').value=tm.tecnico.nome||''; tec.querySelector('.tecApelido').value=tm.tecnico.apelido||''; }
+    kt_contar(t);
 }
 function kt_marcados(t){ return [...document.querySelectorAll('#roster'+t+' input[type=checkbox]:checked')]; }
 function kt_contar(t, caixa){
     let m = kt_marcados(t);
     if(m.length > KT_MAX && caixa){ caixa.checked = false; m = kt_marcados(t); kt_aviso('Máximo de '+KT_MAX+' atletas por time.'); }
-    document.querySelectorAll('#roster'+t+' .atl').forEach(r=>r.classList.toggle('marcado', r.querySelector('input[type=checkbox]').checked));
+    document.querySelectorAll('#roster'+t+' .atl:not(.tec)').forEach(r=>r.classList.toggle('marcado', r.querySelector('input[type=checkbox]').checked));
     document.getElementById('cont'+t).innerText = m.length+' selecionados';
 }
 function kt_marcar(t, valor){
@@ -383,7 +405,8 @@ function kt_capturar(){
     const time = t => ({
         sigla: document.getElementById('selTime'+t).value,
         nome: kt_nomeEquipe(document.getElementById('selTime'+t).value),
-        atletas: kt_marcados(t).map(c=>({reg:c.dataset.reg, nome:c.dataset.nome, numero:c.closest('.atl').querySelector('.num').value.trim(), apelido:c.closest('.atl').querySelector('.apelido').value.trim()}))
+        atletas: kt_marcados(t).map(c=>({reg:c.dataset.reg, nome:c.dataset.nome, numero:c.closest('.atl').querySelector('.num').value.trim(), apelido:c.closest('.atl').querySelector('.apelido').value.trim()})),
+        tecnico: { nome:((document.querySelector('#tec'+t+' .tecNome')||{}).value||'').trim(), apelido:((document.querySelector('#tec'+t+' .tecApelido')||{}).value||'').trim() }
     });
     return {
         categoria: document.getElementById('selCategoria').value,
@@ -450,19 +473,16 @@ function kt_listarSalvos(){
 function kt_abrir(id){
     const j = kt_lerSalvos().find(x=>x.id===id);
     if(!j) return;
-    kt_editandoId = id;
+    kt_editandoId = id; kt_abrindo=true;
     document.getElementById('selCategoria').value = j.categoria;
     kt_trocarCategoria();
     ['A','B'].forEach(t=>{
         const tm = j['time'+t];
         document.getElementById('selTime'+t).value = tm.sigla;
         kt_listarAtletas(t);
-        tm.atletas.forEach(a=>{
-            const row = document.getElementById('atl'+t+'_'+a.reg);
-            if(row){ row.querySelector('input[type=checkbox]').checked = true; row.querySelector('.num').value = a.numero||''; if(a.apelido) row.querySelector('.apelido').value = a.apelido; }
-        });
-        kt_contar(t);
+        kt_preencherTime(t,tm);
     });
+    kt_abrindo=false;
     document.getElementById('inData').value = j.dataHora||'';
     document.getElementById('inGinasio').value = j.ginasio||'';
     kt_montarGinasios();
