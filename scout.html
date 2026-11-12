@@ -521,7 +521,7 @@ let table = document.getElementById('table'+team);
 
 let html = `
 <tr>
-<th>Nº</th>
+<th>Camisa</th>
 <th>Nome</th>
 <th>PTS</th>
 <th>2PT</th>
@@ -1432,7 +1432,7 @@ async function kt_abrirMontado(id,restaurando){
   ['A','B'].forEach(t=>{ const pq=((st.periodos||{})[t])||[]; for(let q=1;q<=4;q++){ const v=pq[q-1]; document.getElementById('ktQ'+t+q).value=(v===undefined||v===null||v==='')?'':v; } });
   const m=j.meta||{};
   ['A','B'].forEach(t=>{
-    const tm=m['time'+t]||{}; const atl=(tm.atletas||[]).slice(0,12);
+    const tm=m['time'+t]||{}; const atl=(tm.atletas||[]).slice(0,12).slice().sort((x,y)=>{ const nx=parseInt(x.numero,10), ny=parseInt(y.numero,10); const vx=isNaN(nx)?9999:nx, vy=isNaN(ny)?9999:ny; return vx-vy || String(x.nome||'').localeCompare(String(y.nome||''),'pt-BR'); });
     document.getElementById('title'+t).innerText=kt_nomeTime(Object.assign({avulso:m.avulso},tm));
     { const im=document.getElementById('ktEsc'+t); im.style.display=''; im.src=m.avulso?kt_bolaLetra(t,t==='A'?'#1e5bd8':'#e8590c'):('escudos/'+encodeURIComponent(tm.sigla||'')+'.png'); }
     const linhas=document.querySelectorAll('#table'+t+' tr'); KT_REGS[t]=[]; KT_INFO[t]=[];
