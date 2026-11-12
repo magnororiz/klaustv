@@ -54,30 +54,7 @@ body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding
 .novo input{padding:9px;border-radius:8px;border:none;font-size:14px;}
 .credito{max-width:1200px;margin:6px auto 0 auto;font-size:10px;color:#5f7389;text-align:right;}
 .credito a{color:#5f7389;}
-/*ktMenuCSS*/
-html,body{overflow-x:hidden;}
-body{padding-top:0 !important;}
-.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
-  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#1d0f0a 100%);
-  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
-.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
-.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));}
-.ktMenu .bola{position:absolute;right:14px;top:6px;height:136px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));z-index:1;}
-.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
-.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
-.ktMenu .marca span{color:#1e90ff;}
-.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:150px;
-  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 70px,rgba(30,91,216,.95) 150px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
-  border-top:1px solid rgba(255,255,255,.12);}
-.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
-.ktFaixa a:hover{background:rgba(255,255,255,.12);}
-.ktFaixa a.soDono{display:none;}
-html.ktDono .ktFaixa a.soDono{display:flex;}
-.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;}
-@media(max-width:820px){.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
-  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
-@media(max-width:480px){.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
-/*fim*/
+
 .ktFooter{margin:30px auto 0 auto;max-width:1200px;border-top:3px solid #1e90ff;padding:18px 10px 10px 10px;color:#cfd8e3;font-size:13px;}
 .ktFooter .cols{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between;}
 .ktFooter .col{flex:1;min-width:240px;}
@@ -90,7 +67,30 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .ktFooter .patro{display:inline-block;background:#101826;border:1px solid #1e90ff;border-radius:10px;padding:8px 12px;color:#fff;margin:2px 4px 2px 0;}
 .ktFooter .patro b{color:#ffd54f;}
 .ktFooter .copy{text-align:center;color:#5f7389;font-size:11px;margin-top:14px;}
-</style>
+/*ktMenuCSS*/
+html,body{overflow-x:hidden;}
+body{padding-top:0 !important;}
+.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
+  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#1d0f0a 100%);
+  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
+.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
+.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 85%,rgba(0,0,0,.4));}
+.ktMenu .bola{position:absolute;right:14px;top:6px;height:136px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));z-index:1;}
+.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
+.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
+.ktMenu .marca span{color:#1e90ff;}
+.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:170px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 100px,rgba(30,91,216,.95) 170px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
+  border-top:1px solid rgba(255,255,255,.12);}
+.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
+.ktFaixa a:hover{background:rgba(255,255,255,.12);}
+.ktFaixa a.soDono{display:none;}
+html.ktDono .ktFaixa a.soDono{display:flex;}
+.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;}
+@media(max-width:820px){.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
+  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
+@media(max-width:480px){.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
+/*fim*/</style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -111,7 +111,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
   const r=cv.getBoundingClientRect(), dpr=window.devicePixelRatio||1;
   cv.width=r.width*dpr; cv.height=r.height*dpr; const c=cv.getContext('2d'); c.scale(dpr,dpr);
   const W=r.width,H=r.height; let seed=7; const rnd=()=>((seed=(seed*9301+49297)%233280)/233280);
-  const ini=Math.min(80,W*0.12), fim=W-Math.min(150,W*0.22);
+  const ini=Math.min(125,W*0.16), fim=W-Math.min(150,W*0.22);
   const g=c.createLinearGradient(0,0,W,0);
   g.addColorStop(0,'rgba(222,228,238,0.10)'); g.addColorStop(0.5,'rgba(180,150,120,0.06)'); g.addColorStop(1,'rgba(205,88,40,0.20)');
   c.fillStyle=g; c.fillRect(0,0,W,H);
