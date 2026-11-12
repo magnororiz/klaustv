@@ -31,7 +31,16 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 @media(max-width:820px){.ktMenu .marca small{font-size:9px;letter-spacing:2px;margin-top:4px;}.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
   .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
 @media(max-width:480px){.ktMenu .bola{height:82px !important;top:6px !important;right:6px !important;}.ktMenu .miolo{padding-right:80px;}.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
-/*fim*/</style>
+/*fim*//*ktJMcss*/
+.ktJM{max-width:1100px;margin:6px auto 16px;padding:12px 14px;border:2px solid #ffd54f;border-radius:12px;background:#101826;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:center;}
+.ktJM label{color:#ffd54f;font-weight:700;font-size:15px;}
+.ktJM select{flex:1;min-width:260px;max-width:640px;padding:9px;border-radius:8px;border:none;font-size:14px;}
+.ktJMinfo{flex-basis:100%;text-align:center;font-size:12.5px;color:#9fb3c8;}
+.ktJMinfo:empty{display:none;}
+.ktFim{text-align:center;margin:26px auto 10px;}
+.ktFim button{font-size:15px;padding:12px 26px;}
+/*fimJM*/
+</style>
 <script>
 (function(){
  var d=document.documentElement; d.classList.add('ktTravado');
@@ -256,14 +265,14 @@ hr{
 </script>
 <!--/ktMenu-->
 
-<h1>🏀 Klaus TV · Scout</h1>
-<div style="color:#9fb3c8;font-size:12px;margin:-14px 0 6px 0;">Basket RJ Stats PRO 4.0</div>
 
 
-<div class="topButtons">
-<button onclick="gerarPDF()">🧾 Gerar PDF</button>
-<button onclick="novoJogo()">🔄 Novo Jogo</button>
-</div>
+<!--ktJogoMontado--><div class="ktJM">
+<label for="ktSelJogo">🏀 Jogo montado</label>
+<select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select>
+<button type="button" onclick="kt_listarMontados()" title="Atualizar a lista">🔄 Atualizar lista</button>
+<div id="ktJMinfo" class="ktJMinfo"></div>
+</div><!--/ktJogoMontado-->
 
 <!-- ================= PRÉ-JOGOS SALVOS 3.4 ================= -->
 <div class="savedGamesPanel">
@@ -1656,6 +1665,58 @@ if(win){
 
 
 
+<!--ktFimJogo--><div class="ktFim"><button onclick="gerarPDF()">🧾 Gerar PDF</button></div><!--/ktFimJogo-->
+<!--ktJMjs--><script>
+const KT_API_SC='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
+const KT_CURTO={"BSA": "Basquete S.A.", "BFR": "Botafogo", "CRF": "Flamengo", "CFCSN": "Funcionários", "FFC": "Fluminense", "TTC": "Tijuca", "NBC": "Niterói", "CCL": "Leopoldinense", "IG": "Iguaba Grande", "ABIG": "Jequiá", "ACEAR": "Irajá", "CESC": "Suzano Costa", "EEPZ": "Passo Zero", "IDEC": "IDEC", "ITDA": "Atitude", "KE": "K. Esportes", "MB": "Mesquita", "JTC": "Jacarepaguá", "TKA": "Team Klun", "ASPCM": "Municipal", "CK": "Carioca King's", "IB": "Itaipu", "NBR": "NBR Campos"};
+let KT_MONTADOS=[], KT_REGS={A:[],B:[]}, KT_JOGO_ID=null;
+function kt_tokSc(){ try{ return localStorage.getItem('klaustv_token_v1')||''; }catch(e){ return ''; } }
+async function kt_apiSc(d){ try{ const r=await fetch(KT_API_SC,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({token:kt_tokSc()},d))}); return await r.json(); }catch(e){ return {ok:false,erro:'Sem conexão com a planilha.'}; } }
+const KT_CON=['da','de','do','das','dos','e',"d'"];
+function kt_abrev(n){ const w=String(n||'').trim().split(/\s+/); const core=w.map((x,i)=>KT_CON.includes(x.toLowerCase())?-1:i).filter(i=>i>=0); const c=core.length; let ab=[];
+  if(c>=5) ab=core.slice(1,c-2); else if(c===4) ab=[core[2]]; else if(c===3) ab=[core[1]];
+  ab.forEach(i=>{ w[i]=w[i].charAt(0).toUpperCase()+'.'; }); return w.join(' '); }
+function kt_nomeTime(t){ return t.avulso? (t.nome||t.sigla) : (KT_CURTO[t.sigla]||t.nome||t.sigla); }
+function kt_rotuloJM(j){ const d=String(j.dataHora||''); const dt=d.slice(8,10)+'/'+d.slice(5,7)+(d.length>11?' '+d.slice(11,16):'');
+  const m=j.meta||{}; const a=m.timeA||{}, b=m.timeB||{};
+  return dt+' · '+(j.categoria||'')+' · '+kt_nomeTime(Object.assign({avulso:m.avulso},a))+' x '+kt_nomeTime(Object.assign({avulso:m.avulso},b))+(m.avulso?' · avulso':'')+(j.status==='FINAL'?' · FINAL':''); }
+async function kt_listarMontados(){
+  const sel=document.getElementById('ktSelJogo'); const atual=sel.value;
+  const r=await kt_apiSc({acao:'listarJogos'});
+  if(!r.ok){ sel.innerHTML='<option value="">Não foi possível carregar: '+(r.erro||'tente de novo')+'</option>'; return; }
+  const hoje=new Date(); const h=hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0')+'-'+String(hoje.getDate()).padStart(2,'0');
+  KT_MONTADOS=(r.jogos||[]).map(j=>Object.assign(j,{dataHora:String(j.dataHora||'').slice(0,16)})).filter(j=>(j.meta||{}).timeA&&(j.meta||{}).timeB);
+  const futuros=KT_MONTADOS.filter(j=>j.dataHora.slice(0,10)>=h).sort((x,y)=>x.dataHora.localeCompare(y.dataHora));
+  const passados=KT_MONTADOS.filter(j=>j.dataHora.slice(0,10)<h).sort((x,y)=>y.dataHora.localeCompare(x.dataHora));
+  const op=j=>'<option value="'+j.id+'">'+kt_rotuloJM(j).replace(/</g,'&lt;')+'</option>';
+  sel.innerHTML='<option value="">— escolha o jogo montado ('+KT_MONTADOS.length+') —</option>'+(futuros.length?'<optgroup label="Hoje e próximos">'+futuros.map(op).join('')+'</optgroup>':'')+(passados.length?'<optgroup label="Jogos anteriores">'+passados.map(op).join('')+'</optgroup>':'');
+  if(atual && KT_MONTADOS.some(j=>j.id===atual)) sel.value=atual;
+}
+function kt_temNumeros(){ return Object.keys(stats).some(k=>['pts','reb','ast','stl','blk','to','foul','twoMiss','threeMiss','ftMiss'].some(c=>+stats[k][c])); }
+function kt_abrirMontado(id){
+  const sel=document.getElementById('ktSelJogo');
+  if(!id) return;
+  const j=KT_MONTADOS.find(x=>x.id===id); if(!j) return;
+  if(KT_JOGO_ID!==id && kt_temNumeros() && !confirm('Abrir outro jogo vai zerar as estatísticas que estão na tela. Continuar?')){ sel.value=KT_JOGO_ID||''; return; }
+  const m=j.meta||{};
+  ['A','B'].forEach(t=>{
+    const tm=m['time'+t]||{}; const atl=(tm.atletas||[]).slice(0,12);
+    document.getElementById('title'+t).innerText=kt_nomeTime(Object.assign({avulso:m.avulso},tm));
+    const linhas=document.querySelectorAll('#table'+t+' tr'); KT_REGS[t]=[];
+    for(let i=1;i<=12;i++){ const a=atl[i-1]; const c=linhas[i].querySelectorAll('td'); const k=t+'-'+i;
+      c[0].innerText=a?(a.numero||''):''; c[1].innerText=a?(kt_abrev(a.nome)+(a.apelido?' ('+a.apelido+')':'')):'—';
+      KT_REGS[t][i]=a?a.reg:null;
+      stats[k]={pts:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,reb:0,ast:0,stl:0,blk:0,to:0,foul:0,eff:0};
+      linhas[i].style.opacity=a?'':'.35'; }
+  });
+  if(typeof atualizarTodasAsLinhas==='function') atualizarTodasAsLinhas();
+  KT_JOGO_ID=id;
+  const tec=t=>((m['time'+t]||{}).tecnico||{}).nome;
+  document.getElementById('ktJMinfo').textContent=(j.ginasio||m.ginasio||'ginásio não informado')+(j.jogoFed?' · Jogo FBERJ nº '+j.jogoFed:'')+(tec('A')?' · Téc. A: '+tec('A'):'')+(tec('B')?' · Téc. B: '+tec('B'):'');
+  if(typeof kt_mapaFooter==='function') kt_mapaFooter(j.ginasio||m.ginasio||'');
+}
+kt_listarMontados();
+</script><!--/ktJMjs-->
 <footer class="ktFooter">
   <div class="lema">🏀 No basquete, <span>tudo pode acontecer!</span></div>
   <div class="wrap">
