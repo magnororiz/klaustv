@@ -29,7 +29,7 @@ function doPost(e) {
       case 'salvarJogo': return responder(salvarJogo(p.token, p.jogo));
       case 'listarJogos': return responder(listarJogos(p.token, p.data));
       case 'excluirJogo': return responder(excluirJogo(p.token, p.id));
-      case 'salvarStats': return responder(salvarStats(p.token, p.id, p.stats, p.status));
+      case 'salvarStats': return responder(salvarStats(p.token, p.id, p.stats, p.status, p.dataHora));
       case 'salvarFoto': return responder(salvarFoto(p.token, p.chave, p.imagem));
       case 'listarFotos': return responder(listarFotos(p.token));
       case 'salvarApelido': return responder(salvarApelido(p.token, p.reg, p.apelido));
@@ -212,11 +212,12 @@ function excluirJogo(token, id) {
   abaJogos().deleteRow(j.linha); apagarAvulso(id); CacheService.getScriptCache().remove('lista');
   return { ok: true };
 }
-function salvarStats(token, id, stats, status) {
+function salvarStats(token, id, stats, status, dataHora) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
   const j = lerJogos().find(x => x.id === id); if (!j) return { ok: false, erro: 'Jogo não encontrado.' };
   const pl = placarDe(stats); const sh = abaJogos();
   sh.getRange(j.linha, 9, 1, 5).setValues([[JSON.stringify(stats || {}), status || j.status || '', pl[0], pl[1], new Date()]]);
+  if (dataHora && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(String(dataHora))) { const c = sh.getRange(j.linha, 3); c.setNumberFormat('@'); c.setValue(String(dataHora).slice(0, 16)); }
   const c = CacheService.getScriptCache(); c.remove('j_' + id); c.remove('lista');
   return { ok: true, placar: pl };
 }

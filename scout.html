@@ -38,8 +38,10 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .ktJM label{min-width:170px;text-align:right;}
 .ktJM button{width:230px;font-size:13px;padding:9px 10px;}
 .ktJM .ktBtSalvar{background:#27ae60;}
+.ktJM .ktData{display:flex;flex-direction:column;align-items:stretch;gap:2px;min-width:0;text-align:left;font-size:11px;color:#9fb3c8;font-weight:700;}
+.ktJM .ktData input{padding:6px;border-radius:8px;border:none;font-size:13px;width:100%;box-sizing:border-box;}
 .ktJM .ktBtExcluir{background:#c0392b;width:150px;justify-self:end;}
-.ktJM{display:grid !important;grid-template-columns:auto minmax(0,1fr) 230px 170px;}
+.ktJM{display:grid !important;grid-template-columns:auto minmax(0,1fr) 230px 210px;}
 .ktJM select{max-width:none !important;width:100%;}
 @media(max-width:800px){.ktJM{grid-template-columns:1fr;}.ktJM label{text-align:left;}.ktJM button{width:100%;}.ktJM .ktBtExcluir{justify-self:stretch;width:100%;margin-top:14px;}}
 .ktCab{display:flex;align-items:center;justify-content:center;gap:16px;}
@@ -377,7 +379,7 @@ hr{
 <label for="ktSelJogo">🏀 Jogo montado</label>
 <select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select>
 <button type="button" class="ktBtSalvar" onclick="kt_salvarAndamento()">💾 Salvar jogo em andamento</button>
-<span></span>
+<label class="ktData" title="Data e hora reais do jogo (podem ser diferentes da tabela da FBERJ)">📅 Data real<input type="datetime-local" id="ktDataJogo" onchange="kt_dataMudou()"></label>
 <label for="ktSelAnt">📚 Jogos anteriores</label>
 <select id="ktSelAnt" onchange="kt_verAnterior(this.value)"><option value="">Escolha primeiro o jogo montado</option></select>
 <button type="button" onclick="kt_editarAnterior()">✏️ Abrir / editar</button>
@@ -1399,10 +1401,11 @@ function kt_rascLer(id){ try{ const r=JSON.parse(localStorage.getItem('kt_rasc_'
 let kt_rascT=null;
 function kt_rascSalvar(){ if(!KT_JOGO_ID) return; clearTimeout(kt_rascT); kt_rascT=setTimeout(()=>{ try{
   const prem=[...document.querySelectorAll('.ktPremL')].filter(l=>!l.dataset.extra).map(l=>[l.querySelector('.pP').value,l.querySelector('.pJ').value,l.querySelector('.pJ').dataset.manual||'']);
-  localStorage.setItem('kt_rasc_'+KT_JOGO_ID,JSON.stringify({ts:Date.now(),stats:kt_statsDaTela(),prem}));
+  localStorage.setItem('kt_rasc_'+KT_JOGO_ID,JSON.stringify({ts:Date.now(),stats:kt_statsDaTela(),prem,dataHora:document.getElementById('ktDataJogo').value}));
   localStorage.setItem('kt_scout_atual',JSON.stringify({id:KT_JOGO_ID,ts:Date.now()})); }catch(e){} },120); }
 async function kt_restaurar(){ try{ const a=JSON.parse(localStorage.getItem('kt_scout_atual')||'null'); if(!a||Date.now()-a.ts>KT_RASC_H) return;
   if(!KT_MONTADOS.some(j=>j.id===a.id)) return; const sel=document.getElementById('ktSelJogo'); sel.value=a.id; await kt_abrirMontado(a.id,true); }catch(e){} }
+function kt_dataMudou(){ kt_rascSalvar(); if(KT_JOGO_ID) kt_msg('Data do jogo alterada — clique em "Salvar jogo em andamento" para gravar a nova data na planilha e no Ao vivo.'); }
 function kt_qMudou(){ kt_rascSalvar(); if(KT_JOGO_ID) kt_msg('Placar por quarto alterado — clique em "Salvar jogo em andamento" para mandar para a planilha e o Ao vivo.'); }
 function kt_bolaLetra(l,c){ return 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="'+c+'" stroke="#fff" stroke-width="5"/><text x="50" y="68" font-family="Arial Black,Arial" font-weight="900" font-size="52" fill="#fff" text-anchor="middle">'+l+'</text></svg>'); }
 function kt_msg(t){ document.getElementById('ktJMmsg').textContent=t||''; }
@@ -1429,7 +1432,9 @@ async function kt_abrirMontado(id,restaurando){
       stats[k]=Object.assign({},KT_ZERO,(a&&st[t]&&st[t][a.reg])||{});
     }
   });
+  document.getElementById('ktDataJogo').value=String(j.dataHora||'').slice(0,16);
   const rasc=kt_rascLer(id);
+  if(rasc && rasc.dataHora) document.getElementById('ktDataJogo').value=rasc.dataHora;
   if(rasc && rasc.stats){ ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; const v=reg&&rasc.stats[t]&&rasc.stats[t][reg]; if(v) stats[t+'-'+i]=Object.assign({},KT_ZERO,v); } const pq=((rasc.stats.periodos||{})[t])||[]; for(let q=1;q<=4;q++){ const v=pq[q-1]; document.getElementById('ktQ'+t+q).value=(v===undefined||v===null)?'':v; } }); }
   if(typeof atualizarTodasAsLinhas==='function') atualizarTodasAsLinhas();
   KT_JOGO_ID=id;
@@ -1452,8 +1457,9 @@ async function kt_salvarAndamento(){
   if(!KT_JOGO_ID) return alert('Escolha primeiro o jogo montado.');
   kt_msg('Salvando na planilha…');
   const st=kt_statsDaTela();
-  const r=await kt_apiSc({acao:'salvarStats',id:KT_JOGO_ID,stats:st});
-  if(r.ok){ KT_STATS_SALVOS=st; kt_msg('✅ Jogo salvo na planilha às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(r.placar?' · placar '+r.placar[0]+' x '+r.placar[1]:'')+'.'); }
+  const dh=document.getElementById('ktDataJogo').value;
+  const r=await kt_apiSc({acao:'salvarStats',id:KT_JOGO_ID,stats:st,dataHora:dh});
+  if(r.ok){ KT_STATS_SALVOS=st; const jm=KT_MONTADOS.find(x=>x.id===KT_JOGO_ID); if(jm&&dh&&jm.dataHora!==dh){ jm.dataHora=dh; const o=document.querySelector('#ktSelJogo option[value="'+KT_JOGO_ID+'"]'); if(o) o.textContent=kt_rotuloJM(jm); } kt_msg('✅ Jogo salvo na planilha às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(r.placar?' · placar '+r.placar[0]+' x '+r.placar[1]:'')+'.'); }
   else { kt_msg(''); alert('Não foi possível salvar: '+(r.erro||'tente de novo')); }
 }
 /* ---------- Jogos anteriores da mesma categoria ---------- */
