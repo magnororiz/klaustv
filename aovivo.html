@@ -105,6 +105,8 @@ table.jog tr:nth-child(even) td{background:#f5f6f8;}
 .fogo i:nth-child(2){width:8px;height:13px;margin-left:-9px;animation-duration:.42s;animation-delay:-.2s;opacity:.85;}
 .fogo i:nth-child(3){width:7px;height:12px;margin-left:1px;animation-duration:.48s;animation-delay:-.1s;opacity:.85;}
 @keyframes chama{0%{transform:scaleY(.85) scaleX(1.05) rotate(-4deg) translateY(0);filter:brightness(1);}50%{transform:scaleY(1.12) scaleX(.92) rotate(3deg) translateY(-1px);}100%{transform:scaleY(.95) scaleX(1) rotate(-2deg) translateY(-2px);filter:brightness(1.25);}}
+.mudou{animation:mudou 2.2s ease;}
+@keyframes mudou{0%{background:#ffd54f;}100%{background:transparent;}}
 .atual{font-size:12px;color:#7f93a8;text-align:right;margin-top:8px;}
 /*ktMenuCSS*/
 html,body{overflow-x:hidden;}
@@ -266,7 +268,7 @@ const ZERO={pts:0,reb:0,ast:0,blk:0,stl:0,eff:0,twoMade:0,twoMiss:0,threeMade:0,
 function jogadores(j,l){
   const t=(j.meta||{})['time'+l]||{atletas:[]}; const st=(j.stats||{})[l]||{};
   return (t.atletas||[]).map(a=>Object.assign({},ZERO,st[a.reg]||{},{reg:a.reg,nome:a.nome,numero:a.numero,apelido:a.apelido,foto:a.foto,lado:l,sig:t.sigla}))
-    .sort((x,y)=>(parseInt(x.numero)||999)-(parseInt(y.numero)||999));
+    .sort((x,y)=>((+y.pts||0)-(+x.pts||0)) || ((+y.eff||0)-(+x.eff||0)) || ((parseInt(x.numero)||999)-(parseInt(y.numero)||999)));
 }
 function soma(js,k){ return js.reduce((s,p)=>s+(+p[k]||0),0); }
 function pct(m,a){ return a?Math.round(m*100/a):0; }
@@ -282,10 +284,10 @@ function kt_render(j){
   const melhor={}; cols.forEach(k=>{ const mx=Math.max(...todos.map(p=>+p[k]||0)); melhor[k]=mx>0?mx:null; });
   const med=(p,k)=>(melhor[k]!==null && (+p[k]||0)===melhor[k])?'<span class="med">🥇</span>':'';
   const linha=p=>{ const c=cor(p.sig); const rk=(D.rank[cat]||{})[p.reg];
-    return `<tr><td><span class="num" style="background:${c};color:${txt(c)}">${esc(p.numero||'-')}</span></td>
+    return `<tr data-reg="${p.reg}"><td><span class="num" style="background:${c};color:${txt(c)}">${esc(p.numero||'-')}</span></td>
     <td class="rk">${rk?rk+'º':'—'}</td><td class="hm"><img class="foto" src="${foto(p.reg)}" alt="" onclick="kt_zoom(this.src,'${esc(p.nome).replace(/'/g,'')}')"></td>
     <td class="l">${esc(p.nome)}${p.apelido?'<span class="ap">'+esc(p.apelido)+'</span>':''}</td>
-    ${cols.map(k=>`<td>${+p[k]||0}${med(p,k)}</td>`).join('')}</tr>`; };
+    ${cols.map(k=>`<td data-k="${p.reg}-${k}" data-v="${+p[k]||0}">${+p[k]||0}${med(p,k)}</td>`).join('')}</tr>`; };
   const tabela=(t,js)=>`<div class="box"><div class="cab"><img src="${escudo(t.sigla)}" alt=""><div>${esc(D.curto[t.sigla]||t.sigla)} <small>· ${esc(cat)}</small>${(t.tecnico&&t.tecnico.nome)?`<div class="tec">${fotoTec(t.sigla)}Técnico: <b>${esc(t.tecnico.nome)}</b>${t.tecnico.apelido?' ('+esc(t.tecnico.apelido)+')':''}</div>`:''}</div></div>
     <table class="jog"><tr><th>CAMISA</th><th title="Posição no ranking de cestinhas do campeonato">RANKING<br>CESTINHAS</th><th class="hm"></th><th class="l">JOGADOR</th><th>PTS</th><th>REB</th><th>AST</th><th title="Tocos">TOC</th><th title="Roubos de bola">ROU</th><th title="Eficiência">EF</th></tr>
     ${js.map(linha).join('')||'<tr><td colspan="10">Sem atletas.</td></tr>'}</table></div>`;
@@ -315,6 +317,10 @@ function kt_render(j){
     const seg=i=>`<div>${a[i]?`<span>${nomeJ(a[i])}</span><span>${+a[i][k]||0}</span>`:''}</div><div class="dir">${b[i]?`<span>${nomeJ(b[i])}</span><span>${+b[i][k]||0}</span>`:''}</div>`;
     return `<div class="bloco"><div class="tit"><div class="b" style="background:${ca}"></div><img src="${escudo(sa)}" alt=""><div>${t}</div><img src="${escudo(sb)}" alt=""><div class="b" style="background:${cb}"></div></div>
       <div class="top">${lado(a[0],false)}${lado(b[0],true)}</div><div class="seg">${seg(1)}${seg(2)}</div></div>`; }).join('');
+  const antes={}, valAntes={};
+  document.querySelectorAll('#jogo tr[data-reg]').forEach(tr=>{ antes[tr.dataset.reg]=tr.getBoundingClientRect().top; });
+  document.querySelectorAll('#jogo td[data-k]').forEach(td=>{ valAntes[td.dataset.k]=td.dataset.v; });
+  const pAntes=$('jogo').querySelector('.placar .pts') ? [...$('jogo').querySelectorAll('.placar .pts')].map(e=>e.textContent) : null;
   $('jogo').innerHTML=`
    <div class="placar"><div class="barra" style="background:${ca}"></div><img src="${escudo(sa)}" alt=""><div class="nome nomeA">${nome(sa)}</div>
      <div class="pts">${pa}</div><div class="x">X</div><div class="pts">${pb}</div>
@@ -329,6 +335,12 @@ function kt_render(j){
    </div>
    <div class="atual">${status(j)==='vivo'?'🔴 Atualizando ao vivo · ':''}Atualizado às ${new Date().toLocaleTimeString('pt-BR')}</div>`;
   if(typeof kt_mapaFooter==='function') kt_mapaFooter(j.ginasio||m.ginasio||'');
+  if(Object.keys(antes).length){
+    document.querySelectorAll('#jogo tr[data-reg]').forEach(tr=>{ const a=antes[tr.dataset.reg]; if(a===undefined) return; const d=a-tr.getBoundingClientRect().top;
+      if(Math.abs(d)>2){ tr.style.transition='none'; tr.style.transform='translateY('+d+'px)'; requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ tr.style.transition='transform .8s ease'; tr.style.transform=''; }); }); } });
+    document.querySelectorAll('#jogo td[data-k]').forEach(td=>{ const v=valAntes[td.dataset.k]; if(v!==undefined && v!==td.dataset.v) td.classList.add('mudou'); });
+  }
+  if(pAntes){ [...$('jogo').querySelectorAll('.placar .pts')].forEach((e,i)=>{ if(e.textContent!==pAntes[i]) e.classList.add('mudou'); }); }
 }
 kt_init();
 </script>
