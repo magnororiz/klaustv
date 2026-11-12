@@ -31,7 +31,40 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 @media(max-width:820px){.ktMenu .marca small{font-size:9px;letter-spacing:2px;margin-top:4px;}.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
   .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
 @media(max-width:480px){.ktMenu .bola{height:82px !important;top:6px !important;right:6px !important;}.ktMenu .miolo{padding-right:80px;}.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
-/*fim*/</style>
+/*fim*//*ktFooterCSS*/
+.ktFooter{position:relative;width:100vw;left:50%;margin-left:-50vw;margin-top:40px;margin-bottom:-16px;color:#c9d4e2;font-family:'Barlow',Arial,sans-serif;font-size:14px;text-align:left;
+  background:linear-gradient(180deg,#0a1428 0%,#070d1b 100%);border-top:3px solid #1e5bd8;}
+.ktFooter .lema{font-family:'Oswald','Arial Narrow',Arial;text-align:center;font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:22px 16px 18px 16px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0%,rgba(30,91,216,.25) 50%,rgba(30,91,216,0) 100%);border-bottom:1px solid rgba(255,255,255,.06);}
+.ktFooter .lema span{color:#ffd54f;}
+.ktFooter .wrap{max-width:1200px;margin:0 auto;padding:26px 20px 10px 20px;display:grid;grid-template-columns:1.25fr .8fr 1.1fr 1.5fr;gap:28px;}
+@media(max-width:980px){.ktFooter .wrap{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.ktFooter .wrap{grid-template-columns:1fr;}.ktFooter .lema{font-size:18px;letter-spacing:2px;}}
+.ktFooter h4{font-family:'Oswald','Arial Narrow',Arial;color:#fff;margin:0 0 12px 0;font-size:16px;letter-spacing:2px;text-transform:uppercase;padding-bottom:8px;border-bottom:2px solid #1e5bd8;display:inline-block;}
+.ktFooter a{color:#e6edf5;text-decoration:none;transition:.15s;}
+.ktFooter a:hover{color:#ffd54f;}
+.ktFooter .marca{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.ktFooter .marca img{width:56px;height:56px;border-radius:50%;background:#132039;border:2px solid #1e5bd8;object-fit:cover;}
+.ktFooter .marca b{font-family:'Oswald','Arial Narrow',Arial;font-size:24px;letter-spacing:2px;color:#fff;display:block;line-height:1;}
+.ktFooter .marca b span{color:#1e90ff;}
+.ktFooter .marca small{display:block;font-size:11px;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;margin-top:4px;}
+.ktFooter .sobre{line-height:1.55;color:#aebbd0;margin:0 0 14px 0;}
+.ktFooter .redes{display:flex;gap:8px;}
+.ktFooter .redes a{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#132039;border:1px solid #24406b;font-size:17px;}
+.ktFooter .redes a:hover{background:#1e5bd8;border-color:#1e5bd8;}
+.ktFooter ul{list-style:none;margin:0;padding:0;}
+.ktFooter li{margin:0 0 9px 0;}
+.ktFooter li a:before{content:'›';color:#1e90ff;font-weight:800;margin-right:8px;}
+.ktFooter .ct{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.ktFooter .ct i{font-style:normal;width:30px;height:30px;border-radius:8px;background:#132039;display:flex;align-items:center;justify-content:center;flex:0 0 30px;}
+.ktFooter .patro{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#132039,#0f1a2e);border:1px solid #24406b;border-radius:12px;padding:10px 12px;margin-top:6px;}
+.ktFooter .patro b{display:block;color:#ffd54f;font-family:'Oswald','Arial Narrow',Arial;letter-spacing:1px;font-size:15px;}
+.ktFooter .patro small{color:#aebbd0;}
+.ktFooter .local{font-size:13px;color:#fff;margin:-4px 0 8px 0;}
+.ktFooter .mapa{width:100%;height:190px;border:0;border-radius:12px;background:#101826;box-shadow:0 6px 18px rgba(0,0,0,.4);}
+.ktFooter .copy{border-top:1px solid rgba(255,255,255,.06);text-align:center;color:#6f819a;font-size:12px;padding:14px 16px 18px 16px;margin-top:14px;letter-spacing:.5px;}
+.ktFooter .copy b{color:#9fb3c8;font-weight:600;}
+/*fimF*/</style>
 <script>
 (function(){
  var d=document.documentElement; d.classList.add('ktTravado');
@@ -131,40 +164,7 @@ button:hover{background:#0f6fd1;}
 .jogoItem .meta{color:#9fb3c8;font-size:11px;}
 .vazio{color:#7f93a8;text-align:center;font-size:12px;padding:10px;}
 #kt_aviso{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#ffd54f;color:#000;padding:10px 16px;border-radius:10px;font-weight:bold;font-size:13px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.5);cursor:pointer;display:none;max-width:90%;text-align:center;}
-/*ktFooterCSS*/
-.ktFooter{position:relative;width:100vw;left:50%;margin-left:-50vw;margin-top:40px;margin-bottom:-16px;color:#c9d4e2;font-family:'Barlow',Arial,sans-serif;font-size:14px;
-  background:linear-gradient(180deg,#0a1428 0%,#070d1b 100%);border-top:3px solid #1e5bd8;}
-.ktFooter .lema{font-family:'Oswald','Arial Narrow',Arial;text-align:center;font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:22px 16px 18px 16px;
-  background:linear-gradient(90deg,rgba(30,91,216,0) 0%,rgba(30,91,216,.25) 50%,rgba(30,91,216,0) 100%);border-bottom:1px solid rgba(255,255,255,.06);}
-.ktFooter .lema span{color:#ffd54f;}
-.ktFooter .wrap{max-width:1200px;margin:0 auto;padding:26px 20px 10px 20px;display:grid;grid-template-columns:1.25fr .8fr 1.1fr 1.5fr;gap:28px;}
-@media(max-width:980px){.ktFooter .wrap{grid-template-columns:1fr 1fr;}}
-@media(max-width:600px){.ktFooter .wrap{grid-template-columns:1fr;}.ktFooter .lema{font-size:18px;letter-spacing:2px;}}
-.ktFooter h4{font-family:'Oswald','Arial Narrow',Arial;color:#fff;margin:0 0 12px 0;font-size:16px;letter-spacing:2px;text-transform:uppercase;padding-bottom:8px;border-bottom:2px solid #1e5bd8;display:inline-block;}
-.ktFooter a{color:#e6edf5;text-decoration:none;transition:.15s;}
-.ktFooter a:hover{color:#ffd54f;}
-.ktFooter .marca{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
-.ktFooter .marca img{width:56px;height:56px;border-radius:50%;background:#132039;border:2px solid #1e5bd8;object-fit:cover;}
-.ktFooter .marca b{font-family:'Oswald','Arial Narrow',Arial;font-size:24px;letter-spacing:2px;color:#fff;display:block;line-height:1;}
-.ktFooter .marca b span{color:#1e90ff;}
-.ktFooter .marca small{display:block;font-size:11px;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;margin-top:4px;}
-.ktFooter .sobre{line-height:1.55;color:#aebbd0;margin:0 0 14px 0;}
-.ktFooter .redes{display:flex;gap:8px;}
-.ktFooter .redes a{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#132039;border:1px solid #24406b;font-size:17px;}
-.ktFooter .redes a:hover{background:#1e5bd8;border-color:#1e5bd8;}
-.ktFooter ul{list-style:none;margin:0;padding:0;}
-.ktFooter li{margin:0 0 9px 0;}
-.ktFooter li a:before{content:'›';color:#1e90ff;font-weight:800;margin-right:8px;}
-.ktFooter .ct{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.ktFooter .ct i{font-style:normal;width:30px;height:30px;border-radius:8px;background:#132039;display:flex;align-items:center;justify-content:center;flex:0 0 30px;}
-.ktFooter .patro{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#132039,#0f1a2e);border:1px solid #24406b;border-radius:12px;padding:10px 12px;margin-top:6px;}
-.ktFooter .patro b{display:block;color:#ffd54f;font-family:'Oswald','Arial Narrow',Arial;letter-spacing:1px;font-size:15px;}
-.ktFooter .patro small{color:#aebbd0;}
-.ktFooter .local{font-size:13px;color:#fff;margin:-4px 0 8px 0;}
-.ktFooter .mapa{width:100%;height:190px;border:0;border-radius:12px;background:#101826;box-shadow:0 6px 18px rgba(0,0,0,.4);}
-.ktFooter .copy{border-top:1px solid rgba(255,255,255,.06);text-align:center;color:#6f819a;font-size:12px;padding:14px 16px 18px 16px;margin-top:14px;letter-spacing:.5px;}
-.ktFooter .copy b{color:#9fb3c8;font-weight:600;}
-/*fimF*/</style>
+</style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 </head>
@@ -690,6 +690,7 @@ function kt_salvarAvulso(){
 kt_avLinhas('A'); kt_avLinhas('B');
 kt_iniciar();
 </script>
+
 
 <footer class="ktFooter">
   <div class="lema">🏀 No basquete, <span>tudo pode acontecer!</span></div>
