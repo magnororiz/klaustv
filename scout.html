@@ -1356,7 +1356,7 @@ if(win){
 
 
 <!--ktFimJogo--><div id="ktAnterior"></div><div class="ktFim">
-<div class="ktPrem"><div class="ktPremTit">🏆 Prêmios do jogo</div>
+<div class="ktPrem"><div class="ktPremTit">🏆 Destaques do jogo</div>
 <div class="ktPremCab"><span>Prêmio</span><span>Jogador</span><span></span></div>
 <div id="ktPremLista"></div>
 <button type="button" onclick="kt_premLinha()">➕ Adicionar prêmio</button></div>
@@ -1502,7 +1502,7 @@ async function kt_salvarAnterior(){
 }
 kt_listarMontados();
 /* ---------- Prêmios do jogo ---------- */
-const KT_PREM_BASE=['MVP do jogo','Cestinha do jogo','Defensor do jogo','Reboteiro do jogo','Destaque do Time A','Destaque do Time B'];
+const KT_PREM_BASE=['MVP do jogo','Cestinha do jogo','Reboteiro do jogo','Defensor do jogo','Destaque do Time A','Destaque do Time B'];
 function kt_premExtras(){ try{ return JSON.parse(localStorage.getItem('klaustv_premios_v1')||'[]'); }catch(e){ return []; } }
 function kt_premNomes(){ const ta=document.getElementById('titleA').innerText.trim()||'Time A', tb=document.getElementById('titleB').innerText.trim()||'Time B';
   return KT_PREM_BASE.map(p=>p.replace('Time A',ta).replace('Time B',tb)).concat(kt_premExtras()); }
@@ -1515,6 +1515,7 @@ function kt_sugestao(i){ const js=kt_jogadores(); if(!js.length) return '';
   const eff=p=>(+p.s.eff||0)+0.001*(+p.s.pts||0);
   if(i===0) return melhor(js,eff);
   if(i===1) return melhor(js,p=>(+p.s.pts||0)+0.001*(+p.s.eff||0));
+  if(i===2) return melhor(js,p=>(+p.s.reb||0)+0.001*(+p.s.eff||0));
   return ''; }
 function kt_premOpcoes(l){ const sp=l.querySelector('.pP'), sj=l.querySelector('.pJ'); const vp=sp.value, vj=sj.value;
   const nomes=kt_premNomes(); sp.innerHTML=nomes.map((n,i)=>'<option value="'+i+'">'+n.replace(/</g,'&lt;')+'</option>').join('')+'<option value="novo">Novo prêmio…</option>';
@@ -1532,7 +1533,7 @@ function kt_premLinha(ini){ const l=document.createElement('div'); l.className='
   document.getElementById('ktPremLista').appendChild(l); kt_premOpcoes(l); }
 [0,1,2,3,4,5].forEach(i=>kt_premLinha(i));
 let kt_premT=null;
-function kt_premAuto(){ clearTimeout(kt_premT); kt_premT=setTimeout(()=>document.querySelectorAll('.ktPremL').forEach(l=>{ const v=l.querySelector('.pP').value; if((v==='0'||v==='1') && l.querySelector('.pJ').dataset.manual!=='1') kt_premOpcoes(l); }),150); }
+function kt_premAuto(){ clearTimeout(kt_premT); kt_premT=setTimeout(()=>document.querySelectorAll('.ktPremL').forEach(l=>{ const v=l.querySelector('.pP').value; if((v==='0'||v==='1'||v==='2') && l.querySelector('.pJ').dataset.manual!=='1') kt_premOpcoes(l); }),150); }
 if(typeof atualizarTotaisEquipe==='function'){ const _atz=atualizarTotaisEquipe; atualizarTotaisEquipe=function(){ const r=_atz.apply(this,arguments); kt_premAuto(); return r; }; }
 /* ---------- PDF e imagem ---------- */
 function kt_carregarLib(src){ return new Promise((ok,erro)=>{ if(document.querySelector('script[src="'+src+'"]')) return ok(); const e=document.createElement('script'); e.src=src; e.onload=ok; e.onerror=erro; document.head.appendChild(e); }); }
@@ -1549,7 +1550,7 @@ function kt_montarSumula(){
     ps.map(p=>{ const s=p.s; return '<tr><td>'+kt_esc2(p.num)+'</td><td class="l">'+kt_esc2(p.nome)+'</td><td><b>'+(+s.pts||0)+'</b></td><td>'+fr(+s.twoMade||0,+s.twoMiss||0)+'</td><td>'+fr(+s.threeMade||0,+s.threeMiss||0)+'</td><td>'+fr(+s.ftMade||0,+s.ftMiss||0)+'</td><td>'+(+s.reb||0)+'</td><td>'+(+s.ast||0)+'</td><td>'+(+s.stl||0)+'</td><td>'+(+s.blk||0)+'</td><td>'+(+s.to||0)+'</td><td>'+(+s.foul||0)+'</td><td><b>'+(+s.eff||0)+'</b></td></tr>'; }).join('')+
     '<tr class="tot"><td colspan="2" class="l">Total</td><td>'+sum('pts')+'</td><td>'+fr(sum('twoMade'),sum('twoMiss'))+'</td><td>'+fr(sum('threeMade'),sum('threeMiss'))+'</td><td>'+fr(sum('ftMade'),sum('ftMiss'))+'</td><td>'+sum('reb')+'</td><td>'+sum('ast')+'</td><td>'+sum('stl')+'</td><td>'+sum('blk')+'</td><td>'+sum('to')+'</td><td>'+sum('foul')+'</td><td>'+sum('eff')+'</td></tr></table>'; };
   const nomes=kt_premNomes(); const prem=[...document.querySelectorAll('.ktPremL')].map(l=>{ const p=nomes[+l.querySelector('.pP').value]; const k=l.querySelector('.pJ').value; const pl=js.find(x=>x.k===k); return (p&&pl)?{p,pl}:null; }).filter(Boolean);
-  const premHtml=prem.length?'<div class="sT">🏆 Prêmios do jogo</div><div class="prem">'+prem.map(x=>'<div><span>'+kt_esc2(x.p)+'</span><b>'+kt_esc2(x.pl.nome)+'</b><small>'+kt_esc2(x.pl.tn)+'</small></div>').join('')+'</div>':'';
+  const premHtml=prem.length?'<div class="sT">🏆 Destaques do jogo</div><div class="prem">'+prem.map(x=>'<div><span>'+kt_esc2(x.p)+'</span><b>'+kt_esc2(x.pl.nome)+'</b><small>'+kt_esc2(x.pl.tn)+'</small></div>').join('')+'</div>':'';
   const info=[j.categoria, data, j.ginasio||m.ginasio, j.jogoFed?'Jogo FBERJ nº '+j.jogoFed:''].filter(Boolean).map(kt_esc2).join(' · ');
   const el=document.getElementById('ktSumula');
   el.innerHTML='<div id="ktSumBox"><style>#ktSumBox{width:1000px;background:#fff;color:#111;font-family:Arial,sans-serif;padding:26px 30px;box-sizing:border-box}#ktSumBox .cab{display:flex;align-items:center;gap:18px;border-bottom:4px solid #1e5bd8;padding-bottom:14px}#ktSumBox .cab img{height:96px}#ktSumBox .pl{flex:1;text-align:center}#ktSumBox .pl .t{display:flex;align-items:center;justify-content:center;gap:18px;font-weight:900;font-size:24px}#ktSumBox .pl .n{font-size:54px;color:#1e5bd8;font-family:Oswald,Arial}#ktSumBox .pl .x{font-size:26px;color:#999}#ktSumBox .inf{color:#555;font-size:14px;margin-top:6px}#ktSumBox .sT{background:#1e5bd8;color:#fff;font-weight:800;font-size:17px;padding:7px 12px;margin-top:18px;border-radius:6px 6px 0 0}#ktSumBox table{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:fixed}#ktSumBox th:first-child{width:38px}#ktSumBox th:nth-child(2){width:300px}#ktSumBox th{background:#e8eefb;color:#1a2c55;padding:6px 4px;font-size:12px}#ktSumBox td{padding:5px 4px;text-align:center;border-bottom:1px solid #e4e7ec}#ktSumBox .l{text-align:left}#ktSumBox tr.tot td{background:#0d1a33;color:#ffd54f;font-weight:800}#ktSumBox .prem{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;background:#fff8e1;border:1px solid #ffd54f;border-top:none}#ktSumBox .prem div{display:flex;flex-direction:column;background:#fff;border-radius:8px;padding:8px 10px;border:1px solid #f0e2a8}#ktSumBox .prem span{font-size:12px;color:#8a6d00;font-weight:700;text-transform:uppercase}#ktSumBox .prem b{font-size:15px}#ktSumBox .prem small{color:#666}#ktSumBox .rod{margin-top:18px;border-top:2px solid #e4e7ec;padding-top:10px;display:flex;justify-content:space-between;color:#555;font-size:13px}</style>'+
