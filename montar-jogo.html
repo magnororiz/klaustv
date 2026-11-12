@@ -65,13 +65,14 @@ button:hover{background:#0f6fd1;}
 .setupGrid{display:flex;gap:28px;margin-bottom:8px;}
 .setupGrid .bloco{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr;column-gap:8px;row-gap:10px;align-content:start;}
 .setupGrid .bloco > .cheia{grid-column:1/-1;}
+.setupGrid .bloco.bJogo{grid-template-columns:minmax(150px,.55fr) 1.45fr;}
 .obsReg{font-size:11px;color:#7f93a8;margin:0 0 12px 0;}
 .obsReg .legNum{color:#5fa8ff;font-size:11px;}
 .obsReg .legNome{font-size:11px;font-weight:700;color:#cfd8e3;}
 .setupGrid label{font-size:12px;color:#cfd8e3;display:flex;flex-direction:column;gap:3px;min-width:0;}
 .setupGrid select,.setupGrid input{padding:7px;border-radius:8px;border:none;font-size:13px;width:100%;box-sizing:border-box;}
 @media(max-width:1100px){.setupGrid{flex-direction:column;gap:10px;}}
-@media(max-width:560px){.setupGrid .bloco{grid-template-columns:1fr;}}
+@media(max-width:560px){.setupGrid .bloco,.setupGrid .bloco.bJogo{grid-template-columns:1fr;}}
 .legendaReg{align-self:end;padding-bottom:9px;}
 .legNome{color:#fff;font-size:13px;}.legNum{color:#7f93a8;font-size:11px;}
 .rosterCols{display:flex;gap:12px;flex-wrap:wrap;}
@@ -199,7 +200,7 @@ button:hover{background:#0f6fd1;}
 <div class="panel">
     <strong class="titulo">🏟️ Montar jogo com os atletas da Federação</strong>
     <div class="setupGrid" id="setupGrid">
-      <div class="bloco">
+      <div class="bloco bJogo">
         <label>Categoria<select id="selCategoria" onchange="kt_trocarCategoria(true)"></select></label>
         <label>Jogo da tabela FBERJ<select id="selJogoFed" onchange="kt_escolherJogoFed()"></select><input id="inData" type="hidden"></label>
         <label class="cheia">Time A<select id="selTimeA" onchange="kt_listarAtletas('A')"></select></label>
