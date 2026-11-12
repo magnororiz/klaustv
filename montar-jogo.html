@@ -36,7 +36,7 @@ button:hover{background:#0f6fd1;}
 .selo{display:inline-block;margin-top:5px;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:10px;}
 .selo.casa{background:#ffd54f;color:#000;}.selo.fora{background:#cfd8e3;color:#0b1220;}
 .rosterList{max-height:300px;overflow-y:auto;}
-.atl,.atlHead{display:grid;grid-template-columns:18px 26px minmax(0,1fr) 110px 52px;align-items:center;column-gap:6px;font-size:12px;padding:3px 2px;border-bottom:1px solid #16243a;}
+.atl,.atlHead{display:grid;grid-template-columns:18px 26px minmax(0,var(--nomeW,1fr)) 110px 52px;justify-content:start;align-items:center;column-gap:6px;font-size:12px;padding:3px 2px;border-bottom:1px solid #16243a;}
 .atlHead{font-size:10px;color:#7f93a8;text-transform:uppercase;border-bottom:1px solid #2a3b55;padding-bottom:4px;}
 .atlHead .c{text-align:center;}
 .atl:hover{background:#17263d;}
@@ -199,11 +199,19 @@ function kt_listarAtletas(t){
         `<div class="atl" id="atl${t}_${a[0]}"><input type="checkbox" id="cb${t}_${i}" data-reg="${a[0]}" data-nome="${kt_esc(a[1])}" onchange="kt_contar('${t}',this)"><input class="num" placeholder="#" maxlength="2" inputmode="numeric" title="Número da camisa"><label for="cb${t}_${i}">${a[1]}</label><input class="apelido" placeholder="" value="${kt_esc(kt_apelidos()[a[0]]||'')}" oninput="kt_salvarApelido('${a[0]}',this.value)" title="Apelido"><span class="reg">${a[0]}</span></div>`
     ).join('');
     document.getElementById('roster'+t).innerHTML = lista.length ? '<div class="atlHead"><span></span><span class="c">Nº</span><span>Nome</span><span>Apelido</span><span style="text-align:right;">FBERJ</span></div>' + document.getElementById('roster'+t).innerHTML : '<div class="vazio">Nenhum atleta inscrito.</div>';
+    kt_larguraNomes(t);
     kt_pintar(t);
     kt_montarGinasios();
     kt_contar(t);
 }
 
+function kt_larguraNomes(t){
+    const box=document.getElementById('roster'+t);
+    const lab=box.querySelector('.atl label'); if(!lab){ box.style.removeProperty('--nomeW'); return; }
+    const ctx=document.createElement('canvas').getContext('2d'); ctx.font=getComputedStyle(lab).font;
+    let maior=0; box.querySelectorAll('.atl label').forEach(l=>{ maior=Math.max(maior, ctx.measureText(l.textContent).width); });
+    box.style.setProperty('--nomeW', (Math.ceil(maior)+14)+'px');
+}
 function kt_marcados(t){ return [...document.querySelectorAll('#roster'+t+' input[type=checkbox]:checked')]; }
 function kt_contar(t, caixa){
     let m = kt_marcados(t);
