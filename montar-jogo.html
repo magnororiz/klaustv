@@ -221,16 +221,16 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
             <input id="inGinasio" list="dlGinasios" placeholder="Digite o nome do ginásio" style="display:none;margin-top:4px;" oninput="kt_marcarMandante()"></label>
       </div>
       <div class="bloco">
-        <label>Árbitro<input id="inArbitro" list="dlArbitros" placeholder="Escolha ou digite"></label>
-        <label>1º Fiscal<input id="inFiscal" list="dlArbitros" placeholder="Escolha ou digite"></label>
-        <label>Apontador(a)<input id="inApontador" list="dlMesa" placeholder="Escolha ou digite"></label>
-        <label>Cronometrista<input id="inCronometrista" list="dlMesa" placeholder="Escolha ou digite"></label>
-        <label>Relógio de arremesso<input id="inRelogio" list="dlMesa" placeholder="Escolha ou digite"></label>
+        <label>Árbitro<input id="inArbitro" list="dlArb" placeholder="Escolha ou digite"></label>
+        <label>1º Fiscal<input id="inFiscal" list="dlArb" placeholder="Escolha ou digite"></label>
+        <label>Apontador(a)<input id="inApontador" list="dlArb" placeholder="Escolha ou digite"></label>
+        <label>Cronometrista<input id="inCronometrista" list="dlArb" placeholder="Escolha ou digite"></label>
+        <label>Relógio de arremesso<input id="inRelogio" list="dlArb" placeholder="Escolha ou digite"></label>
         <div class="infoFed" id="infoFed"></div>
       </div>
     </div>
     <div class="obsReg">Obs.: na lista de atletas, o número em azul é o cadastro na FBERJ (ex.: <span class="legNome">Nome do Jogador</span> <span class="legNum">– 123456</span>).</div>
-    <datalist id="dlGinasios"></datalist><datalist id="dlArbitros"></datalist><datalist id="dlMesa"></datalist>
+    <datalist id="dlGinasios"></datalist><datalist id="dlArb"></datalist>
     <div class="rosterCols">
         <div class="rosterBox" id="boxA" style="display:none"><div class="rosterHead" id="headA"><div><div class="rosterTitle" id="rosterTitleA">Time A</div><div class="contador" id="contA">0 selecionados</div><span class="selo" id="seloA"></span></div><div class="escudo" id="escA"></div></div>
             <div><button onclick="kt_marcar('A',true)">Marcar todos</button><button onclick="kt_marcar('A',false)">Limpar</button></div>
@@ -253,11 +253,11 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
           <label class="cheia">Ginásio<input id="avGinasio" placeholder="Nome do ginásio"></label>
         </div>
         <div class="bloco">
-          <label>Árbitro<input id="avArbitro"></label>
-          <label>1º Fiscal<input id="avFiscal"></label>
-          <label>Apontador(a)<input id="avApontador"></label>
-          <label>Cronometrista<input id="avCronometrista"></label>
-          <label>Relógio de arremesso<input id="avRelogio"></label>
+          <label>Árbitro<input id="avArbitro" list="dlArb" placeholder="Escolha ou digite"></label>
+          <label>1º Fiscal<input id="avFiscal" list="dlArb" placeholder="Escolha ou digite"></label>
+          <label>Apontador(a)<input id="avApontador" list="dlArb" placeholder="Escolha ou digite"></label>
+          <label>Cronometrista<input id="avCronometrista" list="dlArb" placeholder="Escolha ou digite"></label>
+          <label>Relógio de arremesso<input id="avRelogio" list="dlArb" placeholder="Escolha ou digite"></label>
         </div>
       </div>
       <div class="rosterCols">
@@ -328,12 +328,21 @@ function kt_ajustarLargura(){
     document.getElementById('setupGrid').style.setProperty('--w', (Math.ceil(maior)+50)+'px');
 }
 
+let KT_ARB=[];
+function kt_arbNorm(x){ return String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLowerCase(); }
+function kt_arbMostrar(){ const m={}; [...(KT_DADOS.arbitros||[]),...(KT_DADOS.mesa||[]),...KT_ARB].forEach(n=>{ const k=kt_arbNorm(n); if(k&&!m[k]) m[k]=n; });
+  try{ JSON.parse(localStorage.getItem('kt_arb_v1')||'[]').forEach(n=>{ const k=kt_arbNorm(n); if(k&&!m[k]) m[k]=n; }); }catch(e){}
+  KT_ARB=Object.values(m).sort((a,b)=>a.localeCompare(b,'pt-BR')); document.getElementById('dlArb').innerHTML=KT_ARB.map(n=>'<option value="'+kt_esc(n)+'">').join(''); }
+async function kt_arbCarregar(){ const r=await kt_api({acao:'listarArbitragem'}); if(r&&r.ok&&r.lista){ const ns=r.lista.map(x=>x.nome); try{ localStorage.setItem('kt_arb_v1',JSON.stringify(ns)); }catch(e){} KT_ARB=ns; kt_arbMostrar(); } }
+function kt_arbNovos(ids){ const tem={}; KT_ARB.forEach(n=>tem[kt_arbNorm(n)]=1); const nv=[];
+  ids.forEach(i=>{ const el=document.getElementById(i); const v=el?String(el.value||'').replace(/\s+/g,' ').trim():''; if(v.length>=3 && !tem[kt_arbNorm(v)]){ tem[kt_arbNorm(v)]=1; nv.push(v); } });
+  if(!nv.length) return; KT_ARB=KT_ARB.concat(nv); try{ localStorage.setItem('kt_arb_v1',JSON.stringify(KT_ARB)); }catch(e){} kt_arbMostrar();
+  kt_api({acao:'incluirArbitragem',nomes:nv}).then(r=>{ if(r&&r.ok&&r.incluidos&&r.incluidos.length) kt_aviso('Incluído na lista FBERJ — Mesa e Arbitragem: '+r.incluidos.join(', ')); }); }
 function kt_iniciar(){
     kt_ajustarLargura();
     const op = l => l.map(n=>`<option value="${kt_esc(n)}">`).join('');
     document.getElementById('dlGinasios').innerHTML = op(KT_DADOS.ginasios);
-    document.getElementById('dlArbitros').innerHTML = op(KT_DADOS.arbitros);
-    document.getElementById('dlMesa').innerHTML = op(KT_DADOS.mesa);
+    kt_arbMostrar(); kt_arbCarregar();
     const selC = document.getElementById('selCategoria');
     selC.innerHTML = '<option value="">— escolha a categoria —</option>' + KT_DADOS.ordem.map(c=>`<option value="${c}">${c}</option>`).join('');
     selC.value = '';
@@ -586,6 +595,7 @@ function kt_salvarJogo(){
     document.getElementById('filtroData').value = j.dataHora.slice(0,10);
     kt_listarSalvos();
     kt_aviso('Salvando na planilha...');
+    kt_arbNovos(['inArbitro','inFiscal','inApontador','inCronometrista','inRelogio']);
     kt_api({acao:'salvarJogo', jogo:Object.assign({id:kt_editandoId, oficiais:{arbitro:j.arbitro,fiscal:j.fiscal,apontador:j.apontador,cronometrista:j.cronometrista,relogio:j.relogio}}, j)}).then(r=>{
         if(r.ok) kt_aviso('Jogo salvo na planilha: '+j.timeA.sigla+' x '+j.timeB.sigla+' · '+j.categoria);
         else kt_aviso('Salvo só neste aparelho. Planilha: '+r.erro);
@@ -713,6 +723,7 @@ function kt_salvarAvulso(){
   if(!kt_gravarSalvos(lista)) return;
   document.getElementById('filtroData').value=j.dataHora.slice(0,10); kt_listarSalvos();
   kt_aviso('Salvando na planilha...');
+  kt_arbNovos(['avArbitro','avFiscal','avApontador','avCronometrista','avRelogio']);
   kt_api({acao:'salvarJogo', jogo:Object.assign({id:kt_editandoId, oficiais:{arbitro:j.arbitro,fiscal:j.fiscal,apontador:j.apontador,cronometrista:j.cronometrista,relogio:j.relogio}}, j)}).then(r=>{
     if(r.ok) kt_aviso('Jogo avulso salvo na planilha: '+j.timeA.nome+' x '+j.timeB.nome); else kt_aviso('Salvo só neste aparelho. Planilha: '+r.erro); });
 }

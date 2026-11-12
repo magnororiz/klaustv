@@ -37,6 +37,9 @@ function doPost(e) {
       case 'salvarCamisa': return responder(salvarCamisa(p.token, p.reg, p.camisa));
       case 'aoVivoLista': return responder(aoVivoLista(p.categoria));
       case 'aoVivoJogo': return responder(aoVivoJogo(p.id));
+      case 'listarArbitragem': return responder(listarArbitragem(p.token));
+      case 'incluirArbitragem': return responder(incluirArbitragem(p.token, p.nomes));
+      case 'excluirArbitragem': return responder(excluirArbitragem(p.token, p.nome));
       case 'statusBackup': return responder(statusBackup(p.token));
       case 'rodarBackup': return responder(rodarBackupSite(p.token));
       case 'sair': CacheService.getScriptCache().remove('s_' + p.token); return responder({ ok: true });
@@ -501,4 +504,46 @@ function instalarBackupDiario() {
   ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'backupFBERJ').forEach(t => ScriptApp.deleteTrigger(t));
   ScriptApp.newTrigger('backupFBERJ').timeBased().everyDays(1).atHour(20).inTimezone('America/Sao_Paulo').create();
   return backupFBERJ();
+}
+
+
+/* ---------- FBERJ — Mesa e Arbitragem (lista única) ----------
+ * Aba FBERJ_Arbitragem: nome | funcao | nivel | origem (FBERJ/Klaus TV) | incluidoEm | incluidoPor
+ * Nomes da FBERJ nunca são apagados; só os incluídos pelo site podem ser excluídos.
+ */
+const ARB_INICIAL = [["Mauricio Serour", "Árbitro(a)", "Especial"], ["Gabriel de Melo Alves", "Árbitro(a)", "Nacional"], ["Lucas Costa Maia da Silva", "Árbitro(a)", "Nacional"], ["Sandra Victória da Costa", "Árbitro(a)", "Nacional"], ["Tarik Silva Costa", "Árbitro(a)", "Nacional"], ["Juliane de Freitas Campos", "Árbitro(a)", "2ª"], ["Marco Aurelio Custodio Vieira", "Árbitro(a)", "2ª"], ["Rebeca Marciano Pockel Monteiro", "Árbitro(a)", "2ª"], ["Silvia Ferreira de Oliveira", "Árbitro(a)", "2ª"], ["Washington Luís Ferreira Franklin", "Árbitro(a)", "2ª"], ["Allan Madureira Ayres", "Árbitro(a)", "3ª"], ["Artur Louzada Guimarães", "Árbitro(a)", "3ª"], ["Flávia dos Santos Matias", "Árbitro(a)", "3ª"], ["Flávio Peixoto Luna", "Árbitro(a)", "3ª"], ["Felipe Miranda Rodrigues", "Árbitro(a)", "3ª"], ["Gabriela Aypana Delfino Braga", "Árbitro(a)", "3ª"], ["Gabriel Carvalho de Freitas", "Árbitro(a)", "3ª"], ["Gustavo Xisto Furtado", "Árbitro(a)", "3ª"], ["João Paulo Bernaldo de Paula", "Árbitro(a)", "3ª"], ["José Carlos Bastos de Azevedo", "Árbitro(a)", "3ª"], ["Luís Felipe Lage da Rocha", "Árbitro(a)", "3ª"], ["Luiz Felipe Cruz Soares", "Árbitro(a)", "3ª"], ["Maykel Bruno Gomes Fernandes", "Árbitro(a)", "3ª"], ["Michael dos Santos Braga", "Árbitro(a)", "3ª"], ["Rafael Stofel de Paulo", "Árbitro(a)", "3ª"], ["Saul Emmanuel de Mattos Quintans", "Árbitro(a)", "3ª"], ["Alvaro Francisco Gomes de Souza", "Árbitro(a)", "Estagiário(a)"], ["Hugo Ricardo Martins Ramalho", "Árbitro(a)", "Estagiário(a)"], ["Raphael de Miranda Machado", "Árbitro(a)", "Estagiário(a)"], ["Aline Miranda Vianna", "Oficial de mesa", "Especial e FIBA"], ["Elisângela Santana Cardoso", "Oficial de mesa", "Especial e FIBA"], ["Isabela Gomes Valentim", "Oficial de mesa", "Especial e FIBA"], ["Maria Claudia de Mattos Molina", "Oficial de mesa", "Especial e FIBA"], ["Marcelo Santana Cardoso", "Oficial de mesa", "Especial e FIBA"], ["Maria Thereza Rezende", "Oficial de mesa", "Especial e FIBA"], ["Rosângela Esteves Menezes", "Oficial de mesa", "Especial e FIBA"], ["Adriana Schimkus de Lima", "Oficial de mesa", "2ª"], ["Alessandra Rosa Lopes Zachi", "Oficial de mesa", "2ª"], ["Bárbara Silva de Oliveira", "Oficial de mesa", "2ª"], ["Denize de Lima Lourenço", "Oficial de mesa", "2ª"], ["Stéphanie Santana dos Santos Coelho", "Oficial de mesa", "2ª"], ["Alessandra de Oliveira Lages", "Oficial de mesa", "3ª"], ["Carolina Pontes Magalhães Cordeiro", "Oficial de mesa", "3ª"], ["Carolina Ribeiro Leite Chaves", "Oficial de mesa", "3ª"], ["Fernanda Rafaela Andrade Nunes", "Oficial de mesa", "3ª"], ["Helena La Marca de Azevedo", "Oficial de mesa", "3ª"], ["Igor Thales da Silva Souza", "Oficial de mesa", "3ª"], ["Jônatas Rodrigues Silva", "Oficial de mesa", "3ª"], ["Kátia Cristina de Lima Francisco", "Oficial de mesa", "3ª"], ["Luciano da Conceição Daniel", "Oficial de mesa", "3ª"], ["Mateus Pires Ribeiro", "Oficial de mesa", "3ª"], ["Milena Piva Rocha de Araujo", "Oficial de mesa", "3ª"], ["Raphael Queiroz Pereira Martins", "Oficial de mesa", "3ª"], ["Shirlei Regina de Oliveira", "Oficial de mesa", "3ª"], ["Yasmin Almeida Menzes de Souza", "Oficial de mesa", "3ª"], ["Elisangela Cristina Cardoso Mamede", "Oficial de mesa", "Estagiário(a)"], ["Lívia Cristina Alves Viana", "Oficial de mesa", "Estagiário(a)"], ["Mônica Meireles da Silva Molina Freitas", "Oficial de mesa", "Estagiário(a)"], ["Pablo Pereira Miranda da Silva", "Oficial de mesa", "Estagiário(a)"], ["Patrícia Filardi Monteiro", "Oficial de mesa", "Estagiário(a)"], ["Rafael de Lima Carvalho", "Oficial de mesa", "Estagiário(a)"], ["Vanessa de Oliveira Freitas", "Oficial de mesa", "Estagiário(a)"]];
+function abaArbitragem() {
+  const ss = SpreadsheetApp.openById(PLANILHA_ID); let sh = ss.getSheetByName('FBERJ_Arbitragem');
+  if (!sh) {
+    sh = ss.insertSheet('FBERJ_Arbitragem'); sh.getRange(1, 1, 1, 6).setValues([['nome', 'funcao', 'nivel', 'origem', 'incluidoEm', 'incluidoPor']]); sh.setFrozenRows(1);
+    const agora = new Date(); sh.getRange(2, 1, ARB_INICIAL.length, 6).setValues(ARB_INICIAL.map(r => [r[0], r[1], r[2], 'FBERJ', agora, 'PDF FBERJ']));
+  }
+  return sh;
+}
+function arbNorm(x) { return String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toLowerCase(); }
+function lerArbitragem() {
+  return abaArbitragem().getDataRange().getValues().slice(1).filter(r => String(r[0]).trim())
+    .map((r, i) => ({ linha: i + 2, nome: String(r[0]).trim(), funcao: String(r[1] || ''), origem: String(r[3] || '') }));
+}
+function listarArbitragem(token) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  const l = lerArbitragem().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  return { ok: true, lista: l.map(x => ({ nome: x.nome, funcao: x.funcao, origem: x.origem })) };
+}
+function incluirArbitragem(token, nomes) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  const tem = {}; lerArbitragem().forEach(x => tem[arbNorm(x.nome)] = 1);
+  const novos = []; (Array.isArray(nomes) ? nomes : [nomes]).forEach(n => {
+    n = String(n || '').replace(/\s+/g, ' ').trim(); if (n.length < 3 || n.length > 80) return;
+    const k = arbNorm(n); if (tem[k]) return; tem[k] = 1; novos.push([n, '', '', 'Klaus TV', new Date(), u.usuario]);
+  });
+  if (novos.length) { const sh = abaArbitragem(); sh.getRange(sh.getLastRow() + 1, 1, novos.length, 6).setValues(novos); }
+  return { ok: true, incluidos: novos.map(r => r[0]) };
+}
+function excluirArbitragem(token, nome) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  const x = lerArbitragem().find(r => arbNorm(r.nome) === arbNorm(nome));
+  if (!x) return { ok: false, erro: 'Nome não encontrado.' };
+  if (x.origem === 'FBERJ') return { ok: false, erro: 'Nome da lista oficial da FBERJ não pode ser excluído.' };
+  abaArbitragem().deleteRow(x.linha); return { ok: true };
 }
