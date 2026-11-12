@@ -85,10 +85,10 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 #ktSumula{position:absolute;left:-10000px;top:0;}
 /*fimJM*/
 /*ktBtCss*/
-.team .buttons{display:grid;grid-template-columns:repeat(4,minmax(0,108px));gap:8px;justify-content:center;margin-top:16px;}
+.team .buttons{display:grid;grid-template-columns:repeat(4,minmax(0,108px));gap:6px;justify-content:center;margin-top:16px;}
 .team .buttons br{display:none;}
-.team .buttons hr{grid-column:1/-1;width:100%;border:none;border-top:1px solid #2c3e50;margin:6px 0;}
-.team .buttons button{margin:0;width:100%;height:38px;font-size:13px;font-weight:800;letter-spacing:.3px;color:#fff;border-radius:9px;
+.team .buttons hr{grid-column:1/-1;width:100%;border:none;border-top:1px solid #2c3e50;margin:3px 0;}
+.team .buttons button{margin:0;width:100%;height:31px;font-size:13px;font-weight:800;letter-spacing:.3px;color:#fff;border-radius:9px;
   border:1px solid rgba(255,255,255,.18);border-bottom:4px solid rgba(0,0,0,.35);
   box-shadow:0 3px 8px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.25);text-shadow:0 1px 1px rgba(0,0,0,.4);transition:transform .06s,filter .15s;}
 .team .buttons button:hover{filter:brightness(1.12);}
@@ -99,6 +99,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .team .buttons button[onclick^="removeMiss"]{background:linear-gradient(180deg,#9b3430,#6e1f1c);}
 .team .buttons button[onclick^="addOther"][onclick$=",1)"]{background:linear-gradient(180deg,#3aa0ff,#1567c9);}
 .team .buttons button[onclick^="addOther"][onclick$=",-1)"]{background:linear-gradient(180deg,#235a96,#173c66);}
+.team tr[onclick]{cursor:pointer;user-select:none;}
 /*fimBt*/
 /*ktFooterCSS*/
 .ktFooter{position:relative;width:100vw;left:50%;margin-left:-50vw;margin-top:40px;margin-bottom:-16px;color:#c9d4e2;font-family:'Barlow',Arial,sans-serif;font-size:14px;text-align:left;
@@ -378,7 +379,7 @@ hr{
 <!-- ================= TIME A ================= -->
 <div class="team">
 
-<div class="ktCab"><img id="ktEscA" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 contenteditable="true" class="teamTitle" id="titleA">Time A</h2><div class="score" id="scoreA">0</div></div></div><div class="ktQ"><span>Placar</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQA1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQA2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQA3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQA4" oninput="kt_qMudou()"></label></div>
+<div class="ktCab"><img id="ktEscA" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleA">Time A</h2><div class="score" id="scoreA">0</div></div></div><div class="ktQ"><span>Placar</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQA1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQA2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQA3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQA4" oninput="kt_qMudou()"></label></div>
 
 <table class="table" id="tableA"></table>
 
@@ -433,7 +434,7 @@ hr{
 <!-- ================= TIME B ================= -->
 <div class="team">
 
-<div class="ktCab"><img id="ktEscB" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 contenteditable="true" class="teamTitle" id="titleB">Time B</h2><div class="score" id="scoreB">0</div></div></div><div class="ktQ"><span>Placar</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQB1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQB2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQB3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQB4" oninput="kt_qMudou()"></label></div>
+<div class="ktCab"><img id="ktEscB" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleB">Time B</h2><div class="score" id="scoreB">0</div></div></div><div class="ktQ"><span>Placar</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQB1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQB2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQB3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQB4" oninput="kt_qMudou()"></label></div>
 
 <table class="table" id="tableB"></table>
 
@@ -543,9 +544,9 @@ eff:0
 html += `
 <tr onclick="selectPlayer('${team}',${i},this)">
 
-<td contenteditable>${i}</td>
+<td>${i}</td>
 
-<td contenteditable>Jogador ${i}</td>
+<td>Jogador ${i}</td>
 
 <td id="pts-${key}">0</td>
 
