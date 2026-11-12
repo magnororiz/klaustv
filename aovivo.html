@@ -125,7 +125,37 @@ table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444
 .mudou{animation:mudou 2.2s ease;}
 @keyframes mudou{0%{background:#ffd54f;}100%{background:transparent;}}
 .atual{font-size:12px;color:#7f93a8;text-align:right;margin-top:8px;}
-/*ktFooterCSS*/
+/*ktMenuCSS*/
+html,body{overflow-x:hidden;}
+body{padding-top:0 !important;}
+.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
+  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#1d0f0a 100%);
+  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
+.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
+.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;z-index:4;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 85%,rgba(0,0,0,.4));}
+.ktMenu .bola{position:absolute;right:14px;top:6px;height:136px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));z-index:4;}
+.ktMenu .bola.logoKT{height:142px;top:3px;right:10px;}
+.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
+.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
+.ktMenu .marca span{color:#1e90ff;}
+.ktMenu .marca{text-align:center;line-height:1;}
+.ktMenu .marca small{display:block;font-family:'Barlow',Arial,sans-serif;font-size:12px;font-weight:600;letter-spacing:4px;color:#ffd54f;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,.8);}
+.ktFaixa a.vivo:before{content:'';width:8px;height:8px;border-radius:50%;background:#ff3b30;margin-right:7px;box-shadow:0 0 6px #ff3b30;animation:ktPisca 1.2s infinite;}
+@keyframes ktPisca{50%{opacity:.3;}}
+.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:170px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 100px,rgba(30,91,216,.95) 170px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
+  border-top:1px solid rgba(255,255,255,.12);}
+.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
+.ktFaixa a:hover{background:rgba(255,255,255,.12);}
+.ktFaixa a.soDono{display:none;}
+html.ktDono .ktFaixa a.soDono{display:flex;}
+.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;background:rgba(255,255,255,.16);box-shadow:inset 0 -3px 0 #ffd54f;}
+.ktFaixa{overflow-x:auto;scrollbar-width:none;}
+.ktFaixa a{white-space:nowrap;}
+@media(max-width:820px){.ktMenu .marca small{font-size:9px;letter-spacing:2px;margin-top:4px;}.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
+  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
+@media(max-width:480px){.ktMenu .bola{height:82px !important;top:6px !important;right:6px !important;}.ktMenu .miolo{padding-right:80px;}.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
+/*fim*//*ktFooterCSS*/
 .ktFooter{position:relative;width:100vw;left:50%;margin-left:-50vw;margin-top:40px;margin-bottom:-16px;color:#c9d4e2;font-family:'Barlow',Arial,sans-serif;font-size:14px;
   background:linear-gradient(180deg,#0a1428 0%,#070d1b 100%);border-top:3px solid #1e5bd8;}
 .ktFooter .lema{font-family:'Oswald','Arial Narrow',Arial;text-align:center;font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:22px 16px 18px 16px;
@@ -158,37 +188,7 @@ table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444
 .ktFooter .mapa{width:100%;height:190px;border:0;border-radius:12px;background:#101826;box-shadow:0 6px 18px rgba(0,0,0,.4);}
 .ktFooter .copy{border-top:1px solid rgba(255,255,255,.06);text-align:center;color:#6f819a;font-size:12px;padding:14px 16px 18px 16px;margin-top:14px;letter-spacing:.5px;}
 .ktFooter .copy b{color:#9fb3c8;font-weight:600;}
-/*fimF*//*ktMenuCSS*/
-html,body{overflow-x:hidden;}
-body{padding-top:0 !important;}
-.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
-  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#1d0f0a 100%);
-  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
-.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
-.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;z-index:4;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 85%,rgba(0,0,0,.4));}
-.ktMenu .bola{position:absolute;right:14px;top:6px;height:136px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));z-index:4;}
-.ktMenu .bola.logoKT{height:142px;top:3px;right:10px;}
-.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
-.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
-.ktMenu .marca span{color:#1e90ff;}
-.ktMenu .marca{text-align:center;line-height:1;}
-.ktMenu .marca small{display:block;font-family:'Barlow',Arial,sans-serif;font-size:12px;font-weight:600;letter-spacing:4px;color:#ffd54f;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,.8);}
-.ktFaixa a.vivo:before{content:'';width:8px;height:8px;border-radius:50%;background:#ff3b30;margin-right:7px;box-shadow:0 0 6px #ff3b30;animation:ktPisca 1.2s infinite;}
-@keyframes ktPisca{50%{opacity:.3;}}
-.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:170px;
-  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 100px,rgba(30,91,216,.95) 170px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
-  border-top:1px solid rgba(255,255,255,.12);}
-.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
-.ktFaixa a:hover{background:rgba(255,255,255,.12);}
-.ktFaixa a.soDono{display:none;}
-html.ktDono .ktFaixa a.soDono{display:flex;}
-.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;background:rgba(255,255,255,.16);box-shadow:inset 0 -3px 0 #ffd54f;}
-.ktFaixa{overflow-x:auto;scrollbar-width:none;}
-.ktFaixa a{white-space:nowrap;}
-@media(max-width:820px){.ktMenu .marca small{font-size:9px;letter-spacing:2px;margin-top:4px;}.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
-  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
-@media(max-width:480px){.ktMenu .bola{height:82px !important;top:6px !important;right:6px !important;}.ktMenu .miolo{padding-right:80px;}.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
-/*fim*/</style>
+/*fimF*/</style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 </head>
@@ -268,7 +268,7 @@ function fmtData(d){ return d.toLocaleDateString('pt-BR',{weekday:'short',day:'2
 function fmtHora(d){ return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
 
 function kt_init(){
-  const s=$('selCat'); s.innerHTML=D.ordem.map(c=>`<option>${c}</option>`).join('');
+  const s=$('selCat'); s.innerHTML=D.ordem.map(c=>`<option>${c}</option>`).join('')+'<option value="__AV">Jogos avulsos</option>';
   const q=new URLSearchParams(location.search);
   s.value=q.get('cat')||'Sub-12';
   kt_lista(q.get('jogo'));
@@ -321,8 +321,10 @@ function abrev(n){ const w=String(n||'').trim().split(/\s+/); const core=w.map((
   ab.forEach(i=>{ w[i]=w[i].charAt(0).toUpperCase()+'.'; }); return w.join(' '); }
 function soma(js,k){ return js.reduce((s,p)=>s+(+p[k]||0),0); }
 function pct(m,a){ return a?Math.round(m*100/a):0; }
+function kt_bolaLetra(l,c){ return 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="'+c+'" stroke="#fff" stroke-width="5"/><text x="50" y="68" font-family="Arial Black,Arial" font-weight="900" font-size="52" fill="#fff" text-anchor="middle">'+l+'</text></svg>'); }
 function kt_render(j){
   const m=j.meta||{}, A=m.timeA||{}, B=m.timeB||{}, sa=A.sigla, sb=B.sigla;
+  if(m.avulso){ [[sa,'A','#1e5bd8'],[sb,'B','#e8590c']].forEach(([s,l,c])=>{ if(!s) return; D.escudos[s]=kt_bolaLetra(l,c); D.cores[s]=[c,'#ffffff']; if(!D.equipes[s]) D.equipes[s]=s; }); }
   const ja=jogadores(j,'A'), jb=jogadores(j,'B'), todos=ja.concat(jb);
   const pa=soma(ja,'pts'), pb=soma(jb,'pts');
   const d=dataJogo(j), cat=j.categoria;
@@ -384,7 +386,7 @@ function kt_render(j){
      <div class="pts">${pa}</div><div class="x">X</div><div class="pts">${pb}</div>
      <div class="nome dir nomeB">${nome(sb)}</div><img src="${escudo(sb)}" alt=""><div class="barra" style="background:${cb}"></div></div>
    ${parcial}
-   <div class="faixaCinza"><span><b>Competição</b> CEMB 2026 · ${esc(cat)}</span><span><b>Ginásio</b> ${esc(j.ginasio||m.ginasio||'—')}</span>
+   <div class="faixaCinza"><span><b>Competição</b> ${m.avulso?"Jogo avulso":"CEMB 2026"} · ${esc(cat)}</span><span><b>Ginásio</b> ${esc(j.ginasio||m.ginasio||'—')}</span>
      <span><b>Detalhes do jogo</b> ${m.jogoFed?'Jogo nº '+esc(m.jogoFed)+' · ':''}${d?fmtData(d)+' às '+fmtHora(d):''}</span></div>
    <div class="abas"><span class="cond">Resumo</span></div>
    <div class="duas">${tabela(A,ja)}${tabela(B,jb)}</div>

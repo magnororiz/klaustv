@@ -192,10 +192,11 @@ function salvarJogo(token, j) {
   const sh = abaJogos(); const todos = lerJogos();
   const id = j.id || ('KT-' + Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'yyyyMMddHHmmss') + '-' + Math.floor(Math.random() * 1000));
   const atual = todos.find(x => x.id === id);
-  const meta = { timeA: j.timeA, timeB: j.timeB, oficiais: j.oficiais || {}, ginasio: j.ginasio || '', mandante: j.mandante || '', jogoFed: j.jogoFed || '', dataFed: j.dataFed || '' };
+  const meta = { timeA: j.timeA, timeB: j.timeB, oficiais: j.oficiais || {}, ginasio: j.ginasio || '', mandante: j.mandante || '', jogoFed: j.jogoFed || '', dataFed: j.dataFed || '', avulso: !!j.avulso, atualizadoEm: new Date().toISOString() };
   const linha = [id, j.categoria, j.dataHora || '', j.timeA.sigla || '', j.timeB.sigla || '', j.ginasio || '', j.jogoFed || '', JSON.stringify(meta),
     atual ? atual.stats : '', atual ? atual.status : '', atual ? atual.placarA : 0, atual ? atual.placarB : 0, new Date(), u.usuario];
   if (atual) sh.getRange(atual.linha, 1, 1, COLS.length).setValues([linha]); else sh.appendRow(linha);
+  if (j.avulso) gravarAvulso(id, j, meta, u.usuario);
   CacheService.getScriptCache().remove('j_' + id); CacheService.getScriptCache().remove('lista');
   return { ok: true, id: id };
 }
@@ -208,7 +209,7 @@ function listarJogos(token, data) {
 function excluirJogo(token, id) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
   const j = lerJogos().find(x => x.id === id); if (!j) return { ok: false, erro: 'Jogo não encontrado.' };
-  abaJogos().deleteRow(j.linha); CacheService.getScriptCache().remove('lista');
+  abaJogos().deleteRow(j.linha); apagarAvulso(id); CacheService.getScriptCache().remove('lista');
   return { ok: true };
 }
 function salvarStats(token, id, stats, status) {
@@ -223,10 +224,11 @@ function aoVivoLista(categoria) {
   const c = CacheService.getScriptCache(); let lista = jsonOu(c.get('lista'), null);
   if (!lista) {
     lista = lerJogos().map(x => ({ id: x.id, categoria: x.categoria, dataHora: x.dataHora instanceof Date ? x.dataHora.toISOString() : String(x.dataHora),
-      timeA: x.timeA, timeB: x.timeB, placarA: Number(x.placarA || 0), placarB: Number(x.placarB || 0), status: x.status, ginasio: x.ginasio }));
+      timeA: x.timeA, timeB: x.timeB, placarA: Number(x.placarA || 0), placarB: Number(x.placarB || 0), status: x.status, ginasio: x.ginasio, avulso: !!jsonOu(x.meta, {}).avulso }));
     c.put('lista', JSON.stringify(lista), 20);
   }
-  if (categoria) lista = lista.filter(x => x.categoria === categoria);
+  if (categoria === '__AV') lista = lista.filter(x => x.avulso);
+  else if (categoria) lista = lista.filter(x => x.categoria === categoria && !x.avulso);
   return { ok: true, jogos: lista, agora: new Date().toISOString() };
 }
 function aoVivoJogo(id) {
@@ -305,4 +307,23 @@ function salvarApelido(token, reg, apelido) {
   else if (apelido) sh.appendRow([reg, apelido, new Date()]);
   CacheService.getScriptCache().remove('apelidos');
   return { ok: true };
+}
+
+
+/* ================= JOGOS AVULSOS (aba própria, cópia de cada jogo avulso) ================= */
+function abaAvulsos() {
+  const ss = SpreadsheetApp.openById(PLANILHA_ID);
+  let sh = ss.getSheetByName('JogosAvulsos');
+  if (!sh) { sh = ss.insertSheet('JogosAvulsos'); sh.getRange(1,1,1,8).setValues([['id','categoria','dataHora','timeA','timeB','ginasio','dados','atualizado']]); sh.setFrozenRows(1); }
+  return sh;
+}
+function gravarAvulso(id, j, meta, quem) {
+  const sh = abaAvulsos(); const v = sh.getDataRange().getValues();
+  const i = v.findIndex((r, k) => k > 0 && r[0] === id);
+  const linha = [id, j.categoria, j.dataHora || '', j.timeA.nome || '', j.timeB.nome || '', j.ginasio || '', JSON.stringify(meta), new Date()];
+  if (i > 0) sh.getRange(i + 1, 1, 1, 8).setValues([linha]); else sh.appendRow(linha);
+}
+function apagarAvulso(id) {
+  const sh = abaAvulsos(); const v = sh.getDataRange().getValues();
+  const i = v.findIndex((r, k) => k > 0 && r[0] === id); if (i > 0) sh.deleteRow(i + 1);
 }

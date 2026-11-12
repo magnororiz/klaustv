@@ -109,6 +109,15 @@ button:hover{background:#0f6fd1;}
 .atl input.num::placeholder{color:var(--tx,#fff);opacity:.6;}
 .atl.marcado input.num{box-shadow:0 0 0 2px #ffd54f;}
 .btnSalvar{background:#27ae60;font-size:14px;padding:10px 22px;}
+.modoTopo{text-align:center;margin-bottom:10px;font-size:18px;}
+.modoTopo select{font-size:15px;font-weight:700;color:#ffd54f;background:#0b1220;border:1px solid #ffd54f;border-radius:8px;padding:6px 10px;}
+.avTime{width:100%;box-sizing:border-box;font-size:15px;font-weight:700;padding:6px 8px;border-radius:6px;border:none;}
+.avHead,.avLinha{display:grid;grid-template-columns:46px minmax(0,1fr) 130px;gap:6px;align-items:center;padding:4px 2px;}
+.avHead{font-size:10px;color:#9fb3c8;text-transform:uppercase;padding-top:8px;}
+.avLinha input{width:100%;box-sizing:border-box;padding:6px;border-radius:6px;border:1px solid #2c3e50;font-size:13px;}
+.avLinha.avTec{background:#101c31;border-bottom:2px solid #2a3b55;}
+.avLinha .tecLab{font-size:10px;font-weight:700;color:#ffd54f;text-transform:uppercase;}
+.avEsc{display:flex;align-items:center;justify-content:center;font:900 34px 'Oswald',Arial;}
 .btIgual{width:250px;max-width:46%;font-size:14px;padding:10px 12px;}
 .infoFed{align-self:end;color:#ffd54f;font-size:12.5px;font-weight:700;line-height:1.35;padding:6px 8px;border:1px dashed rgba(255,213,79,.5);border-radius:8px;min-height:32px;display:flex;align-items:center;}
 .infoFed:empty{display:none;}
@@ -198,7 +207,8 @@ button:hover{background:#0f6fd1;}
 <!--/ktMenu-->
 
 <div class="panel">
-    <strong class="titulo">🏟️ Montar jogo com os atletas da Federação</strong>
+    <div class="modoTopo">🏟️ <select id="selModo" onchange="kt_trocarModo()"><option value="fed">Montar jogo com atletas da FBERJ</option><option value="av">Montar jogo avulso</option></select></div>
+    <div id="painelFed">
     <div class="setupGrid" id="setupGrid">
       <div class="bloco bJogo">
         <label>Categoria<select id="selCategoria" onchange="kt_trocarCategoria(true)"></select></label>
@@ -232,6 +242,38 @@ button:hover{background:#0f6fd1;}
         <button class="btIgual" onclick="kt_novo()">➕ Limpar e montar outro</button>
     </div>
     <div class="dica">Marque até 12 atletas por time (o máximo que a Federação permite em quadra). Ao escolher o time, vem marcado o último elenco salvo, com camisas e apelidos; no rodízio, é só desmarcar um e marcar outro. Digite o número da camisa quando não houver.</div>
+    </div>
+    <div id="painelAv" style="display:none">
+      <div class="setupGrid">
+        <div class="bloco">
+          <label>Categoria<input id="avCategoria" placeholder="Ex.: Master, Sub-15, Amistoso"></label>
+          <label>Data e hora do jogo<input id="avData" type="datetime-local"></label>
+          <label class="cheia">Ginásio<input id="avGinasio" placeholder="Nome do ginásio"></label>
+        </div>
+        <div class="bloco">
+          <label>Árbitro<input id="avArbitro"></label>
+          <label>1º Fiscal<input id="avFiscal"></label>
+          <label>Apontador(a)<input id="avApontador"></label>
+          <label>Cronometrista<input id="avCronometrista"></label>
+          <label>Relógio de arremesso<input id="avRelogio"></label>
+        </div>
+      </div>
+      <div class="rosterCols">
+        <div class="rosterBox avBox"><div class="rosterHead" style="background:#1e5bd8"><div style="flex:1;min-width:0"><input class="avTime" id="avTimeA" placeholder="Nome do time A"><div class="contador" id="avContA" style="color:#fff">0 atletas</div></div><div class="escudo avEsc" style="background:#fff;color:#1e5bd8;border-color:#fff">A</div></div>
+          <div class="avHead"><span>Nº</span><span>Nome</span><span>Apelido</span></div>
+          <div class="avLinha avTec"><span class="tecLab">Técnico</span><input class="avNome" id="avTecNA" placeholder="Técnico do time A"><input class="avAp" id="avTecAA" placeholder="Apelido"></div>
+          <div id="avListaA"></div></div>
+        <div class="rosterBox avBox"><div class="rosterHead" style="background:#e8590c"><div style="flex:1;min-width:0"><input class="avTime" id="avTimeB" placeholder="Nome do time B"><div class="contador" id="avContB" style="color:#fff">0 atletas</div></div><div class="escudo avEsc" style="background:#fff;color:#e8590c;border-color:#fff">B</div></div>
+          <div class="avHead"><span>Nº</span><span>Nome</span><span>Apelido</span></div>
+          <div class="avLinha avTec"><span class="tecLab">Técnico</span><input class="avNome" id="avTecNB" placeholder="Técnico do time B"><input class="avAp" id="avTecAB" placeholder="Apelido"></div>
+          <div id="avListaB"></div></div>
+      </div>
+      <div style="text-align:center;margin-top:12px;">
+        <button class="btnSalvar btIgual" onclick="kt_salvarAvulso()">💾 Salvar jogo</button>
+        <button class="btIgual" onclick="kt_limparAvulso()">➕ Limpar e montar outro</button>
+      </div>
+      <div class="dica">Jogo avulso: tudo é digitado, sem listas da Federação. Até 12 atletas por time; só entram as linhas com nome. Ao abrir, vem o último jogo avulso salvo para aproveitar os dados — confira a data.</div>
+    </div>
 </div>
 
 <div class="panel salvos">
@@ -402,7 +444,7 @@ function kt_escolherFoto(btn){
 }
 function kt_aplicarUltimo(t){
     const cat=document.getElementById('selCategoria').value, sig=document.getElementById('selTime'+t).value;
-    const ult=kt_lerSalvos().filter(j=>j.categoria===cat && ((j.timeA||{}).sigla===sig || (j.timeB||{}).sigla===sig))
+    const ult=kt_lerSalvos().filter(j=>!j.avulso && j.categoria===cat && ((j.timeA||{}).sigla===sig || (j.timeB||{}).sigla===sig))
         .sort((a,b)=>String(b.atualizadoEm||b.dataHora||'').localeCompare(String(a.atualizadoEm||a.dataHora||'')))[0];
     if(!ult) return;
     const tm=(ult.timeA.sigla===sig)?ult.timeA:ult.timeB;
@@ -527,7 +569,7 @@ async function kt_sincronizar(){
     const r = await kt_api({acao:'listarJogos'});
     if(!r.ok) return;
     const loc = kt_lerSalvos();
-    const srv = r.jogos.map(g=>{ const m=g.meta||{}; const o=m.oficiais||{}; return {id:g.id, categoria:g.categoria, dataHora:String(g.dataHora||'').slice(0,16), ginasio:g.ginasio||m.ginasio||'', mandante:m.mandante||'', arbitro:o.arbitro||'', fiscal:o.fiscal||'', apontador:o.apontador||'', cronometrista:o.cronometrista||'', relogio:o.relogio||'', timeA:m.timeA, timeB:m.timeB, jogoFed:g.jogoFed||m.jogoFed||'', dataFed:m.dataFed||''}; }).filter(g=>g.timeA&&g.timeB);
+    const srv = r.jogos.map(g=>{ const m=g.meta||{}; const o=m.oficiais||{}; return {id:g.id, categoria:g.categoria, dataHora:String(g.dataHora||'').slice(0,16), ginasio:g.ginasio||m.ginasio||'', mandante:m.mandante||'', arbitro:o.arbitro||'', fiscal:o.fiscal||'', apontador:o.apontador||'', cronometrista:o.cronometrista||'', relogio:o.relogio||'', timeA:m.timeA, timeB:m.timeB, jogoFed:g.jogoFed||m.jogoFed||'', dataFed:m.dataFed||'', avulso:!!m.avulso, atualizadoEm:m.atualizadoEm||''}; }).filter(g=>g.timeA&&g.timeB);
     const ids = new Set(srv.map(g=>g.id));
     kt_gravarSalvos(srv.concat(loc.filter(g=>!ids.has(g.id))));
     kt_listarSalvos();
@@ -540,7 +582,7 @@ function kt_listarSalvos(){
     const lista = kt_lerSalvos().filter(j=>!f || (j.dataHora||'').startsWith(f)).sort((a,b)=>(a.dataHora||'').localeCompare(b.dataHora||''));
     const box = document.getElementById('listaSalvos');
     if(!lista.length){ box.innerHTML = '<div class="vazio">'+(f?'Nenhum jogo montado para esta data.':'Nenhum jogo montado ainda.')+'</div>'; return; }
-    box.innerHTML = lista.map(j=>`<div class="jogoItem"><div><b>${j.timeA.sigla} x ${j.timeB.sigla}</b> · ${j.categoria}
+    box.innerHTML = lista.map(j=>`<div class="jogoItem"><div><b>${kt_esc(j.timeA.sigla)} x ${kt_esc(j.timeB.sigla)}</b> · ${kt_esc(j.categoria)}${j.avulso?' · <span style="color:#ffd54f">AVULSO</span>':''}
         <div class="meta">${kt_fmtData(j.dataHora)} · ${j.ginasio||'ginásio não informado'} · ${j.timeA.atletas.length} x ${j.timeB.atletas.length} atletas${j.arbitro?' · Árb.: '+j.arbitro:''}</div></div>
         <div><button onclick="kt_abrir('${j.id}')">✏️ Abrir / editar</button><button onclick="kt_excluir('${j.id}')" style="background:#c0392b;">🗑️ Excluir</button></div></div>`).join('');
 }
@@ -548,6 +590,8 @@ function kt_listarSalvos(){
 function kt_abrir(id){
     const j = kt_lerSalvos().find(x=>x.id===id);
     if(!j) return;
+    if(j.avulso){ kt_trocarModo(true); kt_preencherAvulso(j,true); window.scrollTo({top:0,behavior:'smooth'}); kt_aviso('Jogo avulso aberto para edição. Depois clique em "Salvar jogo".'); return; }
+    kt_trocarModo(false);
     kt_editandoId = id; kt_abrindo=true;
     document.getElementById('selCategoria').value = j.categoria;
     kt_trocarCategoria();
@@ -586,6 +630,64 @@ function kt_novo(){
     kt_jogoFed();
 }
 
+const KT_AVMAX=12;
+function kt_slug(x){ return String(x||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'').toUpperCase().slice(0,14)||'X'; }
+function kt_avLinhas(t){ document.getElementById('avLista'+t).innerHTML=Array.from({length:KT_AVMAX},(_,i)=>'<div class="avLinha"><input class="avNum" maxlength="3" inputmode="numeric" placeholder="#"><input class="avNome" placeholder="Atleta '+(i+1)+'" oninput="kt_avContar()"><input class="avAp" placeholder=""></div>').join(''); }
+function kt_avContar(){ ['A','B'].forEach(t=>{ const n=[...document.querySelectorAll('#avLista'+t+' .avNome')].filter(i=>i.value.trim()).length; document.getElementById('avCont'+t).textContent=n+(n===1?' atleta':' atletas'); }); }
+function kt_limparAvulso(semUltimo){
+  kt_editandoId=null;
+  ['avCategoria','avData','avGinasio','avArbitro','avFiscal','avApontador','avCronometrista','avRelogio','avTimeA','avTimeB','avTecNA','avTecNB','avTecAA','avTecAB'].forEach(i=>document.getElementById(i).value='');
+  kt_avLinhas('A'); kt_avLinhas('B'); kt_avContar();
+}
+function kt_preencherAvulso(j,manterId){
+  kt_limparAvulso();
+  kt_editandoId = manterId ? j.id : null;
+  document.getElementById('avCategoria').value=j.categoria||'';
+  document.getElementById('avData').value=manterId?(j.dataHora||''):'';
+  document.getElementById('avGinasio').value=j.ginasio||'';
+  ['Arbitro','Fiscal','Apontador','Cronometrista','Relogio'].forEach(k=>document.getElementById('av'+k).value=j[k.toLowerCase()]||'');
+  ['A','B'].forEach(t=>{ const tm=j['time'+t]||{}; document.getElementById('avTime'+t).value=tm.nome||tm.sigla||'';
+    document.getElementById('avTecN'+t).value=(tm.tecnico||{}).nome||''; document.getElementById('avTecA'+t).value=(tm.tecnico||{}).apelido||'';
+    const ls=document.querySelectorAll('#avLista'+t+' .avLinha'); (tm.atletas||[]).slice(0,KT_AVMAX).forEach((a,i)=>{ const r=ls[i]; r.querySelector('.avNum').value=a.numero||''; r.querySelector('.avNome').value=a.nome||''; r.querySelector('.avAp').value=a.apelido||''; }); });
+  kt_avContar();
+}
+function kt_trocarModo(av){
+  const sel=document.getElementById('selModo'); if(av!==undefined) sel.value=av?'av':'fed';
+  const ehAv=sel.value==='av';
+  document.getElementById('painelFed').style.display=ehAv?'none':'';
+  document.getElementById('painelAv').style.display=ehAv?'':'none';
+  if(ehAv && av===undefined){ kt_limparAvulso(); const u=kt_lerSalvos().filter(j=>j.avulso).sort((a,b)=>String(b.atualizadoEm||b.dataHora||'').localeCompare(String(a.atualizadoEm||a.dataHora||'')))[0];
+    if(u){ kt_preencherAvulso(u,false); kt_aviso('Dados do último jogo avulso carregados. Confira e escolha a data.'); } }
+  if(!ehAv && av===undefined) kt_novo();
+}
+function kt_capturarAvulso(){
+  const time=t=>{ const nome=document.getElementById('avTime'+t).value.trim();
+    const atl=[...document.querySelectorAll('#avLista'+t+' .avLinha')].map(r=>({numero:r.querySelector('.avNum').value.trim(), nome:r.querySelector('.avNome').value.trim(), apelido:r.querySelector('.avAp').value.trim()})).filter(a=>a.nome);
+    const usados={}; atl.forEach(a=>{ let k='AV-'+kt_slug(nome)+'-'+kt_slug(a.nome); while(usados[k]) k+='2'; usados[k]=1; a.reg=k; });
+    return {sigla:nome, nome:nome, letra:t, atletas:atl, tecnico:{nome:document.getElementById('avTecN'+t).value.trim(), apelido:document.getElementById('avTecA'+t).value.trim()}}; };
+  const g=id=>document.getElementById(id).value.trim();
+  return {avulso:true, categoria:g('avCategoria'), dataHora:document.getElementById('avData').value, ginasio:g('avGinasio'), mandante:null,
+    arbitro:g('avArbitro'), fiscal:g('avFiscal'), apontador:g('avApontador'), cronometrista:g('avCronometrista'), relogio:g('avRelogio'),
+    timeA:time('A'), timeB:time('B'), jogoFed:'', dataFed:''};
+}
+function kt_salvarAvulso(){
+  const j=kt_capturarAvulso();
+  if(!j.categoria) return kt_aviso('Digite a categoria.');
+  if(!j.dataHora) return kt_aviso('Escolha a data e a hora do jogo.');
+  if(!j.timeA.nome || !j.timeB.nome) return kt_aviso('Digite o nome dos dois times.');
+  if(j.timeA.nome.toLowerCase()===j.timeB.nome.toLowerCase()) return kt_aviso('Time A e Time B estão com o mesmo nome.');
+  if(!j.timeA.atletas.length || !j.timeB.atletas.length) return kt_aviso('Digite pelo menos 1 atleta em cada time.');
+  const lista=kt_lerSalvos(), agora=new Date().toISOString();
+  if(!kt_editandoId) kt_editandoId='M'+Date.now();
+  const i=lista.findIndex(x=>x.id===kt_editandoId);
+  if(i>=0) lista[i]={...lista[i],...j,atualizadoEm:agora}; else lista.push({id:kt_editandoId,...j,criadoEm:agora,atualizadoEm:agora});
+  if(!kt_gravarSalvos(lista)) return;
+  document.getElementById('filtroData').value=j.dataHora.slice(0,10); kt_listarSalvos();
+  kt_aviso('Salvando na planilha...');
+  kt_api({acao:'salvarJogo', jogo:Object.assign({id:kt_editandoId, oficiais:{arbitro:j.arbitro,fiscal:j.fiscal,apontador:j.apontador,cronometrista:j.cronometrista,relogio:j.relogio}}, j)}).then(r=>{
+    if(r.ok) kt_aviso('Jogo avulso salvo na planilha: '+j.timeA.nome+' x '+j.timeB.nome); else kt_aviso('Salvo só neste aparelho. Planilha: '+r.erro); });
+}
+kt_avLinhas('A'); kt_avLinhas('B');
 kt_iniciar();
 </script>
 
