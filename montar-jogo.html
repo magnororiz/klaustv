@@ -36,12 +36,18 @@ button:hover{background:#0f6fd1;}
 .selo{display:inline-block;margin-top:5px;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:10px;}
 .selo.casa{background:#ffd54f;color:#000;}.selo.fora{background:#cfd8e3;color:#0b1220;}
 .rosterList{max-height:300px;overflow-y:auto;}
-.atl,.atlHead{display:grid;grid-template-columns:18px 26px minmax(0,var(--nomeW,1fr)) 110px 52px;justify-content:start;align-items:center;column-gap:6px;font-size:12px;padding:3px 2px;border-bottom:1px solid #16243a;}
+.atl,.atlHead{display:grid;grid-template-columns:18px 26px minmax(0,var(--nomeW,1fr)) 110px 52px 50px;justify-content:start;align-items:center;column-gap:6px;font-size:12px;padding:3px 2px;border-bottom:1px solid #16243a;}
 .atlHead{font-size:10px;color:#7f93a8;text-transform:uppercase;border-bottom:1px solid #2a3b55;padding-bottom:4px;}
 .atlHead .c{text-align:center;}
 .atl:hover{background:#17263d;}
 .atl label{cursor:pointer;min-width:0;}
 .atl .reg{color:#5fa8ff;font-size:11px;text-align:right;font-variant-numeric:tabular-nums;}
+.atl .bEdit{width:44px;height:24px;border:1px solid #2a3b55;border-radius:6px;background:#16243a;color:#cfd8e3;font-size:12px;cursor:pointer;padding:0;}
+.atl .bEdit:hover{border-color:#1e90ff;}
+.atl.editando .bEdit{background:#ffd54f;color:#000;border-color:#ffd54f;font-weight:700;}
+.atl input[readonly]{cursor:default;}
+.atl input.apelido[readonly]{background:#e3e8ee;color:#333;}
+.atl.editando input.num,.atl.editando input.apelido{box-shadow:0 0 0 2px #ffd54f;}
 .atl input.apelido{width:100%;box-sizing:border-box;padding:3px 6px;border-radius:6px;border:none;font-size:12px;background:#ffffff;color:#000;}
 .atl input.num{width:24px;height:24px;padding:0;border-radius:50%;border:2px solid var(--borda,#9fb3c8);font-size:12px;font-weight:700;text-align:center;background:var(--c1,#1e90ff);color:var(--tx,#fff);box-sizing:border-box;}
 .atl input.num::placeholder{color:var(--tx,#fff);opacity:.6;}
@@ -280,9 +286,9 @@ function kt_listarAtletas(t){
     const lista = (KT_DADOS.elencos[cat]||{})[sig] || [];
     document.getElementById('rosterTitle'+t).innerText = 'Time '+t+': '+kt_nomeEquipe(sig);
     document.getElementById('roster'+t).innerHTML = lista.map((a,i)=>
-        `<div class="atl" id="atl${t}_${a[0]}"><input type="checkbox" id="cb${t}_${i}" data-reg="${a[0]}" data-nome="${kt_esc(a[1])}" onchange="kt_contar('${t}',this)"><input class="num" placeholder="#" maxlength="2" inputmode="numeric" title="Número da camisa"><label for="cb${t}_${i}">${a[1]}</label><input class="apelido" placeholder="" value="${kt_esc(kt_apelidos()[a[0]]||'')}" oninput="kt_salvarApelido('${a[0]}',this.value)" title="Apelido"><span class="reg">${a[0]}</span></div>`
+        `<div class="atl" id="atl${t}_${a[0]}"><input type="checkbox" id="cb${t}_${i}" data-reg="${a[0]}" data-nome="${kt_esc(a[1])}" onchange="kt_contar('${t}',this)"><input class="num" readonly placeholder="#" maxlength="2" inputmode="numeric" title="Número da camisa"><label for="cb${t}_${i}">${a[1]}</label><input class="apelido" readonly placeholder="" value="${kt_esc(kt_apelidos()[a[0]]||'')}" oninput="kt_salvarApelido('${a[0]}',this.value)" title="Apelido"><span class="reg">${a[0]}</span><button type="button" class="bEdit" title="Editar camisa e apelido" onclick="kt_editarLinha(this)">✏️</button></div>`
     ).join('');
-    document.getElementById('roster'+t).innerHTML = lista.length ? '<div class="atlHead"><span></span><span class="c">Nº</span><span>Nome</span><span>Apelido</span><span style="text-align:right;">FBERJ</span></div>' + document.getElementById('roster'+t).innerHTML : '<div class="vazio">Nenhum atleta inscrito.</div>';
+    document.getElementById('roster'+t).innerHTML = lista.length ? '<div class="atlHead"><span></span><span class="c">Nº</span><span>Nome</span><span>Apelido</span><span style="text-align:right;">FBERJ</span><span class="c">Editar</span></div>' + document.getElementById('roster'+t).innerHTML : '<div class="vazio">Nenhum atleta inscrito.</div>';
     kt_larguraNomes(t);
     kt_pintar(t);
     kt_montarGinasios();
@@ -295,6 +301,13 @@ function kt_larguraNomes(t){
     const ctx=document.createElement('canvas').getContext('2d'); ctx.font=getComputedStyle(lab).font;
     let maior=0; box.querySelectorAll('.atl label').forEach(l=>{ maior=Math.max(maior, ctx.measureText(l.textContent).width); });
     box.style.setProperty('--nomeW', (Math.ceil(maior)+14)+'px');
+}
+function kt_editarLinha(btn){
+    const row=btn.closest('.atl'); const on=!row.classList.contains('editando');
+    row.classList.toggle('editando',on);
+    row.querySelectorAll('input.num,input.apelido').forEach(i=>{ i.readOnly=!on; });
+    btn.textContent = on ? '✔' : '✏️'; btn.title = on ? 'Travar edição' : 'Editar camisa e apelido';
+    if(on) row.querySelector('input.num').focus();
 }
 function kt_marcados(t){ return [...document.querySelectorAll('#roster'+t+' input[type=checkbox]:checked')]; }
 function kt_contar(t, caixa){
