@@ -379,7 +379,7 @@ function fedConverterXlsx(id) {
     method: 'post', contentType: 'application/json', headers: { Authorization: 'Bearer ' + tk }, muteHttpExceptions: true,
     payload: JSON.stringify({ name: 'Klaus TV - backup FBERJ (temporário)', mimeType: 'application/vnd.google-apps.spreadsheet' })
   });
-  if (r.getResponseCode() !== 200) throw new Error('Não consegui abrir a planilha de cestinhas da FBERJ (' + r.getResponseCode() + ').');
+  if (r.getResponseCode() !== 200) throw new Error('Não consegui copiar a planilha da FBERJ ' + id + ' (' + r.getResponseCode() + ').');
   return JSON.parse(r.getContentText()).id;
 }
 
@@ -418,8 +418,9 @@ function fedFase(cat, label) {
 }
 
 function fedLerTabela() {
-  const out = []; const semSigla = {};
-  SpreadsheetApp.openById(FED_TABELA_ID).getSheets().forEach(ws => {
+  const out = []; const semSigla = {}; const tmp = fedConverterXlsx(FED_TABELA_ID);
+  try {
+  SpreadsheetApp.openById(tmp).getSheets().forEach(ws => {
     const cat = FED_CAT_TAB[ws.getName().trim().toUpperCase()]; if (!cat) return;
     let fase = FED_DEF[cat] || 'Turno Único';
     ws.getDataRange().getDisplayValues().forEach(r => {
@@ -432,6 +433,7 @@ function fedLerTabela() {
       out.push([cat, fase, r[3], r[0], r[1].slice(0, 5), a, b, FED_GYM[r[2]] || r[2], r[5], r[7], r[9]]);
     });
   });
+  } finally { try { DriveApp.getFileById(tmp).setTrashed(true); } catch (e) {} }
   return { linhas: out, semSigla: Object.keys(semSigla) };
 }
 
