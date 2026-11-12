@@ -45,6 +45,10 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .ktCab{display:flex;align-items:center;justify-content:center;gap:16px;}
 .ktEsc{height:78px;max-width:100px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));}
 .ktCabTx{text-align:center;}
+.ktQ{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:4px 0 12px;font-size:13px;color:#cfd8e3;}
+.ktQ span{font-weight:800;color:#ffd54f;text-transform:uppercase;letter-spacing:1px;font-size:12px;}
+.ktQ label{display:flex;align-items:center;gap:5px;font-weight:700;}
+.ktQ input{width:54px;padding:6px 4px;border-radius:7px;border:1px solid #2c3e50;text-align:center;font-size:15px;font-weight:800;}
 .ktCabTx .teamTitle{margin:0 0 2px;}
 .ktJMsep{flex-basis:100%;height:0;}
 .ktJMmsg{grid-column:1/-1;text-align:center;font-size:12.5px;color:#9fb3c8;min-height:0;}
@@ -374,7 +378,7 @@ hr{
 <!-- ================= TIME A ================= -->
 <div class="team">
 
-<div class="ktCab"><img id="ktEscA" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 contenteditable="true" class="teamTitle" id="titleA">Time A</h2><div class="score" id="scoreA">0</div></div></div>
+<div class="ktCab"><img id="ktEscA" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 contenteditable="true" class="teamTitle" id="titleA">Time A</h2><div class="score" id="scoreA">0</div></div></div><div class="ktQ"><span>Placar</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQA1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQA2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQA3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQA4" oninput="kt_qMudou()"></label></div>
 
 <table class="table" id="tableA"></table>
 
@@ -429,7 +433,7 @@ hr{
 <!-- ================= TIME B ================= -->
 <div class="team">
 
-<div class="ktCab"><img id="ktEscB" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 contenteditable="true" class="teamTitle" id="titleB">Time B</h2><div class="score" id="scoreB">0</div></div></div>
+<div class="ktCab"><img id="ktEscB" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 contenteditable="true" class="teamTitle" id="titleB">Time B</h2><div class="score" id="scoreB">0</div></div></div><div class="ktQ"><span>Placar</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQB1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQB2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQB3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQB4" oninput="kt_qMudou()"></label></div>
 
 <table class="table" id="tableB"></table>
 
@@ -1375,6 +1379,7 @@ async function kt_listarMontados(){
 function kt_temNumeros(){ return Object.keys(stats).some(k=>['pts','reb','ast','stl','blk','to','foul','twoMiss','threeMiss','ftMiss'].some(c=>+stats[k][c])); }
 const KT_ZERO={pts:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,reb:0,ast:0,stl:0,blk:0,to:0,foul:0,eff:0};
 let KT_STATS_SALVOS={};
+function kt_qMudou(){ if(KT_JOGO_ID) kt_msg('Placar por quarto alterado — clique em "Salvar jogo em andamento" para mandar para a planilha e o Ao vivo.'); }
 function kt_bolaLetra(l,c){ return 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="'+c+'" stroke="#fff" stroke-width="5"/><text x="50" y="68" font-family="Arial Black,Arial" font-weight="900" font-size="52" fill="#fff" text-anchor="middle">'+l+'</text></svg>'); }
 function kt_msg(t){ document.getElementById('ktJMmsg').textContent=t||''; }
 async function kt_abrirMontado(id){
@@ -1385,6 +1390,7 @@ async function kt_abrirMontado(id){
   let st={};
   if(r.ok && r.jogo){ j=Object.assign({},j,{meta:r.jogo.meta||j.meta,ginasio:r.jogo.ginasio||j.ginasio,status:r.jogo.status}); st=r.jogo.stats||{}; }
   KT_STATS_SALVOS=st;
+  ['A','B'].forEach(t=>{ const pq=((st.periodos||{})[t])||[]; for(let q=1;q<=4;q++){ const v=pq[q-1]; document.getElementById('ktQ'+t+q).value=(v===undefined||v===null||v==='')?'':v; } });
   const m=j.meta||{};
   ['A','B'].forEach(t=>{
     const tm=m['time'+t]||{}; const atl=(tm.atletas||[]).slice(0,12);
@@ -1406,7 +1412,8 @@ async function kt_abrirMontado(id){
 function kt_statsDaTela(){
   const out={A:{},B:{}};
   ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; if(!reg) continue; const s=stats[t+'-'+i]||{}; const o={}; Object.keys(KT_ZERO).forEach(c=>o[c]=+s[c]||0); out[t][reg]=o; } });
-  if(KT_STATS_SALVOS.periodos) out.periodos=KT_STATS_SALVOS.periodos;
+  out.periodos={A:[],B:[]};
+  ['A','B'].forEach(t=>{ for(let q=1;q<=4;q++){ const v=document.getElementById('ktQ'+t+q).value; out.periodos[t].push(v===''?null:Math.max(0,parseInt(v)||0)); } });
   return out;
 }
 async function kt_salvarAndamento(){
