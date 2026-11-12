@@ -336,9 +336,10 @@ function kt_arbMostrar(){ const m={}; [...(KT_DADOS.arbitros||[]),...(KT_DADOS.m
   KT_ARB=Object.values(m).sort((a,b)=>a.localeCompare(b,'pt-BR')); document.getElementById('dlArb').innerHTML=KT_ARB.map(n=>'<option value="'+kt_esc(n)+'">').join(''); }
 async function kt_arbCarregar(){ const r=await kt_api({acao:'listarArbitragem'}); if(r&&r.ok&&r.lista){ const ns=r.lista.map(x=>x.nome); try{ localStorage.setItem('kt_arb_v1',JSON.stringify(ns)); }catch(e){} KT_ARB=ns; kt_arbMostrar(); } }
 function kt_arbNovos(ids){ const tem={}; KT_ARB.forEach(n=>tem[kt_arbNorm(n)]=1); const nv=[];
-  ids.forEach(i=>{ const el=document.getElementById(i); const v=el?String(el.value||'').replace(/\s+/g,' ').trim():''; if(v.length>=3 && !tem[kt_arbNorm(v)]){ tem[kt_arbNorm(v)]=1; nv.push(v); } });
+  const fn=i=>/Arbitro|Fiscal/.test(i)?'Árbitro(a)':'Oficial de mesa'; const env=[];
+  ids.forEach(i=>{ const el=document.getElementById(i); const v=el?String(el.value||'').replace(/\s+/g,' ').trim():''; if(v.length>=3 && !tem[kt_arbNorm(v)]){ tem[kt_arbNorm(v)]=1; nv.push(v); env.push({nome:v,funcao:fn(i)}); } });
   if(!nv.length) return; KT_ARB=KT_ARB.concat(nv); try{ localStorage.setItem('kt_arb_v1',JSON.stringify(KT_ARB)); }catch(e){} kt_arbMostrar();
-  kt_api({acao:'incluirArbitragem',nomes:nv}).then(r=>{ if(r&&r.ok&&r.incluidos&&r.incluidos.length) kt_aviso('Incluído na lista FBERJ — Mesa e Arbitragem: '+r.incluidos.join(', ')); }); }
+  kt_api({acao:'incluirArbitragem',nomes:env}).then(r=>{ if(r&&r.ok&&r.incluidos&&r.incluidos.length) kt_aviso('Incluído na lista FBERJ — Mesa e Arbitragem: '+r.incluidos.join(', ')); }); }
 function kt_iniciar(){
     kt_ajustarLargura();
     const op = l => l.map(n=>`<option value="${kt_esc(n)}">`).join('');

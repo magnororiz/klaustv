@@ -39,6 +39,7 @@ function doPost(e) {
       case 'aoVivoJogo': return responder(aoVivoJogo(p.id));
       case 'listarArbitragem': return responder(listarArbitragem(p.token));
       case 'incluirArbitragem': return responder(incluirArbitragem(p.token, p.nomes));
+      case 'funcaoArbitragem': return responder(funcaoArbitragem(p.token, p.nome, p.funcao));
       case 'excluirArbitragem': return responder(excluirArbitragem(p.token, p.nome));
       case 'statusBackup': return responder(statusBackup(p.token));
       case 'rodarBackup': return responder(rodarBackupSite(p.token));
@@ -533,9 +534,10 @@ function listarArbitragem(token) {
 function incluirArbitragem(token, nomes) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
   const tem = {}; lerArbitragem().forEach(x => tem[arbNorm(x.nome)] = 1);
-  const novos = []; (Array.isArray(nomes) ? nomes : [nomes]).forEach(n => {
+  const novos = []; (Array.isArray(nomes) ? nomes : [nomes]).forEach(x => {
+    let n = (x && typeof x === 'object') ? x.nome : x; let f = (x && typeof x === 'object') ? arbFuncao(x.funcao) : '';
     n = String(n || '').replace(/\s+/g, ' ').trim(); if (n.length < 3 || n.length > 80) return;
-    const k = arbNorm(n); if (tem[k]) return; tem[k] = 1; novos.push([n, '', '', 'Klaus TV', new Date(), u.usuario]);
+    const k = arbNorm(n); if (tem[k]) return; tem[k] = 1; novos.push([n, f, '', 'Klaus TV', new Date(), u.usuario]);
   });
   if (novos.length) { const sh = abaArbitragem(); sh.getRange(sh.getLastRow() + 1, 1, novos.length, 6).setValues(novos); }
   return { ok: true, incluidos: novos.map(r => r[0]) };
@@ -546,4 +548,12 @@ function excluirArbitragem(token, nome) {
   if (!x) return { ok: false, erro: 'Nome não encontrado.' };
   if (x.origem === 'FBERJ') return { ok: false, erro: 'Nome da lista oficial da FBERJ não pode ser excluído.' };
   abaArbitragem().deleteRow(x.linha); return { ok: true };
+}
+
+function arbFuncao(f) { f = arbNorm(f); return f.indexOf('arbitro') === 0 ? 'Árbitro(a)' : (f.indexOf('oficial') === 0 ? 'Oficial de mesa' : ''); }
+function funcaoArbitragem(token, nome, funcao) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  const x = lerArbitragem().find(r => arbNorm(r.nome) === arbNorm(nome)); if (!x) return { ok: false, erro: 'Nome não encontrado.' };
+  if (x.origem === 'FBERJ') return { ok: false, erro: 'Função da lista oficial da FBERJ não se altera.' };
+  abaArbitragem().getRange(x.linha, 2).setValue(arbFuncao(funcao)); return { ok: true };
 }
