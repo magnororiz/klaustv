@@ -75,6 +75,7 @@ button:hover{background:#0f6fd1;}
 .legendaReg{align-self:end;padding-bottom:9px;}
 .legNome{color:#fff;font-size:13px;}.legNum{color:#7f93a8;font-size:11px;}
 .rosterCols{display:flex;gap:12px;flex-wrap:wrap;}
+@media(min-width:900px){.rosterCols .rosterBox{flex:0 1 calc(50% - 6px);max-width:calc(50% - 6px);}}
 .rosterBox{flex:1;min-width:300px;background:#0b1220;border:2px solid #2c3e50;border-radius:10px;padding:8px;}
 .rosterHead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:8px;border-radius:8px;margin-bottom:8px;background:#132036;}
 .rosterTitle{font-size:14px;font-weight:bold;color:#1e90ff;}
@@ -218,10 +219,10 @@ button:hover{background:#0f6fd1;}
     <div class="obsReg">Obs.: na lista de atletas, o número em azul é o cadastro na FBERJ (ex.: <span class="legNome">Nome do Jogador</span> <span class="legNum">– 123456</span>).</div>
     <datalist id="dlGinasios"></datalist><datalist id="dlArbitros"></datalist><datalist id="dlMesa"></datalist>
     <div class="rosterCols">
-        <div class="rosterBox" id="boxA"><div class="rosterHead" id="headA"><div><div class="rosterTitle" id="rosterTitleA">Time A</div><div class="contador" id="contA">0 selecionados</div><span class="selo" id="seloA"></span></div><div class="escudo" id="escA"></div></div>
+        <div class="rosterBox" id="boxA" style="display:none"><div class="rosterHead" id="headA"><div><div class="rosterTitle" id="rosterTitleA">Time A</div><div class="contador" id="contA">0 selecionados</div><span class="selo" id="seloA"></span></div><div class="escudo" id="escA"></div></div>
             <div><button onclick="kt_marcar('A',true)">Marcar todos</button><button onclick="kt_marcar('A',false)">Limpar</button></div>
             <div class="rosterList" id="rosterA"></div></div>
-        <div class="rosterBox" id="boxB"><div class="rosterHead" id="headB"><div><div class="rosterTitle" id="rosterTitleB">Time B</div><div class="contador" id="contB">0 selecionados</div><span class="selo" id="seloB"></span></div><div class="escudo" id="escB"></div></div>
+        <div class="rosterBox" id="boxB" style="display:none"><div class="rosterHead" id="headB"><div><div class="rosterTitle" id="rosterTitleB">Time B</div><div class="contador" id="contB">0 selecionados</div><span class="selo" id="seloB"></span></div><div class="escudo" id="escB"></div></div>
             <div><button onclick="kt_marcar('B',true)">Marcar todos</button><button onclick="kt_marcar('B',false)">Limpar</button></div>
             <div class="rosterList" id="rosterB"></div></div>
     </div>
@@ -276,8 +277,8 @@ function kt_iniciar(){
     document.getElementById('dlArbitros').innerHTML = op(KT_DADOS.arbitros);
     document.getElementById('dlMesa').innerHTML = op(KT_DADOS.mesa);
     const selC = document.getElementById('selCategoria');
-    selC.innerHTML = KT_DADOS.ordem.map(c=>`<option value="${c}">${c}</option>`).join('');
-    selC.value = KT_DADOS.ordem.includes('Sub-12') ? 'Sub-12' : KT_DADOS.ordem[0];
+    selC.innerHTML = '<option value="">— escolha a categoria —</option>' + KT_DADOS.ordem.map(c=>`<option value="${c}">${c}</option>`).join('');
+    selC.value = '';
     kt_trocarCategoria();
     kt_listarSalvos();
     kt_sincronizar();
@@ -291,10 +292,9 @@ function kt_trocarCategoria(manter){
     ['A','B'].forEach((t,idx)=>{
         const sel = document.getElementById('selTime'+t);
         const ant = sel.value;
-        sel.innerHTML = sigs.map(s=>`<option value="${s}">${kt_nomeEquipe(s)} (${s})</option>`).join('');
+        sel.innerHTML = '<option value="">'+(cat?'— escolha o time '+t+' —':'— escolha a categoria primeiro —')+'</option>' + sigs.map(s=>`<option value="${s}">${kt_nomeEquipe(s)} (${s})</option>`).join('');
         const outro = idx ? document.getElementById('selTimeA').value : null;
-        if(manter && sigs.includes(ant) && ant !== outro){ sel.value = ant; }
-        else { sel.value = sigs.find((s,i)=>i>=idx && s!==outro) || sigs.find(s=>s!==outro) || sigs[0]; }
+        sel.value = (manter && sigs.includes(ant) && ant !== outro) ? ant : '';
         kt_listarAtletas(t);
     });
 }
@@ -350,6 +350,8 @@ function kt_listarAtletas(t){
     const cat = document.getElementById('selCategoria').value;
     const sig = document.getElementById('selTime'+t).value;
     const lista = (KT_DADOS.elencos[cat]||{})[sig] || [];
+    document.getElementById('box'+t).style.display = sig ? '' : 'none';
+    if(!sig){ document.getElementById('roster'+t).innerHTML=''; kt_montarGinasios(); if(document.getElementById('infoFed')) kt_jogoFed(); return; }
     document.getElementById('rosterTitle'+t).innerText = 'Time '+t+': '+kt_nomeEquipe(sig);
     document.getElementById('roster'+t).innerHTML = lista.map((a,i)=>
         `<div class="atl" id="atl${t}_${a[0]}"><input type="checkbox" id="cb${t}_${i}" data-reg="${a[0]}" data-nome="${kt_esc(a[1])}" onchange="kt_contar('${t}',this)"><input class="num" readonly placeholder="#" maxlength="2" inputmode="numeric" title="Número da camisa"><label for="cb${t}_${i}">${a[1]}</label><input class="apelido" readonly placeholder="" value="${kt_esc(kt_apelidos()[a[0]]||'')}" oninput="kt_salvarApelido('${a[0]}',this.value)" title="Apelido"><span class="reg">${a[0]}</span><button type="button" class="bEdit" title="Editar camisa e apelido" onclick="kt_editarLinha(this)">✏️</button>${kt_btFoto(a[0])}</div>`
@@ -498,6 +500,7 @@ function kt_capturar(){
 function kt_salvarJogo(){
     const j = kt_capturar();
     if(!j.dataHora) return kt_aviso('Escolha o jogo da tabela FBERJ.');
+    if(!j.categoria || !document.getElementById('selTimeA').value || !document.getElementById('selTimeB').value) return kt_aviso('Escolha a categoria e os dois times.');
     if(!j.timeA.atletas.length || !j.timeB.atletas.length) return kt_aviso('Marque pelo menos 1 atleta em cada time.');
     if(j.timeA.sigla === j.timeB.sigla) return kt_aviso('Time A e Time B estão iguais.');
     const lista = kt_lerSalvos();
@@ -577,7 +580,8 @@ function kt_excluir(id){
 function kt_novo(){
     kt_editandoId = null;
     ['inData','inGinasio','inArbitro','inFiscal','inApontador','inCronometrista','inRelogio'].forEach(i=>document.getElementById(i).value='');
-    kt_trocarCategoria(true);
+    document.getElementById('selCategoria').value='';
+    kt_trocarCategoria();
     kt_jogoFed();
 }
 
