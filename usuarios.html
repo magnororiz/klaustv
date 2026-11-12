@@ -13,6 +13,10 @@ body{padding-top:0 !important;}
 .ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
 .ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
 .ktMenu .marca span{color:#1e90ff;}
+.ktMenu .marca{text-align:center;line-height:1;}
+.ktMenu .marca small{display:block;font-family:'Barlow',Arial,sans-serif;font-size:12px;font-weight:600;letter-spacing:4px;color:#ffd54f;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,.8);}
+.ktFaixa a.vivo:before{content:'';width:8px;height:8px;border-radius:50%;background:#ff3b30;margin-right:7px;box-shadow:0 0 6px #ff3b30;animation:ktPisca 1.2s infinite;}
+@keyframes ktPisca{50%{opacity:.3;}}
 .ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:170px;
   background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 100px,rgba(30,91,216,.95) 170px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
   border-top:1px solid rgba(255,255,255,.12);}
@@ -21,23 +25,12 @@ body{padding-top:0 !important;}
 .ktFaixa a.soDono{display:none;}
 html.ktDono .ktFaixa a.soDono{display:flex;}
 .ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;}
-@media(max-width:820px){.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
+.ktFaixa{overflow-x:auto;scrollbar-width:none;}
+.ktFaixa a{white-space:nowrap;}
+@media(max-width:820px){.ktMenu .marca small{font-size:9px;letter-spacing:2px;margin-top:4px;}.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
   .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
-@media(max-width:480px){.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
-/*fim*/
-.ktFooter{margin:30px auto 0 auto;max-width:1200px;border-top:3px solid #1e90ff;padding:18px 10px 10px 10px;color:#cfd8e3;font-size:13px;}
-.ktFooter .cols{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between;}
-.ktFooter .col{flex:1;min-width:240px;}
-.ktFooter h4{color:#1e90ff;margin:0 0 8px 0;font-size:14px;}
-.ktFooter a{color:#ffd54f;text-decoration:none;}
-.ktFooter .mapa{width:100%;height:220px;border:0;border-radius:10px;background:#101826;}
-.ktFooter .local{font-size:12px;color:#fff;margin-bottom:6px;}
-.ktFooter .lema{text-align:center;color:#ffd54f;font-weight:800;font-size:16px;letter-spacing:.5px;margin:0 0 14px 0;text-transform:uppercase;}
-.ktFooter .contato div{margin-bottom:5px;}
-.ktFooter .patro{display:inline-block;background:#101826;border:1px solid #1e90ff;border-radius:10px;padding:8px 12px;color:#fff;margin:2px 4px 2px 0;}
-.ktFooter .patro b{color:#ffd54f;}
-.ktFooter .copy{text-align:center;color:#5f7389;font-size:11px;margin-top:14px;}
-</style>
+@media(max-width:480px){.ktMenu .bola{height:82px !important;top:6px !important;right:6px !important;}.ktMenu .miolo{padding-right:80px;}.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
+/*fim*/</style>
 <script>
 (function(){
  var d=document.documentElement; d.classList.add('ktTravado');
@@ -88,7 +81,7 @@ tr.linha{cursor:pointer;} tr.linha:hover td{background:#132640;}
 .msg.erro{color:#ff8a80;}.msg.ok{color:#8be28b;}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="favicon-180.png">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 <!--ktMenu-->
@@ -96,8 +89,8 @@ tr.linha{cursor:pointer;} tr.linha:hover td{background:#132640;}
 <canvas id="ktMenuCanvas"></canvas>
 <img class="cristo" src="cristo.png" alt="Cristo Redentor">
 <img class="bola" src="bola.png" alt="Bola de basquete">
-<div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span></a></div>
-<nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="aovivo.html" class="">Ao vivo</a><a href="montar-jogo.html" class="">Montar Jogo</a><a href="scout.html" class="">Scout</a><a href="usuarios.html" class="ativo soDono">Usuários</a></nav>
+<div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span><small>Basket RJ Stats PRO 4.0</small></a></div>
+<nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="montar-jogo.html" class="">Montar Jogo</a><a href="scout.html" class="">Scout</a><a href="usuarios.html" class="ativo soDono">Usuários</a><a href="https://klauschagas.blogspot.com/" class="ext" target="_blank" rel="noopener">Blog</a><a href="aovivo.html" class="vivo">Ao vivo</a></nav>
 </header>
 <script>
 (function(){
@@ -204,31 +197,44 @@ kt_listar();
 </script>
 
 <footer class="ktFooter">
-  <div class="lema">🏀 No basquete, tudo pode acontecer!</div>
-  <div class="cols">
-    <div class="col">
-      <h4>🏀 Klaus TV</h4>
-      <div>Basquete do Rio de Janeiro com narração de Klaus Chagas.</div>
-      <div style="margin-top:8px;">▶️ <a href="https://www.youtube.com/@klauschagas" target="_blank" rel="noopener">YouTube: Klaus Basquete RJ TV</a></div>
-      <div>📰 <a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener">Blog: Basquete RJ por Klaus Chagas</a></div>
-      <div style="margin-top:8px;">🔗 <a href="index.html">Início</a> · <a href="aovivo.html">Ao vivo</a> · <a href="montar-jogo.html">Montar Jogo</a> · <a href="scout.html">Scout</a></div>
+  <div class="lema">🏀 No basquete, <span>tudo pode acontecer!</span></div>
+  <div class="wrap">
+    <div>
+      <div class="marca"><img src="favicon-180.png" alt="Klaus Chagas"><div><b>Klaus <span>TV</span></b><small>Basket RJ Stats PRO 4.0</small></div></div>
+      <p class="sobre">Basquete do Rio de Janeiro com narração de Klaus Chagas. Desde 2007 registrando a base carioca.</p>
+      <div class="redes">
+        <a href="https://www.youtube.com/@klauschagas" target="_blank" rel="noopener" title="YouTube">▶️</a>
+        <a href="https://www.instagram.com/basquete.rj/" target="_blank" rel="noopener" title="Instagram">📸</a>
+        <a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener" title="Blog">📰</a>
+        <a href="https://wa.me/5521998092305" target="_blank" rel="noopener" title="WhatsApp">💬</a>
+      </div>
     </div>
-    <div class="col contato">
-      <h4>📞 Contato</h4>
-      <div>💬 <a href="https://wa.me/5521998092305" target="_blank" rel="noopener">WhatsApp: (21) 99809-2305</a></div>
-      <div>📸 <a href="https://www.instagram.com/basquete.rj/" target="_blank" rel="noopener">Instagram: @basquete.rj</a></div>
-      <div>✉️ <a href="mailto:klaustv.rj@gmail.com">klaustv.rj@gmail.com</a></div>
-      <h4 style="margin-top:12px;">🤝 Parceiros</h4>
-      <div class="patro"><b>Coach Márcia Santos</b><br><span style="font-size:11px;">Treinamento de basquete</span></div>
+    <div>
+      <h4>Páginas</h4>
+      <ul>
+        <li><a href="index.html">Início</a></li>
+        <li><a href="montar-jogo.html">Montar Jogo</a></li>
+        <li><a href="scout.html">Scout</a></li>
+        <li><a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener">Blog</a></li>
+        <li><a href="aovivo.html">Ao vivo</a></li>
+      </ul>
     </div>
-    <div class="col" style="flex:1.4;">
-      <h4>📍 Local do jogo</h4>
+    <div>
+      <h4>Contato</h4>
+      <div class="ct"><i>💬</i><a href="https://wa.me/5521998092305" target="_blank" rel="noopener">(21) 99809-2305</a></div>
+      <div class="ct"><i>📸</i><a href="https://www.instagram.com/basquete.rj/" target="_blank" rel="noopener">@basquete.rj</a></div>
+      <div class="ct"><i>✉️</i><a href="mailto:klaustv.rj@gmail.com">klaustv.rj@gmail.com</a></div>
+      <h4 style="margin-top:10px;">Parceiros</h4>
+      <div class="patro"><span style="font-size:22px;">🤝</span><div><b>Coach Márcia Santos</b><small>Treinamento de basquete</small></div></div>
+    </div>
+    <div>
+      <h4>Local do jogo</h4>
       <div class="local" id="ktLocalNome">Cristo Redentor, Rio de Janeiro</div>
       <iframe class="mapa" id="ktMapa" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
         src="https://www.google.com/maps?q=Cristo%20Redentor%2C%20Rio%20de%20Janeiro&output=embed"></iframe>
     </div>
   </div>
-  <div class="copy">© 2026 Klaus TV · klaustv.com · Basket RJ Stats PRO 4.0</div>
+  <div class="copy">© 2026 <b>Klaus TV</b> · klaustv.com · Basket RJ Stats PRO 4.0</div>
 </footer>
 <script>
 function kt_mapaFooter(nome){
