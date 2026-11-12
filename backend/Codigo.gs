@@ -33,6 +33,7 @@ function doPost(e) {
       case 'salvarFoto': return responder(salvarFoto(p.token, p.chave, p.imagem));
       case 'listarFotos': return responder(listarFotos(p.token));
       case 'salvarApelido': return responder(salvarApelido(p.token, p.reg, p.apelido));
+      case 'salvarCamisa': return responder(salvarCamisa(p.token, p.reg, p.camisa));
       case 'aoVivoLista': return responder(aoVivoLista(p.categoria));
       case 'aoVivoJogo': return responder(aoVivoJogo(p.id));
       case 'sair': CacheService.getScriptCache().remove('s_' + p.token); return responder({ ok: true });
@@ -266,7 +267,7 @@ function mapaFotos() {
 }
 function listarFotos(token) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
-  return { ok: true, fotos: mapaFotos(), apelidos: mapaApelidos() };
+  return { ok: true, fotos: mapaFotos(), apelidos: mapaApelidos(), camisas: mapaCamisas() };
 }
 function salvarFoto(token, chave, imagem) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
@@ -304,7 +305,7 @@ function salvarApelido(token, reg, apelido) {
   if (!/^[A-Za-z0-9_-]{2,40}$/.test(reg)) return { ok: false, erro: 'Cadastro inválido.' };
   const sh = abaApelidos(); const v = sh.getDataRange().getValues();
   const i = v.findIndex((r, k) => k > 0 && String(r[0]) === reg);
-  if (i > 0) { if (apelido) sh.getRange(i + 1, 2, 1, 2).setValues([[apelido, new Date()]]); else sh.deleteRow(i + 1); }
+  if (i > 0) { sh.getRange(i + 1, 2, 1, 2).setValues([[apelido, new Date()]]); }
   else if (apelido) sh.appendRow([reg, apelido, new Date()]);
   CacheService.getScriptCache().remove('apelidos');
   return { ok: true };
@@ -327,4 +328,22 @@ function gravarAvulso(id, j, meta, quem) {
 function apagarAvulso(id) {
   const sh = abaAvulsos(); const v = sh.getDataRange().getValues();
   const i = v.findIndex((r, k) => k > 0 && r[0] === id); if (i > 0) sh.deleteRow(i + 1);
+}
+
+/* ================= CAMISA PADRÃO (Banco de jogadores) — coluna D da aba Apelidos ================= */
+function mapaCamisas() {
+  const c = CacheService.getScriptCache(); const hit = c.get('camisas'); if (hit) return JSON.parse(hit);
+  const m = {}; abaApelidos().getDataRange().getValues().slice(1).forEach(r => { if (r[0] && r[3] !== '' && r[3] !== null && r[3] !== undefined) m[String(r[0])] = String(r[3]); });
+  c.put('camisas', JSON.stringify(m), 300); return m;
+}
+function salvarCamisa(token, reg, camisa) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  reg = String(reg || '').trim(); camisa = String(camisa || '').replace(/[^0-9]/g, '').slice(0, 3);
+  if (!/^[A-Za-z0-9_-]{2,40}$/.test(reg)) return { ok: false, erro: 'Cadastro inválido.' };
+  const sh = abaApelidos(); if (sh.getRange(1, 4).getValue() !== 'camisa') sh.getRange(1, 4).setValue('camisa');
+  const v = sh.getDataRange().getValues(); const i = v.findIndex((r, k) => k > 0 && String(r[0]) === reg);
+  if (i > 0) { const cel = sh.getRange(i + 1, 4); cel.setNumberFormat('@'); cel.setValue(camisa); sh.getRange(i + 1, 3).setValue(new Date()); }
+  else { sh.appendRow([reg, '', new Date(), camisa]); sh.getRange(sh.getLastRow(), 4).setNumberFormat('@').setValue(camisa); }
+  CacheService.getScriptCache().remove('camisas');
+  return { ok: true };
 }

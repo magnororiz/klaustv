@@ -125,7 +125,37 @@ table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444
 .mudou{animation:mudou 2.2s ease;}
 @keyframes mudou{0%{background:#ffd54f;}100%{background:transparent;}}
 .atual{font-size:12px;color:#7f93a8;text-align:right;margin-top:8px;}
-/*ktFooterCSS*/
+/*ktMenuCSS*/
+html,body{overflow-x:hidden;}
+body{padding-top:0 !important;}
+.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
+  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#1d0f0a 100%);
+  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
+.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
+.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;z-index:4;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 85%,rgba(0,0,0,.4));}
+.ktMenu .bola{position:absolute;right:14px;top:6px;height:136px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));z-index:4;}
+.ktMenu .bola.logoKT{height:142px;top:3px;right:10px;}
+.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
+.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
+.ktMenu .marca span{color:#1e90ff;}
+.ktMenu .marca{text-align:center;line-height:1;}
+.ktMenu .marca small{display:block;font-family:'Barlow',Arial,sans-serif;font-size:12px;font-weight:600;letter-spacing:4px;color:#ffd54f;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,.8);}
+.ktFaixa a.vivo:before{content:'';width:8px;height:8px;border-radius:50%;background:#ff3b30;margin-right:7px;box-shadow:0 0 6px #ff3b30;animation:ktPisca 1.2s infinite;}
+@keyframes ktPisca{50%{opacity:.3;}}
+.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:170px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 100px,rgba(30,91,216,.95) 170px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
+  border-top:1px solid rgba(255,255,255,.12);}
+.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
+.ktFaixa a:hover{background:rgba(255,255,255,.12);}
+.ktFaixa a.soDono{display:none;}
+html.ktDono .ktFaixa a.soDono{display:flex;}
+.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;background:rgba(255,255,255,.16);box-shadow:inset 0 -3px 0 #ffd54f;}
+.ktFaixa{overflow-x:auto;scrollbar-width:none;}
+.ktFaixa a{white-space:nowrap;}
+@media(max-width:820px){.ktMenu .marca small{font-size:9px;letter-spacing:2px;margin-top:4px;}.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
+  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
+@media(max-width:480px){.ktMenu .bola{height:82px !important;top:6px !important;right:6px !important;}.ktMenu .miolo{padding-right:80px;}.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
+/*fim*//*ktFooterCSS*/
 .ktFooter{position:relative;width:100vw;left:50%;margin-left:-50vw;margin-top:40px;margin-bottom:-16px;color:#c9d4e2;font-family:'Barlow',Arial,sans-serif;font-size:14px;text-align:left;
   background:linear-gradient(180deg,#0a1428 0%,#070d1b 100%);border-top:3px solid #1e5bd8;}
 .ktFooter .lema{font-family:'Oswald','Arial Narrow',Arial;text-align:center;font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:22px 16px 18px 16px;
@@ -158,37 +188,7 @@ table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444
 .ktFooter .mapa{width:100%;height:190px;border:0;border-radius:12px;background:#101826;box-shadow:0 6px 18px rgba(0,0,0,.4);}
 .ktFooter .copy{border-top:1px solid rgba(255,255,255,.06);text-align:center;color:#6f819a;font-size:12px;padding:14px 16px 18px 16px;margin-top:14px;letter-spacing:.5px;}
 .ktFooter .copy b{color:#9fb3c8;font-weight:600;}
-/*fimF*//*ktMenuCSS*/
-html,body{overflow-x:hidden;}
-body{padding-top:0 !important;}
-.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
-  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#1d0f0a 100%);
-  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
-.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
-.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;z-index:4;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 85%,rgba(0,0,0,.4));}
-.ktMenu .bola{position:absolute;right:14px;top:6px;height:136px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));z-index:4;}
-.ktMenu .bola.logoKT{height:142px;top:3px;right:10px;}
-.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
-.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
-.ktMenu .marca span{color:#1e90ff;}
-.ktMenu .marca{text-align:center;line-height:1;}
-.ktMenu .marca small{display:block;font-family:'Barlow',Arial,sans-serif;font-size:12px;font-weight:600;letter-spacing:4px;color:#ffd54f;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,.8);}
-.ktFaixa a.vivo:before{content:'';width:8px;height:8px;border-radius:50%;background:#ff3b30;margin-right:7px;box-shadow:0 0 6px #ff3b30;animation:ktPisca 1.2s infinite;}
-@keyframes ktPisca{50%{opacity:.3;}}
-.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:170px;
-  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 100px,rgba(30,91,216,.95) 170px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
-  border-top:1px solid rgba(255,255,255,.12);}
-.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
-.ktFaixa a:hover{background:rgba(255,255,255,.12);}
-.ktFaixa a.soDono{display:none;}
-html.ktDono .ktFaixa a.soDono{display:flex;}
-.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;background:rgba(255,255,255,.16);box-shadow:inset 0 -3px 0 #ffd54f;}
-.ktFaixa{overflow-x:auto;scrollbar-width:none;}
-.ktFaixa a{white-space:nowrap;}
-@media(max-width:820px){.ktMenu .marca small{font-size:9px;letter-spacing:2px;margin-top:4px;}.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
-  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
-@media(max-width:480px){.ktMenu .bola{height:82px !important;top:6px !important;right:6px !important;}.ktMenu .miolo{padding-right:80px;}.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
-/*fim*/</style>
+/*fimF*/</style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 </head>
@@ -199,7 +199,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 <img class="cristo" src="cristo.png" alt="Cristo Redentor">
 <img class="bola logoKT" src="logo_klaustv.png" alt="Klaus Basquete RJ TV">
 <div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span><small>Basket RJ Stats PRO 4.0</small></a></div>
-<nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="montar-jogo.html" class="">Montar Jogo</a><a href="scout.html" class="">Scout</a><a href="usuarios.html" class="soDono">Usuários</a><a href="https://klauschagas.blogspot.com/" class="ext" target="_blank" rel="noopener">Blog</a><a href="aovivo.html" class="ativo vivo">Ao vivo</a></nav>
+<nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="montar-jogo.html" class="">Montar Jogo</a><a href="scout.html" class="">Scout</a><a href="bancodados.html" class="">Banco de dados</a><a href="usuarios.html" class="soDono">Usuários</a><a href="https://klauschagas.blogspot.com/" class="ext" target="_blank" rel="noopener">Blog</a><a href="aovivo.html" class="ativo vivo">Ao vivo</a></nav>
 </header>
 <script>
 (function(){
@@ -270,9 +270,19 @@ function fmtHora(d){ return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:
 function kt_init(){
   const s=$('selCat'); s.innerHTML=D.ordem.map(c=>`<option>${c}</option>`).join('')+'<option value="__AV">Jogos avulsos</option>';
   const q=new URLSearchParams(location.search);
-  s.value=q.get('cat')||'Sub-12';
-  kt_lista(q.get('jogo'));
+  if(q.get('jogo')){ s.value=q.get('cat')||'Sub-12'; kt_lista(q.get('jogo')); }
+  else kt_abrirMaisProximo();
   setInterval(()=>{ if(!document.hidden) kt_lista(null,true); },30000);
+}
+async function kt_abrirMaisProximo(){
+  const s=$('selCat'); s.value='Sub-12';
+  const r=await api({acao:'aoVivoLista',categoria:''});
+  if(!r.ok||!r.jogos||!r.jogos.length){ kt_lista(); return; }
+  const agora=Date.now(); const vivos=r.jogos.filter(j=>status(j)==='vivo');
+  const dist=j=>{ const d=dataJogo(j); return d?Math.abs(d.getTime()-agora):1e15; };
+  const esc1=(vivos.length?vivos:r.jogos).slice().sort((a,b)=>dist(a)-dist(b))[0];
+  s.value=esc1.avulso?'__AV':esc1.categoria; if(!s.value) s.value='Sub-12';
+  kt_lista(esc1.id);
 }
 function kt_rotulo(j){ const st=status(j), d=dataJogo(j);
   const ic={vivo:'🔴 AO VIVO',breve:'🟡 EM BREVE',final:'⚪ FINAL'}[st];
@@ -301,7 +311,7 @@ async function kt_abrir(id){
 }
 async function kt_carregar(primeira){
   const r=await api({acao:'aoVivoJogo',id:kt_atual});
-  if(!r.ok){ if(primeira) $('jogo').innerHTML='<div class="vazio">Não foi possível abrir o jogo agora.</div>'; return; }
+  if(!r.ok||!r.jogo){ if(primeira) $('jogo').innerHTML='<div class="vazio">Não foi possível abrir o jogo agora.</div>'; return; }
   KT_FOTOS=r.fotos||{}; KT_AP=r.apelidos||{};
   kt_render(r.jogo);
   if(primeira) $('jogo').scrollIntoView({behavior:'smooth',block:'start'});
@@ -406,8 +416,6 @@ function kt_render(j){
 kt_init();
 </script>
 
-
-
 <footer class="ktFooter">
   <div class="lema">🏀 No basquete, <span>tudo pode acontecer!</span></div>
   <div class="wrap">
@@ -427,6 +435,7 @@ kt_init();
         <li><a href="index.html">Início</a></li>
         <li><a href="montar-jogo.html">Montar Jogo</a></li>
         <li><a href="scout.html">Scout</a></li>
+        <li><a href="bancodados.html">Banco de dados</a></li>
         <li><a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener">Blog</a></li>
         <li><a href="aovivo.html">Ao vivo</a></li>
       </ul>
