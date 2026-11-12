@@ -75,7 +75,7 @@ button:hover{background:#0f6fd1;}
 .legendaReg{align-self:end;padding-bottom:9px;}
 .legNome{color:#fff;font-size:13px;}.legNum{color:#7f93a8;font-size:11px;}
 .rosterCols{display:flex;gap:12px;flex-wrap:wrap;}
-@media(min-width:900px){.rosterCols .rosterBox{flex:0 1 calc(50% - 6px);max-width:calc(50% - 6px);}}
+@media(min-width:900px){.rosterCols{flex-wrap:nowrap;}.rosterCols .rosterBox{box-sizing:border-box;flex:0 1 calc(50% - 6px);max-width:calc(50% - 6px);min-width:0;}}
 .rosterBox{flex:1;min-width:300px;background:#0b1220;border:2px solid #2c3e50;border-radius:10px;padding:8px;}
 .rosterHead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:8px;border-radius:8px;margin-bottom:8px;background:#132036;}
 .rosterTitle{font-size:14px;font-weight:bold;color:#1e90ff;}
