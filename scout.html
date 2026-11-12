@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<meta charset="UTF-8">
+<title>Klaus TV · Scout</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#0b0b0b;
+    color:#fff;
+    text-align:center;
+    margin:0;
+    padding:20px;
+}
+
+h1{
+    color:#1e90ff;
+    margin-bottom:20px;
+}
+
+/* 🔥 TIMES LADO A LADO */
+.container{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:15px;
+    flex-wrap:nowrap;
+}
+
+/* 🔥 CARD DOS TIMES */
+.team{
+    border:2px solid #1e90ff;
+    padding:10px;
+    border-radius:15px;
+    width:49%;
+    background:#101826;
+    box-shadow:0 0 20px rgba(30,144,255,0.2);
+    overflow-x:auto;
+}
+
+.teamTitle{
+    font-size:24px;
+    font-weight:900;
+    outline:none;
+    margin-bottom:10px;
+}
+
+.score{
+    font-size:42px;
+    font-weight:bold;
+    color:#ffd54f;
+    margin-bottom:15px;
+}
+
+/* 🔥 TABELA */
+.table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+
+.table th{
+    background:#1e90ff;
+    color:#fff;
+    font-size:10px;
+    padding:5px;
+}
+
+.table td{
+    border:1px solid #444;
+    padding:4px;
+    font-size:12px;
+}
+
+.table tr:nth-child(even){
+    background:#17263d;
+}
+
+.selected{
+    background:#ffd54f !important;
+    color:#000;
+    font-weight:bold;
+}
+
+/* 🔥 BOTÕES */
+.buttons{
+    margin-top:15px;
+}
+
+button{
+    margin:3px;
+    padding:6px;
+    border:none;
+    border-radius:8px;
+    background:#1e90ff;
+    color:#fff;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:10px;
+}
+
+button:hover{
+    background:#0f6fd1;
+}
+
+.topButtons{
+    margin-bottom:20px;
+}
+
+hr{
+    border:1px solid #2c3e50;
+    margin:10px 0;
+}
+
+/* 🔥 PRÉ-JOGOS SALVOS 3.4 */
+.savedGamesPanel{
+    margin:0 auto 20px auto;
+    padding:10px;
+    border:2px solid #1e90ff;
+    border-radius:12px;
+    background:#101826;
+    max-width:900px;
+}
+
+.savedGamesPanel strong{
+    display:block;
+    color:#1e90ff;
+    margin-bottom:8px;
+    font-size:15px;
+}
+
+.savedGamesPanel select{
+    margin:3px;
+    padding:6px;
+    border:none;
+    border-radius:8px;
+    background:#fff;
+    color:#000;
+    font-size:11px;
+    max-width:420px;
+}
+
+.historyPanel{
+    border-color:#ffd54f;
+}
+
+.historyPanel strong{
+    color:#ffd54f;
+}
+
+/* 🔥 RESPONSIVO */
+@media(max-width:1100px){
+
+.container{
+    flex-wrap:wrap;
+}
+
+.team{
+    width:100%;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>🏀 Klaus TV · Scout</h1>
+<div style="color:#9fb3c8;font-size:12px;margin:-14px 0 6px 0;">Basket RJ Stats PRO 4.0</div>
+<div style="font-size:13px;margin-bottom:16px;"><a href="montar-jogo.html" style="color:#ffd54f;">← Ir para Montar Jogo</a> · <b>Scout do Klaus</b></div>
+
+<div class="topButtons">
+<button onclick="gerarPDF()">🧾 Gerar PDF</button>
+<button onclick="novoJogo()">🔄 Novo Jogo</button>
+</div>
+
+<!-- ================= PRÉ-JOGOS SALVOS 3.4 ================= -->
+<div class="savedGamesPanel">
+    <strong>💾 Pré-jogos / Elencos salvos</strong>
+    <button onclick="salvarPreJogo()">💾 Salvar elenco atual</button>
+    <select id="savedGamesSelect">
+        <option value="">📂 Selecione um pré-jogo salvo</option>
+    </select>
+    <button onclick="carregarPreJogo()">📥 Carregar</button>
+    <button onclick="excluirPreJogo()">🗑️ Excluir</button>
+</div>
+
+
+<div class="savedGamesPanel teamRosterPanel">
+    <strong>👥 Elencos individuais por equipe</strong>
+    <div style="margin-bottom:8px;">
+        <button onclick="salvarElencoEquipe('A')">💾 Salvar elenco do Time A</button>
+        <button onclick="salvarElencoEquipe('B')">💾 Salvar elenco do Time B</button>
+    </div>
+    <div style="margin:6px 0;">
+        <select id="savedRostersSelectA">
+            <option value="">📋 Selecione um elenco para o Time A</option>
+        </select>
+        <button onclick="carregarElencoEquipe('A')">📥 Carregar no Time A</button>
+    </div>
+    <div style="margin:6px 0;">
+        <select id="savedRostersSelectB">
+            <option value="">📋 Selecione um elenco para o Time B</option>
+        </select>
+        <button onclick="carregarElencoEquipe('B')">📥 Carregar no Time B</button>
+    </div>
+    <div style="margin-top:8px;">
+        <button onclick="excluirElencoEquipe()">🗑️ Excluir elenco selecionado</button>
+    </div>
+</div>
+<div class="savedGamesPanel historyPanel">
+    <strong>🏀 Histórico de jogos</strong>
+    <button onclick="salvarJogoHistorico()">🏀 Salvar jogo completo</button>
+    <select id="historyGamesSelect">
+        <option value="">📚 Selecione um jogo salvo</option>
+    </select>
+    <button onclick="carregarJogoHistorico()">📥 Abrir / Editar</button>
+    <button onclick="excluirJogoHistorico()">🗑️ Excluir</button>
+    <button onclick="novoJogoHistorico()">➕ Novo jogo</button>
+    <button id="saveHistoryChangesButton" onclick="salvarAlteracoesHistorico()" style="display:none;">💾 Salvar alterações</button>
+</div>
+
+<div class="container">
+
+<!-- ================= TIME A ================= -->
+<div class="team">
+
+<h2 contenteditable="true" class="teamTitle" id="titleA">Time A</h2>
+
+<div class="score" id="scoreA">0</div>
+
+<table class="table" id="tableA"></table>
+
+<div class="buttons">
+
+<button onclick="addMade('A','2')">+2 ✔</button>
+<button onclick="removeMade('A','2')">-2 ✔</button>
+
+<button onclick="addMiss('A','2')">2 ❌</button>
+<button onclick="removeMiss('A','2')">-2 ❌</button>
+
+<br>
+
+<button onclick="addMade('A','3')">+3 ✔</button>
+<button onclick="removeMade('A','3')">-3 ✔</button>
+
+<button onclick="addMiss('A','3')">3 ❌</button>
+<button onclick="removeMiss('A','3')">-3 ❌</button>
+
+<br>
+
+<button onclick="addMade('A','1')">LL ✔</button>
+<button onclick="removeMade('A','1')">-LL ✔</button>
+
+<button onclick="addMiss('A','1')">LL ❌</button>
+<button onclick="removeMiss('A','1')">-LL ❌</button>
+
+<hr>
+
+<button onclick="addOther('A','reb',1)">REB+</button>
+<button onclick="addOther('A','reb',-1)">REB-</button>
+
+<button onclick="addOther('A','ast',1)">AST+</button>
+<button onclick="addOther('A','ast',-1)">AST-</button>
+
+<button onclick="addOther('A','stl',1)">STL+</button>
+<button onclick="addOther('A','stl',-1)">STL-</button>
+
+<button onclick="addOther('A','blk',1)">BLK+</button>
+<button onclick="addOther('A','blk',-1)">BLK-</button>
+
+<button onclick="addOther('A','to',1)">TO+</button>
+<button onclick="addOther('A','to',-1)">TO-</button>
+
+<button onclick="addOther('A','foul',1)">F+</button>
+<button onclick="addOther('A','foul',-1)">F-</button>
+
+</div>
+
+</div>
+
+<!-- ================= TIME B ================= -->
+<div class="team">
+
+<h2 contenteditable="true" class="teamTitle" id="titleB">Time B</h2>
+
+<div class="score" id="scoreB">0</div>
+
+<table class="table" id="tableB"></table>
+
+<div class="buttons">
+
+<button onclick="addMade('B','2')">+2 ✔</button>
+<button onclick="removeMade('B','2')">-2 ✔</button>
+
+<button onclick="addMiss('B','2')">2 ❌</button>
+<button onclick="removeMiss('B','2')">-2 ❌</button>
+
+<br>
+
+<button onclick="addMade('B','3')">+3 ✔</button>
+<button onclick="removeMade('B','3')">-3 ✔</button>
+
+<button onclick="addMiss('B','3')">3 ❌</button>
+<button onclick="removeMiss('B','3')">-3 ❌</button>
+
+<br>
+
+<button onclick="addMade('B','1')">LL ✔</button>
+<button onclick="removeMade('B','1')">-LL ✔</button>
+
+<button onclick="addMiss('B','1')">LL ❌</button>
+<button onclick="removeMiss('B','1')">-LL ❌</button>
+
+<hr>
+
+<button onclick="addOther('B','reb',1)">REB+</button>
+<button onclick="addOther('B','reb',-1)">REB-</button>
+
+<button onclick="addOther('B','ast',1)">AST+</button>
+<button onclick="addOther('B','ast',-1)">AST-</button>
+
+<button onclick="addOther('B','stl',1)">STL+</button>
+<button onclick="addOther('B','stl',-1)">STL-</button>
+
+<button onclick="addOther('B','blk',1)">BLK+</button>
+<button onclick="addOther('B','blk',-1)">BLK-</button>
+
+<button onclick="addOther('B','to',1)">TO+</button>
+<button onclick="addOther('B','to',-1)">TO-</button>
+
+<button onclick="addOther('B','foul',1)">F+</button>
+<button onclick="addOther('B','foul',-1)">F-</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let selectedPlayer = null;
+let selectedTeam = null;
+let stats = {};
+
+function criarTabela(team){
+
+let table = document.getElementById('table'+team);
+
+let html = `
+<tr>
+<th>#</th>
+<th>Nome</th>
+<th>PTS</th>
+<th>2PT</th>
+<th>3PT</th>
+<th>LL</th>
+<th>REB</th>
+<th>AST</th>
+<th>STL</th>
+<th>BLK</th>
+<th>TO</th>
+<th>F</th>
+<th>EFF</th>
+</tr>
+`;
+
+for(let i=1;i<=12;i++){
+
+let key = team+'-'+i;
+
+stats[key]={
+pts:0,
+
+twoMade:0,
+twoMiss:0,
+
+threeMade:0,
+threeMiss:0,
+
+ftMade:0,
+ftMiss:0,
+
+reb:0,
+ast:0,
+stl:0,
+blk:0,
+to:0,
+foul:0,
+eff:0
+};
+
+html += `
+<tr onclick="selectPlayer('${team}',${i},this)">
+
+<td contenteditable>${i}</td>
+
+<td contenteditable>Jogador ${i}</td>
+
+<td id="pts-${key}">0</td>
+
+<td id="two-${key}">0/0 (0%)</td>
+
+<td id="three-${key}">0/0 (0%)</td>
+
+<td id="ft-${key}">0/0 (0%)</td>
+
+<td id="reb-${key}">0</td>
+
+<td id="ast-${key}">0</td>
+
+<td id="stl-${key}">0</td>
+
+<td id="blk-${key}">0</td>
+
+<td id="to-${key}">0</td>
+
+<td id="foul-${key}">0</td>
+
+<td id="eff-${key}">0</td>
+
+</tr>
+`;
+}
+
+html += `
+<tr style="background:#0d3b66;font-weight:bold;color:#fff;">
+<td colspan="2">TOTAL</td>
+<td id="teamPts-${team}">0</td>
+<td id="teamTwo-${team}">0/0 (0%)</td>
+<td id="teamThree-${team}">0/0 (0%)</td>
+<td id="teamFt-${team}">0/0 (0%)</td>
+<td id="teamReb-${team}">0</td>
+<td id="teamAst-${team}">0</td>
+<td id="teamStl-${team}">0</td>
+<td id="teamBlk-${team}">0</td>
+<td id="teamTo-${team}">0</td>
+<td id="teamFoul-${team}">0</td>
+<td id="teamEff-${team}">0</td>
+</tr>
+`;
+
+table.innerHTML = html;
+}
+
+criarTabela('A');
+criarTabela('B');
+
+function selectPlayer(team,num,row){
+
+document.querySelectorAll('tr').forEach(r=>{
+r.classList.remove('selected');
+});
+
+row.classList.add('selected');
+
+selectedPlayer = num;
+selectedTeam = team;
+}
+
+function key(){
+return selectedTeam+'-'+selectedPlayer;
+}
+
+function atualizarLinha(k){
+
+document.getElementById('pts-'+k).innerText = stats[k].pts;
+
+let twoTotal = stats[k].twoMade + stats[k].twoMiss;
+let threeTotal = stats[k].threeMade + stats[k].threeMiss;
+let ftTotal = stats[k].ftMade + stats[k].ftMiss;
+
+let twoPct = twoTotal ? Math.round((stats[k].twoMade/twoTotal)*100) : 0;
+let threePct = threeTotal ? Math.round((stats[k].threeMade/threeTotal)*100) : 0;
+let ftPct = ftTotal ? Math.round((stats[k].ftMade/ftTotal)*100) : 0;
+
+document.getElementById('two-'+k).innerText =
+`${stats[k].twoMade}/${twoTotal} (${twoPct}%)`;
+
+document.getElementById('three-'+k).innerText =
+`${stats[k].threeMade}/${threeTotal} (${threePct}%)`;
+
+document.getElementById('ft-'+k).innerText =
+`${stats[k].ftMade}/${ftTotal} (${ftPct}%)`;
+
+document.getElementById('reb-'+k).innerText = stats[k].reb;
+document.getElementById('ast-'+k).innerText = stats[k].ast;
+document.getElementById('stl-'+k).innerText = stats[k].stl;
+document.getElementById('blk-'+k).innerText = stats[k].blk;
+document.getElementById('to-'+k).innerText = stats[k].to;
+document.getElementById('foul-'+k).innerText = stats[k].foul;
+
+calcularEficiencia(k);
+
+let team = k.split('-')[0];
+atualizarTotaisEquipe(team);
+}
+
+function calcularEficiencia(k){
+
+stats[k].eff =
+
+(
+stats[k].pts +
+stats[k].reb +
+stats[k].ast +
+stats[k].blk +
+stats[k].stl
+)
+
+-
+
+(
+stats[k].twoMiss +
+stats[k].threeMiss +
+stats[k].ftMiss +
+stats[k].to
+);
+
+document.getElementById('eff-'+k).innerText = stats[k].eff;
+}
+
+function atualizarTotaisEquipe(team){
+
+let pts=0;
+let twoMade=0;
+let twoMiss=0;
+let threeMade=0;
+let threeMiss=0;
+let ftMade=0;
+let ftMiss=0;
+
+let reb=0;
+let ast=0;
+let stl=0;
+let blk=0;
+let to=0;
+let foul=0;
+let eff=0;
+
+for(let i=1;i<=12;i++){
+
+let s = stats[team+'-'+i];
+
+pts += s.pts;
+
+twoMade += s.twoMade;
+twoMiss += s.twoMiss;
+
+threeMade += s.threeMade;
+threeMiss += s.threeMiss;
+
+ftMade += s.ftMade;
+ftMiss += s.ftMiss;
+
+reb += s.reb;
+ast += s.ast;
+stl += s.stl;
+blk += s.blk;
+to += s.to;
+foul += s.foul;
+eff += s.eff;
+
+}
+
+let twoTotal = twoMade + twoMiss;
+let threeTotal = threeMade + threeMiss;
+let ftTotal = ftMade + ftMiss;
+
+let twoPct = twoTotal ? Math.round(twoMade*100/twoTotal) : 0;
+let threePct = threeTotal ? Math.round(threeMade*100/threeTotal) : 0;
+let ftPct = ftTotal ? Math.round(ftMade*100/ftTotal) : 0;
+
+document.getElementById('teamPts-'+team).innerText = pts;
+
+document.getElementById('teamTwo-'+team).innerText =
+`${twoMade}/${twoTotal} (${twoPct}%)`;
+
+document.getElementById('teamThree-'+team).innerText =
+`${threeMade}/${threeTotal} (${threePct}%)`;
+
+document.getElementById('teamFt-'+team).innerText =
+`${ftMade}/${ftTotal} (${ftPct}%)`;
+
+document.getElementById('teamReb-'+team).innerText = reb;
+document.getElementById('teamAst-'+team).innerText = ast;
+document.getElementById('teamStl-'+team).innerText = stl;
+document.getElementById('teamBlk-'+team).innerText = blk;
+document.getElementById('teamTo-'+team).innerText = to;
+document.getElementById('teamFoul-'+team).innerText = foul;
+document.getElementById('teamEff-'+team).innerText = eff;
+
+}
+function addMade(team,type){
+
+if(team!==selectedTeam){
+return alert('Selecione um jogador');
+}
+
+let k = key();
+
+if(type==='2'){
+stats[k].pts += 2;
+stats[k].twoMade += 1;
+document.getElementById('score'+team).innerText =
+parseInt(document.getElementById('score'+team).innerText)+2;
+}
+
+if(type==='3'){
+stats[k].pts += 3;
+stats[k].threeMade += 1;
+document.getElementById('score'+team).innerText =
+parseInt(document.getElementById('score'+team).innerText)+3;
+}
+
+if(type==='1'){
+stats[k].pts += 1;
+stats[k].ftMade += 1;
+document.getElementById('score'+team).innerText =
+parseInt(document.getElementById('score'+team).innerText)+1;
+}
+
+atualizarLinha(k);
+}
+
+function addMiss(team,type){
+
+if(team!==selectedTeam){
+return alert('Selecione um jogador');
+}
+
+let k = key();
+
+if(type==='2'){
+stats[k].twoMiss += 1;
+}
+
+if(type==='3'){
+stats[k].threeMiss += 1;
+}
+
+if(type==='1'){
+stats[k].ftMiss += 1;
+}
+
+atualizarLinha(k);
+}
+
+function removeMade(team,type){
+
+if(team!==selectedTeam){
+return alert('Selecione um jogador');
+}
+
+let k = key();
+
+if(type==='2' && stats[k].twoMade > 0){
+
+stats[k].twoMade--;
+stats[k].pts -= 2;
+
+document.getElementById('score'+team).innerText =
+Math.max(
+0,
+parseInt(document.getElementById('score'+team).innerText)-2
+);
+
+}
+
+if(type==='3' && stats[k].threeMade > 0){
+
+stats[k].threeMade--;
+stats[k].pts -= 3;
+
+document.getElementById('score'+team).innerText =
+Math.max(
+0,
+parseInt(document.getElementById('score'+team).innerText)-3
+);
+
+}
+
+if(type==='1' && stats[k].ftMade > 0){
+
+stats[k].ftMade--;
+stats[k].pts -= 1;
+
+document.getElementById('score'+team).innerText =
+Math.max(
+0,
+parseInt(document.getElementById('score'+team).innerText)-1
+);
+
+}
+
+if(stats[k].pts < 0){
+stats[k].pts = 0;
+}
+
+atualizarLinha(k);
+
+}
+
+function removeMiss(team,type){
+
+if(team!==selectedTeam){
+return alert('Selecione um jogador');
+}
+
+let k = key();
+
+if(type==='2' && stats[k].twoMiss > 0){
+stats[k].twoMiss--;
+}
+
+if(type==='3' && stats[k].threeMiss > 0){
+stats[k].threeMiss--;
+}
+
+if(type==='1' && stats[k].ftMiss > 0){
+stats[k].ftMiss--;
+}
+
+atualizarLinha(k);
+
+}
+
+function addOther(team,stat,val){
+
+if(team!==selectedTeam){
+return alert('Selecione um jogador');
+}
+
+let k = key();
+
+stats[k][stat]+=val;
+
+if(stats[k][stat]<0){
+stats[k][stat]=0;
+}
+
+atualizarLinha(k);
+}
+
+/* =========================================================
+   PRÉ-JOGOS / ELENCOS SALVOS - VERSÃO 3.4
+   Salva somente nomes, números e nomes dos times.
+   As estatísticas não fazem parte do pré-jogo salvo.
+   ========================================================= */
+
+const PREJOGOS_STORAGE_KEY = 'basketRJStatsPRO_34_prejogos';
+
+function obterPreJogosSalvos(){
+
+    try{
+        const dados = localStorage.getItem(PREJOGOS_STORAGE_KEY);
+        return dados ? JSON.parse(dados) : [];
+    }catch(e){
+        alert('Não foi possível acessar os pré-jogos salvos neste navegador.');
+        return [];
+    }
+
+}
+
+function obterElencoAtual(team){
+
+    const tabela = document.getElementById('table'+team);
+    const linhas = tabela.querySelectorAll('tr');
+
+    const jogadores = [];
+
+    for(let i=1;i<=12;i++){
+
+        const celulas = linhas[i].querySelectorAll('td');
+
+        jogadores.push({
+            numero: celulas[0].innerText.trim(),
+            nome: celulas[1].innerText.trim()
+        });
+
+    }
+
+    return jogadores;
+
+}
+
+function salvarPreJogo(){
+
+    const nome = prompt(
+        'Digite um nome para este pré-jogo/elenco:\n\nEx.: Flamengo x Botafogo - Sub-14'
+    );
+
+    if(nome === null){
+        return;
+    }
+
+    const nomeLimpo = nome.trim();
+
+    if(!nomeLimpo){
+        alert('Digite um nome para o pré-jogo.');
+        return;
+    }
+
+    const preJogos = obterPreJogosSalvos();
+
+    const novo = {
+        id: Date.now().toString(),
+        nome: nomeLimpo,
+        titleA: document.getElementById('titleA').innerText.trim(),
+        titleB: document.getElementById('titleB').innerText.trim(),
+        elencoA: obterElencoAtual('A'),
+        elencoB: obterElencoAtual('B')
+    };
+
+    preJogos.push(novo);
+
+    try{
+        localStorage.setItem(PREJOGOS_STORAGE_KEY, JSON.stringify(preJogos));
+    }catch(e){
+        alert('Não foi possível salvar. O armazenamento do navegador pode estar indisponível.');
+        return;
+    }
+
+    atualizarListaPreJogos(novo.id);
+
+    alert('Pré-jogo salvo com sucesso!');
+
+}
+
+function atualizarListaPreJogos(selecionarId=''){
+
+    const select = document.getElementById('savedGamesSelect');
+
+    if(!select){
+        return;
+    }
+
+    const preJogos = obterPreJogosSalvos();
+
+    select.innerHTML =
+        '<option value="">📂 Selecione um pré-jogo salvo</option>';
+
+    preJogos.forEach(preJogo => {
+
+        const option = document.createElement('option');
+
+        option.value = preJogo.id;
+        option.textContent = preJogo.nome;
+
+        if(preJogo.id === selecionarId){
+            option.selected = true;
+        }
+
+        select.appendChild(option);
+
+    });
+
+}
+
+function carregarPreJogo(){
+
+    const select = document.getElementById('savedGamesSelect');
+    const id = select.value;
+
+    if(!id){
+        alert('Selecione um pré-jogo salvo.');
+        return;
+    }
+
+    const preJogos = obterPreJogosSalvos();
+    const preJogo = preJogos.find(item => item.id === id);
+
+    if(!preJogo){
+        alert('Pré-jogo não encontrado.');
+        atualizarListaPreJogos();
+        return;
+    }
+
+    if(!confirm(
+        'Carregar "'+preJogo.nome+'"?\n\n' +
+        'Isso vai substituir somente os nomes dos times, números e nomes dos jogadores atuais.\n' +
+        'As estatísticas atuais não serão alteradas.'
+    )){
+        return;
+    }
+
+    document.getElementById('titleA').innerText = preJogo.titleA;
+    document.getElementById('titleB').innerText = preJogo.titleB;
+
+    aplicarElenco('A', preJogo.elencoA);
+    aplicarElenco('B', preJogo.elencoB);
+
+}
+
+function aplicarElenco(team, elenco){
+
+    if(!Array.isArray(elenco)){
+        return;
+    }
+
+    const tabela = document.getElementById('table'+team);
+    const linhas = tabela.querySelectorAll('tr');
+
+    for(let i=1;i<=12;i++){
+
+        const jogador = elenco[i-1];
+
+        if(!jogador){
+            continue;
+        }
+
+        const celulas = linhas[i].querySelectorAll('td');
+
+        celulas[0].innerText = jogador.numero;
+        celulas[1].innerText = jogador.nome;
+
+    }
+
+}
+
+function excluirPreJogo(){
+
+    const select = document.getElementById('savedGamesSelect');
+    const id = select.value;
+
+    if(!id){
+        alert('Selecione um pré-jogo salvo.');
+        return;
+    }
+
+    const preJogos = obterPreJogosSalvos();
+    const preJogo = preJogos.find(item => item.id === id);
+
+    if(!preJogo){
+        atualizarListaPreJogos();
+        return;
+    }
+
+    if(!confirm('Excluir o pré-jogo "'+preJogo.nome+'"?')){
+        return;
+    }
+
+    const atualizados = preJogos.filter(item => item.id !== id);
+
+    try{
+        localStorage.setItem(
+            PREJOGOS_STORAGE_KEY,
+            JSON.stringify(atualizados)
+        );
+    }catch(e){
+        alert('Não foi possível atualizar os pré-jogos salvos.');
+        return;
+    }
+
+    atualizarListaPreJogos();
+
+}
+
+atualizarListaPreJogos();
+
+
+/* =========================================================
+   BIBLIOTECA DE ELENCOS INDIVIDUAIS POR EQUIPE - VERSÃO 3.6
+   Salva nome do time, números e nomes dos 12 atletas.
+   Não salva estatísticas.
+   ========================================================= */
+
+const ELENCOS_STORAGE_KEY = 'basketRJStatsPRO_36_elencos';
+
+function obterElencosSalvos(){
+    try{
+        const dados = localStorage.getItem(ELENCOS_STORAGE_KEY);
+        return dados ? JSON.parse(dados) : [];
+    }catch(e){
+        alert('Não foi possível acessar a biblioteca de elencos neste navegador.');
+        return [];
+    }
+}
+
+function salvarElencoEquipe(team){
+    const tituloAtual = document.getElementById('title'+team).innerText.trim();
+    const jogadores = obterElencoAtual(team);
+
+    const nome = prompt(
+        'Digite o nome deste elenco/equipe:\n\nEx.: Flamengo Sub-14\n\nO nome do título atual é: ' + tituloAtual
+    );
+
+    if(nome === null) return;
+
+    const nomeLimpo = nome.trim();
+    if(!nomeLimpo){
+        alert('Digite um nome para o elenco.');
+        return;
+    }
+
+    const elencos = obterElencosSalvos();
+
+    const existente = elencos.find(item =>
+        item.nome.toLowerCase() === nomeLimpo.toLowerCase()
+    );
+
+    if(existente){
+        const substituir = confirm(
+            'Já existe um elenco chamado "'+existente.nome+'".\n\nDeseja substituir o elenco salvo pelos dados atuais do Time '+team+'?'
+        );
+        if(!substituir) return;
+
+        existente.nome = nomeLimpo;
+        existente.titulo = tituloAtual;
+        existente.jogadores = jogadores;
+        existente.atualizadoEm = new Date().toISOString();
+    }else{
+        elencos.push({
+            id: 'E'+Date.now().toString()+'_'+team,
+            nome: nomeLimpo,
+            titulo: tituloAtual,
+            jogadores: jogadores,
+            criadoEm: new Date().toISOString(),
+            atualizadoEm: new Date().toISOString()
+        });
+    }
+
+    try{
+        localStorage.setItem(ELENCOS_STORAGE_KEY, JSON.stringify(elencos));
+    }catch(e){
+        alert('Não foi possível salvar o elenco. O armazenamento do navegador pode estar indisponível.');
+        return;
+    }
+
+    atualizarListaElencos();
+    alert('Elenco "'+nomeLimpo+'" salvo com sucesso!');
+}
+
+function atualizarListaElencos(selecionarId=''){
+    const selectA = document.getElementById('savedRostersSelectA');
+    const selectB = document.getElementById('savedRostersSelectB');
+    const elencos = obterElencosSalvos();
+
+    [selectA, selectB].forEach((select)=>{
+        if(!select) return;
+        select.innerHTML = '<option value="">📋 Selecione um elenco</option>';
+
+        elencos.slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).forEach(elenco=>{
+            const option = document.createElement('option');
+            option.value = elenco.id;
+            option.textContent = elenco.nome;
+            if(elenco.id === selecionarId) option.selected = true;
+            select.appendChild(option);
+        });
+    });
+}
+
+function carregarElencoEquipe(team){
+    const select = document.getElementById('savedRostersSelect'+team);
+    const id = select ? select.value : '';
+
+    if(!id){
+        return alert('Selecione um elenco para o Time '+team+'.');
+    }
+
+    const elencos = obterElencosSalvos();
+    const elenco = elencos.find(item => item.id === id);
+
+    if(!elenco){
+        alert('Elenco não encontrado.');
+        atualizarListaElencos();
+        return;
+    }
+
+    if(!confirm(
+        'Carregar o elenco "'+elenco.nome+'" no Time '+team+'?\n\n' +
+        'Serão substituídos somente o nome da equipe, números e nomes dos jogadores.\n' +
+        'As estatísticas atuais não serão alteradas.'
+    )) return;
+
+    document.getElementById('title'+team).innerText = elenco.titulo || elenco.nome;
+    aplicarElenco(team, elenco.jogadores);
+
+    alert('Elenco "'+elenco.nome+'" carregado no Time '+team+'!');
+}
+
+function excluirElencoEquipe(){
+    const selectA = document.getElementById('savedRostersSelectA');
+    const selectB = document.getElementById('savedRostersSelectB');
+    const id = (selectA && selectA.value) || (selectB && selectB.value);
+
+    if(!id){
+        return alert('Selecione um elenco para excluir.');
+    }
+
+    const elencos = obterElencosSalvos();
+    const elenco = elencos.find(item => item.id === id);
+
+    if(!elenco){
+        atualizarListaElencos();
+        return;
+    }
+
+    if(!confirm('Excluir definitivamente o elenco "'+elenco.nome+'"?')) return;
+
+    const atualizados = elencos.filter(item => item.id !== id);
+
+    try{
+        localStorage.setItem(ELENCOS_STORAGE_KEY, JSON.stringify(atualizados));
+    }catch(e){
+        alert('Não foi possível atualizar a biblioteca de elencos.');
+        return;
+    }
+
+    atualizarListaElencos();
+    alert('Elenco excluído com sucesso.');
+}
+
+atualizarListaElencos();
+
+/* =========================================================
+   HISTÓRICO COMPLETO DE JOGOS - VERSÃO 3.5
+   ========================================================= */
+
+const HISTORICO_STORAGE_KEY = 'basketRJStatsPRO_35_historico';
+let jogoHistoricoEmEdicaoId = null;
+
+function obterHistoricoJogos(){
+    try{
+        const dados = localStorage.getItem(HISTORICO_STORAGE_KEY);
+        return dados ? JSON.parse(dados) : [];
+    }catch(e){
+        alert('Não foi possível acessar o histórico neste navegador.');
+        return [];
+    }
+}
+
+function capturarEstadoTime(team){
+    const jogadores = [];
+
+    for(let i=1;i<=12;i++){
+        const k = team+'-'+i;
+        const row = document.querySelector('#table'+team+' tr:nth-child('+(i+1)+')');
+        const celulas = row.querySelectorAll('td');
+
+        jogadores.push({
+            numero: celulas[0].innerText.trim(),
+            nome: celulas[1].innerText.trim(),
+            stats: {...stats[k]}
+        });
+    }
+
+    return {
+        title: document.getElementById('title'+team).innerText.trim(),
+        score: parseInt(document.getElementById('score'+team).innerText) || 0,
+        jogadores: jogadores
+    };
+}
+
+function capturarJogoAtual(){
+    return {
+        titleA: document.getElementById('titleA').innerText.trim(),
+        titleB: document.getElementById('titleB').innerText.trim(),
+        timeA: capturarEstadoTime('A'),
+        timeB: capturarEstadoTime('B')
+    };
+}
+
+function formatarDataHistorico(iso){
+    const d = new Date(iso);
+    return d.toLocaleString('pt-BR', {
+        dateStyle:'short',
+        timeStyle:'short'
+    });
+}
+
+function salvarJogoHistorico(){
+    const nome = prompt(
+        'Digite um nome para este jogo:\n\nEx.: Flamengo x Botafogo - Sub-14'
+    );
+
+    if(nome === null) return;
+
+    const nomeLimpo = nome.trim();
+
+    if(!nomeLimpo){
+        alert('Digite um nome para o jogo.');
+        return;
+    }
+
+    const historico = obterHistoricoJogos();
+    const jogo = {
+        id: 'J'+Date.now().toString(),
+        nome: nomeLimpo,
+        data: new Date().toISOString(),
+        ...capturarJogoAtual()
+    };
+
+    historico.push(jogo);
+
+    try{
+        localStorage.setItem(HISTORICO_STORAGE_KEY, JSON.stringify(historico));
+    }catch(e){
+        alert('Não foi possível salvar o jogo. O armazenamento do navegador pode estar indisponível.');
+        return;
+    }
+
+    jogoHistoricoEmEdicaoId = jogo.id;
+    atualizarListaHistorico(jogo.id);
+    mostrarBotaoSalvarAlteracoes();
+    alert('Jogo salvo no histórico com sucesso!');
+}
+
+function salvarAlteracoesHistorico(){
+    if(!jogoHistoricoEmEdicaoId){
+        alert('Abra um jogo do histórico para editar.');
+        return;
+    }
+
+    const historico = obterHistoricoJogos();
+    const indice = historico.findIndex(item => item.id === jogoHistoricoEmEdicaoId);
+
+    if(indice === -1){
+        alert('O jogo que estava sendo editado não foi encontrado.');
+        return;
+    }
+
+    historico[indice] = {
+        ...historico[indice],
+        ...capturarJogoAtual(),
+        ultimaEdicao: new Date().toISOString()
+    };
+
+    try{
+        localStorage.setItem(HISTORICO_STORAGE_KEY, JSON.stringify(historico));
+    }catch(e){
+        alert('Não foi possível salvar as alterações.');
+        return;
+    }
+
+    atualizarListaHistorico(jogoHistoricoEmEdicaoId);
+    alert('Alterações salvas no histórico!');
+}
+
+function atualizarListaHistorico(selecionarId=''){
+    const select = document.getElementById('historyGamesSelect');
+    if(!select) return;
+
+    const historico = obterHistoricoJogos();
+
+    select.innerHTML = '<option value="">📚 Selecione um jogo salvo</option>';
+
+    historico.slice().reverse().forEach(jogo => {
+        const option = document.createElement('option');
+        option.value = jogo.id;
+
+        const placar =
+            (jogo.timeA?.score ?? 0) + ' x ' +
+            (jogo.timeB?.score ?? 0);
+
+        option.textContent =
+            jogo.nome + ' — ' + placar + ' — ' +
+            formatarDataHistorico(jogo.data);
+
+        if(jogo.id === selecionarId){
+            option.selected = true;
+        }
+
+        select.appendChild(option);
+    });
+}
+
+function carregarJogoHistorico(){
+    const select = document.getElementById('historyGamesSelect');
+    const id = select.value;
+
+    if(!id){
+        alert('Selecione um jogo salvo no histórico.');
+        return;
+    }
+
+    const historico = obterHistoricoJogos();
+    const jogo = historico.find(item => item.id === id);
+
+    if(!jogo){
+        alert('Jogo não encontrado.');
+        atualizarListaHistorico();
+        return;
+    }
+
+    if(!confirm(
+        'Abrir "'+jogo.nome+'"?\n\n' +
+        'O jogo será carregado com todas as estatísticas e poderá ser corrigido.'
+    )){
+        return;
+    }
+
+    carregarEstadoTime('A', jogo.timeA);
+    carregarEstadoTime('B', jogo.timeB);
+
+    document.getElementById('titleA').innerText =
+        jogo.timeA?.title ?? jogo.titleA ?? 'Time A';
+
+    document.getElementById('titleB').innerText =
+        jogo.timeB?.title ?? jogo.titleB ?? 'Time B';
+
+    document.getElementById('scoreA').innerText = jogo.timeA?.score ?? 0;
+    document.getElementById('scoreB').innerText = jogo.timeB?.score ?? 0;
+
+    jogoHistoricoEmEdicaoId = jogo.id;
+
+    selectedPlayer = null;
+    selectedTeam = null;
+
+    document.querySelectorAll('.selected').forEach(r=>{
+        r.classList.remove('selected');
+    });
+
+    atualizarTodasAsLinhas();
+    atualizarListaHistorico(jogo.id);
+    mostrarBotaoSalvarAlteracoes();
+
+    alert('Jogo carregado. Faça as correções normalmente e depois clique em "💾 Salvar alterações".');
+}
+
+function carregarEstadoTime(team, estadoTime){
+    if(!estadoTime) return;
+
+    const jogadores = estadoTime.jogadores || [];
+
+    for(let i=1;i<=12;i++){
+        const jogador = jogadores[i-1];
+        const k = team+'-'+i;
+
+        if(!jogador) continue;
+
+        const row = document.querySelector('#table'+team+' tr:nth-child('+(i+1)+')');
+        const celulas = row.querySelectorAll('td');
+
+        celulas[0].innerText = jogador.numero ?? i;
+        celulas[1].innerText = jogador.nome ?? ('Jogador '+i);
+
+        stats[k] = {
+            pts:0,
+            twoMade:0,
+            twoMiss:0,
+            threeMade:0,
+            threeMiss:0,
+            ftMade:0,
+            ftMiss:0,
+            reb:0,
+            ast:0,
+            stl:0,
+            blk:0,
+            to:0,
+            foul:0,
+            eff:0,
+            ...(jogador.stats || {})
+        };
+    }
+}
+
+function atualizarTodasAsLinhas(){
+    for(let team of ['A','B']){
+        for(let i=1;i<=12;i++){
+            atualizarLinha(team+'-'+i);
+        }
+        atualizarTotaisEquipe(team);
+    }
+}
+
+function mostrarBotaoSalvarAlteracoes(){
+    const botao = document.getElementById('saveHistoryChangesButton');
+    if(botao) botao.style.display = 'inline-block';
+}
+
+function ocultarBotaoSalvarAlteracoes(){
+    const botao = document.getElementById('saveHistoryChangesButton');
+    if(botao) botao.style.display = 'none';
+}
+
+function novoJogoHistorico(){
+    if(!confirm(
+        'Iniciar uma nova partida?\n\n' +
+        'Os jogos já salvos no histórico não serão apagados.'
+    )){
+        return;
+    }
+
+    jogoHistoricoEmEdicaoId = null;
+    ocultarBotaoSalvarAlteracoes();
+    location.reload();
+}
+
+function excluirJogoHistorico(){
+    const select = document.getElementById('historyGamesSelect');
+    const id = select.value;
+
+    if(!id){
+        alert('Selecione um jogo salvo.');
+        return;
+    }
+
+    const historico = obterHistoricoJogos();
+    const jogo = historico.find(item => item.id === id);
+
+    if(!jogo){
+        atualizarListaHistorico();
+        return;
+    }
+
+    if(!confirm('Excluir definitivamente "'+jogo.nome+'"?')){
+        return;
+    }
+
+    const atualizados = historico.filter(item => item.id !== id);
+
+    try{
+        localStorage.setItem(HISTORICO_STORAGE_KEY, JSON.stringify(atualizados));
+    }catch(e){
+        alert('Não foi possível atualizar o histórico.');
+        return;
+    }
+
+    if(jogoHistoricoEmEdicaoId === id){
+        jogoHistoricoEmEdicaoId = null;
+        ocultarBotaoSalvarAlteracoes();
+    }
+
+    atualizarListaHistorico();
+}
+
+atualizarListaHistorico();
+
+function novoJogo(){
+
+if(confirm('Deseja iniciar novo jogo?')){
+location.reload();
+}
+
+}
+
+/* 🔥 PDF LIMPO PROFISSIONAL */
+
+function gerarPDF(){
+
+document.querySelectorAll('.selected').forEach(r=>{
+    r.classList.remove('selected');
+});
+
+let win = null; try{ win = window.open('','PRINT'); }catch(e){ win = null; }
+
+let style = `
+<style>
+
+@page{
+    size:A4;
+    margin:8mm;
+}
+
+body{
+    font-family:"Times New Roman", Times, serif;
+    padding:15px;
+    color:#000;
+    background:#fff;
+}
+
+h2{
+    text-align:center;
+    color:#0D3B66;
+    margin-bottom:20px;
+}
+
+h3{
+    text-align:center;
+    margin-top:10px;
+    margin-bottom:0;
+    padding:4px;
+    background:#0D3B66;
+    color:#fff;
+    border:1px solid #000;
+    font-size:18px;
+    font-weight:bold;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:12px;
+    border:2px solid #0D3B66;
+}
+
+th{
+    background:#5DADE2;
+    color:#fff;
+    border:1px solid #000;
+    padding:7px 4px;
+    font-size:12px;
+    font-weight:bold;
+    text-align:center;
+    vertical-align:middle;
+}
+
+td{
+    border:1px solid #000;
+    padding:2px;
+    font-size:12px;
+    text-align:center;
+    vertical-align:middle;
+    background:#fff;
+}
+
+tr{
+    background:#fff;
+}
+
+.selected td{
+    background:#fff !important;
+    color:#000 !important;
+    font-weight:normal !important;
+}
+
+
+tr:last-child td{
+    background:#0D3B66;
+    color:#fff;
+    font-weight:bold;
+}
+
+</style>
+`;
+
+let html = `
+<html>
+
+<head>
+<title>BoxScore Basket RJ</title>
+${style}
+</head>
+
+<body>
+
+<h2>🏀 Basket RJ Stats PRO</h2>
+
+<h3>${document.getElementById('titleA').innerText}</h3>
+${document.getElementById('tableA').outerHTML}
+
+<h3>${document.getElementById('titleB').innerText}</h3>
+${document.getElementById('tableB').outerHTML}
+
+</body>
+</html>
+`;
+
+if(win){
+    win.document.write(html);
+    win.document.close();
+    setTimeout(()=>{ try{ win.focus(); win.print(); }catch(e){} }, 400);
+}else{
+    let fr = document.getElementById('kt_printFrame');
+    if(!fr){ fr = document.createElement('iframe'); fr.id='kt_printFrame'; fr.style.cssText='position:absolute;width:0;height:0;border:0;left:-9999px;'; document.body.appendChild(fr); }
+    fr.contentDocument.open(); fr.contentDocument.write(html); fr.contentDocument.close();
+    setTimeout(()=>{ try{ fr.contentWindow.focus(); fr.contentWindow.print(); }catch(e){} }, 400);
+}
+
+}
+
+</script>
+
+</body>
+</html>
