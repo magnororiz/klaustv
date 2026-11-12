@@ -219,6 +219,13 @@ hr{
 .ktJM label{min-width:170px;text-align:right;}
 .ktJM button{width:230px;font-size:13px;padding:9px 10px;}
 .ktJM .ktBtSalvar{background:#27ae60;}
+.ktJM{position:relative;}
+.ktJM .ktModo{position:absolute;top:-13px;right:14px;width:auto !important;padding:3px 10px !important;font-size:11px !important;border-radius:20px;background:#1f9a55;border:1px solid #43c97b;box-shadow:none;z-index:2;}
+html.ktLeitura .ktJM .ktModo{background:#c77700;border-color:#ffb74d;}
+html.ktLeitura .team .buttons button,html.ktLeitura .ktQ input,html.ktLeitura #ktDataJogo,html.ktLeitura .ktBtSalvar,html.ktLeitura .ktPremL select,html.ktLeitura .ktPremL button,html.ktLeitura .ktPrem>button,html.ktLeitura #ktSelJogo,html.ktLeitura .ktBtExcluir,html.ktLeitura .ktJM button[onclick^="kt_editarAnterior"],html.ktLeitura .ktAntBt button{opacity:.35;pointer-events:none;filter:grayscale(.6);}
+#ktFaixaLeitura{display:none;grid-column:1/-1;text-align:center;background:#3a2600;border:1px solid #ffb74d;color:#ffd08a;border-radius:8px;padding:6px;font-weight:800;font-size:13px;letter-spacing:.5px;}
+html.ktLeitura #ktFaixaLeitura{display:block;}
+html.ktLeitura .team{border-color:#c77700 !important;}
 .ktJM .ktData{display:flex;flex-direction:column;align-items:stretch;gap:2px;min-width:0;text-align:left;font-size:11px;color:#9fb3c8;font-weight:700;}
 .ktJM .ktData input{padding:6px;border-radius:8px;border:none;font-size:13px;width:100%;box-sizing:border-box;}
 .ktJM .ktBtExcluir{background:#c0392b;width:150px;justify-self:end;}
@@ -375,7 +382,7 @@ hr{
 
 
 
-<!--ktJogoMontado--><div class="ktJM">
+<!--ktJogoMontado--><div class="ktJM"><button type="button" id="ktModo" class="ktModo" onclick="kt_trocarModoTela()" title="Trocar entre marcar o jogo e só acompanhar (segunda tela)">✏️ Marcando</button>
 <label for="ktSelJogo">🏀 Jogo montado</label>
 <select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select>
 <button type="button" class="ktBtSalvar" onclick="kt_salvarAndamento()">💾 Salvar jogo em andamento</button>
@@ -384,6 +391,7 @@ hr{
 <select id="ktSelAnt" onchange="kt_verAnterior(this.value)"><option value="">Escolha primeiro o jogo montado</option></select>
 <button type="button" onclick="kt_editarAnterior()">✏️ Abrir / editar</button>
 <button type="button" class="ktBtExcluir" onclick="kt_excluirAnterior(this)">🗑️ Excluir jogo</button>
+<div id="ktFaixaLeitura">👁️ SEGUNDA TELA — só leitura · acompanhando o que o outro computador marca</div>
 <div id="ktJMmsg" class="ktJMmsg"></div>
 </div><!--/ktJogoMontado-->
 
@@ -1403,7 +1411,7 @@ const KT_RASC_H=8*3600*1000;
 function kt_rascLer(id){ try{ const r=JSON.parse(localStorage.getItem('kt_rasc_'+id)||'null'); return (r&&Date.now()-r.ts<KT_RASC_H)?r:null; }catch(e){ return null; } }
 let kt_rascT=null;
 let KT_SUJO=false, KT_ENVIANDO=false;
-function kt_rascSalvar(){ if(!KT_JOGO_ID) return; KT_SUJO=true; clearTimeout(kt_rascT); kt_rascT=setTimeout(()=>{ try{
+function kt_rascSalvar(){ if(!KT_JOGO_ID || (typeof KT_LEITURA!=='undefined' && KT_LEITURA)) return; KT_SUJO=true; clearTimeout(kt_rascT); kt_rascT=setTimeout(()=>{ try{
   const prem=[...document.querySelectorAll('.ktPremL')].filter(l=>!l.dataset.extra).map(l=>[l.querySelector('.pP').value,l.querySelector('.pJ').value,l.querySelector('.pJ').dataset.manual||'']);
   localStorage.setItem('kt_rasc_'+KT_JOGO_ID,JSON.stringify({ts:Date.now(),stats:kt_statsDaTela(),prem,dataHora:document.getElementById('ktDataJogo').value}));
   localStorage.setItem('kt_scout_atual',JSON.stringify({id:KT_JOGO_ID,ts:Date.now()})); }catch(e){} },120); }
@@ -1438,7 +1446,7 @@ async function kt_abrirMontado(id,restaurando){
     }
   });
   document.getElementById('ktDataJogo').value=String(j.dataHora||'').slice(0,16);
-  const rasc=kt_rascLer(id);
+  const rasc=(typeof KT_LEITURA!=='undefined'&&KT_LEITURA)?null:kt_rascLer(id);
   if(rasc && rasc.dataHora) document.getElementById('ktDataJogo').value=rasc.dataHora;
   if(rasc && rasc.stats){ ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; const v=reg&&rasc.stats[t]&&rasc.stats[t][reg]; if(v) stats[t+'-'+i]=Object.assign({},KT_ZERO,v); } const pq=((rasc.stats.periodos||{})[t])||[]; for(let q=1;q<=4;q++){ const v=pq[q-1]; document.getElementById('ktQ'+t+q).value=(v===undefined||v===null)?'':v; } }); }
   if(typeof atualizarTodasAsLinhas==='function') atualizarTodasAsLinhas();
@@ -1447,6 +1455,7 @@ async function kt_abrirMontado(id,restaurando){
   kt_msg(rasc?(restaurando?'🔄 Jogo recuperado depois de atualizar a página — os números da tela foram mantidos.':'🔄 Números da tela recuperados deste aparelho.'):((st.A||st.B)?'Jogo aberto com os números salvos na planilha.':''));
   KT_RASC_PREM=rasc&&rasc.prem||null;
   KT_SUJO=!!rasc;
+  if(KT_LEITURA){ KT_SUJO=false; kt_lerLoop(); } else if(!KT_DONO_TS){ const ed=st.editor; KT_DONO_TS=(ed&&ed.dev===KT_DEV)?(+ed.ts||Date.now()):Date.now(); }
   kt_listarAnteriores(j);
   document.querySelectorAll('.ktPremL').forEach(l=>{ if(typeof kt_premOpcoes==='function') kt_premOpcoes(l); });
   if(KT_RASC_PREM){ const ls=document.getElementById('ktPremLista'); ls.innerHTML=''; KT_RASC_PREM.forEach(([pv,jv,man])=>{ kt_premLinha(+pv||0); const l=ls.lastElementChild; l.querySelector('.pP').value=pv; kt_premOpcoes(l); if(man==='1'){ l.querySelector('.pJ').value=jv; l.querySelector('.pJ').dataset.manual='1'; } else kt_premOpcoes(l); }); KT_RASC_PREM=null; }
@@ -1455,11 +1464,13 @@ async function kt_abrirMontado(id,restaurando){
 function kt_statsDaTela(){
   const out={A:{},B:{}};
   ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; if(!reg) continue; const s=stats[t+'-'+i]||{}; const o={}; Object.keys(KT_ZERO).forEach(c=>o[c]=+s[c]||0); out[t][reg]=o; } });
+  out.editor={dev:KT_DEV,ts:KT_DONO_TS||Date.now()};
   out.periodos={A:[],B:[]};
   ['A','B'].forEach(t=>{ for(let q=1;q<=4;q++){ const v=document.getElementById('ktQ'+t+q).value; out.periodos[t].push(v===''?null:Math.max(0,parseInt(v)||0)); } });
   return out;
 }
 async function kt_enviarAuto(){
+  if(typeof KT_LEITURA!=='undefined' && KT_LEITURA) return;
   if(!KT_JOGO_ID || !KT_SUJO || KT_ENVIANDO) return;
   KT_ENVIANDO=true; KT_SUJO=false; const id=KT_JOGO_ID;
   const st=kt_statsDaTela(); const dh=document.getElementById('ktDataJogo').value;
@@ -1469,6 +1480,35 @@ async function kt_enviarAuto(){
   else if(!r.ok){ KT_SUJO=true; kt_msg('⚠️ Sem conexão com a planilha — os números estão guardados neste computador e serão enviados quando a conexão voltar.'); }
 }
 setInterval(kt_enviarAuto,8000);
+/* ---------- Segunda tela (só leitura) e dono da marcação ---------- */
+let KT_LEITURA=false, KT_DONO_TS=0;
+const KT_DEV=(()=>{ try{ let d=localStorage.getItem('kt_dev'); if(!d){ d='D'+Math.random().toString(36).slice(2,10); localStorage.setItem('kt_dev',d); } return d; }catch(e){ return 'D0'; } })();
+function kt_pintarModo(){ document.documentElement.classList.toggle('ktLeitura',KT_LEITURA); const b=document.getElementById('ktModo'); b.textContent=KT_LEITURA?'👁️ Segunda tela':'✏️ Marcando'; b.title=KT_LEITURA?'Só leitura. Clique para assumir a marcação neste computador.':'Este computador está marcando. Clique para virar segunda tela (só leitura).'; }
+function kt_aplicarRemoto(st){
+  if(!st) return; ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; if(!reg) continue; stats[t+'-'+i]=Object.assign({},KT_ZERO,(st[t]&&st[t][reg])||{}); }
+    const pq=((st.periodos||{})[t])||[]; for(let q=1;q<=4;q++){ const v=pq[q-1]; const el=document.getElementById('ktQ'+t+q); if(el!==document.activeElement) el.value=(v===undefined||v===null)?'':v; } });
+  const was=KT_LEITURA; atualizarTodasAsLinhas(); }
+async function kt_buscarRemoto(){ if(!KT_JOGO_ID) return null; const r=await kt_apiSc({acao:'aoVivoJogo',id:KT_JOGO_ID}); return (r.ok&&r.jogo)?r.jogo:null; }
+async function kt_trocarModoTela(){
+  if(!KT_LEITURA){ // virar segunda tela
+    if(KT_SUJO) await kt_enviarAuto();
+    KT_LEITURA=true; try{ localStorage.setItem('kt_leitura','1'); }catch(e){} kt_pintarModo(); kt_msg('👁️ Este computador agora só acompanha. Para voltar a marcar, clique em "Segunda tela".'); kt_lerLoop();
+  } else { // assumir a marcação
+    kt_msg('Buscando a versão mais nova do jogo…');
+    const j=await kt_buscarRemoto(); if(j){ KT_LEITURA=false; kt_aplicarRemoto(j.stats||{}); if(j.dataHora) document.getElementById('ktDataJogo').value=String(j.dataHora).slice(0,16); }
+    KT_LEITURA=false; try{ localStorage.removeItem('kt_leitura'); }catch(e){} KT_DONO_TS=Date.now(); kt_pintarModo();
+    KT_SUJO=true; await kt_enviarAuto(); kt_msg('✏️ Este computador assumiu a marcação do jogo.');
+  } }
+let kt_lerT=null;
+async function kt_lerLoop(){ clearTimeout(kt_lerT); if(!KT_LEITURA) return;
+  if(!document.hidden && KT_JOGO_ID){ const j=await kt_buscarRemoto(); if(j && KT_LEITURA){ kt_aplicarRemoto(j.stats||{}); if(j.dataHora) document.getElementById('ktDataJogo').value=String(j.dataHora).slice(0,16); kt_msg('👁️ Atualizado às '+new Date().toLocaleTimeString('pt-BR')); } }
+  kt_lerT=setTimeout(kt_lerLoop,5000); }
+// quem marca confere a cada 10 s se outro computador assumiu
+setInterval(async()=>{ if(KT_LEITURA||!KT_JOGO_ID||!KT_DONO_TS) return; const j=await kt_buscarRemoto(); const ed=j&&j.stats&&j.stats.editor;
+  if(ed && ed.dev!==KT_DEV && +ed.ts>KT_DONO_TS){ KT_LEITURA=true; try{ localStorage.setItem('kt_leitura','1'); }catch(e){} kt_pintarModo(); kt_msg('👁️ Outro computador assumiu a marcação. Esta tela virou segunda tela (só leitura).'); kt_lerLoop(); } },10000);
+['addMade','addMiss','removeMade','removeMiss','addOther'].forEach(n=>{ const f=window[n]; if(typeof f==='function') window[n]=function(){ if(KT_LEITURA) return; return f.apply(this,arguments); }; });
+try{ if(localStorage.getItem('kt_leitura')==='1'){ KT_LEITURA=true; } }catch(e){}
+kt_pintarModo();
 async function kt_salvarAndamento(){
   if(!KT_JOGO_ID) return alert('Escolha primeiro o jogo montado.');
   kt_msg('Salvando na planilha…');
