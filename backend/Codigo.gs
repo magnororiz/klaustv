@@ -17,6 +17,7 @@ function doPost(e) {
   try { p = JSON.parse(e.postData.contents || '{}'); } catch (err) { return responder({ ok: false, erro: 'Pedido inválido.' }); }
   if (p.acao === 'aoVivoLista') return responder(aoVivoLista(p.categoria));
   if (p.acao === 'aoVivoJogo') return responder(aoVivoJogo(p.id));
+  if (p.acao === 'dadosFed') return responder(dadosFed());
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     switch (p.acao) {
@@ -36,6 +37,8 @@ function doPost(e) {
       case 'salvarCamisa': return responder(salvarCamisa(p.token, p.reg, p.camisa));
       case 'aoVivoLista': return responder(aoVivoLista(p.categoria));
       case 'aoVivoJogo': return responder(aoVivoJogo(p.id));
+      case 'statusBackup': return responder(statusBackup(p.token));
+      case 'rodarBackup': return responder(rodarBackupSite(p.token));
       case 'sair': CacheService.getScriptCache().remove('s_' + p.token); return responder({ ok: true });
       default: return responder({ ok: false, erro: 'Ação desconhecida.' });
     }
@@ -346,4 +349,157 @@ function salvarCamisa(token, reg, camisa) {
   else { sh.appendRow([reg, '', new Date(), camisa]); sh.getRange(sh.getLastRow(), 4).setNumberFormat('@').setValue(camisa); }
   CacheService.getScriptCache().remove('camisas');
   return { ok: true };
+}
+
+
+/* ---------- backup diário da FBERJ (20h) ----------
+ * Elenco: planilha "Cestinhas_CEMB_2026" (xlsx) -> aba FBERJ_Atletas. SÓ ACRESCENTA, nunca apaga.
+ * Tabela: planilha "CEMB 2026" -> aba FBERJ_Tabela. Só troca se a leitura nova vier completa.
+ * Se a FBERJ sair do ar ou mudar o arquivo, o site continua com o último backup.
+ */
+const FED_CESTINHAS_ID = '1wekGITrAep1-1pAttzs0hpY9e5-pPY_8';
+const FED_TABELA_ID = '1SsTnHglFy0oSvFUT6i9OH_ZBAQmxtlxVIEnFCEYKNiE';
+const FED_MAP = {"ABIG - IGUABA GRANDE": "IG", "ABIG / IGUABA GRANDE": "IG", "ABIG / JIC / SHARK'S": "ABIG", "ACEAR / IRAJÁ A. C. / PJMC": "ACEAR", "ACEAR / IRAJÁ A.C. / PJMC": "ACEAR", "ACEAR / IRAJÁ A.C. / PROJETO MC": "ACEAR", "ASP C. MUNICIPAL": "ASPCM", "ASP CLUB MUNICIPAL": "ASPCM", "BASQUETE S.A": "BSA", "BASQUETE S.A.": "BSA", "BOTAFOGO F. R.": "BFR", "BOTAFOGO F.R.": "BFR", "C. R. FLAMENGO": "CRF", "C.R. FLAMENGO": "CRF", "CARIOCA KING'S": "CK", "CCL": "CCL", "CESC": "CESC", "CFCSN": "CFCSN", "E. E. PASSO ZERO": "EEPZ", "E.E. PASSO ZERO": "EEPZ", "FLUMINENSE F. C.": "FFC", "FLUMINENSE F.C.": "FFC", "FLUMINESE F. C.": "FFC", "IDEC": "IDEC", "ITAIPU BASQUETE": "IB", "ITDA": "ITDA", "JACAREPAGUÁ T. C.": "JTC", "JACAREPAGUÁ T.C.": "JTC", "K ESPORTES": "KE", "MESQUITA BASQUETE": "MB", "NBR CAMPOS": "NBR", "NITERÓI B. C.": "NBC", "NITERÓI B.C.": "NBC", "TEAM KLUN ACADEMY": "TKA", "TIJUCA BASKET": "TTC", "TIJUCA T. C. / RAIZEIRAS": "TTC"};
+const FED_GYM = { 'NBA STORE ARENA': 'NBA Store Arena Rio - Uptown' };
+const FED_CAT_CEST = { SUB12: 'Sub-12', SUB13: 'Sub-13', SUB14: 'Sub-14', SUB15: 'Sub-15', SUB16: 'Sub-16', SUB17: 'Sub-17', SUB19: 'Sub-19', SUB22: 'Sub-22', ADULTO: 'Adulto' };
+const FED_CAT_TAB = { SUB_12: 'Sub-12', SUB_13: 'Sub-13', SUB_14: 'Sub-14', SUB_15: 'Sub-15', SUB_16: 'Sub-16', SUB_17: 'Sub-17', SUB_19: 'Sub-19', SUB_22: 'Sub-22', ADULTO: 'Adulto' };
+const FED_DEF = { 'Sub-12': 'Turno', 'Sub-13': 'Turno', 'Sub-14': 'Turno', 'Sub-22': 'Turno', 'Adulto': 'Classificação' };
+
+function fedAba(nome, cab) {
+  const ss = SpreadsheetApp.openById(PLANILHA_ID); let sh = ss.getSheetByName(nome);
+  if (!sh) { sh = ss.insertSheet(nome); sh.getRange(1, 1, 1, cab.length).setValues([cab]); sh.setFrozenRows(1); }
+  return sh;
+}
+function fedNorm(x) { return String(x == null ? '' : x).replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim(); }
+function fedTitulo(x) { x = fedNorm(x); if (x && x === x.toUpperCase()) x = x.toLowerCase().replace(/(^|\s)(\S)/g, (m, a, b) => a + b.toUpperCase()); return x; }
+
+function fedConverterXlsx(id) {
+  const tk = ScriptApp.getOAuthToken();
+  const r = UrlFetchApp.fetch('https://www.googleapis.com/drive/v3/files/' + id + '/copy?supportsAllDrives=true', {
+    method: 'post', contentType: 'application/json', headers: { Authorization: 'Bearer ' + tk }, muteHttpExceptions: true,
+    payload: JSON.stringify({ name: 'Klaus TV - backup FBERJ (temporário)', mimeType: 'application/vnd.google-apps.spreadsheet' })
+  });
+  if (r.getResponseCode() !== 200) throw new Error('Não consegui abrir a planilha de cestinhas da FBERJ (' + r.getResponseCode() + ').');
+  return JSON.parse(r.getContentText()).id;
+}
+
+function fedLerElenco() {
+  const tmp = fedConverterXlsx(FED_CESTINHAS_ID); const atl = {}; const equipes = {};
+  try {
+    SpreadsheetApp.openById(tmp).getSheets().forEach(ws => {
+      const t = ws.getName().toUpperCase(); const ck = Object.keys(FED_CAT_CEST).find(k => t.indexOf(k) === 0); if (!ck) return;
+      const cat = FED_CAT_CEST[ck]; const rows = ws.getDataRange().getDisplayValues();
+      for (let i = 0; i < rows.length; i++) {
+        if (fedNorm(rows[i][0]) !== 'Reg') continue;
+        let sig = null;
+        for (let k = i - 1; k >= Math.max(0, i - 4); k--) { const m = fedNorm(rows[k][0]).match(/^(.*)\(([A-Z]+)\)$/); if (m) { sig = m[2]; if (!equipes[sig]) equipes[sig] = fedNorm(m[1]); break; } }
+        if (!sig) continue;
+        for (let k = i + 1; k < rows.length; k++) {
+          const r0 = fedNorm(rows[k][0]), nome = fedNorm(rows[k][1]);
+          if (!r0 || r0.toUpperCase() === 'TOTAL' || !nome) break;
+          let reg = r0.replace(/[.,]0+$/, '').split(' ')[0]; if (!/^\d+$/.test(reg)) continue;
+          atl[cat + '|' + sig + '|' + reg] = { cat: cat, sig: sig, reg: reg, nome: nome };
+        }
+      }
+    });
+  } finally { try { DriveApp.getFileById(tmp).setTrashed(true); } catch (e) {} }
+  return { atletas: atl, equipes: equipes };
+}
+
+function fedFase(cat, label) {
+  let l = fedNorm(label.replace(/,/g, ' ')).toUpperCase().replace('RETIURNO', 'RETURNO').replace('SEMIS', 'SEMIFINAL').replace('SEMI ', 'SEMIFINAL ');
+  if (l === 'SEMI') l = 'SEMIFINAL';
+  const serie = ['Sub-15', 'Sub-16', 'Sub-17', 'Sub-19'].indexOf(cat) >= 0; const parts = l.split(' '); const head = parts[0];
+  const nivel = fedTitulo(parts.slice(1).join(' '));
+  if (head === 'RETURNO') return serie ? ('Série' + (nivel ? ' ' + nivel : '')) : ('Returno' + (nivel ? ' ' + nivel : ''));
+  if (head.indexOf('SEMIFINAL') === 0) return 'Semifinal' + (nivel ? ' ' + nivel : '');
+  if (head === 'FINAL') return 'Final' + (nivel ? ' ' + nivel : '');
+  return fedTitulo(l);
+}
+
+function fedLerTabela() {
+  const out = []; const semSigla = {};
+  SpreadsheetApp.openById(FED_TABELA_ID).getSheets().forEach(ws => {
+    const cat = FED_CAT_TAB[ws.getName().trim().toUpperCase()]; if (!cat) return;
+    let fase = FED_DEF[cat] || 'Turno Único';
+    ws.getDataRange().getDisplayValues().forEach(r => {
+      r = r.map(fedNorm); while (r.length < 10) r.push('');
+      if (!r.join('') || r[0] === 'DATA') return;
+      if (!r[2] && !r[3]) { const lab = [r[0], r[1]].filter(x => x).join(' '); if (lab && lab !== '/') fase = fedFase(cat, lab); return; }
+      if (r[2] === 'GINÁSIO') return;
+      const a = FED_MAP[r[4]] || '', b = FED_MAP[r[8]] || '';
+      if (r[4] && !a) semSigla[r[4]] = 1; if (r[8] && !b) semSigla[r[8]] = 1;
+      out.push([cat, fase, r[3], r[0], r[1].slice(0, 5), a, b, FED_GYM[r[2]] || r[2], r[5], r[7], r[9]]);
+    });
+  });
+  return { linhas: out, semSigla: Object.keys(semSigla) };
+}
+
+function backupFBERJ() {
+  const log = fedAba('FBERJ_Backup', ['quando', 'resultado', 'detalhes']); const agora = new Date(); const det = [];
+  let ok = true;
+  // 1) elenco: só acrescenta
+  try {
+    const e = fedLerElenco(); const n = Object.keys(e.atletas).length;
+    if (n < 200) throw new Error('leitura veio com só ' + n + ' atletas; mantive o backup anterior');
+    const sh = fedAba('FBERJ_Atletas', ['categoria', 'sigla', 'matricula', 'nome', 'entrouEm', 'vistoNaFBERJ']);
+    const v = sh.getDataRange().getValues(); const idx = {};
+    for (let i = 1; i < v.length; i++) idx[v[i][0] + '|' + v[i][1] + '|' + String(v[i][2])] = i + 1;
+    const novos = []; const vistos = [];
+    Object.keys(e.atletas).forEach(k => { const a = e.atletas[k]; if (idx[k]) vistos.push(idx[k]); else novos.push([a.cat, a.sig, "'" + a.reg, a.nome, agora, agora]); });
+    if (novos.length) sh.getRange(sh.getLastRow() + 1, 1, novos.length, 6).setValues(novos);
+    if (vistos.length && v.length > 1) { const col = sh.getRange(2, 6, v.length - 1, 1).getValues(); vistos.forEach(l => col[l - 2][0] = agora); sh.getRange(2, 6, v.length - 1, 1).setValues(col); }
+    const eq = fedAba('FBERJ_Equipes', ['sigla', 'nome']); const ev = eq.getDataRange().getValues(); const tem = {};
+    for (let i = 1; i < ev.length; i++) tem[ev[i][0]] = 1;
+    const novEq = Object.keys(e.equipes).filter(s => !tem[s]).map(s => [s, e.equipes[s]]);
+    if (novEq.length) eq.getRange(eq.getLastRow() + 1, 1, novEq.length, 2).setValues(novEq);
+    det.push('Elenco: ' + n + ' atletas lidos, ' + novos.length + ' novos' + (novEq.length ? ', ' + novEq.length + ' equipes novas' : ''));
+  } catch (err) { ok = false; det.push('Elenco: ERRO — ' + err.message); }
+  // 2) tabela: troca só se veio completa
+  try {
+    const t = fedLerTabela(); const sh = fedAba('FBERJ_Tabela', ['categoria', 'fase', 'jogo', 'data', 'hora', 'timeA', 'timeB', 'ginasio', 'placarA', 'placarB', 'obs']);
+    const antes = Math.max(0, sh.getLastRow() - 1);
+    if (t.linhas.length < Math.max(50, antes * 0.8)) throw new Error('leitura veio com ' + t.linhas.length + ' jogos (antes ' + antes + '); mantive o backup anterior');
+    if (antes) sh.getRange(2, 1, antes, 11).clearContent();
+    sh.getRange(2, 1, t.linhas.length, 11).setNumberFormat('@').setValues(t.linhas);
+    det.push('Tabela: ' + t.linhas.length + ' jogos' + (t.semSigla.length ? ' — nomes de time sem sigla: ' + t.semSigla.join(', ') : ''));
+  } catch (err) { ok = false; det.push('Tabela: ERRO — ' + err.message); }
+  log.appendRow([agora, ok ? 'OK' : 'COM ERRO', det.join(' | ')]);
+  fedLimparCache();
+  return { ok: ok, detalhes: det };
+}
+
+function fedLimparCache() { const c = CacheService.getScriptCache(); const n = Number(c.get('fed_n') || 0); const ks = ['fed_n']; for (let i = 0; i < n; i++) ks.push('fed_' + i); c.removeAll(ks); }
+
+function dadosFed() {
+  const c = CacheService.getScriptCache(); const n = Number(c.get('fed_n') || 0);
+  if (n) { const p = c.getAll(Array.from({ length: n }, (_, i) => 'fed_' + i)); const s = Array.from({ length: n }, (_, i) => p['fed_' + i]).join(''); if (s.length && Object.keys(p).length === n) return JSON.parse(s); }
+  const ss = SpreadsheetApp.openById(PLANILHA_ID);
+  const sa = ss.getSheetByName('FBERJ_Atletas'), st = ss.getSheetByName('FBERJ_Tabela'), se = ss.getSheetByName('FBERJ_Equipes'), sl = ss.getSheetByName('FBERJ_Backup');
+  if (!sa || !st) return { ok: false, erro: 'Backup ainda não feito.' };
+  const elencos = {};
+  sa.getDataRange().getDisplayValues().slice(1).forEach(r => { if (!r[0]) return; ((elencos[r[0]] = elencos[r[0]] || {})[r[1]] = elencos[r[0]][r[1]] || []).push([String(r[2]), r[3]]); });
+  Object.keys(elencos).forEach(cat => Object.keys(elencos[cat]).forEach(s => elencos[cat][s].sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'))));
+  const equipes = {}; if (se) se.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0]) equipes[r[0]] = r[1]; });
+  const tabela = [], placar = [];
+  st.getDataRange().getDisplayValues().slice(1).forEach(r => { if (!r[0] || !r[5] || !r[6]) return; tabela.push([r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], (r[8] || r[9]) ? 1 : 0, r[10]]); placar.push([r[8], r[9]]); });
+  let quando = ''; if (sl && sl.getLastRow() > 1) { const u = sl.getRange(sl.getLastRow(), 1, 1, 2).getValues()[0]; quando = Utilities.formatDate(new Date(u[0]), 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm') + ' (' + u[1] + ')'; }
+  const res = { ok: true, atualizado: quando, elencos: elencos, equipes: equipes, tabela: tabela, placar: placar };
+  try { const s = JSON.stringify(res); const parts = []; for (let i = 0; i < s.length; i += 90000) parts.push(s.slice(i, i + 90000)); const o = { fed_n: String(parts.length) }; parts.forEach((x, i) => o['fed_' + i] = x); c.putAll(o, 21600); } catch (e) {}
+  return res;
+}
+
+function statusBackup(token) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  const sl = SpreadsheetApp.openById(PLANILHA_ID).getSheetByName('FBERJ_Backup'); if (!sl || sl.getLastRow() < 2) return { ok: true, ultimo: null };
+  const v = sl.getRange(Math.max(2, sl.getLastRow() - 4), 1, Math.min(5, sl.getLastRow() - 1), 3).getValues().reverse();
+  return { ok: true, ultimos: v.map(r => ({ quando: Utilities.formatDate(new Date(r[0]), 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm'), resultado: r[1], detalhes: r[2] })) };
+}
+function rodarBackupSite(token) { const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' }; return backupFBERJ(); }
+
+/* Rodar UMA vez no editor: cria o gatilho diário das 20h e já faz o primeiro backup. */
+function instalarBackupDiario() {
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'backupFBERJ').forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('backupFBERJ').timeBased().everyDays(1).atHour(20).inTimezone('America/Sao_Paulo').create();
+  return backupFBERJ();
 }
