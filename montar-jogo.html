@@ -1,6 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+<!--ktTrava--><style>html.ktTravado body{visibility:hidden;}/*ktMenuCSS*/
+html,body{overflow-x:hidden;}
+body{padding-top:0 !important;}
+.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
+  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#140f0a 100%);
+  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
+.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
+.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));}
+.ktMenu .bola{position:absolute;right:0;top:50%;transform:translateY(-50%);height:180px;width:auto;}
+.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
+.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
+.ktMenu .marca span{color:#1e90ff;}
+.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:150px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 70px,rgba(30,91,216,.95) 150px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
+  border-top:1px solid rgba(255,255,255,.12);}
+.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
+.ktFaixa a:hover{background:rgba(255,255,255,.12);}
+.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;}
+@media(max-width:820px){.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:140px;}.ktMenu .marca{font-size:24px;}
+  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
+@media(max-width:480px){.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
+/*fim*/</style>
+<script>
+(function(){
+ var d=document.documentElement; d.classList.add('ktTravado');
+ var pag=location.pathname.split('/').pop()||'index.html';
+ function fora(){ location.replace('index.html?voltar='+encodeURIComponent(pag)); }
+ var tok=''; try{ tok=localStorage.getItem('klaustv_token_v1')||''; }catch(e){}
+ if(!tok){ fora(); return; }
+ try{ var ok=sessionStorage.getItem('kt_ok'); if(ok && ok.split('|')[0]===tok && Date.now()<+ok.split('|')[1]){ d.classList.remove('ktTravado'); return; } }catch(e){}
+ fetch('https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({acao:'eu',token:tok})})
+  .then(function(r){return r.json();}).then(function(r){
+   if(r.ok && !r.usuario.trocarSenha){ try{ sessionStorage.setItem('kt_ok',tok+'|'+(Date.now()+10*60*1000)); }catch(e){} d.classList.remove('ktTravado'); }
+   else { try{ if(!r.ok) localStorage.removeItem('klaustv_token_v1'); }catch(e){} fora(); }
+  }).catch(function(){ fora(); });
+})();
+</script><!--/ktTrava-->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Klaus TV · Montar Jogo</title>
@@ -76,28 +113,7 @@ button:hover{background:#0f6fd1;}
 .ktFooter .patro{display:inline-block;background:#101826;border:1px solid #1e90ff;border-radius:10px;padding:8px 12px;color:#fff;margin:2px 4px 2px 0;}
 .ktFooter .patro b{color:#ffd54f;}
 .ktFooter .copy{text-align:center;color:#5f7389;font-size:11px;margin-top:14px;}
-/*ktMenuCSS*/
-html,body{overflow-x:hidden;}
-body{padding-top:0 !important;}
-.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
-  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#140f0a 100%);
-  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
-.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
-.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));}
-.ktMenu .bola{position:absolute;right:0;top:50%;transform:translateY(-50%);height:180px;width:auto;}
-.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
-.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
-.ktMenu .marca span{color:#1e90ff;}
-.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:150px;
-  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 70px,rgba(30,91,216,.95) 150px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
-  border-top:1px solid rgba(255,255,255,.12);}
-.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
-.ktFaixa a:hover{background:rgba(255,255,255,.12);}
-.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;}
-@media(max-width:820px){.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:140px;}.ktMenu .marca{font-size:24px;}
-  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
-@media(max-width:480px){.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
-/*fim*/</style>
+</style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 </head>

@@ -230,11 +230,13 @@ async function kt_api(dados){
     return await r.json();
   }catch(e){ return {ok:false, erro:'Sem conexão com o servidor. Tente de novo.'}; }
 }
+const KT_VOLTAR = (new URLSearchParams(location.search)).get('voltar');
 function kt_tela(u){
   ['cxLogin','cxTroca','cxLogado'].forEach(id=>$(id).classList.add('oculto'));
   $('cxUsuarios').classList.add('oculto');
-  if(!u){ $('cxLogin').classList.remove('oculto'); return; }
+  if(!u){ $('cxLogin').classList.remove('oculto'); if(KT_VOLTAR) kt_msg('msgLogin','Entre com seu usuário e senha para acessar essa página.','erro'); return; }
   if(u.trocarSenha){ kt_mostrarTroca(true); return; }
+  if(KT_VOLTAR && /^[a-z0-9-]+\.html$/.test(KT_VOLTAR)){ location.replace(KT_VOLTAR); return; }
   $('cxLogado').classList.remove('oculto');
   $('lgOla').textContent = 'Olá, '+u.nome+'!';
   $('lgPerfil').textContent = u.perfil==='Dono' ? 'Perfil: Dono · pode criar e excluir usuários' : 'Perfil: '+u.perfil;
@@ -266,7 +268,7 @@ async function kt_trocar(ev){
   ['trAtual','trNova','trNova2'].forEach(id=>$(id).value='');
   kt_msg('msgTroca',''); kt_tela(r.usuario);
 }
-async function kt_sair(){ const t=kt_tok(); kt_setTok(''); kt_tela(null); if(t) kt_api({acao:'sair', token:t}); }
+async function kt_sair(){ const t=kt_tok(); kt_setTok(''); try{ sessionStorage.removeItem('kt_ok'); }catch(e){} kt_tela(null); if(t) kt_api({acao:'sair', token:t}); }
 async function kt_listar(){
   const r = await kt_api({acao:'listarUsuarios', token:kt_tok()});
   if(!r.ok) return kt_msg('msgUsuarios', r.erro, 'erro');
