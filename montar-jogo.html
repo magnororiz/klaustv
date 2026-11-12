@@ -77,7 +77,7 @@ button:hover{background:#0f6fd1;}
 .selo{display:inline-block;margin-top:5px;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:10px;}
 .selo.casa{background:#ffd54f;color:#000;}.selo.fora{background:#cfd8e3;color:#0b1220;}
 .rosterList{max-height:300px;overflow-y:auto;}
-.atl,.atlHead{display:grid;grid-template-columns:18px 26px minmax(0,var(--nomeW,1fr)) 110px 52px 50px;justify-content:start;align-items:center;column-gap:6px;font-size:12px;padding:3px 2px;border-bottom:1px solid #16243a;}
+.atl,.atlHead{display:grid;grid-template-columns:18px 26px minmax(0,var(--nomeW,1fr)) 110px 52px 50px 34px;justify-content:start;align-items:center;column-gap:6px;font-size:12px;padding:3px 2px;border-bottom:1px solid #16243a;}
 .atlHead{font-size:10px;color:#7f93a8;text-transform:uppercase;border-bottom:1px solid #2a3b55;padding-bottom:4px;}
 .atlHead .c{text-align:center;}
 .atl:hover{background:#17263d;}
@@ -85,6 +85,10 @@ button:hover{background:#0f6fd1;}
 .atl .reg{color:#5fa8ff;font-size:11px;text-align:right;font-variant-numeric:tabular-nums;}
 .atl .bEdit{width:44px;height:24px;border:1px solid #2a3b55;border-radius:6px;background:#16243a;color:#cfd8e3;font-size:12px;cursor:pointer;padding:0;}
 .atl .bEdit:hover{border-color:#1e90ff;}
+.atl .bFoto{width:30px;height:30px;border:1px dashed #2a3b55;border-radius:50%;background:#16243a;color:#cfd8e3;font-size:13px;cursor:pointer;padding:0;overflow:hidden;}
+.atl .bFoto img{width:100%;height:100%;object-fit:cover;display:block;}
+.atl .bFoto.tem{border:2px solid #1e90ff;}
+.atl .bFoto.carregando{opacity:.5;}
 .atl.editando .bEdit{background:#ffd54f;color:#000;border-color:#ffd54f;font-weight:700;}
 .atl input[readonly]{cursor:default;}
 .atl input.apelido[readonly]{background:#e3e8ee;color:#333;}
@@ -120,7 +124,7 @@ button:hover{background:#0f6fd1;}
 .ktFooter .patro b{color:#ffd54f;}
 .ktFooter .copy{text-align:center;color:#5f7389;font-size:11px;margin-top:14px;}
 </style>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -249,6 +253,7 @@ function kt_iniciar(){
     kt_trocarCategoria();
     kt_listarSalvos();
     kt_sincronizar();
+    kt_carregarFotos();
 }
 
 function kt_trocarCategoria(manter){
@@ -299,10 +304,10 @@ function kt_listarAtletas(t){
     const lista = (KT_DADOS.elencos[cat]||{})[sig] || [];
     document.getElementById('rosterTitle'+t).innerText = 'Time '+t+': '+kt_nomeEquipe(sig);
     document.getElementById('roster'+t).innerHTML = lista.map((a,i)=>
-        `<div class="atl" id="atl${t}_${a[0]}"><input type="checkbox" id="cb${t}_${i}" data-reg="${a[0]}" data-nome="${kt_esc(a[1])}" onchange="kt_contar('${t}',this)"><input class="num" readonly placeholder="#" maxlength="2" inputmode="numeric" title="Número da camisa"><label for="cb${t}_${i}">${a[1]}</label><input class="apelido" readonly placeholder="" value="${kt_esc(kt_apelidos()[a[0]]||'')}" oninput="kt_salvarApelido('${a[0]}',this.value)" title="Apelido"><span class="reg">${a[0]}</span><button type="button" class="bEdit" title="Editar camisa e apelido" onclick="kt_editarLinha(this)">✏️</button></div>`
+        `<div class="atl" id="atl${t}_${a[0]}"><input type="checkbox" id="cb${t}_${i}" data-reg="${a[0]}" data-nome="${kt_esc(a[1])}" onchange="kt_contar('${t}',this)"><input class="num" readonly placeholder="#" maxlength="2" inputmode="numeric" title="Número da camisa"><label for="cb${t}_${i}">${a[1]}</label><input class="apelido" readonly placeholder="" value="${kt_esc(kt_apelidos()[a[0]]||'')}" oninput="kt_salvarApelido('${a[0]}',this.value)" title="Apelido"><span class="reg">${a[0]}</span><button type="button" class="bEdit" title="Editar camisa e apelido" onclick="kt_editarLinha(this)">✏️</button>${kt_btFoto(a[0])}</div>`
     ).join('');
-    const tecRow = '<div class="atl tec" id="tec'+t+'"><span class="tecLab">Técnico</span><input class="apelido tecNome" readonly placeholder="Nome do técnico" title="Nome do técnico"><input class="apelido tecApelido" readonly placeholder="" title="Apelido do técnico"><span></span><button type="button" class="bEdit" title="Editar técnico" onclick="kt_editarLinha(this)">✏️</button></div>';
-    document.getElementById('roster'+t).innerHTML = lista.length ? '<div class="atlHead"><span></span><span class="c">Nº</span><span>Nome</span><span>Apelido</span><span style="text-align:right;">FBERJ</span><span class="c">Editar</span></div>' + tecRow + document.getElementById('roster'+t).innerHTML : '<div class="vazio">Nenhum atleta inscrito.</div>';
+    const tecRow = '<div class="atl tec" id="tec'+t+'"><span class="tecLab">Técnico</span><input class="apelido tecNome" readonly placeholder="Nome do técnico" title="Nome do técnico"><input class="apelido tecApelido" readonly placeholder="" title="Apelido do técnico"><span></span><button type="button" class="bEdit" title="Editar técnico" onclick="kt_editarLinha(this)">✏️</button>'+kt_btFoto('TEC-'+sig+'-'+cat.replace(/[^A-Za-z0-9]/g,''))+'</div>';
+    document.getElementById('roster'+t).innerHTML = lista.length ? '<div class="atlHead"><span></span><span class="c">Nº</span><span>Nome</span><span>Apelido</span><span style="text-align:right;">FBERJ</span><span class="c">Editar</span><span class="c">Foto</span></div>' + tecRow + document.getElementById('roster'+t).innerHTML : '<div class="vazio">Nenhum atleta inscrito.</div>';
     if(!kt_abrindo) kt_aplicarUltimo(t);
     kt_larguraNomes(t);
     kt_pintar(t);
@@ -326,6 +331,23 @@ function kt_editarLinha(btn){
     if(on) row.querySelector('input.num,input.tecNome').focus();
 }
 let kt_abrindo=false;
+let KT_FOTOS={};
+function kt_btFoto(chave){ const u=KT_FOTOS[chave]; return '<button type="button" class="bFoto'+(u?' tem':'')+'" data-chave="'+chave+'" title="Salvar foto" onclick="kt_escolherFoto(this)">'+(u?'<img src="'+u+'" alt="">':'📷')+'</button>'; }
+async function kt_carregarFotos(){ const r=await kt_api({acao:'listarFotos'}); if(!r.ok) return; KT_FOTOS=r.fotos||{};
+  document.querySelectorAll('.bFoto').forEach(b=>{ const u=KT_FOTOS[b.dataset.chave]; if(u){ b.classList.add('tem'); b.innerHTML='<img src="'+u+'" alt="">'; } }); }
+function kt_escolherFoto(btn){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
+  inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; const rd=new FileReader();
+    rd.onload=()=>{ const im=new Image(); im.onload=async()=>{
+      const M=600, k=Math.min(1,M/Math.max(im.width,im.height)); const c=document.createElement('canvas'); c.width=Math.round(im.width*k); c.height=Math.round(im.height*k);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height); const data=c.toDataURL('image/jpeg',0.85);
+      btn.classList.add('carregando'); btn.innerHTML='<img src="'+data+'" alt="">'; kt_aviso('Enviando foto...');
+      const r=await kt_api({acao:'salvarFoto',chave:btn.dataset.chave,imagem:data}); btn.classList.remove('carregando');
+      if(r.ok){ KT_FOTOS[btn.dataset.chave]=r.url; btn.classList.add('tem'); kt_aviso('Foto salva. Ela já aparece no Ao vivo.'); }
+      else { kt_aviso('Não foi possível salvar a foto: '+(r.erro||'tente de novo')); btn.innerHTML=KT_FOTOS[btn.dataset.chave]?'<img src="'+KT_FOTOS[btn.dataset.chave]+'" alt="">':'📷'; }
+    }; im.src=rd.result; }; rd.readAsDataURL(f); };
+  inp.click();
+}
 function kt_aplicarUltimo(t){
     const cat=document.getElementById('selCategoria').value, sig=document.getElementById('selTime'+t).value;
     const ult=kt_lerSalvos().filter(j=>j.categoria===cat && ((j.timeA||{}).sigla===sig || (j.timeB||{}).sigla===sig))

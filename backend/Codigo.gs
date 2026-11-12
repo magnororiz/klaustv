@@ -30,6 +30,8 @@ function doPost(e) {
       case 'listarJogos': return responder(listarJogos(p.token, p.data));
       case 'excluirJogo': return responder(excluirJogo(p.token, p.id));
       case 'salvarStats': return responder(salvarStats(p.token, p.id, p.stats, p.status));
+      case 'salvarFoto': return responder(salvarFoto(p.token, p.chave, p.imagem));
+      case 'listarFotos': return responder(listarFotos(p.token));
       case 'aoVivoLista': return responder(aoVivoLista(p.categoria));
       case 'aoVivoJogo': return responder(aoVivoJogo(p.id));
       case 'sair': CacheService.getScriptCache().remove('s_' + p.token); return responder({ ok: true });
@@ -162,7 +164,7 @@ function excluirUsuario(token, usuario) {
 }
 
 /* Rode uma vez pelo editor para autorizar planilha e e-mail. */
-function autorizar() { protegerSenhas(); Logger.log(MailApp.getRemainingDailyQuota() + ' e-mails disponíveis hoje'); }
+function autorizar() { protegerSenhas(); pastaFotos(); Logger.log(MailApp.getRemainingDailyQuota() + ' e-mails disponíveis hoje'); }
 
 
 /* ================= JOGOS (Montar Jogo / Scout / Ao vivo) ================= */
@@ -230,8 +232,51 @@ function aoVivoJogo(id) {
   const c = CacheService.getScriptCache(); const k = 'j_' + id; const hit = c.get(k);
   if (hit) return JSON.parse(hit);
   const x = lerJogos().find(j => j.id === id); if (!x) return { ok: false, erro: 'Jogo não encontrado.' };
-  const r = { ok: true, jogo: { id: x.id, categoria: x.categoria, dataHora: x.dataHora instanceof Date ? x.dataHora.toISOString() : String(x.dataHora),
+  const fotos = mapaFotos();
+  const r = { ok: true, fotos: fotos, jogo: { id: x.id, categoria: x.categoria, dataHora: x.dataHora instanceof Date ? x.dataHora.toISOString() : String(x.dataHora),
     ginasio: x.ginasio, jogoFed: x.jogoFed, meta: jsonOu(x.meta, {}), stats: jsonOu(x.stats, {}), status: x.status }, agora: new Date().toISOString() };
   c.put(k, JSON.stringify(r), 4);
   return r;
+}
+
+
+/* ================= FOTOS (jogadores e técnicos) ================= */
+const ABA_FOTOS = 'Fotos';
+const PASTA_FOTOS = 'Klaus TV - Fotos dos atletas';
+function abaFotos() {
+  const ss = SpreadsheetApp.openById(PLANILHA_ID);
+  let sh = ss.getSheetByName(ABA_FOTOS);
+  if (!sh) { sh = ss.insertSheet(ABA_FOTOS); sh.getRange(1,1,1,4).setValues([['chave','url','arquivoId','atualizado']]); sh.setFrozenRows(1); }
+  return sh;
+}
+function pastaFotos() {
+  const it = DriveApp.getFoldersByName(PASTA_FOTOS);
+  return it.hasNext() ? it.next() : DriveApp.createFolder(PASTA_FOTOS);
+}
+function mapaFotos() {
+  const c = CacheService.getScriptCache(); const hit = c.get('fotos'); if (hit) return JSON.parse(hit);
+  const v = abaFotos().getDataRange().getValues().slice(1); const m = {};
+  v.forEach(r => { if (r[0]) m[String(r[0])] = r[1]; });
+  c.put('fotos', JSON.stringify(m), 300);
+  return m;
+}
+function listarFotos(token) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  return { ok: true, fotos: mapaFotos() };
+}
+function salvarFoto(token, chave, imagem) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  chave = String(chave || '').trim(); if (!/^[A-Za-z0-9_-]{2,40}$/.test(chave)) return { ok: false, erro: 'Chave inválida.' };
+  const m = String(imagem || '').match(/^data:(image\/(jpeg|png|webp));base64,(.+)$/); if (!m) return { ok: false, erro: 'Imagem inválida.' };
+  const bytes = Utilities.base64Decode(m[3]); if (bytes.length > 600000) return { ok: false, erro: 'Imagem grande demais.' };
+  const sh = abaFotos(); const v = sh.getDataRange().getValues();
+  const i = v.findIndex((r, k) => k > 0 && String(r[0]) === chave);
+  if (i > 0 && v[i][2]) { try { DriveApp.getFileById(v[i][2]).setTrashed(true); } catch (e) {} }
+  const f = pastaFotos().createFile(Utilities.newBlob(bytes, m[1], chave + '.' + (m[2] === 'jpeg' ? 'jpg' : m[2])));
+  f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  const url = 'https://lh3.googleusercontent.com/d/' + f.getId() + '=w600';
+  const linha = [chave, url, f.getId(), new Date()];
+  if (i > 0) sh.getRange(i + 1, 1, 1, 4).setValues([linha]); else sh.appendRow(linha);
+  const c = CacheService.getScriptCache(); c.remove('fotos'); c.removeAll(['lista']);
+  return { ok: true, url: url };
 }
