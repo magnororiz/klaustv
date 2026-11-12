@@ -42,6 +42,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .ktJM{display:grid !important;grid-template-columns:auto minmax(0,1fr) 230px 170px;}
 .ktJM select{max-width:none !important;width:100%;}
 @media(max-width:800px){.ktJM{grid-template-columns:1fr;}.ktJM label{text-align:left;}.ktJM button{width:100%;}.ktJM .ktBtExcluir{justify-self:stretch;width:100%;margin-top:14px;}}
+.ktEsc{display:block;height:84px;max-width:120px;object-fit:contain;margin:6px auto -4px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));}
 .ktJMsep{flex-basis:100%;height:0;}
 .ktJMmsg{grid-column:1/-1;text-align:center;font-size:12.5px;color:#9fb3c8;min-height:0;}
 .ktJMmsg:empty{display:none;}
@@ -318,7 +319,7 @@ hr{
 <!-- ================= TIME A ================= -->
 <div class="team">
 
-<h2 contenteditable="true" class="teamTitle" id="titleA">Time A</h2>
+<img id="ktEscA" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><h2 contenteditable="true" class="teamTitle" id="titleA">Time A</h2>
 
 <div class="score" id="scoreA">0</div>
 
@@ -375,7 +376,7 @@ hr{
 <!-- ================= TIME B ================= -->
 <div class="team">
 
-<h2 contenteditable="true" class="teamTitle" id="titleB">Time B</h2>
+<img id="ktEscB" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><h2 contenteditable="true" class="teamTitle" id="titleB">Time B</h2>
 
 <div class="score" id="scoreB">0</div>
 
@@ -1323,6 +1324,7 @@ async function kt_listarMontados(){
 function kt_temNumeros(){ return Object.keys(stats).some(k=>['pts','reb','ast','stl','blk','to','foul','twoMiss','threeMiss','ftMiss'].some(c=>+stats[k][c])); }
 const KT_ZERO={pts:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,reb:0,ast:0,stl:0,blk:0,to:0,foul:0,eff:0};
 let KT_STATS_SALVOS={};
+function kt_bolaLetra(l,c){ return 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="'+c+'" stroke="#fff" stroke-width="5"/><text x="50" y="68" font-family="Arial Black,Arial" font-weight="900" font-size="52" fill="#fff" text-anchor="middle">'+l+'</text></svg>'); }
 function kt_msg(t){ document.getElementById('ktJMmsg').textContent=t||''; }
 async function kt_abrirMontado(id){
   if(!id) return;
@@ -1336,6 +1338,7 @@ async function kt_abrirMontado(id){
   ['A','B'].forEach(t=>{
     const tm=m['time'+t]||{}; const atl=(tm.atletas||[]).slice(0,12);
     document.getElementById('title'+t).innerText=kt_nomeTime(Object.assign({avulso:m.avulso},tm));
+    { const im=document.getElementById('ktEsc'+t); im.style.display=''; im.src=m.avulso?kt_bolaLetra(t,t==='A'?'#1e5bd8':'#e8590c'):('escudos/'+encodeURIComponent(tm.sigla||'')+'.png'); }
     const linhas=document.querySelectorAll('#table'+t+' tr'); KT_REGS[t]=[];
     for(let i=1;i<=12;i++){ const a=atl[i-1]; const c=linhas[i].querySelectorAll('td'); const k=t+'-'+i;
       c[0].innerText=a?(a.numero||''):''; c[1].innerText=a?(kt_abrev(a.nome)+(a.apelido?' ('+a.apelido+')':'')):'';
