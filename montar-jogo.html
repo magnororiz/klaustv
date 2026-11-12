@@ -160,7 +160,7 @@ button:hover{background:#0f6fd1;}
 <img class="cristo" src="cristo.png" alt="Cristo Redentor">
 <img class="bola" src="bola.png" alt="Bola de basquete">
 <div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span><small>Basket RJ Stats PRO 4.0</small></a></div>
-<nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="montar-jogo.html" class="ativo">Montar Jogo</a><a href="scout.html" class="">Scout</a><a href="usuarios.html" class="soDono">Usuários</a><a href="https://klauschagas.blogspot.com/" class="ext" target="_blank" rel="noopener">Blog</a><a href="aovivo.html" class="vivo">Ao vivo</a></nav>
+<nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="montar-jogo.html" class="">Montar Jogo</a><a href="scout.html" class="">Scout</a><a href="usuarios.html" class="soDono">Usuários</a><a href="https://klauschagas.blogspot.com/" class="ext" target="_blank" rel="noopener">Blog</a><a href="aovivo.html" class="vivo">Ao vivo</a></nav>
 </header>
 <script>
 (function(){
@@ -255,7 +255,7 @@ function kt_nomeEquipe(sig){ return KT_DADOS.equipes[sig] || sig; }
 function kt_cores(sig){ return (KT_DADOS.cores||{})[sig] || ['#1e90ff','#ffffff']; }
 function kt_textoSobre(hex){ const n=parseInt(hex.slice(1),16); const r=n>>16,g=(n>>8)&255,b=n&255; return (r*0.299+g*0.587+b*0.114)>150 ? '#000000' : '#ffffff'; }
 function kt_apelidos(){ try{ return JSON.parse(localStorage.getItem('klaustv_apelidos_v1')||'{}'); }catch(e){ return {}; } }
-function kt_salvarApelido(reg,v){ try{ const a=kt_apelidos(); v=v.trim(); if(v) a[reg]=v; else delete a[reg]; localStorage.setItem('klaustv_apelidos_v1',JSON.stringify(a)); }catch(e){} }
+function kt_salvarApelido(reg,v){ try{ const a=kt_apelidos(); v=v.trim(); if(v) a[reg]=v; else delete a[reg]; localStorage.setItem('klaustv_apelidos_v1',JSON.stringify(a)); }catch(e){} clearTimeout((window.kt_apT=window.kt_apT||{})[reg]); window.kt_apT[reg]=setTimeout(()=>{ kt_api({acao:'salvarApelido',reg:reg,apelido:v}).then(r=>{ if(r&&r.ok===false) kt_aviso('Apelido não foi salvo: '+(r.erro||'tente de novo')); }); },900); }
 function kt_esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
 function kt_ajustarLargura(){
@@ -360,6 +360,7 @@ let kt_abrindo=false;
 let KT_FOTOS={};
 function kt_btFoto(chave){ const u=KT_FOTOS[chave]; return '<button type="button" class="bFoto'+(u?' tem':'')+'" data-chave="'+chave+'" title="Salvar foto" onclick="kt_escolherFoto(this)">'+(u?'<img src="'+u+'" alt="">':'📷')+'</button>'; }
 async function kt_carregarFotos(){ const r=await kt_api({acao:'listarFotos'}); if(!r.ok) return; KT_FOTOS=r.fotos||{};
+  if(r.apelidos){ try{ localStorage.setItem('klaustv_apelidos_v1',JSON.stringify(Object.assign(kt_apelidos(),r.apelidos))); }catch(e){} document.querySelectorAll('.atl:not(.tec)').forEach(row=>{ const cb=row.querySelector('input[data-reg]'), ap=row.querySelector('input.apelido'); if(cb&&ap&&r.apelidos[cb.dataset.reg]&&!ap.matches(':focus')) ap.value=r.apelidos[cb.dataset.reg]; }); }
   document.querySelectorAll('.bFoto').forEach(b=>{ const u=KT_FOTOS[b.dataset.chave]; if(u){ b.classList.add('tem'); b.innerHTML='<img src="'+u+'" alt="">'; } }); }
 function kt_escolherFoto(btn){
   const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';

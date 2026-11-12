@@ -32,6 +32,7 @@ function doPost(e) {
       case 'salvarStats': return responder(salvarStats(p.token, p.id, p.stats, p.status));
       case 'salvarFoto': return responder(salvarFoto(p.token, p.chave, p.imagem));
       case 'listarFotos': return responder(listarFotos(p.token));
+      case 'salvarApelido': return responder(salvarApelido(p.token, p.reg, p.apelido));
       case 'aoVivoLista': return responder(aoVivoLista(p.categoria));
       case 'aoVivoJogo': return responder(aoVivoJogo(p.id));
       case 'sair': CacheService.getScriptCache().remove('s_' + p.token); return responder({ ok: true });
@@ -233,7 +234,7 @@ function aoVivoJogo(id) {
   if (hit) return JSON.parse(hit);
   const x = lerJogos().find(j => j.id === id); if (!x) return { ok: false, erro: 'Jogo não encontrado.' };
   const fotos = mapaFotos();
-  const r = { ok: true, fotos: fotos, jogo: { id: x.id, categoria: x.categoria, dataHora: x.dataHora instanceof Date ? x.dataHora.toISOString() : String(x.dataHora),
+  const r = { ok: true, fotos: fotos, apelidos: mapaApelidos(), jogo: { id: x.id, categoria: x.categoria, dataHora: x.dataHora instanceof Date ? x.dataHora.toISOString() : String(x.dataHora),
     ginasio: x.ginasio, jogoFed: x.jogoFed, meta: jsonOu(x.meta, {}), stats: jsonOu(x.stats, {}), status: x.status }, agora: new Date().toISOString() };
   c.put(k, JSON.stringify(r), 4);
   return r;
@@ -262,7 +263,7 @@ function mapaFotos() {
 }
 function listarFotos(token) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
-  return { ok: true, fotos: mapaFotos() };
+  return { ok: true, fotos: mapaFotos(), apelidos: mapaApelidos() };
 }
 function salvarFoto(token, chave, imagem) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
@@ -279,4 +280,29 @@ function salvarFoto(token, chave, imagem) {
   if (i > 0) sh.getRange(i + 1, 1, 1, 4).setValues([linha]); else sh.appendRow(linha);
   const c = CacheService.getScriptCache(); c.remove('fotos'); c.removeAll(['lista']);
   return { ok: true, url: url };
+}
+
+
+/* ================= APELIDOS (valem para todos os jogos) ================= */
+function abaApelidos() {
+  const ss = SpreadsheetApp.openById(PLANILHA_ID);
+  let sh = ss.getSheetByName('Apelidos');
+  if (!sh) { sh = ss.insertSheet('Apelidos'); sh.getRange(1,1,1,3).setValues([['cadastro','apelido','atualizado']]); sh.setFrozenRows(1); }
+  return sh;
+}
+function mapaApelidos() {
+  const c = CacheService.getScriptCache(); const hit = c.get('apelidos'); if (hit) return JSON.parse(hit);
+  const m = {}; abaApelidos().getDataRange().getValues().slice(1).forEach(r => { if (r[0] && r[1]) m[String(r[0])] = String(r[1]); });
+  c.put('apelidos', JSON.stringify(m), 300); return m;
+}
+function salvarApelido(token, reg, apelido) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  reg = String(reg || '').trim(); apelido = String(apelido || '').trim().slice(0, 30);
+  if (!/^[A-Za-z0-9_-]{2,40}$/.test(reg)) return { ok: false, erro: 'Cadastro inválido.' };
+  const sh = abaApelidos(); const v = sh.getDataRange().getValues();
+  const i = v.findIndex((r, k) => k > 0 && String(r[0]) === reg);
+  if (i > 0) { if (apelido) sh.getRange(i + 1, 2, 1, 2).setValues([[apelido, new Date()]]); else sh.deleteRow(i + 1); }
+  else if (apelido) sh.appendRow([reg, apelido, new Date()]);
+  CacheService.getScriptCache().remove('apelidos');
+  return { ok: true };
 }
