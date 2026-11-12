@@ -280,18 +280,6 @@ hr{
 <select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select>
 </div><!--/ktJogoMontado-->
 
-<!-- ================= PRÉ-JOGOS SALVOS 3.4 ================= -->
-<div class="savedGamesPanel">
-    <strong>💾 Pré-jogos / Elencos salvos</strong>
-    <button onclick="salvarPreJogo()">💾 Salvar elenco atual</button>
-    <select id="savedGamesSelect">
-        <option value="">📂 Selecione um pré-jogo salvo</option>
-    </select>
-    <button onclick="carregarPreJogo()">📥 Carregar</button>
-    <button onclick="excluirPreJogo()">🗑️ Excluir</button>
-</div>
-
-
 <div class="savedGamesPanel teamRosterPanel">
     <strong>👥 Elencos individuais por equipe</strong>
     <div style="margin-bottom:8px;">
@@ -855,20 +843,6 @@ atualizarLinha(k);
    As estatísticas não fazem parte do pré-jogo salvo.
    ========================================================= */
 
-const PREJOGOS_STORAGE_KEY = 'basketRJStatsPRO_34_prejogos';
-
-function obterPreJogosSalvos(){
-
-    try{
-        const dados = localStorage.getItem(PREJOGOS_STORAGE_KEY);
-        return dados ? JSON.parse(dados) : [];
-    }catch(e){
-        alert('Não foi possível acessar os pré-jogos salvos neste navegador.');
-        return [];
-    }
-
-}
-
 function obterElencoAtual(team){
 
     const tabela = document.getElementById('table'+team);
@@ -888,114 +862,6 @@ function obterElencoAtual(team){
     }
 
     return jogadores;
-
-}
-
-function salvarPreJogo(){
-
-    const nome = prompt(
-        'Digite um nome para este pré-jogo/elenco:\n\nEx.: Flamengo x Botafogo - Sub-14'
-    );
-
-    if(nome === null){
-        return;
-    }
-
-    const nomeLimpo = nome.trim();
-
-    if(!nomeLimpo){
-        alert('Digite um nome para o pré-jogo.');
-        return;
-    }
-
-    const preJogos = obterPreJogosSalvos();
-
-    const novo = {
-        id: Date.now().toString(),
-        nome: nomeLimpo,
-        titleA: document.getElementById('titleA').innerText.trim(),
-        titleB: document.getElementById('titleB').innerText.trim(),
-        elencoA: obterElencoAtual('A'),
-        elencoB: obterElencoAtual('B')
-    };
-
-    preJogos.push(novo);
-
-    try{
-        localStorage.setItem(PREJOGOS_STORAGE_KEY, JSON.stringify(preJogos));
-    }catch(e){
-        alert('Não foi possível salvar. O armazenamento do navegador pode estar indisponível.');
-        return;
-    }
-
-    atualizarListaPreJogos(novo.id);
-
-    alert('Pré-jogo salvo com sucesso!');
-
-}
-
-function atualizarListaPreJogos(selecionarId=''){
-
-    const select = document.getElementById('savedGamesSelect');
-
-    if(!select){
-        return;
-    }
-
-    const preJogos = obterPreJogosSalvos();
-
-    select.innerHTML =
-        '<option value="">📂 Selecione um pré-jogo salvo</option>';
-
-    preJogos.forEach(preJogo => {
-
-        const option = document.createElement('option');
-
-        option.value = preJogo.id;
-        option.textContent = preJogo.nome;
-
-        if(preJogo.id === selecionarId){
-            option.selected = true;
-        }
-
-        select.appendChild(option);
-
-    });
-
-}
-
-function carregarPreJogo(){
-
-    const select = document.getElementById('savedGamesSelect');
-    const id = select.value;
-
-    if(!id){
-        alert('Selecione um pré-jogo salvo.');
-        return;
-    }
-
-    const preJogos = obterPreJogosSalvos();
-    const preJogo = preJogos.find(item => item.id === id);
-
-    if(!preJogo){
-        alert('Pré-jogo não encontrado.');
-        atualizarListaPreJogos();
-        return;
-    }
-
-    if(!confirm(
-        'Carregar "'+preJogo.nome+'"?\n\n' +
-        'Isso vai substituir somente os nomes dos times, números e nomes dos jogadores atuais.\n' +
-        'As estatísticas atuais não serão alteradas.'
-    )){
-        return;
-    }
-
-    document.getElementById('titleA').innerText = preJogo.titleA;
-    document.getElementById('titleB').innerText = preJogo.titleB;
-
-    aplicarElenco('A', preJogo.elencoA);
-    aplicarElenco('B', preJogo.elencoB);
 
 }
 
@@ -1024,47 +890,6 @@ function aplicarElenco(team, elenco){
     }
 
 }
-
-function excluirPreJogo(){
-
-    const select = document.getElementById('savedGamesSelect');
-    const id = select.value;
-
-    if(!id){
-        alert('Selecione um pré-jogo salvo.');
-        return;
-    }
-
-    const preJogos = obterPreJogosSalvos();
-    const preJogo = preJogos.find(item => item.id === id);
-
-    if(!preJogo){
-        atualizarListaPreJogos();
-        return;
-    }
-
-    if(!confirm('Excluir o pré-jogo "'+preJogo.nome+'"?')){
-        return;
-    }
-
-    const atualizados = preJogos.filter(item => item.id !== id);
-
-    try{
-        localStorage.setItem(
-            PREJOGOS_STORAGE_KEY,
-            JSON.stringify(atualizados)
-        );
-    }catch(e){
-        alert('Não foi possível atualizar os pré-jogos salvos.');
-        return;
-    }
-
-    atualizarListaPreJogos();
-
-}
-
-atualizarListaPreJogos();
-
 
 /* =========================================================
    BIBLIOTECA DE ELENCOS INDIVIDUAIS POR EQUIPE - VERSÃO 3.6
