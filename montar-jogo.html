@@ -31,12 +31,15 @@ button:hover{background:#0f6fd1;}
 .selo{display:inline-block;margin-top:5px;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:10px;}
 .selo.casa{background:#ffd54f;color:#000;}.selo.fora{background:#cfd8e3;color:#0b1220;}
 .rosterList{max-height:300px;overflow-y:auto;}
-.atl{display:flex;align-items:center;gap:6px;font-size:12px;padding:3px 2px;border-bottom:1px solid #16243a;}
+.atl,.atlHead{display:grid;grid-template-columns:18px 26px minmax(0,1fr) 110px 52px;align-items:center;column-gap:6px;font-size:12px;padding:3px 2px;border-bottom:1px solid #16243a;}
+.atlHead{font-size:10px;color:#7f93a8;text-transform:uppercase;border-bottom:1px solid #2a3b55;padding-bottom:4px;}
+.atlHead .c{text-align:center;}
 .atl:hover{background:#17263d;}
-.atl label{flex:1;cursor:pointer;}
-.atl .reg{color:#7f93a8;font-size:10px;}
-.atl input.num{width:42px;padding:3px;border-radius:6px;border:none;font-size:12px;text-align:center;visibility:hidden;}
-.atl.marcado input.num{visibility:visible;}
+.atl label{cursor:pointer;min-width:0;}
+.atl .reg{color:#5fa8ff;font-size:11px;text-align:right;font-variant-numeric:tabular-nums;}
+.atl input.apelido{width:100%;box-sizing:border-box;padding:3px 6px;border-radius:6px;border:none;font-size:12px;background:#ffffff;color:#000;}
+.atl input.num{width:24px;height:24px;padding:0;border-radius:50%;border:2px solid #9fb3c8;font-size:12px;font-weight:700;text-align:center;background:#ffffff;color:#000;box-sizing:border-box;}
+.atl.marcado input.num{border-color:#1e90ff;}
 .btnSalvar{background:#27ae60;font-size:14px;padding:10px 22px;}
 .btnSalvar:hover{background:#1e8c4d;}
 .dica{font-size:11px;color:#9fb3c8;text-align:center;margin-top:6px;}
@@ -122,6 +125,8 @@ function kt_aviso(msg){ const a=document.getElementById('kt_aviso'); a.innerText
 function kt_nomeEquipe(sig){ return KT_DADOS.equipes[sig] || sig; }
 function kt_cores(sig){ return (KT_DADOS.cores||{})[sig] || ['#1e90ff','#ffffff']; }
 function kt_textoSobre(hex){ const n=parseInt(hex.slice(1),16); const r=n>>16,g=(n>>8)&255,b=n&255; return (r*0.299+g*0.587+b*0.114)>150 ? '#000000' : '#ffffff'; }
+function kt_apelidos(){ try{ return JSON.parse(localStorage.getItem('klaustv_apelidos_v1')||'{}'); }catch(e){ return {}; } }
+function kt_salvarApelido(reg,v){ try{ const a=kt_apelidos(); v=v.trim(); if(v) a[reg]=v; else delete a[reg]; localStorage.setItem('klaustv_apelidos_v1',JSON.stringify(a)); }catch(e){} }
 function kt_esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
 function kt_ajustarLargura(){
@@ -180,8 +185,9 @@ function kt_listarAtletas(t){
     const lista = (KT_DADOS.elencos[cat]||{})[sig] || [];
     document.getElementById('rosterTitle'+t).innerText = 'Time '+t+': '+kt_nomeEquipe(sig);
     document.getElementById('roster'+t).innerHTML = lista.map((a,i)=>
-        `<div class="atl" id="atl${t}_${a[0]}"><input type="checkbox" id="cb${t}_${i}" data-reg="${a[0]}" data-nome="${kt_esc(a[1])}" onchange="kt_contar('${t}',this)"><label for="cb${t}_${i}">${a[1]} <span class="reg">${a[0]}</span></label><input class="num" placeholder="#" maxlength="3" inputmode="numeric"></div>`
-    ).join('') || '<div class="vazio">Nenhum atleta inscrito.</div>';
+        `<div class="atl" id="atl${t}_${a[0]}"><input type="checkbox" id="cb${t}_${i}" data-reg="${a[0]}" data-nome="${kt_esc(a[1])}" onchange="kt_contar('${t}',this)"><input class="num" placeholder="#" maxlength="2" inputmode="numeric" title="Número da camisa"><label for="cb${t}_${i}">${a[1]}</label><input class="apelido" placeholder="" value="${kt_esc(kt_apelidos()[a[0]]||'')}" oninput="kt_salvarApelido('${a[0]}',this.value)" title="Apelido"><span class="reg">${a[0]}</span></div>`
+    ).join('');
+    document.getElementById('roster'+t).innerHTML = lista.length ? '<div class="atlHead"><span></span><span class="c">Nº</span><span>Nome</span><span>Apelido</span><span style="text-align:right;">FBERJ</span></div>' + document.getElementById('roster'+t).innerHTML : '<div class="vazio">Nenhum atleta inscrito.</div>';
     kt_pintar(t);
     kt_montarGinasios();
     kt_contar(t);
@@ -249,7 +255,7 @@ function kt_capturar(){
     const time = t => ({
         sigla: document.getElementById('selTime'+t).value,
         nome: kt_nomeEquipe(document.getElementById('selTime'+t).value),
-        atletas: kt_marcados(t).map(c=>({reg:c.dataset.reg, nome:c.dataset.nome, numero:c.closest('.atl').querySelector('.num').value.trim()}))
+        atletas: kt_marcados(t).map(c=>({reg:c.dataset.reg, nome:c.dataset.nome, numero:c.closest('.atl').querySelector('.num').value.trim(), apelido:c.closest('.atl').querySelector('.apelido').value.trim()}))
     });
     return {
         categoria: document.getElementById('selCategoria').value,
@@ -310,7 +316,7 @@ function kt_abrir(id){
         kt_listarAtletas(t);
         tm.atletas.forEach(a=>{
             const row = document.getElementById('atl'+t+'_'+a.reg);
-            if(row){ row.querySelector('input[type=checkbox]').checked = true; row.querySelector('.num').value = a.numero||''; }
+            if(row){ row.querySelector('input[type=checkbox]').checked = true; row.querySelector('.num').value = a.numero||''; if(a.apelido) row.querySelector('.apelido').value = a.apelido; }
         });
         kt_contar(t);
     });
