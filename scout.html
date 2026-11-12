@@ -1385,6 +1385,7 @@ async function kt_abrirMontado(id){
   KT_JOGO_ID=id;
   kt_msg((st.A||st.B)?'Jogo aberto com os números salvos na planilha.':'');
   kt_listarAnteriores(j);
+  document.querySelectorAll('.ktPremL').forEach(l=>{ if(typeof kt_premOpcoes==='function') kt_premOpcoes(l); });
 }
 function kt_statsDaTela(){
   const out={A:{},B:{}};
@@ -1472,8 +1473,9 @@ function kt_tem(k){ const s=stats[k]||{}; return ['pts','reb','ast','stl','blk',
 function kt_sugestao(i){ const js=kt_jogadores(); if(!js.length) return '';
   const melhor=(lista,f)=>{ let b=null; lista.forEach(p=>{ if(f(p)>0 && (!b||f(p)>f(b))) b=p; }); return b?b.k:''; };
   const eff=p=>(+p.s.eff||0)+0.001*(+p.s.pts||0);
-  return [melhor(js,eff), melhor(js,p=>+p.s.pts||0), melhor(js,p=>(+p.s.blk||0)+(+p.s.stl||0)), melhor(js,p=>+p.s.reb||0),
-          melhor(js.filter(p=>p.t==='A'),eff), melhor(js.filter(p=>p.t==='B'),eff)][i]||''; }
+  if(i===0) return melhor(js,eff);
+  if(i===1) return melhor(js,p=>(+p.s.pts||0)+0.001*(+p.s.eff||0));
+  return ''; }
 function kt_premOpcoes(l){ const sp=l.querySelector('.pP'), sj=l.querySelector('.pJ'); const vp=sp.value, vj=sj.value;
   const nomes=kt_premNomes(); sp.innerHTML=nomes.map((n,i)=>'<option value="'+i+'">'+n.replace(/</g,'&lt;')+'</option>').join('')+'<option value="novo">Novo prêmio…</option>';
   sp.value=(vp!==''&&+vp<nomes.length)?vp:(l.dataset.ini||'0');
@@ -1489,6 +1491,9 @@ function kt_premLinha(ini){ const l=document.createElement('div'); l.className='
   l.querySelector('button').onclick=()=>l.remove();
   document.getElementById('ktPremLista').appendChild(l); kt_premOpcoes(l); }
 [0,1,2,3,4,5].forEach(i=>kt_premLinha(i));
+let kt_premT=null;
+function kt_premAuto(){ clearTimeout(kt_premT); kt_premT=setTimeout(()=>document.querySelectorAll('.ktPremL').forEach(l=>{ const v=l.querySelector('.pP').value; if((v==='0'||v==='1') && l.querySelector('.pJ').dataset.manual!=='1') kt_premOpcoes(l); }),150); }
+if(typeof atualizarTotaisEquipe==='function'){ const _atz=atualizarTotaisEquipe; atualizarTotaisEquipe=function(){ const r=_atz.apply(this,arguments); kt_premAuto(); return r; }; }
 /* ---------- PDF e imagem ---------- */
 function kt_carregarLib(src){ return new Promise((ok,erro)=>{ if(document.querySelector('script[src="'+src+'"]')) return ok(); const e=document.createElement('script'); e.src=src; e.onload=ok; e.onerror=erro; document.head.appendChild(e); }); }
 function kt_esc2(x){ return String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
