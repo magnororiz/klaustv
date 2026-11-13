@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Klaus TV · Ao vivo</title>
+<title>Klaus TV · Estatísticas ao vivo</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <style>
 body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding:0 16px 16px 16px;}
@@ -65,6 +65,10 @@ body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding
 .box .cab{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #e4e7ec;font-weight:800;font-size:16px;}
 .box .cab img{width:34px;height:34px;object-fit:contain;}
 .box .cab small{color:#666;font-weight:700;}
+.box .cab .ord{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#555;white-space:nowrap;}
+.box .cab .ord select{font:inherit;font-size:13px;font-weight:700;padding:4px 6px;border:1px solid #c9ced6;border-radius:6px;background:#fff;color:#1e5bd8;cursor:pointer;}
+table.jog .ordOn{background:rgba(255,213,79,.25);}
+table.jog th.ordOn{box-shadow:inset 0 -3px 0 #ffb300;}
 .box .cab .tec{font-size:12px;color:#555;font-weight:600;margin-top:2px;}
 table.jog{width:100%;border-collapse:collapse;font-size:13px;}
 table.jog th{font-size:11px;color:#333;padding:6px 4px;text-align:center;border-bottom:1px solid #e4e7ec;}
@@ -199,7 +203,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 <img class="cristo" src="cristo.png" alt="Cristo Redentor">
 <img class="bola logoKT" src="logo_klaustv.png" alt="Klaus Basquete RJ TV">
 <div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span><small>Basket RJ Stats PRO 4.0</small></a></div>
-<nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="montar-jogo.html" class="">Montar Jogo</a><a href="scout.html" class="">Scout</a><a href="bancodados.html" class="">Banco de dados</a><a href="usuarios.html" class="soDono">Usuários</a><a href="https://klauschagas.blogspot.com/" class="ext" target="_blank" rel="noopener">Blog</a><a href="aovivo.html" class="ativo vivo">Ao vivo</a></nav>
+<nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="montar-jogo.html" class="">Montar Jogo</a><a href="scout.html" class="">Scout</a><a href="bancodados.html" class="">Banco de dados</a><a href="usuarios.html" class="soDono">Usuários</a><a href="https://klauschagas.blogspot.com/" class="ext" target="_blank" rel="noopener">Blog</a><a href="aovivo.html" class="ativo vivo">Estatísticas ao vivo</a></nav>
 </header>
 <script>
 (function(){
@@ -317,13 +321,24 @@ async function kt_carregar(primeira){
   if(primeira) $('jogo').scrollIntoView({behavior:'smooth',block:'start'});
 }
 const CRIT=['pts','eff','reb','ast','blk','stl'];
+let KT_ORD='pts', KT_ULT=null;
+const KT_ORDS=[['num','Camisa'],['pts','Pontos'],['2p','2P'],['3p','3P'],['ll','LL'],['reb','REB'],['ast','AST'],['stl','ROU'],['blk','TOC'],['to','ERR'],['foul','FP'],['eff','EF']];
+function kt_cmp(k){
+  const cam=(x,y)=>(parseInt(x.numero)||999)-(parseInt(y.numero)||999);
+  if(k==='num') return cam;
+  const f={'2p':'two','3p':'three','ll':'ft'}[k];
+  if(f) return (x,y)=>{ const mx=+x[f+'Made']||0, my=+y[f+'Made']||0; if(my!==mx) return my-mx;
+    const px=pct(mx,mx+(+x[f+'Miss']||0)), py=pct(my,my+(+y[f+'Miss']||0)); if(py!==px) return py-px; return ordem('pts')(x,y); };
+  return ordem(k);
+}
+function kt_ordMudou(v){ KT_ORD=v; if(KT_ULT) kt_render(KT_ULT); }
 function ordem(k){ const ch=[k].concat(CRIT.filter(c=>c!==k));
   return (x,y)=>{ for(const c of ch){ const d=(+y[c]||0)-(+x[c]||0); if(d) return d; } return (parseInt(x.numero)||999)-(parseInt(y.numero)||999); }; }
 const ZERO={pts:0,reb:0,ast:0,blk:0,stl:0,eff:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,to:0,foul:0};
 function jogadores(j,l){
   const t=(j.meta||{})['time'+l]||{atletas:[]}; const st=(j.stats||{})[l]||{};
   return (t.atletas||[]).map(a=>Object.assign({},ZERO,st[a.reg]||{},{reg:a.reg,nome:a.nome,numero:a.numero,apelido:(KT_AP[a.reg]||a.apelido||''),foto:a.foto,lado:l,sig:t.sigla}))
-    .sort(ordem('pts'));
+    .sort(kt_cmp(KT_ORD));
 }
 const KT_CON=['da','de','do','das','dos','e',"d'"];
 function abrev(n){ const w=String(n||'').trim().split(/\s+/); const core=w.map((x,i)=>KT_CON.includes(x.toLowerCase())?-1:i).filter(i=>i>=0); const c=core.length; let ab=[];
@@ -333,6 +348,7 @@ function soma(js,k){ return js.reduce((s,p)=>s+(+p[k]||0),0); }
 function pct(m,a){ return a?Math.round(m*100/a):0; }
 function kt_bolaLetra(l,c){ return 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="'+c+'" stroke="#fff" stroke-width="5"/><text x="50" y="68" font-family="Arial Black,Arial" font-weight="900" font-size="52" fill="#fff" text-anchor="middle">'+l+'</text></svg>'); }
 function kt_render(j){
+  KT_ULT=j;
   const m=j.meta||{}, A=m.timeA||{}, B=m.timeB||{}, sa=A.sigla, sb=B.sigla;
   if(m.avulso){ [[sa,'A','#1e5bd8'],[sb,'B','#e8590c']].forEach(([s,l,c])=>{ if(!s) return; D.escudos[s]=kt_bolaLetra(l,c); D.cores[s]=[c,'#ffffff']; if(!D.equipes[s]) D.equipes[s]=s; }); }
   const ja=jogadores(j,'A'), jb=jogadores(j,'B'), todos=ja.concat(jb);
@@ -348,12 +364,12 @@ function kt_render(j){
   const melhor={}; cols.forEach(k=>{ const mx=Math.max(...todos.map(p=>+p[k]||0)); melhor[k]=mx>0?mx:null; });
   const med=(p,k)=>(melhor[k]!==null && (+p[k]||0)===melhor[k])?'<span class="med">🥇</span>':'';
   const linha=p=>{ const c=cor(p.sig); const rk=(D.rank[cat]||{})[p.reg];
-    return `<tr data-reg="${p.reg}"><td><span class="num" style="background:${c};color:${txt(c)}">${esc(p.numero||'-')}</span></td>
+    return `<tr data-reg="${p.reg}"><td class="c-num"><span class="num" style="background:${c};color:${txt(c)}">${esc(p.numero||'-')}</span></td>
     <td class="rk">${rk?rk+'º':'—'}</td><td class="hm"><img class="foto" src="${foto(p.reg)}" alt="" onclick="kt_zoom(this.src,'${esc(p.nome).replace(/'/g,'')}')"></td>
     <td class="l nm" title="${esc(p.nome)}">${esc(abrev(p.nome))}${p.apelido?'<span class="ap">'+esc(p.apelido)+'</span>':''}</td>
     ${COLS.map(k=>`<td class="c-${k}" data-k="${p.reg}-${k}" data-v="${val(p,k)}">${val(p,k)}${cols.includes(k)?med(p,k):''}</td>`).join('')}</tr>`; };
-  const tabela=(t,js)=>`<div class="box"><div class="cab"><img src="${escudo(t.sigla)}" alt=""><div>${esc(D.curto[t.sigla]||t.sigla)} <small>· ${esc(cat)}</small>${(t.tecnico&&t.tecnico.nome)?`<div class="tec">${fotoTec(t.sigla)}Técnico: <b>${esc(t.tecnico.nome)}</b>${t.tecnico.apelido?' ('+esc(t.tecnico.apelido)+')':''}</div>`:''}</div></div>
-    <table class="jog"><tr><th>CAMISA</th><th class="rkh" title="Posição no ranking de cestinhas do campeonato">RANKING<br>CESTINHAS</th><th class="hm"></th><th class="l">JOGADOR</th><th title="Pontos">PTS</th><th class="c-2p" title="Arremessos de 2: certos/tentados">2P</th><th class="c-3p" title="Arremessos de 3: certos/tentados">3P</th><th class="c-ll" title="Lances livres: certos/tentados">LL</th><th title="Rebotes">REB</th><th title="Assistências">AST</th><th title="Roubos de bola">ROU</th><th title="Tocos">TOC</th><th title="Erros (perdas de bola)">ERR</th><th title="Faltas pessoais">FP</th><th title="Eficiência">EF</th></tr>
+  const tabela=(t,js,sel)=>`<div class="box"><div class="cab"><img src="${escudo(t.sigla)}" alt=""><div>${esc(D.curto[t.sigla]||t.sigla)} <small>· ${esc(cat)}</small>${(t.tecnico&&t.tecnico.nome)?`<div class="tec">${fotoTec(t.sigla)}Técnico: <b>${esc(t.tecnico.nome)}</b>${t.tecnico.apelido?' ('+esc(t.tecnico.apelido)+')':''}</div>`:''}</div>${sel?`<label class="ord" title="Muda a ordem dos jogadores dos dois times">Ordenar por <select onchange="kt_ordMudou(this.value)">${KT_ORDS.map(([v,n])=>`<option value="${v}"${v===KT_ORD?' selected':''}>${n}</option>`).join('')}</select></label>`:''}</div>
+    <table class="jog"><tr><th class="c-num">CAMISA</th><th class="rkh" title="Posição no ranking de cestinhas do campeonato">RANKING<br>CESTINHAS</th><th class="hm"></th><th class="l">JOGADOR</th><th class="c-pts" title="Pontos">PTS</th><th class="c-2p" title="Arremessos de 2: certos/tentados">2P</th><th class="c-3p" title="Arremessos de 3: certos/tentados">3P</th><th class="c-ll" title="Lances livres: certos/tentados">LL</th><th class="c-reb" title="Rebotes">REB</th><th class="c-ast" title="Assistências">AST</th><th class="c-stl" title="Roubos de bola">ROU</th><th class="c-blk" title="Tocos">TOC</th><th class="c-to" title="Erros (perdas de bola)">ERR</th><th class="c-foul" title="Faltas pessoais">FP</th><th class="c-eff" title="Eficiência">EF</th></tr>
     ${js.map(linha).join('')||'<tr><td colspan="15">Sem atletas.</td></tr>'}</table></div>`;
   // comparação
   const tot=js=>{ const o={}; ['pts','twoMade','twoMiss','threeMade','threeMiss','ftMade','ftMiss','reb','ast','stl','blk','to','foul','eff'].forEach(k=>o[k]=soma(js,k)); return o; };
@@ -399,13 +415,14 @@ function kt_render(j){
    <div class="faixaCinza"><span><b>Competição</b> ${m.avulso?"Jogo avulso":"CEMB 2026"} · ${esc(cat)}</span><span><b>Ginásio</b> ${esc(j.ginasio||m.ginasio||'—')}</span>
      <span><b>Detalhes do jogo</b> ${m.jogoFed?'Jogo nº '+esc(m.jogoFed)+' · ':''}${d?fmtData(d)+' às '+fmtHora(d):''}</span></div>
    <div class="abas"><span class="cond">Resumo</span></div>
-   <div class="duas">${tabela(A,ja)}${tabela(B,jb)}</div>
+   <div class="duas">${tabela(A,ja,true)}${tabela(B,jb,false)}</div>
    <div class="duas iguais" style="margin-top:14px;">
      <div class="box comp"><div class="cab" style="justify-content:space-between;"><span style="display:flex;gap:8px;align-items:center;"><img src="${escudo(sa)}" alt="">${esc(D.curto[sa]||sa)}</span><span style="display:flex;gap:8px;align-items:center;">${esc(D.curto[sb]||sb)}<img src="${escudo(sb)}" alt=""></span></div><table>${comp}</table></div>
      <div class="box lid">${lider}</div>
    </div>
    <div class="atual">${status(j)==='vivo'?'🔴 Atualizando ao vivo · ':''}Atualizado às ${new Date().toLocaleTimeString('pt-BR')}</div>`;
   if(typeof kt_mapaFooter==='function') kt_mapaFooter(j.ginasio||m.ginasio||'');
+  document.querySelectorAll('#jogo table.jog .c-'+KT_ORD).forEach(e=>e.classList.add('ordOn'));
   if(Object.keys(antes).length){
     document.querySelectorAll('#jogo tr[data-reg]').forEach(tr=>{ const a=antes[tr.dataset.reg]; if(a===undefined) return; const d=a-tr.getBoundingClientRect().top;
       if(Math.abs(d)>2){ tr.style.transition='none'; tr.style.transform='translateY('+d+'px)'; requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ tr.style.transition='transform .8s ease'; tr.style.transform=''; }); }); } });
@@ -437,7 +454,7 @@ kt_init();
         <li><a href="scout.html">Scout</a></li>
         <li><a href="bancodados.html">Banco de dados</a></li>
         <li><a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener">Blog</a></li>
-        <li><a href="aovivo.html">Ao vivo</a></li>
+        <li><a href="aovivo.html">Estatísticas ao vivo</a></li>
       </ul>
     </div>
     <div>
