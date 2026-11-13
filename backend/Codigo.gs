@@ -18,6 +18,8 @@ function doPost(e) {
   if (p.acao === 'aoVivoLista') return responder(aoVivoLista(p.categoria));
   if (p.acao === 'aoVivoJogo') return responder(aoVivoJogo(p.id));
   if (p.acao === 'dadosFed') return responder(dadosFed());
+  if (p.acao === 'dadosCestinhas') return responder(dadosCestinhas());
+  if (p.acao === 'dadosSumulas') return responder(dadosSumulas());
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     switch (p.acao) {
@@ -363,6 +365,8 @@ function salvarCamisa(token, reg, camisa) {
  */
 const FED_CESTINHAS_ID = '1wekGITrAep1-1pAttzs0hpY9e5-pPY_8';
 const FED_TABELA_ID = '1SsTnHglFy0oSvFUT6i9OH_ZBAQmxtlxVIEnFCEYKNiE';
+const FED_TABELA_FEM_ID = '1AEGj7wdpXq0lRWRnv3ZMA_RVyI7qvDs2pRX08LhiiNc'; // 3ª Taça Magaly Costa (feminino)
+const FED_SUMULAS_ID = '1ApNK5Ke04dY31uOZQvLfZoEFFDpmMCfy'; // pasta CEMB 2026 da FBERJ
 const FED_MAP = {"ABIG - IGUABA GRANDE": "IG", "ABIG / IGUABA GRANDE": "IG", "ABIG / JIC / SHARK'S": "ABIG", "ACEAR / IRAJÁ A. C. / PJMC": "ACEAR", "ACEAR / IRAJÁ A.C. / PJMC": "ACEAR", "ACEAR / IRAJÁ A.C. / PROJETO MC": "ACEAR", "ASP C. MUNICIPAL": "ASPCM", "ASP CLUB MUNICIPAL": "ASPCM", "BASQUETE S.A": "BSA", "BASQUETE S.A.": "BSA", "BOTAFOGO F. R.": "BFR", "BOTAFOGO F.R.": "BFR", "C. R. FLAMENGO": "CRF", "C.R. FLAMENGO": "CRF", "CARIOCA KING'S": "CK", "CCL": "CCL", "CESC": "CESC", "CFCSN": "CFCSN", "E. E. PASSO ZERO": "EEPZ", "E.E. PASSO ZERO": "EEPZ", "FLUMINENSE F. C.": "FFC", "FLUMINENSE F.C.": "FFC", "FLUMINESE F. C.": "FFC", "IDEC": "IDEC", "ITAIPU BASQUETE": "IB", "ITDA": "ITDA", "JACAREPAGUÁ T. C.": "JTC", "JACAREPAGUÁ T.C.": "JTC", "K ESPORTES": "KE", "MESQUITA BASQUETE": "MB", "NBR CAMPOS": "NBR", "NITERÓI B. C.": "NBC", "NITERÓI B.C.": "NBC", "TEAM KLUN ACADEMY": "TKA", "TIJUCA BASKET": "TTC", "TIJUCA T. C. / RAIZEIRAS": "TTC"};
 const FED_GYM = { 'NBA STORE ARENA': 'NBA Store Arena Rio - Uptown' };
 const FED_CAT_CEST = { SUB12: 'Sub-12', SUB13: 'Sub-13', SUB14: 'Sub-14', SUB15: 'Sub-15', SUB16: 'Sub-16', SUB17: 'Sub-17', SUB19: 'Sub-19', SUB22: 'Sub-22', ADULTO: 'Adulto' };
@@ -385,9 +389,10 @@ function fedConverterXlsx(id) {
 }
 
 function fedLerElenco() {
-  const tmp = fedConverterXlsx(FED_CESTINHAS_ID); const atl = {}; const equipes = {};
+  const tmp = fedConverterXlsx(FED_CESTINHAS_ID); const atl = {}; const equipes = {}; const pontos = { resumo: [], jogos: [] };
   try {
     SpreadsheetApp.openById(tmp).getSheets().forEach(ws => {
+      try { fedLerPontos(ws, pontos); } catch (e) {}
       const t = ws.getName().toUpperCase(); const ck = Object.keys(FED_CAT_CEST).find(k => t.indexOf(k) === 0); if (!ck) return;
       const cat = FED_CAT_CEST[ck]; const rows = ws.getDataRange().getDisplayValues();
       for (let i = 0; i < rows.length; i++) {
@@ -404,7 +409,39 @@ function fedLerElenco() {
       }
     });
   } finally { try { DriveApp.getFileById(tmp).setTrashed(true); } catch (e) {} }
-  return { atletas: atl, equipes: equipes };
+  return { atletas: atl, equipes: equipes, pontos: pontos };
+}
+
+/* Pontos dos cestinhas (mesma lógica do parse_fed.py):
+ * resumo = total, cestas de 3, jogos e média (aba final de cada categoria)
+ * jogos  = pontos de cada atleta em cada jogo: [cat, fase, ocorrencia, sigla, adversario, matricula, pts] */
+const FED_FINAL = { 'Sub-12': 'SUB12P', 'Sub-13': 'SUB13P', 'Sub-14': 'SUB14P', 'Sub-15': 'SUB15S', 'Sub-16': 'SUB16S', 'Sub-17': 'SUB17S', 'Sub-19': 'SUB19S', 'Sub-22': 'SUB22P', 'Adulto': 'ADULTO' };
+function fedLerPontos(ws, out) {
+  const t = ws.getName().toUpperCase().trim(); const ck = Object.keys(FED_CAT_CEST).find(k => t.indexOf(k) === 0); if (!ck) return;
+  const cat = FED_CAT_CEST[ck]; const rows = ws.getDataRange().getValues();
+  const tit = rows[1] ? fedNorm(rows[1][0]) : ''; const mm = tit.match(/2026\s*-\s*(.*)$/);
+  let def = mm ? fedTitulo(mm[1]) : 'Classificação'; if (/^TURNO\/RETURNO/i.test(def) || /^CLASSIFICA/i.test(def)) def = 'Classificação';
+  const ehFinal = FED_FINAL[cat] === t;
+  for (let i = 2; i < rows.length; i++) {
+    if (fedNorm(rows[i][0]) !== 'Reg') continue;
+    let sig = null;
+    for (let k = i - 1; k >= Math.max(0, i - 4); k--) { const m = fedNorm(rows[k][0]).match(/^(.*)\(([A-Z]+)\)$/); if (m) { sig = m[2]; break; } }
+    if (!sig) continue;
+    const hdr = rows[i], ph = rows[i - 2], op = rows[i - 1];
+    const H = hdr.map(h => typeof h === 'string' ? h.trim().toLowerCase() : '');
+    const cols = []; H.forEach((h, c) => { if (h === 'pontos' || (h === 'total' && H[c + 1] === 'total' && c > 0 && H[c - 1] === 'pontos')) cols.push(c); });
+    const info = {}; let lastop = null, lastph = null;
+    cols.forEach(c => { let p = null; for (let cc = c; cc > 1; cc--) { if (ph[cc] !== '' && ph[cc] != null) { p = fedTitulo(String(ph[cc])); break; } } p = p || def;
+      let o = (op[c] !== '' && op[c] != null) ? op[c] : (lastph === p ? lastop : null); o = o ? fedNorm(o) : '?'; info[c] = [p, o]; lastop = o; lastph = p; });
+    const jcols = []; hdr.forEach((h, c) => { if (typeof h === 'string' && h.trim().indexOf('Nº de jogos') === 0) jcols.push(c); }); const j = jcols.length ? jcols[jcols.length - 1] : null;
+    const tc = [], cc3 = []; if (j !== null) for (let c = 0; c < j; c++) { const h = typeof hdr[c] === 'string' ? hdr[c].trim().toLowerCase() : ''; if (h === 'total') tc.push(c); if (h.indexOf('cestas') === 0) cc3.push(c); }
+    for (let k = i + 1; k < rows.length; k++) {
+      const r = rows[k]; const r0 = fedNorm(r[0]); if (!r0 || r0.toUpperCase() === 'TOTAL' || r[1] === '' || r[1] == null) break;
+      const reg = String(r0).replace(/[.,]0+$/, '').split(' ')[0]; const nome = fedNorm(r[1]); const cnt = {};
+      cols.forEach(c => { const [p, o] = info[c]; const key = p + '|' + o; cnt[key] = (cnt[key] || 0) + 1; const v = r[c]; if (typeof v === 'number') out.jogos.push([cat, p, cnt[key], sig, o, reg, v]); });
+      if (ehFinal && j !== null) { const n = x => typeof x === 'number' ? x : ''; out.resumo.push([cat, sig, reg, nome, n(r[tc[tc.length - 1]]), n(r[cc3[cc3.length - 1]]), n(r[j]), n(r[j + 1])]); }
+    }
+  }
 }
 
 function fedFase(cat, label) {
@@ -418,23 +455,24 @@ function fedFase(cat, label) {
   return fedTitulo(l);
 }
 
-function fedLerTabela() {
-  const out = []; const semSigla = {}; const tmp = fedConverterXlsx(FED_TABELA_ID);
+function fedLerTabela(id, feminino) {
+  const out = []; const semSigla = {}; const tmp = id ? null : fedConverterXlsx(FED_TABELA_ID);
   try {
-  SpreadsheetApp.openById(tmp).getSheets().forEach(ws => {
-    const cat = FED_CAT_TAB[ws.getName().trim().toUpperCase()]; if (!cat) return;
-    let fase = FED_DEF[cat] || 'Turno Único';
+  SpreadsheetApp.openById(tmp || id).getSheets().forEach(ws => {
+    const nomeAba = ws.getName().trim().toUpperCase();
+    const cat = feminino ? (nomeAba === 'ADULTO' ? 'Adulto' : (nomeAba.match(/^SUB_(\d+)$/) ? 'Sub-' + nomeAba.slice(4) : null)) : FED_CAT_TAB[nomeAba]; if (!cat) return;
+    let fase = feminino ? 'Classificação' : (FED_DEF[cat] || 'Turno Único');
     ws.getDataRange().getDisplayValues().forEach(r => {
       r = r.map(fedNorm); while (r.length < 10) r.push('');
       if (!r.join('') || r[0] === 'DATA') return;
       if (!r[2] && !r[3]) { const lab = [r[0], r[1]].filter(x => x).join(' '); if (lab && lab !== '/') fase = fedFase(cat, lab); return; }
       if (r[2] === 'GINÁSIO') return;
-      const a = FED_MAP[r[4]] || '', b = FED_MAP[r[8]] || '';
+      const a = feminino ? fedTitulo(r[4]) : (FED_MAP[r[4]] || ''), b = feminino ? fedTitulo(r[8]) : (FED_MAP[r[8]] || '');
       if (r[4] && !a) semSigla[r[4]] = 1; if (r[8] && !b) semSigla[r[8]] = 1;
       out.push([cat, fase, r[3], r[0], r[1].slice(0, 5), a, b, FED_GYM[r[2]] || r[2], r[5], r[7], r[9]]);
     });
   });
-  } finally { try { DriveApp.getFileById(tmp).setTrashed(true); } catch (e) {} }
+  } finally { if (tmp) try { DriveApp.getFileById(tmp).setTrashed(true); } catch (e) {} }
   return { linhas: out, semSigla: Object.keys(semSigla) };
 }
 
@@ -457,6 +495,15 @@ function backupFBERJ() {
     const novEq = Object.keys(e.equipes).filter(s => !tem[s]).map(s => [s, e.equipes[s]]);
     if (novEq.length) eq.getRange(eq.getLastRow() + 1, 1, novEq.length, 2).setValues(novEq);
     det.push('Elenco: ' + n + ' atletas lidos, ' + novos.length + ' novos' + (novEq.length ? ', ' + novEq.length + ' equipes novas' : ''));
+    // cestinhas: troca só se veio completo
+    const sr = fedAba('FBERJ_Cestinhas', ['categoria', 'sigla', 'matricula', 'nome', 'total', 'tres', 'jogos', 'media']);
+    const antR = Math.max(0, sr.getLastRow() - 1);
+    if (e.pontos.resumo.length >= Math.max(200, antR * 0.8)) { if (antR) sr.getRange(2, 1, antR, 8).clearContent(); sr.getRange(2, 1, e.pontos.resumo.length, 8).setValues(e.pontos.resumo.map(x => [x[0], x[1], "'" + x[2], x[3], x[4], x[5], x[6], x[7]])); det.push('Cestinhas: ' + e.pontos.resumo.length); }
+    else det.push('Cestinhas: leitura veio com ' + e.pontos.resumo.length + ' (antes ' + antR + '); mantive o anterior');
+    const sj = fedAba('FBERJ_PontosJogo', ['categoria', 'fase', 'ocorrencia', 'sigla', 'adversario', 'matricula', 'pts']);
+    const antJ = Math.max(0, sj.getLastRow() - 1);
+    if (e.pontos.jogos.length >= Math.max(1000, antJ * 0.8)) { if (antJ) sj.getRange(2, 1, antJ, 7).clearContent(); sj.getRange(2, 1, e.pontos.jogos.length, 7).setValues(e.pontos.jogos.map(x => [x[0], x[1], x[2], x[3], x[4], "'" + x[5], x[6]])); det.push('Pontos por jogo: ' + e.pontos.jogos.length); }
+    else det.push('Pontos por jogo: leitura veio com ' + e.pontos.jogos.length + ' (antes ' + antJ + '); mantive o anterior');
   } catch (err) { ok = false; det.push('Elenco: ERRO — ' + err.message); }
   // 2) tabela: troca só se veio completa
   try {
@@ -467,8 +514,17 @@ function backupFBERJ() {
     sh.getRange(2, 1, t.linhas.length, 11).setNumberFormat('@').setValues(t.linhas);
     det.push('Tabela: ' + t.linhas.length + ' jogos' + (t.semSigla.length ? ' — nomes de time sem sigla: ' + t.semSigla.join(', ') : ''));
   } catch (err) { ok = false; det.push('Tabela: ERRO — ' + err.message); }
+  // 3) tabela do feminino (3ª Taça Magaly Costa): troca só se veio completa
+  try {
+    const t = fedLerTabela(FED_TABELA_FEM_ID, true); const sh = fedAba('FBERJ_TabelaFem', ['categoria', 'fase', 'jogo', 'data', 'hora', 'timeA', 'timeB', 'ginasio', 'placarA', 'placarB', 'obs']);
+    const antes = Math.max(0, sh.getLastRow() - 1);
+    if (t.linhas.length < Math.max(5, antes * 0.8)) throw new Error('leitura veio com ' + t.linhas.length + ' jogos (antes ' + antes + '); mantive o backup anterior');
+    if (antes) sh.getRange(2, 1, antes, 11).clearContent();
+    sh.getRange(2, 1, t.linhas.length, 11).setNumberFormat('@').setValues(t.linhas);
+    det.push('Feminino: ' + t.linhas.length + ' jogos');
+  } catch (err) { ok = false; det.push('Feminino: ERRO — ' + err.message); }
   log.appendRow([agora, ok ? 'OK' : 'COM ERRO', det.join(' | ')]);
-  fedLimparCache();
+  fedLimparCache(); ['ces_n', 'sum_n', 'fem'].forEach(k => CacheService.getScriptCache().remove(k));
   return { ok: ok, detalhes: det };
 }
 
@@ -556,4 +612,115 @@ function funcaoArbitragem(token, nome, funcao) {
   const x = lerArbitragem().find(r => arbNorm(r.nome) === arbNorm(nome)); if (!x) return { ok: false, erro: 'Nome não encontrado.' };
   if (x.origem === 'FBERJ') return { ok: false, erro: 'Função da lista oficial da FBERJ não se altera.' };
   abaArbitragem().getRange(x.linha, 2).setValue(arbFuncao(funcao)); return { ok: true };
+}
+
+
+/* ================= SÚMULAS DA FBERJ (backup no nosso Drive) =================
+ * Copia os PDFs da pasta CEMB 2026 da FBERJ para a pasta "Klaus TV - Súmulas FBERJ 2026" (link público só para ver).
+ * Só copia o que é novo; nunca apaga. Se passar do tempo, agenda a continuação sozinho.
+ * Aba FBERJ_Sumulas: origemId | categoria | fase | arquivo | copiaId | bytes | criadoNaFBERJ | copiadoEm
+ */
+const SUM_RAIZ = 'Klaus TV - Súmulas FBERJ 2026';
+function sumPasta(nome, pai) {
+  const it = pai ? pai.getFoldersByName(nome) : DriveApp.getFoldersByName(nome);
+  if (it.hasNext()) return it.next();
+  const f = pai ? pai.createFolder(nome) : DriveApp.createFolder(nome);
+  if (!pai) { try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {} }
+  return f;
+}
+function sumListar(paiId) {
+  const out = []; let tok = null;
+  do {
+    const r = Drive.Files.list({ q: "'" + paiId + "' in parents and trashed = false", fields: 'nextPageToken, files(id, name, mimeType, size, createdTime)', pageSize: 1000, pageToken: tok, supportsAllDrives: true, includeItemsFromAllDrives: true });
+    (r.files || []).forEach(f => out.push(f)); tok = r.nextPageToken;
+  } while (tok);
+  return out;
+}
+function backupSumulas() {
+  const ini = Date.now(); const sh = fedAba('FBERJ_Sumulas', ['origemId', 'categoria', 'fase', 'arquivo', 'copiaId', 'bytes', 'criadoNaFBERJ', 'copiadoEm']);
+  const feitos = {}; sh.getDataRange().getValues().slice(1).forEach(r => { if (r[0] && r[4]) feitos[r[0]] = 1; });
+  const raiz = sumPasta(SUM_RAIZ); const pend = [];
+  // percorre categoria > fase > arquivos (e arquivos soltos em qualquer nível)
+  const andar = (id, caminho) => sumListar(id).forEach(f => {
+    if (f.mimeType === 'application/vnd.google-apps.folder') { if (caminho.length < 3) andar(f.id, caminho.concat([f.name])); }
+    else if (!feitos[f.id]) pend.push({ f: f, caminho: caminho });
+  });
+  andar(FED_SUMULAS_ID, []);
+  let n = 0; const novas = []; const pastas = {};
+  for (const p of pend) {
+    if (Date.now() - ini > 270000) break;
+    const chave = p.caminho.join('/');
+    let dest = pastas[chave]; if (!dest) { dest = raiz; p.caminho.forEach(nm => dest = sumPasta(nm, dest)); pastas[chave] = dest; }
+    try {
+      const c = Drive.Files.copy({ name: p.f.name, parents: [dest.getId()] }, p.f.id, { supportsAllDrives: true });
+      novas.push([p.f.id, p.caminho[0] || '', p.caminho.slice(1).join(' / '), p.f.name, c.id, Number(p.f.size || 0), p.f.createdTime || '', new Date()]); n++;
+    } catch (e) { novas.push([p.f.id, p.caminho[0] || '', p.caminho.slice(1).join(' / '), p.f.name, '', 0, p.f.createdTime || '', 'ERRO: ' + e.message]); }
+    if (novas.length >= 25) { sh.getRange(sh.getLastRow() + 1, 1, novas.length, 8).setValues(novas); novas.length = 0; }
+  }
+  if (novas.length) sh.getRange(sh.getLastRow() + 1, 1, novas.length, 8).setValues(novas);
+  const faltam = pend.length - n;
+  // continua sozinho em 2 minutos se ainda faltar
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'backupSumulasContinuar').forEach(t => ScriptApp.deleteTrigger(t));
+  if (faltam > 0) ScriptApp.newTrigger('backupSumulasContinuar').timeBased().after(120000).create();
+  if (n || faltam) fedAba('FBERJ_Backup', ['quando', 'resultado', 'detalhes']).appendRow([new Date(), faltam ? 'EM ANDAMENTO' : 'OK', 'Súmulas: ' + n + ' copiadas agora' + (faltam ? ', faltam ' + faltam : '')]);
+  CacheService.getScriptCache().remove('sum_n');
+  return { ok: true, copiadas: n, faltam: faltam, pasta: raiz.getUrl() };
+}
+function backupSumulasContinuar() { return backupSumulas(); }
+
+/* Rodar UMA vez no editor: gatilhos diários (20h tabela/cestinhas/feminino, 21h súmulas) e primeira cópia. */
+function instalarBackupSumulas() {
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'backupSumulas').forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('backupSumulas').timeBased().everyDays(1).atHour(21).inTimezone('America/Sao_Paulo').create();
+  const r1 = backupFBERJ();
+  const r2 = backupSumulas();
+  Logger.log(JSON.stringify(r1)); Logger.log(JSON.stringify(r2));
+  return r2;
+}
+
+/* ---------- dados públicos para as páginas Cestinhas e Súmulas (com cache) ---------- */
+function cachePut(pref, obj, seg) { try { const s = JSON.stringify(obj); const parts = []; for (let i = 0; i < s.length; i += 90000) parts.push(s.slice(i, i + 90000)); const o = {}; o[pref + '_n'] = String(parts.length); parts.forEach((x, i) => o[pref + '_' + i] = x); CacheService.getScriptCache().putAll(o, seg); } catch (e) {} }
+function cacheGet(pref) { const c = CacheService.getScriptCache(); const n = Number(c.get(pref + '_n') || 0); if (!n) return null; const p = c.getAll(Array.from({ length: n }, (_, i) => pref + '_' + i)); if (Object.keys(p).length !== n) return null; try { return JSON.parse(Array.from({ length: n }, (_, i) => p[pref + '_' + i]).join('')); } catch (e) { return null; } }
+function fedQuando() { const sl = SpreadsheetApp.openById(PLANILHA_ID).getSheetByName('FBERJ_Backup'); if (!sl || sl.getLastRow() < 2) return ''; const v = sl.getRange(2, 1, sl.getLastRow() - 1, 2).getValues().filter(r => r[1] === 'OK' || r[1] === 'COM ERRO'); const u = v[v.length - 1]; return u ? Utilities.formatDate(new Date(u[0]), 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm') : ''; }
+
+function dadosCestinhas() {
+  const hit = cacheGet('ces'); if (hit) return hit;
+  const ss = SpreadsheetApp.openById(PLANILHA_ID); const sr = ss.getSheetByName('FBERJ_Cestinhas');
+  if (!sr || sr.getLastRow() < 2) return { ok: false, erro: 'Os cestinhas ainda não foram copiados da FBERJ.' };
+  const se = ss.getSheetByName('FBERJ_Equipes'); const equipes = {}; if (se) se.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0]) equipes[r[0]] = r[1]; });
+  const lista = sr.getDataRange().getValues().slice(1).filter(r => r[0]).map(r => [r[0], r[1], String(r[2]), r[3], Number(r[4] || 0), Number(r[5] || 0), Number(r[6] || 0)]);
+  const res = { ok: true, atualizado: fedQuando(), equipes: equipes, apelidos: mapaApelidos(), fotos: mapaFotos(), lista: lista };
+  cachePut('ces', res, 3600); return res;
+}
+
+function dadosSumulas() {
+  const hit = cacheGet('sum'); if (hit) return hit;
+  const ss = SpreadsheetApp.openById(PLANILHA_ID);
+  const ssu = ss.getSheetByName('FBERJ_Sumulas'), st = ss.getSheetByName('FBERJ_Tabela'), sj = ss.getSheetByName('FBERJ_PontosJogo'), sa = ss.getSheetByName('FBERJ_Atletas');
+  if (!ssu || ssu.getLastRow() < 2) return { ok: false, erro: 'As súmulas ainda estão sendo copiadas da FBERJ.' };
+  // tabela por categoria + número do jogo
+  const tab = {}; if (st) st.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0] && r[2]) tab[r[0] + '|' + r[2]] = r; });
+  // nomes dos atletas
+  const nomes = {}; if (sa) sa.getDataRange().getDisplayValues().slice(1).forEach(r => { nomes[r[0] + '|' + r[2]] = r[3]; });
+  // pontos por jogo: cat|fase|sigla|adv -> {ocorrencia: [[reg, pts]]}
+  const pj = {}; if (sj) sj.getDataRange().getValues().slice(1).forEach(r => { if (!r[0]) return; const k = r[0] + '|' + r[1] + '|' + r[3] + '|' + r[4]; ((pj[k] = pj[k] || {})[r[2]] = pj[k][r[2]] || []).push([String(r[5]), Number(r[6] || 0)]); });
+  const cest = (cat, fase, sig, adv) => { const m = pj[cat + '|' + fase + '|' + sig + '|' + adv]; if (!m || Object.keys(m).length !== 1) return null; const l = m[Object.keys(m)[0]].slice().sort((a, b) => b[1] - a[1]); if (!l.length || !l[0][1]) return null; const top = l.filter(x => x[1] === l[0][1]).map(x => nomes[cat + '|' + sig + '|' + x[0]] || x[0]); return [top.join(' / '), l[0][1]]; };
+  // estatísticas do Klaus (MVP e números do time), ligadas pelo nº do jogo
+  const kt = {}; lerJogos().forEach(j => { const m = jsonOu(j.meta, {}); if (m.avulso) return; const num = String(j.jogoFed || '').split(' ')[0]; if (!num || j.status !== 'FINAL') return;
+    const st2 = jsonOu(j.stats, {}); const atl = {}; ['A', 'B'].forEach(l => ((m['time' + l] || {}).atletas || []).forEach(a => atl[a.reg] = [a.nome, (m['time' + l] || {}).sigla]));
+    let mvp = null; const time = {}; ['A', 'B'].forEach(l => { const sg = (m['time' + l] || {}).sigla; const t = { reb: 0, ast: 0, stl: 0, blk: 0, eff: 0 }; Object.keys(st2[l] || {}).forEach(reg => { const s = st2[l][reg]; ['reb', 'ast', 'stl', 'blk', 'eff'].forEach(k => t[k] += Number(s[k] || 0)); if (!mvp || Number(s.eff || 0) > mvp[1]) mvp = [(atl[reg] || [reg])[0], Number(s.eff || 0), sg]; }); time[sg] = t; });
+    kt[j.categoria + '|' + num] = { id: j.id, mvp: mvp, time: time }; });
+  const lista = ssu.getDataRange().getValues().slice(1).filter(r => r[4]).map(r => {
+    const catP = String(r[1]).toUpperCase().replace(/\s+/g, ''); const cat = catP === 'ADULTO' ? 'Adulto' : (catP.match(/^SUB(\d+)/) ? 'Sub-' + catP.match(/^SUB(\d+)/)[1] : r[1]);
+    const nm = String(r[3]); const num = (nm.match(/^\s*(?:jg|jogo)\.?\s*(\d+)/i) || [])[1] || '';
+    const t = tab[cat + '|' + num]; const o = { cat: cat, pasta: String(r[2]), arquivo: nm.replace(/\.pdf$/i, '').trim(), id: r[4], num: num };
+    if (t) { o.fase = t[1]; o.data = t[3]; o.hora = t[4]; o.a = t[5]; o.b = t[6]; o.pa = t[8]; o.pb = t[9]; o.gin = t[7];
+      o.ca = cest(cat, t[1], t[5], t[6]); o.cb = cest(cat, t[1], t[6], t[5]); }
+    const k = kt[cat + '|' + num]; if (k) o.kt = k;
+    return o; });
+  const se = ss.getSheetByName('FBERJ_Equipes'); const equipes = {}; if (se) se.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0]) equipes[r[0]] = r[1]; });
+  // feminino (só tabela, ainda sem súmulas)
+  const sf = ss.getSheetByName('FBERJ_TabelaFem'); const fem = sf ? sf.getDataRange().getDisplayValues().slice(1).filter(r => r[0] && r[5] && r[6]) : [];
+  const res = { ok: true, atualizado: fedQuando(), equipes: equipes, lista: lista, feminino: fem };
+  cachePut('sum', res, 1800); return res;
 }

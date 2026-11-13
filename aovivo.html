@@ -156,6 +156,11 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;background:rgba(255,255,255,.16);box-shadow:inset 0 -3px 0 #ffd54f;}
 .ktFaixa{overflow-x:auto;scrollbar-width:none;}
 .ktFaixa a{white-space:nowrap;}
+.ktFaixa{padding-right:150px;}
+@media(min-width:821px){.ktFaixa a{padding:0 11px;font-size:14px;letter-spacing:1px;}}
+@media(min-width:821px) and (max-width:1180px){.ktFaixa a{padding:0 8px;font-size:12.5px;letter-spacing:.5px;}}
+@media(max-width:820px){.ktFaixa{padding-right:110px;}}
+@media(max-width:480px){.ktFaixa{padding-right:80px;}}
 @media(max-width:820px){.ktMenu .marca small{font-size:9px;letter-spacing:2px;margin-top:4px;}.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
   .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
 @media(max-width:480px){.ktMenu .bola{height:82px !important;top:6px !important;right:6px !important;}.ktMenu .miolo{padding-right:80px;}.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
@@ -203,7 +208,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 <img class="cristo" src="cristo.png" alt="Cristo Redentor">
 <img class="bola logoKT" src="logo_klaustv.png" alt="Klaus Basquete RJ TV">
 <div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span><small>Basket RJ Stats PRO 4.0</small></a></div>
-<nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="bancodados.html" class="">Banco de dados</a><a href="montar-jogo.html" class="">Montar Jogo</a><a href="scout.html" class="">Scout</a><a href="usuarios.html" class="soDono">Usuários</a><a href="https://klauschagas.blogspot.com/" class="ext" target="_blank" rel="noopener">Blog</a><a href="aovivo.html" class="ativo vivo">Estatísticas ao vivo</a></nav>
+<nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="bancodados.html" class="">Banco de dados</a><a href="montar-jogo.html" class="">Montar Jogo</a><a href="scout.html" class="">Scout</a><a href="cestinhas.html" class="">Cestinhas</a><a href="sumulas.html" class="">Súmulas</a><a href="usuarios.html" class="soDono">Usuários</a><a href="https://klauschagas.blogspot.com/" class="ext" target="_blank" rel="noopener">Blog</a><a href="aovivo.html" class="ativo vivo">Estatísticas ao vivo</a></nav>
 </header>
 <script>
 (function(){
@@ -452,6 +457,8 @@ kt_init();
         <li><a href="index.html">Início</a></li>
         <li><a href="montar-jogo.html">Montar Jogo</a></li>
         <li><a href="scout.html">Scout</a></li>
+        <li><a href="cestinhas.html">Cestinhas</a></li>
+        <li><a href="sumulas.html">Súmulas</a></li>
         <li><a href="bancodados.html">Banco de dados</a></li>
         <li><a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener">Blog</a></li>
         <li><a href="aovivo.html">Estatísticas ao vivo</a></li>
