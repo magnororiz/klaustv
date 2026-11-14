@@ -525,9 +525,8 @@ function kt_abaHTML(j,ja,jb){
     const NOME={PTS:'Pontos',AQ:'Arremessos de quadra',"2P":'Arremessos de 2',"3P":'Arremessos de 3',LL:'Lances livres',REB:'Rebotes',AST:'Assistências',RB:'Roubos de bola',T:'Tocos',ERR:'Erros (menos)',FP:'Faltas (menos)',EF:'Eficiência'};
     const lin=I.map((k,i)=>{ const a=A.t[k]||0,b=B.t[k]||0; return `<tr>${kt_celTime(sa,i+2,a,a>b,'A')}<td class="it" title="${NOME[k]}">${k}<br><small style="font-weight:600">${NOME[k]}</small></td>${kt_celTime(sb,i+2,b,b>a,'B')}</tr>`; }).join('');
     return kt_confrTopo(j,sa,sb,'🏆 Troféus nos confrontos')+`
-      <table class="ab cmp"><tr><th style="width:38%">${kt_tm(sa)}</th><th></th><th style="width:38%">${kt_tm(sb)}</th></tr>
-      <tr>${kt_celTime(sa,0,'<span class="trofN">🏆 '+ta+'</span>',ta>tb,'A')}<td class="it">TOTAL</td>${kt_celTime(sb,0,'<span class="trofN">🏆 '+tb+'</span>',tb>ta,'B')}</tr>
-      <tr>${kt_celTime(sa,1,A.j,false,'A')}<td class="it">Confrontos contados</td>${kt_celTime(sb,1,B.j,false,'B')}</tr>${lin}</table>
+      <table class="ab cmp"><tr><th style="width:38%">${kt_tm(sa)}</th><th style="font-size:10px;color:#7a6a3a;text-transform:none">🏆 = nº de jogos em que o time venceu o item</th><th style="width:38%">${kt_tm(sb)}</th></tr>
+      <tr>${kt_celTime(sa,0,A.j,false,'A')}<td class="it">Confrontos na temporada</td>${kt_celTime(sb,0,B.j,false,'B')}</tr><tr>${kt_celTime(sa,1,'<span class="trofN">🏆 '+ta+'</span>',ta>tb,'A')}<td class="it">TOTAL</td>${kt_celTime(sb,1,'<span class="trofN">🏆 '+tb+'</span>',tb>ta,'B')}</tr>${lin}</table>
       <div class="abaNota">Só os jogos entre ${esc(D.curto[sa]||sa)} e ${esc(D.curto[sb]||sb)} no ${esc(cat)} com estatística do Klaus TV (soma de todos os confrontos da temporada, inclusive este jogo; ou só o confronto anterior, se escolhido). Em cada confronto, o time que vence um item do Resumo ganha 🏆 naquele item (empate com valor dá troféu aos dois). A marca ✓ mostra quem tem mais troféus em cada item.</div>`;
   }
   if(KT_ABA==='cla'){
