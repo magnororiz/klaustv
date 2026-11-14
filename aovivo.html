@@ -116,7 +116,7 @@ table.jog td{white-space:nowrap;}table.jog td.nm{white-space:normal;}.med{font-s
 table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444;white-space:nowrap;}
 .box{overflow-x:auto;}
 .med{font-size:10px;margin-left:1px;}
-@media(max-width:560px){table.jog .hm{display:none;}table.jog td.nm{max-width:96px;font-size:11px;}table.jog .rk,table.jog .rkh{display:none;}table.jog th,table.jog td{padding-left:2px;padding-right:2px;}table.jog .num{min-width:22px;padding:2px 3px;font-size:11px;}table.jog{font-size:11.5px;}table.jog th{font-size:10px;}table.jog{font-size:12px;}.lid .lado img{width:40px;height:40px;}.lid .lado{gap:6px;padding:8px;}.lid .lado .n{font-size:13px;}.lid .lado .v{font-size:24px;}.mvp{font-size:12px;padding:10px 12px 3px;margin-top:14px;}}
+@media(max-width:560px){table.jog .hm{display:none;}table.jog td.nm{max-width:96px;font-size:11px;}table.jog .rk,table.jog .rkh{display:none;}table.jog th,table.jog td{padding-left:2px;padding-right:2px;}table.jog .num{min-width:22px;padding:2px 3px;font-size:11px;}table.jog{font-size:11.5px;}table.jog th{font-size:10px;}table.jog{font-size:12px;}.lid .lado img{width:40px;height:40px;}.lid .lado{gap:6px;padding:8px;}.lid .lado .n{font-size:13px;}.lid .lado .v{font-size:24px;}.mvp{font-size:12px;padding:7px 12px 3px;margin-top:24px;}}
 /* comparação */
 .comp table{width:100%;border-collapse:collapse;font-size:14px;}
 @media(min-width:1001px){.duas.iguais{align-items:stretch;}.duas.iguais>.box{display:flex;flex-direction:column;}.duas.iguais .comp table{flex:1;font-size:16px;}.duas.iguais .comp td{padding:6px 12px;}.duas.iguais .lid{justify-content:flex-start;}}
@@ -141,18 +141,9 @@ table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444
 .lid .seg{display:grid;grid-template-columns:1fr 1fr;font-size:13px;font-weight:700;}
 .lid .seg div{display:flex;justify-content:space-between;padding:7px 12px;border-bottom:1px solid #eef0f3;}
 .lid .seg div.dir{flex-direction:row-reverse;border-left:1px solid #e4e7ec;}
-.mvp{position:relative;display:inline-block;margin-top:20px;font-family:'Oswald','Arial Narrow',Arial;font-weight:700;font-size:15px;letter-spacing:2px;color:#fff;padding:13px 18px 5px;line-height:1.1;border-radius:0 0 8px 8px;
-  background:linear-gradient(0deg,#1e5bd8 0%,#1e5bd8 30%,#5a4bc4 46%,#b23a7a 60%,#e8453c 72%,#ff8a00 86%,#ffd54f 100%);text-shadow:0 1px 3px rgba(0,0,0,.8);box-shadow:0 0 10px rgba(255,120,0,.55),0 -4px 16px rgba(255,80,0,.45);animation:fogo 1.4s ease-in-out infinite alternate;}
-.mvp b{position:relative;z-index:2;font-weight:700;}
-@keyframes fogo{0%{box-shadow:0 0 8px rgba(255,140,0,.5),0 -4px 14px rgba(255,60,0,.35);}100%{box-shadow:0 0 14px rgba(255,200,0,.75),0 -8px 22px rgba(255,60,0,.55);}}
-.chamas{position:absolute;left:-3px;right:-3px;bottom:100%;height:24px;margin-bottom:-3px;display:flex;align-items:flex-end;pointer-events:none;z-index:1;}
-.chamas i{flex:1;height:100%;margin:0 -2px;border-radius:50% 50% 45% 45%/85% 85% 15% 15%;
-  background:radial-gradient(ellipse 60% 70% at 50% 100%,#fffde7 0,#ffee58 22%,#ffa726 48%,#ff5722 72%,rgba(229,57,53,0) 100%);transform-origin:50% 100%;animation:chama .5s ease-in-out infinite alternate;}
-.chamas i:nth-child(2n){height:72%;animation-duration:.42s;animation-delay:-.2s;}
-.chamas i:nth-child(3n){height:88%;animation-duration:.58s;animation-delay:-.33s;}
-.chamas i:nth-child(4n+1){animation-duration:.46s;animation-delay:-.12s;}
-.chamas i:nth-child(5n){height:100%;animation-duration:.38s;animation-delay:-.27s;}
-@keyframes chama{0%{transform:scaleY(.85) scaleX(1.05) rotate(-4deg) translateY(0);filter:brightness(1);}50%{transform:scaleY(1.12) scaleX(.92) rotate(3deg) translateY(-1px);}100%{transform:scaleY(.95) scaleX(1) rotate(-2deg) translateY(-2px);filter:brightness(1.25);}}
+.mvp{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:92px;margin-top:26px;font-family:'Oswald','Arial Narrow',Arial;font-weight:700;font-size:15px;letter-spacing:3px;color:#fff;padding:9px 18px 5px;line-height:1.1;border-radius:0 0 8px 8px;box-sizing:border-box;background:linear-gradient(0deg,#1e5bd8 0%,#1e5bd8 35%,#5a4bc4 52%,#b23a7a 66%,#e8453c 78%,#ff8a00 90%,#ffd54f 100%);text-shadow:0 1px 3px rgba(0,0,0,.85);box-shadow:0 0 10px rgba(255,120,0,.45),0 -6px 16px rgba(255,90,0,.35);}
+.mvp b{position:relative;z-index:3;font-weight:700;}
+.mvp canvas.chamas{position:absolute;left:0;right:0;bottom:100%;width:100%;height:30px;margin-bottom:-4px;pointer-events:none;z-index:2;}
 .mudou{animation:mudou 2.2s ease;}
 @keyframes mudou{0%{background:#ffd54f;}100%{background:transparent;}}
 .atual{font-size:12px;color:#7f93a8;text-align:right;margin-top:8px;}
@@ -424,7 +415,7 @@ function kt_render(j){
   const top3=(js,k)=>js.filter(p=>(+p[k]||0)!==0).sort(ordem(k)).slice(0,3);
   const nomeJ=p=>esc(p.apelido||abrev(p.nome));
   const lider=cats.map(([k,t],idx)=>{ const a=top3(ja,k), b=top3(jb,k);
-    const lado=(p,dir)=>p?`<div class="lado ${dir?'dir':''}"><img src="${foto(p.reg)}" alt="" onclick="kt_zoom(this.src,'${esc(p.nome).replace(/'/g,'')}')"><div class="n">${nomeJ(p)}${(k==='eff'&&p.reg===mvp)?'<br><span class="mvp"><span class="chamas"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>MVP</b></span>':''}</div><div class="v">${+p[k]||0}</div></div>`:`<div class="lado ${dir?'dir':''}" style="color:#999;">—</div>`;
+    const lado=(p,dir)=>p?`<div class="lado ${dir?'dir':''}"><img src="${foto(p.reg)}" alt="" onclick="kt_zoom(this.src,'${esc(p.nome).replace(/'/g,'')}')"><div class="n">${nomeJ(p)}${(k==='eff'&&p.reg===mvp)?'<br><span class="mvp"><canvas class="chamas"></canvas><b>MVP</b></span>':''}</div><div class="v">${+p[k]||0}</div></div>`:`<div class="lado ${dir?'dir':''}" style="color:#999;">—</div>`;
     const seg=i=>`<div>${a[i]?`<span>${nomeJ(a[i])}</span><span>${+a[i][k]||0}</span>`:''}</div><div class="dir">${b[i]?`<span>${nomeJ(b[i])}</span><span>${+b[i][k]||0}</span>`:''}</div>`;
     return (idx===3?`<div id="lidExtra" style="${kt_todosLid?'':'display:none'}">`:'')+`<div class="bloco"><div class="tit"><div class="b" style="background:${ca}"></div><img src="${escudo(sa)}" alt=""><div>${t}</div><img src="${escudo(sb)}" alt=""><div class="b" style="background:${cb}"></div></div>
       <div class="top">${lado(a[0],false)}${lado(b[0],true)}</div><div class="seg">${seg(1)}${seg(2)}</div></div>`+(idx===cats.length-1?'</div>':''); }).join('')
@@ -570,6 +561,31 @@ function kt_abaHTML(j,ja,jb){
 kt_init();
 </script>
 
+<script>/*ktFogoMVP*/(function(){
+  if(window.KT_FOGO) return; window.KT_FOGO=1;
+  const est=new WeakMap();
+  function passo(){
+    document.querySelectorAll('canvas.chamas').forEach(cv=>{
+      const dpr=Math.min(2,window.devicePixelRatio||1), w=cv.clientWidth, h=cv.clientHeight; if(!w||!h) return;
+      if(cv.width!==Math.round(w*dpr)){ cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); }
+      let P=est.get(cv); if(!P){ P=[]; est.set(cv,P); }
+      const n=Math.round(w/3.2);
+      for(let i=0;i<n/2.5;i++){ const x=4+Math.random()*(w-8); const borda=Math.min(x,w-x)/(w/2);
+        P.push({x,y:h,vx:(Math.random()-.5)*.35,vy:-(0.5+Math.random()*1.0)*(0.45+0.55*borda),r:4+Math.random()*5,v:0,max:20+Math.random()*24}); }
+      const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h); c.globalCompositeOperation='lighter';
+      for(let i=P.length-1;i>=0;i--){ const p=P[i]; p.v++; p.x+=p.vx+Math.sin((p.v+p.x)*.25)*.18; p.y+=p.vy; p.vy*=.995; const t=p.v/p.max;
+        if(t>=1||p.y<-4){ P.splice(i,1); continue; }
+        const r=p.r*(1-t*.75); const g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,r);
+        const R=255, G=Math.round(235-205*t), B=Math.round(160*(1-t*2.5)); const a=(t<.15?t/.15:1)*(1-t)*.8;
+        g.addColorStop(0,`rgba(${R},${G},${Math.max(0,B)},${a})`); g.addColorStop(1,`rgba(${R},${Math.round(G*.4)},0,0)`);
+        c.fillStyle=g; c.beginPath(); c.arc(p.x,p.y,r,0,6.283); c.fill(); }
+      c.globalCompositeOperation='source-over';
+    });
+    requestAnimationFrame(passo);
+  }
+  window.KT_FOGO_PASSO=passo; requestAnimationFrame(passo);
+})();
+</script>
 <footer class="ktFooter">
   <div class="lema">🏀 No basquete, <span>tudo pode acontecer!</span></div>
   <div class="wrap">
