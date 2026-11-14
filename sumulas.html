@@ -200,6 +200,7 @@ function abrev(n){ const w=String(n||'').trim().split(/\s+/); const core=w.map((
 let S=null, kt_res='';
 document.querySelectorAll('#res button').forEach(b=>b.onclick=()=>{ kt_res=b.dataset.r; document.querySelectorAll('#res button').forEach(x=>x.classList.toggle('on',x===b)); kt_desenha(); });
 function dt(s){ const m=String(s||'').match(/(\d\d)\/(\d\d)\/(\d{4})/); return m?m[3]+m[2]+m[1]:''; }
+function faseDe(j){ if(j.fase) return j.fase; const p=String(j.pasta||'').replace(/^\s*\d+\s*-\s*/,'').trim().toLowerCase(); return p? p.charAt(0).toUpperCase()+p.slice(1):''; }
 function jogos(){
   if($('selNaipe').value==='F') return (S.feminino||[]).map(r=>({cat:r[0],fase:r[1],num:r[2],data:r[3],hora:r[4],a:r[5],b:r[6],gin:r[7],pa:r[8],pb:r[9],fem:1}));
   return S.lista;
@@ -207,7 +208,7 @@ function jogos(){
 function kt_cats(){ const ls=jogos(); const cats=D.ordem.filter(c=>ls.some(j=>j.cat===c)).concat([...new Set(ls.map(j=>j.cat))].filter(c=>!D.ordem.includes(c)));
   const v=$('selCat').value; $('selCat').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join(''); $('selCat').value=cats.includes(v)?v:(cats.includes('Sub-13')?'Sub-13':cats[0]||''); kt_eqs(); }
 function kt_eqs(){ const ls=jogos().filter(j=>j.cat===$('selCat').value);
-  const fs=[...new Set(ls.map(j=>j.fase||j.pasta).filter(Boolean))]; const vf=$('selFase').value; $('selFase').innerHTML='<option value="">Todas</option>'+fs.map(f=>`<option>${esc(f)}</option>`).join(''); if(fs.includes(vf)) $('selFase').value=vf;
+  const fs=[...new Set(ls.map(j=>faseDe(j)).filter(Boolean))]; const vf=$('selFase').value; $('selFase').innerHTML='<option value="">Todas</option>'+fs.map(f=>`<option>${esc(f)}</option>`).join(''); if(fs.includes(vf)) $('selFase').value=vf;
   const es=[...new Set(ls.flatMap(j=>[j.a,j.b]).filter(Boolean))].sort((x,y)=>nomeT(x,S.equipes).localeCompare(nomeT(y,S.equipes),'pt-BR'));
   const ve=$('selEq').value; $('selEq').innerHTML='<option value="">Todas</option>'+es.map(s=>`<option value="${esc(s)}">${esc(nomeT(s,S.equipes))}</option>`).join(''); if(es.includes(ve)) $('selEq').value=ve; }
 function card(j){
@@ -218,19 +219,19 @@ function card(j){
   if(j.kt&&j.kt.mvp) dest.push(`<div><span><span class="mvpS">MVP</span></span><span>${esc(abrev(j.kt.mvp[0]))} · ${esc(nomeT(j.kt.mvp[2],S.equipes))} · EF ${j.kt.mvp[1]}</span></div>`);
   let tim=''; if(j.kt&&j.kt.time&&j.kt.time[j.a]&&j.kt.time[j.b]){ const A=j.kt.time[j.a],B=j.kt.time[j.b]; tim=`<div class="tim">${[['reb','Rebotes'],['ast','Assistências'],['stl','Roubos'],['blk','Tocos'],['eff','Eficiência']].map(([k,n])=>`<div>${A[k]}</div><div class="m">${n}</div><div class="r">${B[k]}</div>`).join('')}</div>`; }
   const d=j.data?j.data+(j.hora?' · '+j.hora:''):'';
-  return `<div class="card"><div class="top"><span>${esc(d||'Data a definir')}${j.fase?' · '+esc(j.fase):''}</span><span class="nj">${j.num?'Jogo '+esc(j.num):''}</span></div>
+  return `<div class="card"><div class="top"><span>${esc(d||'Data a definir')}${faseDe(j)?' · '+esc(faseDe(j)):''}</span><span class="nj">${j.num?'Jogo '+esc(j.num):''}</span></div>
     <div class="pl"><div class="b" style="background:${cor(j.a)}"></div>${t(j.a)}<div class="p ${va?'v':''}">${temP?esc(j.pa):''}</div><div class="x">x</div><div class="p ${vb?'v':''}">${temP?esc(j.pb):''}</div>${t(j.b,1)}<div class="b" style="background:${cor(j.b)}"></div></div>
     ${dest.length?`<div class="dest">${dest.join('')}</div>`:''}${tim}
     ${j.fem?'<div class="sem">A FBERJ ainda não publica a súmula dos jogos do feminino.</div>':`<div class="bt">${j.id?`<a class="s" href="https://drive.google.com/file/d/${esc(j.id)}/view" target="_blank" rel="noopener">📄 Ver súmula</a>`:''}${j.kt?`<a class="e" href="aovivo.html?cat=${encodeURIComponent(j.cat)}&jogo=${encodeURIComponent(j.kt.id)}">📊 Estatísticas</a>`:''}</div>`}</div>`;
 }
 function kt_desenha(){
   const cat=$('selCat').value, fase=$('selFase').value, eq=$('selEq').value;
-  let ls=jogos().filter(j=>j.cat===cat && (!fase||(j.fase||j.pasta)===fase) && (!eq||j.a===eq||j.b===eq) && (!kt_res||j.kt));
+  let ls=jogos().filter(j=>j.cat===cat && (!fase||(faseDe(j))===fase) && (!eq||j.a===eq||j.b===eq) && (!kt_res||j.kt));
   if($('selNaipe').value==='F') ls=ls.filter(j=>j.pa||j.pb);
   ls.sort((x,y)=>dt(y.data).localeCompare(dt(x.data))||(+y.num||0)-(+x.num||0));
   $('res').style.display=$('selNaipe').value==='F'?'none':'';
   if(!ls.length){ $('conteudo').innerHTML='<div class="vazio">Nenhum jogo encontrado com esses filtros.</div>'; return; }
-  const grupos=[]; ls.forEach(j=>{ const g=j.fase||j.pasta||'Jogos'; let x=grupos.find(z=>z.g===g); if(!x) grupos.push(x={g,ls:[]}); x.ls.push(j); });
+  const grupos=[]; ls.forEach(j=>{ const g=faseDe(j)||'Jogos'; let x=grupos.find(z=>z.g===g); if(!x) grupos.push(x={g,ls:[]}); x.ls.push(j); });
   $('conteudo').innerHTML=grupos.map(x=>`<div class="grupo">${esc(x.g)} · ${x.ls.length} ${x.ls.length>1?'jogos':'jogo'}</div><div class="cards">${x.ls.map(card).join('')}</div>`).join('');
 }
 async function kt_init(){

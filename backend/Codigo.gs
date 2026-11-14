@@ -701,7 +701,7 @@ function dadosSumulas() {
   // tabela por categoria + número do jogo
   const tab = {}; if (st) st.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0] && r[2]) tab[r[0] + '|' + r[2]] = r; });
   // nomes dos atletas
-  const nomes = {}; if (sa) sa.getDataRange().getDisplayValues().slice(1).forEach(r => { nomes[r[0] + '|' + r[2]] = r[3]; });
+  const nomes = {}; if (sa) sa.getDataRange().getDisplayValues().slice(1).forEach(r => { nomes[r[0] + '|' + r[1] + '|' + r[2]] = r[3]; });
   // pontos por jogo: cat|fase|sigla|adv -> {ocorrencia: [[reg, pts]]}
   const pj = {}; if (sj) sj.getDataRange().getValues().slice(1).forEach(r => { if (!r[0]) return; const k = r[0] + '|' + r[1] + '|' + r[3] + '|' + r[4]; ((pj[k] = pj[k] || {})[r[2]] = pj[k][r[2]] || []).push([String(r[5]), Number(r[6] || 0)]); });
   const cest = (cat, fase, sig, adv) => { const m = pj[cat + '|' + fase + '|' + sig + '|' + adv]; if (!m || Object.keys(m).length !== 1) return null; const l = m[Object.keys(m)[0]].slice().sort((a, b) => b[1] - a[1]); if (!l.length || !l[0][1]) return null; const top = l.filter(x => x[1] === l[0][1]).map(x => nomes[cat + '|' + sig + '|' + x[0]] || x[0]); return [top.join(' / '), l[0][1]]; };
