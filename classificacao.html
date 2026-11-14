@@ -194,11 +194,11 @@ function abrev(n){ const w=String(n||'').trim().split(/\s+/); const core=w.map((
 let C=null;
 function kt_desenha(){
   const cat=$('selCat').value; const u=new URL(location); u.searchParams.set('cat',cat); history.replaceState(null,'',u);
-  const ls=C.linhas.filter(r=>r[0]===cat); const tabs=[...new Set(ls.map(r=>r[1]))].sort((a,b)=>b-a);
-  $('conteudo').innerHTML=tabs.map((t,ti)=>{ const rs=ls.filter(r=>r[1]===t); const maxJ=Math.max(...rs.map(r=>+r[8]||0)); const atu=rs.map(r=>r[16]).filter(Boolean)[0]||'';
+  const ls=C.linhas.filter(r=>r[0]===cat); const tabs=[...new Set(ls.map(r=>r[1]))].sort((a,b)=>b-a).slice(0,1); // só a tabela mais recente
+  $('conteudo').innerHTML=tabs.map((t,ti)=>{ const rs=ls.filter(r=>r[1]===t); const maxJ=Math.max(...rs.map(r=>+r[8]||0)); const chave=d=>{ const m=String(d).match(/(\d{1,2})\/(\d{1,2})/); return m?(+m[2])*100+(+m[1]):0; }; const atu=rs.map(r=>r[16]).filter(Boolean).sort((a,b)=>chave(b)-chave(a))[0]||''; // data mais recente entre os blocos
     let bl=null; const tr=rs.map(r=>{ let h=''; if(r[3] && r[2]!==bl) h=`<tr class="sub"><td colspan="11">${esc(r[3])}</td></tr>`; bl=r[2];
       const s=r[6]; return h+`<tr><td class="pos">${esc(r[4])}º</td><td class="l"><div class="tm">${s?escudo(s):''}<span>${esc(s?nomeT(s):r[5])}</span></div></td><td class="tot">${esc(r[7])}</td><td>${esc(r[8])}</td><td>${esc(r[9])}</td><td>${esc(r[10])}</td><td>${esc(r[11])}</td><td>${esc(r[12])}</td><td>${esc(r[13])}</td><td>${esc(r[14])}</td><td>${esc(r[15])}</td></tr>`; }).join('');
-    return `<div class="box"><h3>${ti===0?'Classificação atual':'Tabela anterior'} · ${esc(cat)} · ${maxJ} jogos${atu?' · atualizada '+esc(atu):''}</h3><table class="rk"><tr><th>Pos.</th><th class="l">Equipe</th><th>PG</th><th>J</th><th>V</th><th>D</th><th>PP</th><th>PF</th><th>PC</th><th>Saldo</th><th>CAv</th></tr>${tr}</table></div>`; }).join('')||'<div class="vazio">Sem classificação nesta categoria.</div>';
+    return `<div class="box"><h3>Classificação · ${esc(cat)}${atu?' · atualizada em '+esc(atu):''}</h3><table class="rk"><tr><th>Pos.</th><th class="l">Equipe</th><th>PG</th><th>J</th><th>V</th><th>D</th><th>PP</th><th>PF</th><th>PC</th><th>Saldo</th><th>CAv</th></tr>${tr}</table></div>`; }).join('')||'<div class="vazio">Sem classificação nesta categoria.</div>';
 }
 async function kt_init(){
   const r=await api({acao:'dadosClassificacao'});
