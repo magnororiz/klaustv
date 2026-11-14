@@ -570,10 +570,10 @@ kt_init();
       if(cv.width!==Math.round(w*dpr)){ cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); }
       let P=est.get(cv); if(!P){ P=[]; est.set(cv,P); }
       const n=Math.round(w/3.2);
-      for(let i=0;i<n/2.5;i++){ const x=4+Math.random()*(w-8); const borda=Math.min(x,w-x)/(w/2);
-        P.push({x,y:h,vx:(Math.random()-.5)*.35,vy:-(0.5+Math.random()*1.0)*(0.45+0.55*borda),r:4+Math.random()*5,v:0,max:20+Math.random()*24}); }
+      for(let i=0;i<n/4;i++){ const x=4+Math.random()*(w-8); const borda=Math.min(x,w-x)/(w/2);
+        P.push({x,y:h,vx:(Math.random()-.5)*.35,vy:-(0.28+Math.random()*0.55)*(0.45+0.55*borda),r:4+Math.random()*5,v:0,max:36+Math.random()*40}); }
       const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h); c.globalCompositeOperation='lighter';
-      for(let i=P.length-1;i>=0;i--){ const p=P[i]; p.v++; p.x+=p.vx+Math.sin((p.v+p.x)*.25)*.18; p.y+=p.vy; p.vy*=.995; const t=p.v/p.max;
+      for(let i=P.length-1;i>=0;i--){ const p=P[i]; p.v++; p.x+=p.vx*.6+Math.sin((p.v*.6+p.x)*.15)*.12; p.y+=p.vy; p.vy*=.995; const t=p.v/p.max;
         if(t>=1||p.y<-4){ P.splice(i,1); continue; }
         const r=p.r*(1-t*.75); const g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,r);
         const R=255, G=Math.round(235-205*t), B=Math.round(160*(1-t*2.5)); const a=(t<.15?t/.15:1)*(1-t)*.8;
