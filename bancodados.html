@@ -174,7 +174,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 <div class="abasB"><button id="abJ" class="on" onclick="kt_aba('J')">👥 Jogadores</button><button id="abG" onclick="kt_aba('G')">🏀 Jogos</button><button id="abF" onclick="kt_aba('F')">🏛️ FBERJ</button></div>
 <div id="secJ">
  <div class="painel"><div class="filtros"><label>Categoria<select id="jCat" onchange="kt_jTimes()"></select></label><label>Time<select id="jTime" onchange="kt_jLista()"></select></label></div>
- <div class="dica">Elenco inteiro da FBERJ. Apelido, camisa e foto salvos aqui valem para todos os jogos (Montar Jogo, Scout e Ao vivo). Salva sozinho ao sair do campo.</div><div class="dica fedNota" style="color:#7fd1ff"></div></div>
+ <div class="dica">Elenco inteiro da FBERJ. Apelido e foto valem para todos os jogos. A camisa vale para a categoria aberta na tela: quem joga em duas categorias pode ter um número em cada (a categoria sem número próprio usa a camisa que já estava salva). Salva sozinho ao sair do campo.</div><div class="dica fedNota" style="color:#7fd1ff"></div></div>
  <div id="jConteudo"></div>
 </div>
 <div id="secG" style="display:none">
@@ -245,9 +245,11 @@ function kt_jLista(){ const cat=$('jCat').value, sig=$('jTime').value; if(!sig){
   $('jConteudo').innerHTML='<div class="cabT" style="background:'+c+';color:'+txtSobre(c)+'">'+(D.escudos[sig]?'<img src="'+D.escudos[sig]+'">':'')+'<div><b>'+esc(nomeEq(sig))+'</b><div style="font-size:12px">'+esc(cat)+' · '+ls.length+' atletas inscritos na FBERJ</div></div></div>'+
    '<table class="bd"><tr><th>Foto</th><th>Camisa</th><th>Nome completo</th><th>Matrícula FBERJ</th><th>Apelido</th><th></th></tr>'+
    '<tr style="background:#101c31"><td>'+btFoto(tk)+'</td><td style="color:#ffd54f;font-weight:800;font-size:11px">TÉCNICO</td><td colspan="2"><input class="inAp" style="width:340px;max-width:100%;box-sizing:border-box" placeholder="Nome do técnico" value="'+esc(APS[tk]||'')+'" onchange="kt_salvarAp(\''+tk+'\',this)"></td><td></td><td class="ok" id="ok_'+tk+'"></td></tr>'+
-   ls.map(a=>'<tr><td>'+btFoto(a[0])+'</td><td><input class="inCam" inputmode="numeric" maxlength="3" value="'+esc(CAMS[a[0]]||'')+'" onchange="kt_salvarCam(\''+a[0]+'\',this)"></td><td>'+esc(a[1])+'</td><td class="reg">'+a[0]+'</td><td><input class="inAp" value="'+esc(APS[a[0]]||'')+'" onchange="kt_salvarAp(\''+a[0]+'\',this)"></td><td class="ok" id="ok_'+a[0]+'"></td></tr>').join('')+'</table>'; }
+   ls.map(a=>'<tr><td>'+btFoto(a[0])+'</td><td><input class="inCam" inputmode="numeric" maxlength="3" value="'+esc(camDe(a[0],cat))+'" title="Camisa no '+esc(cat)+'" onchange="kt_salvarCam(\''+a[0]+'\',this,\''+cat+'\')"></td><td>'+esc(a[1])+'</td><td class="reg">'+a[0]+'</td><td><input class="inAp" value="'+esc(APS[a[0]]||'')+'" onchange="kt_salvarAp(\''+a[0]+'\',this)"></td><td class="ok" id="ok_'+a[0]+'"></td></tr>').join('')+'</table>'; }
 async function kt_salvarAp(k,el){ const v=el.value.trim(); const r=await api({acao:'salvarApelido',reg:k,apelido:v}); if(r.ok){ APS[k]=v; $('ok_'+k).textContent='✔ salvo'; } else aviso('Não salvou: '+(r.erro||'tente de novo')); }
-async function kt_salvarCam(k,el){ const v=el.value.replace(/[^0-9]/g,''); el.value=v; const r=await api({acao:'salvarCamisa',reg:k,camisa:v}); if(r.ok){ CAMS[k]=v; $('ok_'+k).textContent='✔ salvo'; } else aviso('Não salvou: '+(r.erro||'tente de novo')); }
+const camKey=(r,cat)=>String(r)+'-'+String(cat||'').replace(/[^A-Za-z0-9]/g,'');
+function camDe(r,cat){ const k=camKey(r,cat); return CAMS[k]!==undefined?CAMS[k]:(CAMS[r]||''); } // camisa da categoria; se não houver, a camisa padrão
+async function kt_salvarCam(reg,el,cat){ const k=cat?camKey(reg,cat):reg; const v=el.value.replace(/[^0-9]/g,''); el.value=v; const r=await api({acao:'salvarCamisa',reg:k,camisa:v}); if(r.ok){ CAMS[k]=v; $('ok_'+reg).textContent='✔ salvo'; } else aviso('Não salvou: '+(r.erro||'tente de novo')); }
 function kt_foto(btn){ const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
   inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ const im=new Image(); im.onload=async()=>{
     const M=600,k=Math.min(1,M/Math.max(im.width,im.height)); const c=document.createElement('canvas'); c.width=Math.round(im.width*k); c.height=Math.round(im.height*k); c.getContext('2d').drawImage(im,0,0,c.width,c.height);
