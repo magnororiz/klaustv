@@ -17,7 +17,7 @@ function doPost(e) {
   try { p = JSON.parse(e.postData.contents || '{}'); } catch (err) { return responder({ ok: false, erro: 'Pedido inválido.' }); }
   if (p.acao === 'aoVivoLista') return responder(aoVivoLista(p.categoria));
   if (p.acao === 'aoVivoJogo') return responder(aoVivoJogo(p.id));
-  if (p.acao === 'dadosFed') return responder(dadosFed());
+  if (p.acao === 'dadosFed') return responder(comExtras(dadosFed()));
   if (p.acao === 'dadosCestinhas') return responder(dadosCestinhas());
   if (p.acao === 'dadosSumulas') return responder(dadosSumulas());
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
@@ -44,6 +44,8 @@ function doPost(e) {
       case 'incluirArbitragem': return responder(incluirArbitragem(p.token, p.nomes));
       case 'funcaoArbitragem': return responder(funcaoArbitragem(p.token, p.nome, p.funcao));
       case 'excluirArbitragem': return responder(excluirArbitragem(p.token, p.nome));
+      case 'incluirExtra': return responder(incluirExtra(p.token, p));
+      case 'excluirExtra': return responder(excluirExtra(p.token, p));
       case 'statusBackup': return responder(statusBackup(p.token));
       case 'rodarBackup': return responder(rodarBackupSite(p.token));
       case 'sair': CacheService.getScriptCache().remove('s_' + p.token); return responder({ ok: true });
@@ -555,6 +557,43 @@ function dadosFed() {
   const res = { ok: true, atualizado: quando, elencos: elencos, equipes: equipes, tabela: tabela, placar: placar };
   try { const s = JSON.stringify(res); const parts = []; for (let i = 0; i < s.length; i += 90000) parts.push(s.slice(i, i + 90000)); const o = { fed_n: String(parts.length) }; parts.forEach((x, i) => o['fed_' + i] = x); c.putAll(o, 21600); } catch (e) {}
   return res;
+}
+
+/* ---------- Atleta de categoria inferior jogando na superior ----------
+ * Aba AtletasExtras: categoria | sigla | matricula | nome | deCategoria | incluidoEm | incluidoPor
+ * Mesma matrícula da FBERJ; entra no elenco da categoria superior (dadosFed) marcado com a categoria de origem.
+ */
+const ORD_CAT = ['Sub-12', 'Sub-13', 'Sub-14', 'Sub-15', 'Sub-16', 'Sub-17', 'Sub-19', 'Sub-22', 'Adulto'];
+function abaExtras() {
+  const ss = SpreadsheetApp.openById(PLANILHA_ID); let sh = ss.getSheetByName('AtletasExtras');
+  if (!sh) { sh = ss.insertSheet('AtletasExtras'); sh.getRange(1, 1, 1, 7).setValues([['categoria', 'sigla', 'matricula', 'nome', 'deCategoria', 'incluidoEm', 'incluidoPor']]); sh.setFrozenRows(1); sh.getRange('C:C').setNumberFormat('@'); }
+  return sh;
+}
+function lerExtras() {
+  const sh = SpreadsheetApp.openById(PLANILHA_ID).getSheetByName('AtletasExtras'); if (!sh) return [];
+  return sh.getDataRange().getDisplayValues().slice(1).map((r, i) => ({ linha: i + 2, categoria: r[0], sigla: r[1], matricula: String(r[2]).trim(), nome: r[3], deCategoria: r[4] })).filter(x => x.categoria && x.sigla && x.matricula);
+}
+function comExtras(res) {
+  if (!res || !res.ok) return res;
+  try { lerExtras().forEach(x => { const c = res.elencos[x.categoria] = res.elencos[x.categoria] || {}; const l = c[x.sigla] = c[x.sigla] || [];
+    const a = l.find(y => String(y[0]) === x.matricula); if (a) { if (!a[2]) a[2] = x.deCategoria; } else l.push([x.matricula, x.nome, x.deCategoria]); l.sort((p, q) => String(p[1]).localeCompare(String(q[1]), 'pt-BR')); }); } catch (e) {}
+  return res;
+}
+function incluirExtra(token, p) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  const cat = String(p.categoria || ''), de = String(p.deCategoria || ''), sig = String(p.sigla || '').trim(), mat = String(p.matricula || '').trim(), nome = String(p.nome || '').replace(/\s+/g, ' ').trim();
+  if (ORD_CAT.indexOf(cat) < 0 || ORD_CAT.indexOf(de) < 0) return { ok: false, erro: 'Categoria inválida.' };
+  if (ORD_CAT.indexOf(de) >= ORD_CAT.indexOf(cat)) return { ok: false, erro: 'Só pode subir atleta de categoria inferior.' };
+  if (!/^[A-Za-z0-9]{2,12}$/.test(sig) || !/^[0-9A-Za-z]{2,20}$/.test(mat) || nome.length < 3) return { ok: false, erro: 'Dados do atleta inválidos.' };
+  if (lerExtras().some(x => x.categoria === cat && x.sigla === sig && x.matricula === mat)) return { ok: true, jaTinha: true };
+  const sh = abaExtras(); sh.appendRow([cat, sig, mat, nome, de, new Date(), u.usuario]); sh.getRange(sh.getLastRow(), 3).setNumberFormat('@').setValue(mat);
+  return { ok: true };
+}
+function excluirExtra(token, p) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  const x = lerExtras().find(y => y.categoria === String(p.categoria) && y.sigla === String(p.sigla) && y.matricula === String(p.matricula));
+  if (!x) return { ok: false, erro: 'Atleta não encontrado na lista de inclusões.' };
+  abaExtras().deleteRow(x.linha); return { ok: true };
 }
 
 function statusBackup(token) {

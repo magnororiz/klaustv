@@ -41,6 +41,7 @@ table.bd input{padding:6px;border-radius:6px;border:1px solid #2c3e50;font-size:
 .inCam{width:52px;text-align:center;font-weight:800;}
 .inAp{width:150px;}
 .reg{color:#64b5f6;font-size:12px;}
+.tagSub{background:#ffd54f;color:#000;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:800;margin-left:4px;}
 .bFoto{width:40px;height:40px;border-radius:50%;border:2px dashed #2a3b55;background:#0b1220;color:#fff;cursor:pointer;padding:0;overflow:hidden;font-size:16px;}
 .bFoto.tem{border:2px solid #1e90ff;}
 .bFoto img{width:100%;height:100%;object-fit:cover;}
@@ -245,7 +246,23 @@ function kt_jLista(){ const cat=$('jCat').value, sig=$('jTime').value; if(!sig){
   $('jConteudo').innerHTML='<div class="cabT" style="background:'+c+';color:'+txtSobre(c)+'">'+(D.escudos[sig]?'<img src="'+D.escudos[sig]+'">':'')+'<div><b>'+esc(nomeEq(sig))+'</b><div style="font-size:12px">'+esc(cat)+' · '+ls.length+' atletas inscritos na FBERJ</div></div></div>'+
    '<table class="bd"><tr><th>Foto</th><th>Camisa</th><th>Nome completo</th><th>Matrícula FBERJ</th><th>Apelido</th><th></th></tr>'+
    '<tr style="background:#101c31"><td>'+btFoto(tk)+'</td><td style="color:#ffd54f;font-weight:800;font-size:11px">TÉCNICO</td><td colspan="2"><input class="inAp" style="width:340px;max-width:100%;box-sizing:border-box" placeholder="Nome do técnico" value="'+esc(APS[tk]||'')+'" onchange="kt_salvarAp(\''+tk+'\',this)"></td><td></td><td class="ok" id="ok_'+tk+'"></td></tr>'+
-   ls.map(a=>'<tr><td>'+btFoto(a[0])+'</td><td><input class="inCam" inputmode="numeric" maxlength="3" value="'+esc(camDe(a[0],cat))+'" title="Camisa no '+esc(cat)+'" onchange="kt_salvarCam(\''+a[0]+'\',this,\''+cat+'\')"></td><td>'+esc(a[1])+'</td><td class="reg">'+a[0]+'</td><td><input class="inAp" value="'+esc(APS[a[0]]||'')+'" onchange="kt_salvarAp(\''+a[0]+'\',this)"></td><td class="ok" id="ok_'+a[0]+'"></td></tr>').join('')+'</table>'; }
+   ls.map(a=>'<tr><td>'+btFoto(a[0])+'</td><td><input class="inCam" inputmode="numeric" maxlength="3" value="'+esc(camDe(a[0],cat))+'" title="Camisa no '+esc(cat)+'" onchange="kt_salvarCam(\''+a[0]+'\',this,\''+cat+'\')"></td><td>'+esc(a[1])+(a[2]?' <span class="tagSub">do '+esc(a[2])+'</span> <button class="bExc" title="Tirar do '+esc(cat)+'" onclick="kt_jTirarExtra(\''+a[0]+'\')">🗑️ Excluir</button>':'')+'</td><td class="reg">'+a[0]+'</td><td><input class="inAp" value="'+esc(APS[a[0]]||'')+'" onchange="kt_salvarAp(\''+a[0]+'\',this)"></td><td class="ok" id="ok_'+a[0]+'"></td></tr>').join('')+'</table>'+kt_jBlocoExtra(cat,sig,ls); }
+function kt_jBlocoExtra(cat,sig,ls){ const i=D.ordem.indexOf(cat); if(i<=0) return '';
+  const tem=new Set(ls.map(a=>String(a[0]))); const ops=[];
+  D.ordem.slice(0,i).reverse().forEach(c=>{ const l=((D.elencos[c]||{})[sig]||[]).filter(a=>!a[2]&&!tem.has(String(a[0]))); if(l.length) ops.push('<optgroup label="'+esc(c)+'">'+l.map(a=>'<option value="'+esc(c)+'|'+a[0]+'">'+esc(a[1])+' ('+a[0]+')</option>').join('')+'</optgroup>'); });
+  return '<div class="painel" style="margin-top:10px"><b style="color:#ffd54f">➕ Incluir atleta de categoria inferior no '+esc(cat)+'</b><div class="dica">Atleta do '+esc(nomeEq(sig))+' de categoria abaixo que vai jogar no '+esc(cat)+'. Entra com a mesma matrícula (as estatísticas continuam juntas). Camisa: se for a mesma, não precisa mexer; se for outra, digite na linha dele aqui no '+esc(cat)+'.</div>'+
+    (ops.length?'<div class="filtros" style="margin-top:6px"><select id="jExtraSel" style="flex:1;min-width:260px"><option value="">— escolha o atleta —</option>'+ops.join('')+'</select><button class="btSalvar" style="padding:9px 16px;font-size:14px" onclick="kt_jIncluirExtra()">➕ Incluir</button></div>':'<div class="dica">Nenhum atleta de categoria inferior disponível para este time.</div>')+'</div>'; }
+function kt_jCacheFed(f){ try{ const c=JSON.parse(localStorage.getItem('kt_fed_v1')||'null'); if(c&&c.elencos){ f(c); localStorage.setItem('kt_fed_v1',JSON.stringify(c)); } }catch(e){} }
+async function kt_jIncluirExtra(){ const v=$('jExtraSel').value; if(!v) return aviso('Escolha o atleta na lista.');
+  const cat=$('jCat').value, sig=$('jTime').value; const [de,mat]=v.split('|'); const a=((D.elencos[de]||{})[sig]||[]).find(x=>String(x[0])===mat); if(!a) return;
+  const r=await api({acao:'incluirExtra',categoria:cat,sigla:sig,matricula:mat,nome:a[1],deCategoria:de}); if(!r.ok) return aviso('Não incluiu: '+(r.erro||'tente de novo'));
+  const pr=(x,y)=>String(x[1]).localeCompare(String(y[1]),'pt-BR'); const add=E=>{ const c=E[cat]=E[cat]||{}; const l=c[sig]=c[sig]||[]; if(!l.some(x=>String(x[0])===mat)) l.push([mat,a[1],de]); l.sort(pr); };
+  add(D.elencos); kt_jCacheFed(c=>add(c.elencos)); aviso('✅ '+a[1]+' incluído no '+cat+'.'); kt_jLista(); }
+async function kt_jTirarExtra(mat){ const cat=$('jCat').value, sig=$('jTime').value; const a=((D.elencos[cat]||{})[sig]||[]).find(x=>String(x[0])===String(mat)); if(!a) return;
+  if(!confirm('Tirar '+a[1]+' do '+cat+'? Ele continua no '+a[2]+' e os jogos já montados não mudam.')) return;
+  const r=await api({acao:'excluirExtra',categoria:cat,sigla:sig,matricula:String(mat)}); if(!r.ok) return aviso('Não tirou: '+(r.erro||'tente de novo'));
+  const tira=E=>{ const l=(E[cat]||{})[sig]; if(l){ const k=l.findIndex(x=>String(x[0])===String(mat)&&x[2]); if(k>=0) l.splice(k,1); } };
+  tira(D.elencos); kt_jCacheFed(c=>tira(c.elencos)); aviso('Atleta tirado do '+cat+'.'); kt_jLista(); }
 async function kt_salvarAp(k,el){ const v=el.value.trim(); const r=await api({acao:'salvarApelido',reg:k,apelido:v}); if(r.ok){ APS[k]=v; $('ok_'+k).textContent='✔ salvo'; } else aviso('Não salvou: '+(r.erro||'tente de novo')); }
 const camKey=(r,cat)=>String(r)+'-'+String(cat||'').replace(/[^A-Za-z0-9]/g,'');
 function camDe(r,cat){ const k=camKey(r,cat); return CAMS[k]!==undefined?CAMS[k]:(CAMS[r]||''); } // camisa da categoria; se não houver, a camisa padrão
