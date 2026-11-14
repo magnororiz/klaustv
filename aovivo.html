@@ -80,6 +80,8 @@ table.ab.cmp td.it small{color:#7a6a3a!important;}
 .abaNota{font-size:12px;color:#666;padding:8px 12px;line-height:1.4;}
 .abaNota a{color:#1e5bd8;}
 .trofN{font-family:'Oswald','Arial Narrow',Arial;font-size:30px;}
+.dif{color:#2e7d32;font-weight:800;font-size:11px;}
+table.ab.cmp td small{font-weight:600;}
 /* tabelas */
 .duas{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
 @media(max-width:1000px){.duas{grid-template-columns:1fr;}}
@@ -114,7 +116,7 @@ table.jog td{white-space:nowrap;}table.jog td.nm{white-space:normal;}.med{font-s
 table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444;white-space:nowrap;}
 .box{overflow-x:auto;}
 .med{font-size:10px;margin-left:1px;}
-@media(max-width:560px){table.jog .hm{display:none;}table.jog td.nm{max-width:96px;font-size:11px;}table.jog .rk,table.jog .rkh{display:none;}table.jog th,table.jog td{padding-left:2px;padding-right:2px;}table.jog .num{min-width:22px;padding:2px 3px;font-size:11px;}table.jog{font-size:11.5px;}table.jog th{font-size:10px;}table.jog{font-size:12px;}.lid .lado img{width:40px;height:40px;}.lid .lado{gap:6px;padding:8px;}.lid .lado .n{font-size:13px;}.lid .lado .v{font-size:24px;}.mvp{font-size:12px;padding:1px 8px;}}
+@media(max-width:560px){table.jog .hm{display:none;}table.jog td.nm{max-width:96px;font-size:11px;}table.jog .rk,table.jog .rkh{display:none;}table.jog th,table.jog td{padding-left:2px;padding-right:2px;}table.jog .num{min-width:22px;padding:2px 3px;font-size:11px;}table.jog{font-size:11.5px;}table.jog th{font-size:10px;}table.jog{font-size:12px;}.lid .lado img{width:40px;height:40px;}.lid .lado{gap:6px;padding:8px;}.lid .lado .n{font-size:13px;}.lid .lado .v{font-size:24px;}.mvp{font-size:12px;padding:10px 12px 3px;margin-top:14px;}}
 /* comparação */
 .comp table{width:100%;border-collapse:collapse;font-size:14px;}
 @media(min-width:1001px){.duas.iguais{align-items:stretch;}.duas.iguais>.box{display:flex;flex-direction:column;}.duas.iguais .comp table{flex:1;font-size:16px;}.duas.iguais .comp td{padding:6px 12px;}.duas.iguais .lid{justify-content:flex-start;}}
@@ -139,14 +141,17 @@ table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444
 .lid .seg{display:grid;grid-template-columns:1fr 1fr;font-size:13px;font-weight:700;}
 .lid .seg div{display:flex;justify-content:space-between;padding:7px 12px;border-bottom:1px solid #eef0f3;}
 .lid .seg div.dir{flex-direction:row-reverse;border-left:1px solid #e4e7ec;}
-.mvp{display:inline-block;margin-top:4px;font-family:'Oswald','Arial Narrow',Arial;font-weight:700;font-size:15px;letter-spacing:2px;color:#fff;padding:7px 14px 3px;line-height:1.1;border-radius:7px;
-  background:linear-gradient(0deg,#1e5bd8 0%,#1e5bd8 42%,#ff8f00 78%,#ffd54f 100%);text-shadow:0 1px 2px rgba(0,0,0,.6);box-shadow:0 0 10px rgba(255,120,0,.8),0 0 22px rgba(255,60,0,.45);animation:fogo 1.4s ease-in-out infinite alternate;}
-@keyframes fogo{0%{box-shadow:0 0 8px rgba(255,140,0,.7),0 -2px 14px rgba(255,60,0,.4);transform:translateY(0);}100%{box-shadow:0 0 16px rgba(255,200,0,.95),0 -6px 24px rgba(255,60,0,.6);transform:translateY(-1px);}}
-.fogo{position:relative;display:inline-block;width:16px;height:20px;vertical-align:-4px;margin-right:2px;}
-.fogo i{position:absolute;bottom:0;left:50%;width:12px;height:18px;margin-left:-6px;border-radius:50% 50% 45% 45%/65% 65% 35% 35%;
-  background:radial-gradient(circle at 50% 78%,#fffde7 0,#ffee58 18%,#ffa726 45%,#ff5722 68%,rgba(229,57,53,0) 80%);transform-origin:50% 100%;animation:chama .55s ease-in-out infinite alternate;}
-.fogo i:nth-child(2){width:8px;height:13px;margin-left:-9px;animation-duration:.42s;animation-delay:-.2s;opacity:.85;}
-.fogo i:nth-child(3){width:7px;height:12px;margin-left:1px;animation-duration:.48s;animation-delay:-.1s;opacity:.85;}
+.mvp{position:relative;display:inline-block;margin-top:20px;font-family:'Oswald','Arial Narrow',Arial;font-weight:700;font-size:15px;letter-spacing:2px;color:#fff;padding:13px 18px 5px;line-height:1.1;border-radius:0 0 8px 8px;
+  background:linear-gradient(0deg,#1e5bd8 0%,#1e5bd8 30%,#5a4bc4 46%,#b23a7a 60%,#e8453c 72%,#ff8a00 86%,#ffd54f 100%);text-shadow:0 1px 3px rgba(0,0,0,.8);box-shadow:0 0 10px rgba(255,120,0,.55),0 -4px 16px rgba(255,80,0,.45);animation:fogo 1.4s ease-in-out infinite alternate;}
+.mvp b{position:relative;z-index:2;font-weight:700;}
+@keyframes fogo{0%{box-shadow:0 0 8px rgba(255,140,0,.5),0 -4px 14px rgba(255,60,0,.35);}100%{box-shadow:0 0 14px rgba(255,200,0,.75),0 -8px 22px rgba(255,60,0,.55);}}
+.chamas{position:absolute;left:-3px;right:-3px;bottom:100%;height:24px;margin-bottom:-3px;display:flex;align-items:flex-end;pointer-events:none;z-index:1;}
+.chamas i{flex:1;height:100%;margin:0 -2px;border-radius:50% 50% 45% 45%/85% 85% 15% 15%;
+  background:radial-gradient(ellipse 60% 70% at 50% 100%,#fffde7 0,#ffee58 22%,#ffa726 48%,#ff5722 72%,rgba(229,57,53,0) 100%);transform-origin:50% 100%;animation:chama .5s ease-in-out infinite alternate;}
+.chamas i:nth-child(2n){height:72%;animation-duration:.42s;animation-delay:-.2s;}
+.chamas i:nth-child(3n){height:88%;animation-duration:.58s;animation-delay:-.33s;}
+.chamas i:nth-child(4n+1){animation-duration:.46s;animation-delay:-.12s;}
+.chamas i:nth-child(5n){height:100%;animation-duration:.38s;animation-delay:-.27s;}
 @keyframes chama{0%{transform:scaleY(.85) scaleX(1.05) rotate(-4deg) translateY(0);filter:brightness(1);}50%{transform:scaleY(1.12) scaleX(.92) rotate(3deg) translateY(-1px);}100%{transform:scaleY(.95) scaleX(1) rotate(-2deg) translateY(-2px);filter:brightness(1.25);}}
 .mudou{animation:mudou 2.2s ease;}
 @keyframes mudou{0%{background:#ffd54f;}100%{background:transparent;}}
@@ -419,7 +424,7 @@ function kt_render(j){
   const top3=(js,k)=>js.filter(p=>(+p[k]||0)!==0).sort(ordem(k)).slice(0,3);
   const nomeJ=p=>esc(p.apelido||abrev(p.nome));
   const lider=cats.map(([k,t],idx)=>{ const a=top3(ja,k), b=top3(jb,k);
-    const lado=(p,dir)=>p?`<div class="lado ${dir?'dir':''}"><img src="${foto(p.reg)}" alt="" onclick="kt_zoom(this.src,'${esc(p.nome).replace(/'/g,'')}')"><div class="n">${nomeJ(p)}${(k==='eff'&&p.reg===mvp)?'<br><span class="mvp"><span class="fogo"><i></i><i></i><i></i></span> MVP</span>':''}</div><div class="v">${+p[k]||0}</div></div>`:`<div class="lado ${dir?'dir':''}" style="color:#999;">—</div>`;
+    const lado=(p,dir)=>p?`<div class="lado ${dir?'dir':''}"><img src="${foto(p.reg)}" alt="" onclick="kt_zoom(this.src,'${esc(p.nome).replace(/'/g,'')}')"><div class="n">${nomeJ(p)}${(k==='eff'&&p.reg===mvp)?'<br><span class="mvp"><span class="chamas"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>MVP</b></span>':''}</div><div class="v">${+p[k]||0}</div></div>`:`<div class="lado ${dir?'dir':''}" style="color:#999;">—</div>`;
     const seg=i=>`<div>${a[i]?`<span>${nomeJ(a[i])}</span><span>${+a[i][k]||0}</span>`:''}</div><div class="dir">${b[i]?`<span>${nomeJ(b[i])}</span><span>${+b[i][k]||0}</span>`:''}</div>`;
     return (idx===3?`<div id="lidExtra" style="${kt_todosLid?'':'display:none'}">`:'')+`<div class="bloco"><div class="tit"><div class="b" style="background:${ca}"></div><img src="${escudo(sa)}" alt=""><div>${t}</div><img src="${escudo(sb)}" alt=""><div class="b" style="background:${cb}"></div></div>
       <div class="top">${lado(a[0],false)}${lado(b[0],true)}</div><div class="seg">${seg(1)}${seg(2)}</div></div>`+(idx===cats.length-1?'</div>':''); }).join('')
@@ -518,16 +523,31 @@ function kt_abaHTML(j,ja,jb){
       <div class="abaNota">Medalhas só dos jogos entre ${esc(D.curto[sa]||sa)} e ${esc(D.curto[sb]||sb)} no ${esc(cat)} com estatística do Klaus TV (soma de todos os confrontos da temporada, inclusive este jogo; ou só o confronto anterior, se escolhido). Quem joga em duas categorias tem uma conta em cada. Em cada jogo, os 3 melhores do jogo (os dois times juntos) em cada item ganham 🥇 ouro, 🥈 prata e 🥉 bronze; empate divide a medalha. A classificação é por mais ouros, depois pratas, depois bronzes — no item escolhido ou no Geral (soma de todos os itens). Erros e faltas não dão medalha.</div>`;
   }
   if(KT_ABA==='tro'){
-    const I=KT_HIS.itens, GS=kt_confr(j,sa,sb);
+    const GS=kt_confr(j,sa,sb).filter(g=>g.sa&&g.sb);
     if(!GS.length) return kt_confrTopo(j,sa,sb,'🏆 Troféus nos confrontos')+kt_semConfr;
-    const A={j:GS.length,t:{}}, B={j:GS.length,t:{}}; GS.forEach(g=>{ const xa=g.a===sa?g.ta:g.tb, xb=g.a===sa?g.tb:g.ta; Object.keys(xa||{}).forEach(k=>A.t[k]=(A.t[k]||0)+1); Object.keys(xb||{}).forEach(k=>B.t[k]=(B.t[k]||0)+1); });
-    const tot=o=>I.reduce((s,k)=>s+(o.t[k]||0),0); const ta=tot(A), tb=tot(B);
-    const NOME={PTS:'Pontos',AQ:'Arremessos de quadra',"2P":'Arremessos de 2',"3P":'Arremessos de 3',LL:'Lances livres',REB:'Rebotes',AST:'Assistências',RB:'Roubos de bola',T:'Tocos',ERR:'Erros (menos)',FP:'Faltas (menos)',EF:'Eficiência'};
-    const lin=I.map((k,i)=>{ const a=A.t[k]||0,b=B.t[k]||0; return `<tr>${kt_celTime(sa,i+2,a,a>b,'A')}<td class="it" title="${NOME[k]}">${k}<br><small style="font-weight:600">${NOME[k]}</small></td>${kt_celTime(sb,i+2,b,b>a,'B')}</tr>`; }).join('');
+    const KS=['pts','twoMade','twoMiss','threeMade','threeMiss','ftMade','ftMiss','reb','ast','stl','blk','to','foul','eff'];
+    const S=()=>{ const o={}; KS.forEach(k=>o[k]=0); return o; }; const A=S(), B=S();
+    GS.forEach(g=>{ const xa=g.a===sa?g.sa:g.sb, xb=g.a===sa?g.sb:g.sa; KS.forEach((k,i)=>{ A[k]+=(+xa[i]||0); B[k]+=(+xb[i]||0); }); });
+    const pc=(mk,a)=>a?Math.round(mk*100/a):0;
+    const arr=(o,mk,ms)=>{ const a=o[mk]+o[ms]; return {txt:`${o[mk]}/${a} <small>(${pc(o[mk],a)}%)</small>`,v:pc(o[mk],a),tem:a>0,p:1}; };
+    const aq=o=>{ const mk=o.twoMade+o.threeMade, a=mk+o.twoMiss+o.threeMiss; return {txt:`${mk}/${a} <small>(${pc(mk,a)}%)</small>`,v:pc(mk,a),tem:a>0,p:1}; };
+    const num=(o,k)=>({txt:String(o[k]),v:o[k],tem:true});
+    const L=[['PTS','Pontos',num(A,'pts'),num(B,'pts'),1],['AQ','Arremessos de quadra',aq(A),aq(B),1],['2P','Arremessos de 2',arr(A,'twoMade','twoMiss'),arr(B,'twoMade','twoMiss'),1],
+      ['3P','Arremessos de 3',arr(A,'threeMade','threeMiss'),arr(B,'threeMade','threeMiss'),1],['LL','Lances livres',arr(A,'ftMade','ftMiss'),arr(B,'ftMade','ftMiss'),1],
+      ['REB','Rebotes',num(A,'reb'),num(B,'reb'),1],['AST','Assistências',num(A,'ast'),num(B,'ast'),1],['RB','Roubos de bola',num(A,'stl'),num(B,'stl'),1],
+      ['T','Tocos',num(A,'blk'),num(B,'blk'),1],['ERR','Erros (menos é melhor)',num(A,'to'),num(B,'to'),-1],['FP','Faltas (menos é melhor)',num(A,'foul'),num(B,'foul'),-1],['EF','Eficiência',num(A,'eff'),num(B,'eff'),1]];
+    let na=0, nb=0;
+    const tr=(c,i,txt,ganhou,lado)=>{ const bg=kt_tinta(c,i%2?0.80:0.90); const t=ganhou?'<span class="trofeu">🏆</span>':''; return `<td style="background:${bg}!important;${ganhou?'font-weight:900':''}">${lado==='A'?t+txt:txt+t}</td>`; };
+    const dif=(a,b)=>{ const d=Math.abs(a.v-b.v); return d?` <small class="dif">${a.p?'+'+d+' p.p.':'+'+d}</small>`:''; };
+    const lin=L.map(([k,nome,a,b,dir],i)=>{ let ga=false,gb=false;
+      if((a.tem||b.tem) && a.v!==b.v && !(a.v===0&&b.v===0)){ if((a.v-b.v)*dir>0) ga=true; else gb=true; }
+      if(a.v===b.v && a.v!==0 && dir>0){ ga=gb=true; }
+      if(ga) na++; if(gb) nb++;
+      return `<tr>${tr(cor(sa),i+2,a.txt+(ga&&!gb?dif(a,b):''),ga,'A')}<td class="it" title="${nome}">${k}<br><small style="font-weight:600">${nome}</small></td>${tr(cor(sb),i+2,b.txt+(gb&&!ga?dif(a,b):''),gb,'B')}</tr>`; }).join('');
     return kt_confrTopo(j,sa,sb,'🏆 Troféus nos confrontos')+`
-      <table class="ab cmp"><tr><th style="width:38%">${kt_tm(sa)}</th><th style="font-size:10px;color:#7a6a3a;text-transform:none">🏆 = nº de jogos em que o time venceu o item</th><th style="width:38%">${kt_tm(sb)}</th></tr>
-      <tr>${kt_celTime(sa,0,A.j,false,'A')}<td class="it">Confrontos na temporada</td>${kt_celTime(sb,0,B.j,false,'B')}</tr><tr>${kt_celTime(sa,1,'<span class="trofN">🏆 '+ta+'</span>',ta>tb,'A')}<td class="it">TOTAL</td>${kt_celTime(sb,1,'<span class="trofN">🏆 '+tb+'</span>',tb>ta,'B')}</tr>${lin}</table>
-      <div class="abaNota">Só os jogos entre ${esc(D.curto[sa]||sa)} e ${esc(D.curto[sb]||sb)} no ${esc(cat)} com estatística do Klaus TV (soma de todos os confrontos da temporada, inclusive este jogo; ou só o confronto anterior, se escolhido). Em cada confronto, o time que vence um item do Resumo ganha 🏆 naquele item (empate com valor dá troféu aos dois). A marca ✓ mostra quem tem mais troféus em cada item.</div>`;
+      <table class="ab cmp"><tr><th style="width:38%">${kt_tm(sa)}</th><th style="font-size:10px;color:#7a6a3a;text-transform:none">Soma dos confrontos · 🏆 = quem tem o melhor número</th><th style="width:38%">${kt_tm(sb)}</th></tr>
+      <tr>${kt_celTime(sa,0,GS.length,false,'A')}<td class="it">Confrontos na temporada</td>${kt_celTime(sb,0,GS.length,false,'B')}</tr><tr>${kt_celTime(sa,1,'<span class="trofN">🏆 '+na+'</span>',na>nb,'A')}<td class="it">TOTAL<br><small style="font-weight:600">itens vencidos</small></td>${kt_celTime(sb,1,'<span class="trofN">🏆 '+nb+'</span>',nb>na,'B')}</tr>${lin}</table>
+      <div class="abaNota">Só os jogos entre ${esc(D.curto[sa]||sa)} e ${esc(D.curto[sb]||sb)} no ${esc(cat)} com estatística do Klaus TV (soma de todos os confrontos da temporada, inclusive este jogo; ou só o confronto anterior, se escolhido). Cada linha mostra a soma dos números do Resumo; o 🏆 vai para quem tem o número maior (em erros e faltas, o menor; nos arremessos, o melhor aproveitamento). O número pequeno mostra a diferença para o outro time. Empate com valor dá troféu aos dois.</div>`;
   }
   if(KT_ABA==='cla'){
     if(!KT_CLA){ kt_abaCarregar('cla'); return kt_carregando('a classificação'); }

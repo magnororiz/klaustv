@@ -849,7 +849,7 @@ function ktNum(s) { const o = {}; ['twoMade', 'twoMiss', 'threeMade', 'threeMiss
   o.pts = (s && s.pts !== undefined && s.pts !== '') ? Number(s.pts) : 2 * o.twoMade + 3 * o.threeMade + o.ftMade;
   o.eff = (s && s.eff !== undefined && s.eff !== '') ? Number(s.eff) : o.pts + o.reb + o.ast + o.blk + o.stl - (o.twoMiss + o.threeMiss + o.ftMiss + o.to); return o; }
 function historicoKT() {
-  const hit = cacheGet('hkt3'); if (hit) return hit;
+  const hit = cacheGet('hkt4'); if (hit) return hit;
   const J = {}, T = {}, G = []; let nj = 0;
   lerJogos().forEach(x => {
     const m = jsonOu(x.meta, {}), st = jsonOu(x.stats, {}), cat = String(x.categoria || '');
@@ -862,7 +862,7 @@ function historicoKT() {
     KT_CRIT.forEach(([k, lab]) => ps.forEach(p => { const v = p.s[k]; if (v <= 0) return; const pos = 1 + ps.filter(q => q.s[k] > v).length; if (pos > 3) return; const mm = JC[p.reg].m[lab] = JC[p.reg].m[lab] || [0, 0, 0]; mm[pos - 1]++; const gm = (g.m[p.reg] = g.m[p.reg] || {}); const gx = gm[lab] = gm[lab] || [0, 0, 0]; gx[pos - 1]++; }));
     if (m.avulso && !m.timesFed) return;
     const tot = l => { const o = {}; ps.filter(p => p.l === l).forEach(p => Object.keys(p.s).forEach(k => o[k] = (o[k] || 0) + p.s[k])); ['pts', 'twoMade', 'twoMiss', 'threeMade', 'threeMiss', 'ftMade', 'ftMiss', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'eff'].forEach(k => o[k] = o[k] || 0); return o; };
-    const ta = tot('A'), tb = tot('B'); const pct = (mk, a) => a ? Math.round(mk * 100 / a) : 0;
+    const ta = tot('A'), tb = tot('B'); const KS = ['pts', 'twoMade', 'twoMiss', 'threeMade', 'threeMiss', 'ftMade', 'ftMiss', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'eff']; g.sa = KS.map(k => ta[k]); g.sb = KS.map(k => tb[k]); const pct = (mk, a) => a ? Math.round(mk * 100 / a) : 0;
     const arr = (o, mk, ms) => ({ v: pct(o[mk], o[mk] + o[ms]), tem: (o[mk] + o[ms]) > 0 });
     const aq = o => { const mk = o.twoMade + o.threeMade, a = mk + o.twoMiss + o.threeMiss; return { v: pct(mk, a), tem: a > 0 }; };
     const num = (o, k) => ({ v: o[k], tem: true });
@@ -877,5 +877,5 @@ function historicoKT() {
       if (ga) { oa.t[it] = (oa.t[it] || 0) + 1; g.ta[it] = 1; } if (gb) { ob.t[it] = (ob.t[it] || 0) + 1; g.tb[it] = 1; } });
   });
   const res = { ok: true, jogos: nj, crit: KT_CRIT.map(x => x[1]), itens: KT_ITENS, confrontos: G, fotos: mapaFotos(), apelidos: mapaApelidos(), agora: new Date().toISOString() };
-  cachePut('hkt3', res, 120); return res;
+  cachePut('hkt4', res, 120); return res;
 }
