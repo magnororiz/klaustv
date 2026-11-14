@@ -268,7 +268,7 @@ function status(j){
   if(j.status==='FINAL') return 'final';
   const d=dataJogo(j); if(!d) return 'breve';
   const agora=Date.now();
-  if(agora<d.getTime()) return 'breve';
+  if(agora<d.getTime()-10*60e3) return 'breve'; // ao vivo começa 10 min antes do horário
   if(agora>d.getTime()+3*3600e3) return 'final';
   return 'vivo';
 }
