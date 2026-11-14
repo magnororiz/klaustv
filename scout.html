@@ -252,6 +252,18 @@ html.ktLeitura .team{border-color:#c77700 !important;}
 .ktTopo .ktCabTx{text-align:left;}
 .ktTopo .teamTitle{font-size:17px;margin:0;line-height:1.1;}
 .ktTopo .score{font-size:40px;margin:0;line-height:1;}
+#ktQBar{display:none;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;margin:8px 0 2px 0;}
+#ktQBar.on{display:flex;}
+#ktQBar b{color:#ffd54f;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-right:4px;}
+#ktQBar button{width:auto!important;min-width:0!important;flex:0 0 auto;margin:0!important;border:0;border-radius:8px;padding:7px 11px;font-weight:800;font-size:13px;cursor:pointer;background:#1e5bd8;color:#fff;}
+#ktQBar button.fech{background:#1f6f43;cursor:default;}
+#ktQBar button.prox{background:#e8590c;}
+#ktQBar button:disabled:not(.fech){background:#3a4656;color:#9aa7b6;cursor:not-allowed;}
+#ktQBar button.ed{background:#7f8c8d;}
+#ktQBar.edit{outline:2px dashed #ffd54f;outline-offset:4px;border-radius:8px;}
+.ktQ input[readonly]{background:#e9eef4;color:#1b2533;}
+.ktQ input.ktQcur{box-shadow:0 0 0 2px #e8590c;}
+html.ktLeitura #ktQBar button,html.ktTravado #ktQBar button{opacity:.35;pointer-events:none;}
 .ktQ{display:grid;grid-template-columns:repeat(4,56px);gap:4px 8px;align-items:end;font-size:12px;color:#cfd8e3;}
 .ktQ span{grid-column:1/-1;text-align:center;}
 @media(max-width:520px){.ktTopo{flex-wrap:wrap;justify-content:center;}}
@@ -401,6 +413,7 @@ html.ktLeitura .team{border-color:#c77700 !important;}
 <span class="ktAntSel"><select id="ktSelAntCat" onchange="kt_listarAnteriores()"><option value="">Categoria</option></select><select id="ktSelAnt" onchange="kt_verAnterior(this.value)"><option value="">Carregando jogos encerrados…</option></select></span>
 <button type="button" onclick="kt_editarAnterior()">✏️ Editar</button>
 <div id="ktFaixaTrava"></div>
+<div id="ktQBar"></div>
 <div id="ktFaixaLeitura">👁️ SEGUNDA TELA — só leitura · acompanhando o que o outro computador marca</div>
 <div id="ktJMmsg" class="ktJMmsg"></div>
 </div><!--/ktJogoMontado-->
@@ -1436,7 +1449,7 @@ async function kt_abrirMontado(id,restaurando){
   if(!id) return;
   if(KT_JOGO_ID && KT_JOGO_ID!==id && KT_SUJO){ await kt_enviarAuto(); }
   let j=KT_MONTADOS.find(x=>x.id===id); if(!j) return;
-  kt_msg('Abrindo o jogo…');
+  KT_QLOAD=true; kt_msg('Abrindo o jogo…');
   const r=await kt_apiSc({acao:'aoVivoJogo',id});
   let st={};
   if(r.ok && r.jogo){ j=Object.assign({},j,{meta:r.jogo.meta||j.meta,ginasio:r.jogo.ginasio||j.ginasio,status:r.jogo.status}); st=r.jogo.stats||{}; }
@@ -1468,6 +1481,7 @@ async function kt_abrirMontado(id,restaurando){
   if(KT_LEITURA){ KT_SUJO=false; kt_lerLoop(); } else if(!KT_DONO_TS){ const ed=st.editor; KT_DONO_TS=(ed&&ed.dev===KT_DEV)?(+ed.ts||Date.now()):Date.now(); }
   kt_listarAnteriores(j);
   KT_TRAVADO=kt_encerrado(j) && !rasc; KT_SNAP=null; kt_pintarTrava();
+  KT_QEDIT=false; kt_qCarregar((rasc&&rasc.stats&&rasc.stats.qFech!==undefined)?rasc.stats.qFech:st.qFech);
   document.querySelectorAll('.ktPremL').forEach(l=>{ if(typeof kt_premOpcoes==='function') kt_premOpcoes(l); });
   if(KT_RASC_PREM){ const ls=document.getElementById('ktPremLista'); ls.innerHTML=''; KT_RASC_PREM.forEach(([pv,jv,man])=>{ kt_premLinha(+pv||0); const l=ls.lastElementChild; l.querySelector('.pP').value=pv; kt_premOpcoes(l); if(man==='1'){ l.querySelector('.pJ').value=jv; l.querySelector('.pJ').dataset.manual='1'; } else kt_premOpcoes(l); }); KT_RASC_PREM=null; }
   if(typeof kt_premAuto==='function') kt_premAuto();
@@ -1478,6 +1492,7 @@ function kt_statsDaTela(){
   out.editor={dev:KT_DEV,ts:KT_DONO_TS||Date.now()};
   out.periodos={A:[],B:[]};
   ['A','B'].forEach(t=>{ for(let q=1;q<=4;q++){ const v=document.getElementById('ktQ'+t+q).value; out.periodos[t].push(v===''?null:Math.max(0,parseInt(v)||0)); } });
+  out.qFech=KT_QF;
   return out;
 }
 async function kt_enviarAuto(){
@@ -1498,7 +1513,8 @@ function kt_pintarModo(){ document.documentElement.classList.toggle('ktLeitura',
 function kt_aplicarRemoto(st){
   if(!st) return; ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; if(!reg) continue; stats[t+'-'+i]=Object.assign({},KT_ZERO,(st[t]&&st[t][reg])||{}); }
     const pq=((st.periodos||{})[t])||[]; for(let q=1;q<=4;q++){ const v=pq[q-1]; const el=document.getElementById('ktQ'+t+q); if(el!==document.activeElement) el.value=(v===undefined||v===null)?'':v; } });
-  const was=KT_LEITURA; atualizarTodasAsLinhas(); }
+  if(st.qFech!==undefined) KT_QF=+st.qFech||0;
+  const was=KT_LEITURA; atualizarTodasAsLinhas(); kt_qPintar(); }
 async function kt_buscarRemoto(){ if(!KT_JOGO_ID) return null; const r=await kt_apiSc({acao:'aoVivoJogo',id:KT_JOGO_ID}); return (r.ok&&r.jogo)?r.jogo:null; }
 async function kt_trocarModoTela(){
   if(!KT_LEITURA){ // virar segunda tela
@@ -1530,6 +1546,53 @@ async function kt_salvarAndamento(){
   if(r.ok){ KT_STATS_SALVOS=st; const jm=KT_MONTADOS.find(x=>x.id===KT_JOGO_ID); if(jm&&dh&&jm.dataHora!==dh){ jm.dataHora=dh; const o=document.querySelector('#ktSelJogo option[value="'+KT_JOGO_ID+'"]'); if(o) o.textContent=kt_rotuloJM(jm); } kt_msg('✅ Jogo salvo na planilha às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(r.placar?' · placar '+r.placar[0]+' x '+r.placar[1]:'')+'.'); }
   else { kt_msg(''); alert('Não foi possível salvar: '+(r.erro||'tente de novo')); }
 }
+
+/* ---------- Placar por quarto automático ----------
+   Quarto em andamento = placar total do time − soma dos quartos já fechados.
+   O botão "Fim do Xº quarto" trava aquele quarto; "Editar quartos" libera para corrigir à mão. */
+var KT_QF=0, KT_QEDIT=false, KT_QLOAD=false;
+function kt_qTotal(t){ let p=0; for(let i=1;i<=12;i++){ if(!KT_REGS[t]||!KT_REGS[t][i]) continue; p+=(+((stats[t+'-'+i]||{}).pts)||0); } return p; }
+function kt_qVal(t,q){ return parseInt(document.getElementById('ktQ'+t+q).value)||0; }
+function kt_qCarregar(qf){
+  if(qf===undefined||qf===null){ // jogo de antes deste recurso: se já tem quarto digitado, fica tudo como está
+    let tem=false; ['A','B'].forEach(t=>{ for(let q=1;q<=4;q++) if(document.getElementById('ktQ'+t+q).value!=='') tem=true; });
+    KT_QF=tem?4:0;
+  } else KT_QF=Math.max(0,Math.min(4,+qf||0));
+  KT_QLOAD=false; kt_qAuto(); kt_qPintar(); }
+function kt_qAuto(){
+  if(!KT_JOGO_ID || KT_QLOAD || KT_LEITURA || KT_TRAVADO || KT_QEDIT || KT_QF>=4) return;
+  let mudou=false;
+  ['A','B'].forEach(t=>{ let fech=0; for(let q=1;q<=KT_QF;q++) fech+=kt_qVal(t,q);
+    const cur=String(Math.max(0,kt_qTotal(t)-fech));
+    for(let q=KT_QF+1;q<=4;q++){ const el=document.getElementById('ktQ'+t+q); const v=(q===KT_QF+1)?cur:''; if(el.value!==v){ el.value=v; mudou=true; } } });
+  if(mudou) kt_rascSalvar(); }
+function kt_qPintar(){
+  const bar=document.getElementById('ktQBar'); if(!bar) return;
+  bar.className=KT_JOGO_ID?('on'+(KT_QEDIT?' edit':'')):'';
+  const nA=document.getElementById('titleA').innerText, nB=document.getElementById('titleB').innerText;
+  let h='<b>Quartos</b>';
+  for(let q=1;q<=4;q++){
+    if(q<=KT_QF) h+=`<button type="button" class="fech" disabled title="Quarto fechado e travado">✅ ${q}º Q · ${kt_qVal('A',q)} x ${kt_qVal('B',q)}</button>`;
+    else h+=`<button type="button" class="${q===KT_QF+1?'prox':''}" ${q===KT_QF+1&&!KT_QEDIT?'':'disabled'} onclick="kt_qFechar(${q})" title="Clique no fim do ${q}º quarto para travar o placar dele">🏁 Fim do ${q}º quarto</button>`;
+  }
+  h+=KT_QEDIT?`<button type="button" onclick="kt_qEditar(false)">🔒 Travar quartos</button>${KT_QF>0?`<button type="button" class="ed" onclick="kt_qReabrir()">↩️ Reabrir o ${KT_QF}º quarto</button>`:''}`
+             :`<button type="button" class="ed" onclick="kt_qEditar(true)" title="Liberar as caixinhas dos quartos para corrigir à mão">✏️ Editar quartos</button>`;
+  bar.innerHTML=h;
+  ['A','B'].forEach(t=>{ for(let q=1;q<=4;q++){ const el=document.getElementById('ktQ'+t+q); el.readOnly=!KT_QEDIT; el.classList.toggle('ktQcur',!KT_QEDIT&&q===KT_QF+1); } });
+}
+function kt_qFechar(q){
+  if(q!==KT_QF+1||KT_QEDIT) return; kt_qAuto();
+  const a=kt_qVal('A',q), b=kt_qVal('B',q);
+  if(!confirm(`Encerrar o ${q}º quarto?\n\nPlacar do quarto: ${document.getElementById('titleA').innerText} ${a} x ${b} ${document.getElementById('titleB').innerText}\n\nDepois de encerrado, ele fica travado (só muda com "Editar quartos").`)) return;
+  KT_QF=q; kt_rascSalvar(); kt_qAuto(); kt_qPintar();
+  kt_msg(q<4?`✅ ${q}º quarto travado (${a} x ${b}). Agora os pontos vão para o ${q+1}º quarto.`:`✅ 4º quarto travado (${a} x ${b}).`); }
+function kt_qEditar(on){
+  if(on && !confirm('Liberar as caixinhas dos quartos para corrigir à mão?\n\nEnquanto estiver editando, o quarto em andamento não se calcula sozinho.')) return;
+  KT_QEDIT=!!on; kt_qPintar();
+  if(!on){ kt_rascSalvar(); kt_qAuto(); kt_qPintar(); kt_msg('🔒 Quartos travados de novo — o quarto em andamento volta a se calcular sozinho.'); }
+  else kt_msg('✏️ Editando os quartos: corrija as caixinhas e clique em "Travar quartos".'); }
+function kt_qReabrir(){ if(KT_QF<1) return; if(!confirm(`Reabrir o ${KT_QF}º quarto? Ele volta a somar os pontos marcados.`)) return; KT_QF--; KT_QEDIT=false; kt_rascSalvar(); kt_qAuto(); kt_qPintar(); kt_msg('↩️ Quarto reaberto.'); }
+(function(){ const f=window.atualizarTotaisEquipe; if(typeof f==='function') window.atualizarTotaisEquipe=function(){ const r=f.apply(this,arguments); try{ kt_qAuto(); }catch(e){} return r; }; })();
 /* ---------- Jogos anteriores da mesma categoria ---------- */
 let KT_ANT=null, KT_ANT_EDIT=false;
 var KT_ANT_REF=null, KT_TRAVADO=false, KT_SNAP=null;
@@ -1537,7 +1600,7 @@ function kt_encerrado(j){ if(j.status==='FINAL') return true; const d=new Date(j
 function kt_pintarTrava(){ document.documentElement.classList.toggle('ktTravado',KT_TRAVADO); const f=document.getElementById('ktFaixaTrava'); if(!f) return;
   f.className=KT_TRAVADO?'on':(KT_SNAP?'ed':'');
   f.innerHTML=KT_TRAVADO?'🔒 JOGO ENCERRADO — travado para não mudar sem querer <button type="button" onclick="kt_destravar()">✏️ Editar</button>':(KT_SNAP?'✏️ EDITANDO JOGO ENCERRADO — as mudanças vão para a planilha <button type="button" style="background:#7f8c8d" onclick="kt_desfazer()">↩️ Desfazer alterações</button><button type="button" onclick="KT_TRAVADO=true;kt_pintarTrava()">🔒 Travar de novo</button>':''); }
-function kt_destravar(){ if(!confirm('Você vai alterar um jogo encerrado. Continuar?')) return; KT_SNAP=kt_statsDaTela(); KT_TRAVADO=false; kt_pintarTrava(); }
+function kt_destravar(){ if(!confirm('Você vai alterar um jogo encerrado. Continuar?')) return; KT_SNAP=kt_statsDaTela(); KT_TRAVADO=false; kt_pintarTrava(); kt_qPintar(); }
 function kt_desfazer(){ if(!KT_SNAP) return; if(!confirm('Voltar todos os números ao que eram antes de você mexer?')) return; kt_aplicarRemoto(KT_SNAP); KT_SUJO=true; kt_rascSalvar(); kt_msg('↩️ Números voltaram ao que eram antes da edição.'); }
 function kt_listarAnteriores(atual){
   if(atual) KT_ANT_REF=atual; const ref=KT_ANT_REF||{};
