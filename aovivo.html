@@ -72,7 +72,11 @@ table.ab .esc{width:24px;height:24px;object-fit:contain;vertical-align:middle;ma
 table.ab .ordOn{background:rgba(255,213,79,.25)!important;}
 table.ab .pos{font-family:'Oswald','Arial Narrow',Arial;font-size:16px;}
 table.ab .mm{font-size:11px;font-weight:700;}table.ab .z{color:#bbb;}
-table.ab td.ganha{background:#e8f6ec!important;color:#1b7a3a;}
+table.ab.cmp tr:nth-child(even) td{background:none;}
+table.ab.cmp td{border-bottom:1px solid rgba(0,0,0,.05);}
+table.ab.cmp td.it{background:#fff8de!important;color:#3a3220;}table.ab.cmp tr:nth-child(even) td.it{background:#fdefc0!important;}
+table.ab.cmp td.it small{color:#7a6a3a!important;}
+.vant{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:11px;font-weight:900;margin:0 6px;vertical-align:middle;box-shadow:0 0 0 2px #fff;}
 .abaNota{font-size:12px;color:#666;padding:8px 12px;line-height:1.4;}
 .abaNota a{color:#1e5bd8;}
 .trofN{font-family:'Oswald','Arial Narrow',Arial;font-size:30px;}
@@ -454,7 +458,7 @@ function kt_render(j){
 }
 /* ---------- Abas: Cestinhas, Medalhas, Troféus, Classificação ---------- */
 const KT_ABAS=[['res','Resumo'],['ces','Cestinhas'],['med','Medalhas'],['tro','Troféus'],['cla','Classificação']];
-let KT_ABA='res', KT_CES=null, KT_HIS=null, KT_HIS_T=0, KT_CLA=null, KT_ORDCES='4', KT_CARREG={};
+let KT_ORDMED='G', KT_ABA='res', KT_CES=null, KT_HIS=null, KT_HIS_T=0, KT_CLA=null, KT_ORDCES='4', KT_CARREG={};
 function kt_aba(k){ KT_ABA=k; if(KT_ULT) kt_render(KT_ULT); }
 async function kt_abaCarregar(qual){ if(KT_CARREG[qual]) return; KT_CARREG[qual]=1;
   const r=await api({acao:{ces:'dadosCestinhas',his:'historicoKT',cla:'dadosClassificacao'}[qual]}); KT_CARREG[qual]=0;
@@ -464,6 +468,10 @@ async function kt_abaCarregar(qual){ if(KT_CARREG[qual]) return; KT_CARREG[qual]
 const kt_carregando=t=>'<div class="vazio" style="padding:20px">Carregando '+t+'…</div>';
 const kt_ft=reg=>`<img class="ft" src="${(KT_FOTOS[reg])||(KT_HIS&&KT_HIS.fotos&&KT_HIS.fotos[reg])||'bola_fiba.png'}" alt="">`;
 const kt_tm=s=>`<img class="esc" src="${escudo(s)}" alt="">${esc(D.curto[s]||s||'')}`;
+function kt_tinta(hex,f){ const n=parseInt(String(hex||'#888888').slice(1),16); const r=n>>16,g=(n>>8)&255,b=n&255; const m=c=>Math.round(c+(255-c)*f); return 'rgb('+m(r)+','+m(g)+','+m(b)+')'; }
+function kt_celTime(s,i,txt,venceu,lado){ const c=cor(s); const bg=kt_tinta(c,i%2?0.80:0.90); const mk=venceu?`<span class="vant" title="Na frente neste item" style="background:${c};color:${txt2(c)}">✓</span>`:'';
+  return `<td style="background:${bg}!important">${lado==='A'?mk+txt:txt+mk}</td>`; }
+function txt2(c){ try{ return txt(c); }catch(e){ return '#fff'; } }
 function kt_abaHTML(j,ja,jb){
   const cat=j.categoria, m=j.meta||{}, sa=(m.timeA||{}).sigla, sb=(m.timeB||{}).sigla, todos=ja.concat(jb);
   if(KT_ABA==='ces'){
@@ -485,27 +493,30 @@ function kt_abaHTML(j,ja,jb){
     if(!KT_HIS.ok) return '<div class="vazio">'+esc(KT_HIS.erro)+'</div>';
   }
   if(KT_ABA==='med'){
-    const C=KT_HIS.crit, J=KT_HIS.jogadores;
-    const ls=todos.map(a=>{ const o=J[String(a.reg)]||{j:0,m:{}}; let ou=0,pr=0,br=0; C.forEach(c=>{ const x=o.m[c]||[0,0,0]; ou+=x[0]; pr+=x[1]; br+=x[2]; }); return {a,o,ou,pr,br,tot:ou+pr+br,pts:3*ou+2*pr+br}; })
-      .sort((x,y)=>(y.pts-x.pts)||(y.ou-x.ou)||(y.pr-x.pr)||(y.br-x.br)||String(x.a.nome).localeCompare(y.a.nome,'pt-BR'));
-    let p=0; const pos=ls.map((x,i)=>{ const ant=ls[i-1]; if(!ant||ant.pts!==x.pts||ant.ou!==x.ou||ant.pr!==x.pr||ant.br!==x.br) p=i+1; return p; });
+    const C=KT_HIS.crit, J=((KT_HIS.jogadoresCat||{})[cat])||{}; const ord=KT_ORDMED;
+    const ls=todos.map(a=>{ const o=J[String(a.reg)]||{m:{}}; const g=[0,0,0]; C.forEach(c=>{ const x=o.m[c]||[0,0,0]; g[0]+=x[0]; g[1]+=x[1]; g[2]+=x[2]; }); return {a,o,g}; });
+    const chave=x=>ord==='G'?x.g:(x.o.m[ord]||[0,0,0]);
+    ls.sort((x,y)=>{ const p=chave(x), q=chave(y); return (q[0]-p[0])||(q[1]-p[1])||(q[2]-p[2])||((y.g[0]-x.g[0])||(y.g[1]-x.g[1])||(y.g[2]-x.g[2]))||String(x.a.nome).localeCompare(y.a.nome,'pt-BR'); });
+    let p=0; const pos=ls.map((x,i)=>{ const ant=ls[i-1], k=chave(x); if(!ant||String(chave(ant))!==String(k)) p=i+1; return (k[0]+k[1]+k[2])?p+'º':'—'; });
     const cel=x=>{ if(!x||!(x[0]+x[1]+x[2])) return '<span class="z">—</span>'; return ['🥇','🥈','🥉'].map((e,i)=>x[i]?e+x[i]:'').filter(Boolean).join(' '); };
-    const tr=ls.map((x,i)=>`<tr><td class="pos">${x.tot?pos[i]+'º':'—'}</td><td>${kt_ft(x.a.reg)}</td><td class="l nm">${esc(abrev(x.a.nome))}${x.a.apelido?'<small>'+esc(x.a.apelido)+'</small>':''}</td><td class="l">${kt_tm(x.a.sig)}</td><td>${x.o.j||0}</td>
-      <td class="ordOn">${x.pts}</td><td>${x.tot}</td><td>${x.ou}</td><td>${x.pr}</td><td>${x.br}</td>${C.map(c=>`<td class="mm">${cel(x.o.m[c])}</td>`).join('')}</tr>`).join('');
-    return `<div class="abaTopo">🏅 Medalhas dos jogadores deste jogo · soma de todos os jogos com estatística do Klaus TV</div>
-      <table class="ab"><tr><th>Pos.</th><th></th><th class="l">Atleta</th><th class="l">Equipe</th><th title="Jogos com estatística do Klaus TV">Jogos</th><th class="ordOn" title="Ouro 3, prata 2, bronze 1">Pontos</th><th>Total</th><th>🥇</th><th>🥈</th><th>🥉</th>${C.map(c=>`<th>${c}</th>`).join('')}</tr>${tr}</table>
-      <div class="abaNota">Em cada jogo, os 3 melhores do jogo (os dois times juntos) em ${C.join(', ')} ganham ouro, prata e bronze; empate divide a medalha. Ranking: pontos (ouro 3, prata 2, bronze 1); empate desempata por mais ouros, depois pratas, depois bronzes. Erros e faltas não dão medalha (não é mérito ter mais).</div>`;
+    const cols=[['G','Geral']].concat(C.map(c=>[c,c]));
+    const tr=ls.map((x,i)=>`<tr><td class="pos">${pos[i]}</td><td>${kt_ft(x.a.reg)}</td><td class="l nm">${esc(abrev(x.a.nome))}${x.a.apelido?'<small>'+esc(x.a.apelido)+'</small>':''}</td><td class="l">${kt_tm(x.a.sig)}</td>
+      ${cols.map(([k])=>`<td class="mm${k===ord?' ordOn':''}">${cel(k==='G'?x.g:x.o.m[k])}</td>`).join('')}</tr>`).join('');
+    const NM={G:'Geral (todas)',PTS:'Pontos',"2P":'Cestas de 2',"3P":'Cestas de 3',LL:'Lances livres',REB:'Rebotes',AST:'Assistências',ROU:'Roubos de bola',TOC:'Tocos',EF:'Eficiência'};
+    return `<div class="abaTopo">🏅 Medalhas no ${esc(cat)} · jogos com estatística do Klaus TV<label class="ord">Classificar por <select onchange="KT_ORDMED=this.value;kt_render(KT_ULT)">${cols.map(([k])=>`<option value="${k}"${k===ord?' selected':''}>${NM[k]||k}</option>`).join('')}</select></label></div>
+      <table class="ab"><tr><th>Pos.</th><th></th><th class="l">Atleta</th><th class="l">Equipe</th>${cols.map(([k,n])=>`<th class="${k===ord?'ordOn':''}" title="${NM[k]||k}">${n}</th>`).join('')}</tr>${tr}</table>
+      <div class="abaNota">Medalhas só do ${esc(cat)} (quem joga em duas categorias tem uma conta em cada). Em cada jogo, os 3 melhores do jogo (os dois times juntos) em cada item ganham 🥇 ouro, 🥈 prata e 🥉 bronze; empate divide a medalha. A classificação é por mais ouros, depois pratas, depois bronzes — no item escolhido ou no Geral (soma de todos os itens). Erros e faltas não dão medalha.</div>`;
   }
   if(KT_ABA==='tro'){
     const I=KT_HIS.itens, Tc=(KT_HIS.times||{})[cat]||{}, A=Tc[sa]||{j:0,t:{}}, B=Tc[sb]||{j:0,t:{}};
     const tot=o=>I.reduce((s,k)=>s+(o.t[k]||0),0); const ta=tot(A), tb=tot(B);
     const NOME={PTS:'Pontos',AQ:'Arremessos de quadra',"2P":'Arremessos de 2',"3P":'Arremessos de 3',LL:'Lances livres',REB:'Rebotes',AST:'Assistências',RB:'Roubos de bola',T:'Tocos',ERR:'Erros (menos)',FP:'Faltas (menos)',EF:'Eficiência'};
-    const lin=I.map(k=>{ const a=A.t[k]||0,b=B.t[k]||0; return `<tr><td class="${a>b?'ganha':''}">${a}</td><td title="${NOME[k]}">${k}<br><small style="color:#888;font-weight:600">${NOME[k]}</small></td><td class="${b>a?'ganha':''}">${b}</td></tr>`; }).join('');
+    const lin=I.map((k,i)=>{ const a=A.t[k]||0,b=B.t[k]||0; return `<tr>${kt_celTime(sa,i+2,a,a>b,'A')}<td class="it" title="${NOME[k]}">${k}<br><small style="font-weight:600">${NOME[k]}</small></td>${kt_celTime(sb,i+2,b,b>a,'B')}</tr>`; }).join('');
     return `<div class="abaTopo">🏆 Troféus no histórico do Klaus TV · ${esc(cat)}</div>
-      <table class="ab"><tr><th style="width:38%">${kt_tm(sa)}</th><th></th><th style="width:38%">${kt_tm(sb)}</th></tr>
-      <tr><td class="${ta>tb?'ganha':''}"><span class="trofN">🏆 ${ta}</span></td><td>TOTAL</td><td class="${tb>ta?'ganha':''}"><span class="trofN">🏆 ${tb}</span></td></tr>
-      <tr><td>${A.j}</td><td>Jogos com estatística</td><td>${B.j}</td></tr>${lin}</table>
-      <div class="abaNota">Em cada jogo com estatística do Klaus TV, o time que vence um item do Resumo ganha 🏆 naquele item (empate com valor dá troféu aos dois). Aqui está a soma de todos os jogos do ${esc(cat)}, inclusive este. <a href="trofeus.html?cat=${encodeURIComponent(cat)}" target="_blank">Ranking de troféus de todos os times →</a></div>`;
+      <table class="ab cmp"><tr><th style="width:38%">${kt_tm(sa)}</th><th></th><th style="width:38%">${kt_tm(sb)}</th></tr>
+      <tr>${kt_celTime(sa,0,'<span class="trofN">🏆 '+ta+'</span>',ta>tb,'A')}<td class="it">TOTAL</td>${kt_celTime(sb,0,'<span class="trofN">🏆 '+tb+'</span>',tb>ta,'B')}</tr>
+      <tr>${kt_celTime(sa,1,A.j,false,'A')}<td class="it">Jogos com estatística</td>${kt_celTime(sb,1,B.j,false,'B')}</tr>${lin}</table>
+      <div class="abaNota">Em cada jogo com estatística do Klaus TV, o time que vence um item do Resumo ganha 🏆 naquele item (empate com valor dá troféu aos dois). A marca ✓ mostra quem tem mais troféus em cada item. Aqui está a soma de todos os jogos do ${esc(cat)}, inclusive este. <a href="trofeus.html?cat=${encodeURIComponent(cat)}" target="_blank">Ranking de troféus de todos os times →</a></div>`;
   }
   if(KT_ABA==='cla'){
     if(!KT_CLA){ kt_abaCarregar('cla'); return kt_carregando('a classificação'); }
@@ -516,12 +527,12 @@ function kt_abaHTML(j,ja,jb){
     const ra=lin(sa), rb=lin(sb);
     const cel=(r,i)=>r?esc(r[i]||'—'):'—';
     const campos=[[4,'Posição'],[7,'Pontos ganhos (PG)'],[8,'Jogos (J)'],[9,'Vitórias (V)'],[10,'Derrotas (D)'],[12,'Pontos a favor (PF)'],[13,'Pontos contra (PC)'],[14,'Saldo'],[15,'Cesta average (CAv)']];
-    const mel=(i,r1,r2)=>{ if(!r1||!r2) return ''; const a=parseFloat(String(r1[i]).replace(',','.')), b=parseFloat(String(r2[i]).replace(',','.')); if(isNaN(a)||isNaN(b)||a===b||i===8) return ''; const menor=(i===4||i===10||i===13); return (menor?a<b:a>b)?'ganha':''; };
-    const tr=campos.map(([i,n])=>`<tr><td class="${mel(i,ra,rb)}">${cel(ra,i)}${i===4&&ra?'º':''}</td><td>${n}</td><td class="${mel(i,rb,ra)}">${cel(rb,i)}${i===4&&rb?'º':''}</td></tr>`).join('');
+    const mel=(i,r1,r2)=>{ if(!r1||!r2) return false; const a=parseFloat(String(r1[i]).replace(',','.')), b=parseFloat(String(r2[i]).replace(',','.')); if(isNaN(a)||isNaN(b)||a===b||i===8) return false; const menor=(i===4||i===10||i===13); return menor?a<b:a>b; };
+    const tr=campos.map(([i,n],x)=>`<tr>${kt_celTime(sa,x,cel(ra,i)+(i===4&&ra?'º':''),mel(i,ra,rb),'A')}<td class="it">${n}</td>${kt_celTime(sb,x,cel(rb,i)+(i===4&&rb?'º':''),mel(i,rb,ra),'B')}</tr>`).join('');
     const rot=[...new Set([ra,rb].filter(Boolean).map(r=>r[3]).filter(Boolean))].join(' / ');
     return `<div class="abaTopo">📊 Classificação FBERJ · ${esc(cat)}${rot?' · '+esc(rot):''}${tab[0]&&tab[0][16]?' · atualizada '+esc(tab[0][16]):''}</div>
-      <table class="ab"><tr><th style="width:38%">${kt_tm(sa)}</th><th></th><th style="width:38%">${kt_tm(sb)}</th></tr>${tr}</table>
-      <div class="abaNota">${(!ra||!rb)?'Um dos times não foi encontrado na classificação da FBERJ desta categoria. ':''}Fonte: planilha de classificação da FBERJ (cópia diária do Klaus TV). <a href="classificacao.html?cat=${encodeURIComponent(cat)}" target="_blank">Ver a classificação completa do ${esc(cat)} →</a></div>`;
+      <table class="ab cmp"><tr><th style="width:38%">${kt_tm(sa)}</th><th></th><th style="width:38%">${kt_tm(sb)}</th></tr>${tr}</table>
+      <div class="abaNota">${(!ra||!rb)?'Um dos times não foi encontrado na classificação da FBERJ desta categoria. ':''}A marca ✓ mostra quem está na frente em cada item (posição, derrotas e pontos contra: quanto menor, melhor). Fonte: planilha de classificação da FBERJ (cópia diária do Klaus TV). <a href="classificacao.html?cat=${encodeURIComponent(cat)}" target="_blank">Ver a classificação completa do ${esc(cat)} →</a></div>`;
   }
   return '';
 }

@@ -849,15 +849,16 @@ function ktNum(s) { const o = {}; ['twoMade', 'twoMiss', 'threeMade', 'threeMiss
   o.pts = (s && s.pts !== undefined && s.pts !== '') ? Number(s.pts) : 2 * o.twoMade + 3 * o.threeMade + o.ftMade;
   o.eff = (s && s.eff !== undefined && s.eff !== '') ? Number(s.eff) : o.pts + o.reb + o.ast + o.blk + o.stl - (o.twoMiss + o.threeMiss + o.ftMiss + o.to); return o; }
 function historicoKT() {
-  const hit = cacheGet('hkt'); if (hit) return hit;
+  const hit = cacheGet('hkt2'); if (hit) return hit;
   const J = {}, T = {}; let nj = 0;
   lerJogos().forEach(x => {
     const m = jsonOu(x.meta, {}), st = jsonOu(x.stats, {}), cat = String(x.categoria || '');
     const ps = []; ['A', 'B'].forEach(l => { const tm = m['time' + l] || {}; (tm.atletas || []).forEach(a => { if (!a.reg) return; ps.push({ reg: String(a.reg), nome: a.nome, sig: tm.sigla, l: l, s: ktNum((st[l] || {})[a.reg]) }); }); });
     if (!ps.some(p => ['pts', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'twoMiss', 'threeMiss', 'ftMiss'].some(k => p.s[k]))) return;
     nj++;
-    ps.forEach(p => { const o = J[p.reg] = J[p.reg] || { n: p.nome, s: p.sig, c: cat, j: 0, m: {} }; o.j++; });
-    KT_CRIT.forEach(([k, lab]) => ps.forEach(p => { const v = p.s[k]; if (v <= 0) return; const pos = 1 + ps.filter(q => q.s[k] > v).length; if (pos > 3) return; const mm = J[p.reg].m[lab] = J[p.reg].m[lab] || [0, 0, 0]; mm[pos - 1]++; }));
+    const JC = J[cat] = J[cat] || {}; // medalhas separadas por categoria (quem joga em duas categorias tem uma conta em cada)
+    ps.forEach(p => { const o = JC[p.reg] = JC[p.reg] || { n: p.nome, s: p.sig, j: 0, m: {} }; o.j++; });
+    KT_CRIT.forEach(([k, lab]) => ps.forEach(p => { const v = p.s[k]; if (v <= 0) return; const pos = 1 + ps.filter(q => q.s[k] > v).length; if (pos > 3) return; const mm = JC[p.reg].m[lab] = JC[p.reg].m[lab] || [0, 0, 0]; mm[pos - 1]++; }));
     if (m.avulso && !m.timesFed) return;
     const tot = l => { const o = {}; ps.filter(p => p.l === l).forEach(p => Object.keys(p.s).forEach(k => o[k] = (o[k] || 0) + p.s[k])); ['pts', 'twoMade', 'twoMiss', 'threeMade', 'threeMiss', 'ftMade', 'ftMiss', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'eff'].forEach(k => o[k] = o[k] || 0); return o; };
     const ta = tot('A'), tb = tot('B'); const pct = (mk, a) => a ? Math.round(mk * 100 / a) : 0;
@@ -874,6 +875,6 @@ function historicoKT() {
       if (a.v === b.v && a.v !== 0 && dir > 0) { ga = gb = true; }
       if (ga) oa.t[it] = (oa.t[it] || 0) + 1; if (gb) ob.t[it] = (ob.t[it] || 0) + 1; });
   });
-  const res = { ok: true, jogos: nj, crit: KT_CRIT.map(x => x[1]), itens: KT_ITENS, jogadores: J, times: T, fotos: mapaFotos(), apelidos: mapaApelidos(), agora: new Date().toISOString() };
-  cachePut('hkt', res, 120); return res;
+  const res = { ok: true, jogos: nj, crit: KT_CRIT.map(x => x[1]), itens: KT_ITENS, jogadoresCat: J, times: T, fotos: mapaFotos(), apelidos: mapaApelidos(), agora: new Date().toISOString() };
+  cachePut('hkt2', res, 120); return res;
 }
