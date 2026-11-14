@@ -127,7 +127,6 @@ table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444
 .comp .ganha{border-left:5px solid var(--c);}
 .comp .ganhaR{border-right:5px solid var(--c);}
 .trofeu{font-size:14px;margin:0 4px;}
-table.ab tr.efTop td.nm{font-weight:800;}
 /* líderes */
 .lid .bloco{border-bottom:6px solid #0b0b0b;}
 .lid .tit{display:grid;grid-template-columns:8px 40px 1fr 40px 8px;align-items:center;padding:6px 0;font-weight:800;font-size:15px;text-align:center;border-bottom:1px solid #e4e7ec;}
@@ -454,8 +453,8 @@ function kt_render(j){
   if(pAntes){ [...$('jogo').querySelectorAll('.placar .pts')].forEach((e,i)=>{ if(e.textContent!==pAntes[i]) e.classList.add('mudou'); }); }
 }
 /* ---------- Abas: Cestinhas, Medalhas, Troféus, Classificação ---------- */
-const KT_ABAS=[['res','Resumo'],['ces','Cestinhas'],['efi','Eficiência'],['med','Medalhas'],['tro','Troféus'],['cla','Classificação']];
-let KT_EFM='temp', KT_CONF='todos', KT_ORDMED='G', KT_ABA='res', KT_CES=null, KT_HIS=null, KT_HIS_T=0, KT_CLA=null, KT_ORDCES='4', KT_CARREG={};
+const KT_ABAS=[['res','Resumo'],['ces','Cestinhas'],['med','Medalhas'],['tro','Troféus'],['cla','Classificação']];
+let KT_CONF='todos', KT_ORDMED='G', KT_ABA='res', KT_CES=null, KT_HIS=null, KT_HIS_T=0, KT_CLA=null, KT_ORDCES='4', KT_CARREG={};
 function kt_aba(k){ KT_ABA=k; if(KT_ULT) kt_render(KT_ULT); }
 async function kt_abaCarregar(qual){ if(KT_CARREG[qual]) return; KT_CARREG[qual]=1;
   const r=await api({acao:{ces:'dadosCestinhas',his:'historicoKT',cla:'dadosClassificacao'}[qual]}); KT_CARREG[qual]=0;
@@ -493,25 +492,9 @@ function kt_abaHTML(j,ja,jb){
       <table class="ab"><tr><th title="Posição no ranking de cestinhas da categoria">Pos.</th><th></th><th class="l">Atleta</th><th class="l">Equipe</th><th>Jogos</th><th class="c4">Pontos</th><th class="cm">Média</th><th class="c5">Cestas de 3</th></tr>${tr}</table>
       <div class="abaNota">Fonte: planilha oficial de cestinhas da FBERJ (cópia diária do Klaus TV). A FBERJ publica pontos e cestas de 3, mas não separa as cestas de 2. <a href="cestinhas.html?cat=${encodeURIComponent(cat)}" target="_blank">Ver todos os cestinhas do ${esc(cat)} →</a></div>`.replace(new RegExp('class="'+col+'"','g'),'class="'+col+' ordOn"');
   }
-  if(KT_ABA==='med'||KT_ABA==='tro'||KT_ABA==='efi'){
+  if(KT_ABA==='med'||KT_ABA==='tro'){
     if(!KT_HIS||Date.now()-KT_HIS_T>120000){ kt_abaCarregar('his'); if(!KT_HIS) return kt_carregando('o histórico do Klaus TV'); }
     if(!KT_HIS.ok) return '<div class="vazio">'+esc(KT_HIS.erro)+'</div>';
-  }
-  if(KT_ABA==='efi'){
-    const TODOS=((KT_HIS&&KT_HIS.confrontos)||[]).filter(g=>g.c===cat);
-    if(TODOS.length && !TODOS.some(g=>g.p)) return '<div class="vazio" style="padding:24px">A aba Eficiência precisa da versão nova do servidor. Assim que ela for implantada, os números aparecem aqui.</div>';
-    const conf=KT_EFM==='conf', GS=conf?kt_confrTodos(j,sa,sb):TODOS;
-    const ls=todos.map(a=>{ const t=[0,0,0,0,0,0,0,0,0]; let n=0; GS.forEach(g=>{ const v=g.p&&g.p[String(a.reg)]; if(!v) return; n++; v.forEach((x,i)=>t[i]+=(+x||0)); }); return {a,n,t}; });
-    const md=(x,i)=>x.n?x.t[i]/x.n:-1e9, ap=x=>x.t[8]?x.t[7]/x.t[8]:0;
-    // desempate: média de eficiência → média de pontos → média de rebotes → média de assistências → aproveitamento de quadra → menos erros por jogo → mais jogos → nome
-    ls.sort((x,y)=>(md(y,0)-md(x,0))||(md(y,1)-md(x,1))||(md(y,2)-md(x,2))||(md(y,3)-md(x,3))||(ap(y)-ap(x))||(md(x,6)-md(y,6))||(y.n-x.n)||String(x.a.nome).localeCompare(y.a.nome,'pt-BR'));
-    const f1=v=>v.toFixed(1).replace('.',',');
-    const tr=ls.map((x,i)=>`<tr${i<3&&x.n?' class="efTop"':''}><td class="pos">${x.n?(['🥇','🥈','🥉'][i]||(i+1)+'º'):'—'}</td><td>${kt_ft(x.a.reg)}</td><td class="l nm">${esc(abrev(x.a.nome))}${x.a.apelido?'<small>'+esc(x.a.apelido)+'</small>':''}</td><td class="l">${kt_tm(x.a.sig)}</td>
-      <td>${x.n||'—'}</td><td class="ordOn"><b>${x.n?f1(x.t[0]/x.n):'—'}</b></td><td>${x.n?x.t[0]:'—'}</td><td>${x.n?f1(x.t[1]/x.n):'—'}</td><td>${x.n?f1(x.t[2]/x.n):'—'}</td><td>${x.n?f1(x.t[3]/x.n):'—'}</td><td>${x.n?f1((x.t[4]+x.t[5])/x.n):'—'}</td><td>${x.n&&x.t[8]?Math.round(x.t[7]*100/x.t[8])+'%':'—'}</td><td>${x.n?f1(x.t[6]/x.n):'—'}</td></tr>`).join('');
-    const nc=kt_confrTodos(j,sa,sb).length;
-    return `<div class="abaTopo">⚡ Média de eficiência · jogadores deste jogo · ${esc(cat)}<label class="ord">Jogos <select onchange="KT_EFM=this.value;kt_render(KT_ULT)"><option value="temp"${!conf?' selected':''}>Todos os jogos da temporada (${TODOS.length})</option><option value="conf"${conf?' selected':''}>Só os confrontos entre os dois (${nc})</option></select></label></div>
-      ${GS.length?`<table class="ab"><tr><th>Pos.</th><th></th><th class="l">Atleta</th><th class="l">Equipe</th><th title="Jogos com estatística do Klaus TV">Jogos</th><th class="ordOn" title="Média de eficiência por jogo">Média EF</th><th title="Eficiência somada">EF total</th><th title="Pontos por jogo">Pts/j</th><th title="Rebotes por jogo">Reb/j</th><th title="Assistências por jogo">Ast/j</th><th title="Roubos + tocos por jogo">Rou+Toc/j</th><th title="Aproveitamento dos arremessos de quadra (2 e 3)">Arrem.</th><th title="Erros por jogo">Err/j</th></tr>${tr}</table>`:kt_semConfr}
-      <div class="abaNota">Eficiência de cada jogo = pontos + rebotes + assistências + roubos + tocos − arremessos errados (de 2, de 3 e lances livres) − erros. A média é a eficiência somada dividida pelos jogos que o atleta jogou no ${esc(cat)} com estatística do Klaus TV (${conf?'só os confrontos entre '+esc(D.curto[sa]||sa)+' e '+esc(D.curto[sb]||sb):'contra qualquer adversário'}, inclusive este jogo). Empate na média: desempata quem tem mais pontos por jogo, depois mais rebotes, mais assistências, melhor aproveitamento de arremessos, menos erros e mais jogos.</div>`;
   }
   if(KT_ABA==='med'){
     const C=KT_HIS.crit, GS=kt_confr(j,sa,sb); const ord=KT_ORDMED;

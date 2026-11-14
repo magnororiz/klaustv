@@ -849,16 +849,14 @@ function ktNum(s) { const o = {}; ['twoMade', 'twoMiss', 'threeMade', 'threeMiss
   o.pts = (s && s.pts !== undefined && s.pts !== '') ? Number(s.pts) : 2 * o.twoMade + 3 * o.threeMade + o.ftMade;
   o.eff = (s && s.eff !== undefined && s.eff !== '') ? Number(s.eff) : o.pts + o.reb + o.ast + o.blk + o.stl - (o.twoMiss + o.threeMiss + o.ftMiss + o.to); return o; }
 function historicoKT() {
-  const hit = cacheGet('hkt5'); if (hit) return hit;
+  const hit = cacheGet('hkt4'); if (hit) return hit;
   const J = {}, T = {}, G = []; let nj = 0;
   lerJogos().forEach(x => {
     const m = jsonOu(x.meta, {}), st = jsonOu(x.stats, {}), cat = String(x.categoria || '');
     const ps = []; ['A', 'B'].forEach(l => { const tm = m['time' + l] || {}; (tm.atletas || []).forEach(a => { if (!a.reg) return; ps.push({ reg: String(a.reg), nome: a.nome, sig: tm.sigla, l: l, s: ktNum((st[l] || {})[a.reg]) }); }); });
     if (!ps.some(p => ['pts', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'twoMiss', 'threeMiss', 'ftMiss'].some(k => p.s[k]))) return;
     nj++; const sa0 = (m.timeA || {}).sigla, sb0 = (m.timeB || {}).sigla;
-    const g = { id: x.id, c: cat, d: String(x.dataHora instanceof Date ? x.dataHora.toISOString() : x.dataHora || '').slice(0, 16), a: sa0, b: sb0, ta: {}, tb: {}, m: {}, p: {} }; if (sa0 && sb0) G.push(g);
-    // números de cada atleta neste jogo (aba Eficiência): [EF, PTS, REB, AST, ROU, TOC, ERR, cestas de quadra, arremessos de quadra]
-    ps.forEach(p => { const q = p.s; if (!['pts', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'twoMiss', 'threeMiss', 'ftMiss', 'ftMade'].some(k => q[k])) return; const mk = q.twoMade + q.threeMade; g.p[p.reg] = [q.eff, q.pts, q.reb, q.ast, q.stl, q.blk, q.to, mk, mk + q.twoMiss + q.threeMiss]; });
+    const g = { id: x.id, c: cat, d: String(x.dataHora instanceof Date ? x.dataHora.toISOString() : x.dataHora || '').slice(0, 16), a: sa0, b: sb0, ta: {}, tb: {}, m: {} }; if (sa0 && sb0) G.push(g);
     const JC = J[cat] = J[cat] || {}; // medalhas separadas por categoria (quem joga em duas categorias tem uma conta em cada)
     ps.forEach(p => { const o = JC[p.reg] = JC[p.reg] || { n: p.nome, s: p.sig, j: 0, m: {} }; o.j++; });
     KT_CRIT.forEach(([k, lab]) => ps.forEach(p => { const v = p.s[k]; if (v <= 0) return; const pos = 1 + ps.filter(q => q.s[k] > v).length; if (pos > 3) return; const mm = JC[p.reg].m[lab] = JC[p.reg].m[lab] || [0, 0, 0]; mm[pos - 1]++; const gm = (g.m[p.reg] = g.m[p.reg] || {}); const gx = gm[lab] = gm[lab] || [0, 0, 0]; gx[pos - 1]++; }));
@@ -879,5 +877,5 @@ function historicoKT() {
       if (ga) { oa.t[it] = (oa.t[it] || 0) + 1; g.ta[it] = 1; } if (gb) { ob.t[it] = (ob.t[it] || 0) + 1; g.tb[it] = 1; } });
   });
   const res = { ok: true, jogos: nj, crit: KT_CRIT.map(x => x[1]), itens: KT_ITENS, confrontos: G, fotos: mapaFotos(), apelidos: mapaApelidos(), agora: new Date().toISOString() };
-  cachePut('hkt5', res, 120); return res;
+  cachePut('hkt4', res, 120); return res;
 }
