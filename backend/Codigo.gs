@@ -817,7 +817,7 @@ function fedLerClassificacao() {
         let rot = '', atu = '';
         const acharAtu = l => (l || []).map(fedNorm).find(x => /^Atualizado/i.test(x)) || '';
         atu = acharAtu(rows[i]) || acharAtu(rows[i - 1]) || acharAtu(rows[i - 2]);
-        for (let k = i - 1; k >= Math.max(0, i - 2); k--) { const t = fedNorm(rows[k][c0]) || fedNorm(rows[k][0]); if (t && !/^Atualizado/i.test(t) && !claCategoria(t) && !/^Legenda/i.test(t) && t !== '#') { rot = t; break; } }
+        for (let k = i - 1; k >= Math.max(0, i - 2); k--) { if (rows[k].filter(x => fedNorm(x)).length > 2) break; const t = fedNorm(rows[k][c0]) || fedNorm(rows[k][0]); if (t && !/^\d+\s*[ºª°o]?$/.test(t) && !/^Atualizado/i.test(t) && !claCategoria(t) && !/^Legenda/i.test(t) && t !== '#') { rot = t; break; } }
         const linhas = [];
         let k = i + 1;
         for (; k < rows.length; k++) { const q = rows[k].map(fedNorm); const pm = q[c0].match(/^(\d+)\s*[ºª°o]?$/); if (!pm || !q[c0 + 1]) break; linhas.push([Number(pm[1]), q]); }
