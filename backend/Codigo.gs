@@ -712,12 +712,12 @@ function dadosSumulas() {
     kt[j.categoria + '|' + num] = { id: j.id, mvp: mvp, time: time }; });
   const lista = ssu.getDataRange().getValues().slice(1).filter(r => r[4]).map(r => {
     const catP = String(r[1]).toUpperCase().replace(/\s+/g, ''); const cat = catP === 'ADULTO' ? 'Adulto' : (catP.match(/^SUB(\d+)/) ? 'Sub-' + catP.match(/^SUB(\d+)/)[1] : r[1]);
-    const nm = String(r[3]); const num = (nm.match(/^\s*(?:jg|jogo)\.?\s*(\d+)/i) || [])[1] || '';
+    const nm = String(r[3]); const num = (nm.match(/^\s*(?:jg|jogo)\.?\s*(?:n[º°o]?\.?\s*)?(\d+)/i) || [])[1] || '';
     const t = tab[cat + '|' + num]; const o = { cat: cat, pasta: String(r[2]), arquivo: nm.replace(/\.pdf$/i, '').trim(), id: r[4], num: num };
     if (t) { o.fase = t[1]; o.data = t[3]; o.hora = t[4]; o.a = t[5]; o.b = t[6]; o.pa = t[8]; o.pb = t[9]; o.gin = t[7];
       o.ca = cest(cat, t[1], t[5], t[6]); o.cb = cest(cat, t[1], t[6], t[5]); }
     const k = kt[cat + '|' + num]; if (k) o.kt = k;
-    return o; });
+    return o; }).filter((o, i, arr) => !o.num || arr.findIndex(x => x.cat === o.cat && x.num === o.num) === i); // mesma súmula com dois nomes de arquivo: mostra uma só
   const se = ss.getSheetByName('FBERJ_Equipes'); const equipes = {}; if (se) se.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0]) equipes[r[0]] = r[1]; });
   // feminino (só tabela, ainda sem súmulas)
   const sf = ss.getSheetByName('FBERJ_TabelaFem'); const fem = sf ? sf.getDataRange().getDisplayValues().slice(1).filter(r => r[0] && r[5] && r[6]) : [];

@@ -174,6 +174,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
       <label class="fl">Fase<select id="selFase" onchange="kt_desenha()"></select></label>
       <label class="fl grande">Equipe<select id="selEq" onchange="kt_desenha()"></select></label></div>
     <p class="intro">A súmula é o documento oficial de cada jogo, preenchido pela mesa da FBERJ. O Klaus TV guarda uma cópia de cada súmula, então ela continua aqui mesmo depois que a federação tirar do ar.</p>
+    <p class="intro" style="border-left:4px solid #f5c400;padding:10px 14px;background:rgba(245,196,0,.08);border-radius:6px"><b>📊 Súmula conta o placar. O Klaus TV conta o jogo inteiro.</b> Nos jogos com o botão <b>Estatísticas</b>, o Klaus TV estava lá: cada rebote, assistência, roubo de bola, toco e a eficiência de cada atleta foram registrados lance a lance, com MVP e destaques do jogo. Nos jogos que mostram só a súmula, o Klaus TV não foi contratado — e esses números se perderam para sempre. Quer o seu time com estatística completa, transmissão e destaques para guardar? Fale com o Klaus TV.</p>
     <div class="ler"><div><b>1 · Placar por quarto</b>Na súmula, "Pontuação por período" mostra quantos pontos cada time fez em cada quarto.</div>
       <div><b>2 · Pontos de cada atleta</b>O "Resumo técnico" lista os pontos de cada atleta, quarto a quarto, e o total.</div>
       <div><b>3 · Faltas</b>Ao lado do nome ficam as faltas marcadas pela arbitragem. Com 5, o atleta sai do jogo.</div></div>
@@ -222,7 +223,7 @@ function card(j){
   return `<div class="card"><div class="top"><span>${esc(d||'Data a definir')}${faseDe(j)?' · '+esc(faseDe(j)):''}</span><span class="nj">${j.num?'Jogo '+esc(j.num):''}</span></div>
     <div class="pl"><div class="b" style="background:${cor(j.a)}"></div>${t(j.a)}<div class="p ${va?'v':''}">${temP?esc(j.pa):''}</div><div class="x">x</div><div class="p ${vb?'v':''}">${temP?esc(j.pb):''}</div>${t(j.b,1)}<div class="b" style="background:${cor(j.b)}"></div></div>
     ${dest.length?`<div class="dest">${dest.join('')}</div>`:''}${tim}
-    ${j.fem?'<div class="sem">A FBERJ ainda não publica a súmula dos jogos do feminino.</div>':`<div class="bt">${j.id?`<a class="s" href="https://drive.google.com/file/d/${esc(j.id)}/view" target="_blank" rel="noopener">📄 Ver súmula</a>`:''}${j.kt?`<a class="e" href="aovivo.html?cat=${encodeURIComponent(j.cat)}&jogo=${encodeURIComponent(j.kt.id)}">📊 Estatísticas</a>`:''}</div>`}</div>`;
+    ${j.fem?'<div class="sem">A FBERJ ainda não publica a súmula dos jogos do feminino.</div>':`<div class="bt">${j.id?`<a class="s" href="https://drive.google.com/file/d/${esc(j.id)}/view" target="_blank" rel="noopener">📄 Ver súmula</a>`:''}${j.kt?`<a class="e" href="aovivo.html?cat=${encodeURIComponent(j.cat)}&jogo=${encodeURIComponent(j.kt.id)}" target="_blank" rel="noopener">📊 Estatísticas</a>`:''}</div>`}</div>`;
 }
 function kt_desenha(){
   const cat=$('selCat').value, fase=$('selFase').value, eq=$('selEq').value;
