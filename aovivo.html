@@ -263,7 +263,7 @@ async function api(d){ try{ const r=await fetch(KT_API,{method:'POST',headers:{'
 function cor(s){ return (D.cores[s]||['#1e90ff','#ffffff'])[0]; }
 function txt(hex){ const n=parseInt(hex.slice(1),16); return ((n>>16)*.299+((n>>8)&255)*.587+(n&255)*.114)>150?'#000':'#fff'; }
 function escudo(s){ return D.escudos[s]||'favicon.svg'; }
-function dataJogo(j){ const d=new Date(j.dataHora); return isNaN(d)?null:d; }
+function dataJogo(j){ const d=new Date(String(j.dataHora||'').replace(' ','T')); return isNaN(d)?null:d; }
 function status(j){
   if(j.status==='FINAL') return 'final';
   const d=dataJogo(j); if(!d) return 'breve';
@@ -302,9 +302,8 @@ async function kt_lista(abrir,silencio){
   if(!silencio) sel.innerHTML='<option>Carregando jogos...</option>';
   const r=await api({acao:'aoVivoLista',categoria:cat});
   if(!r.ok){ if(!silencio) sel.innerHTML='<option value="">Não foi possível carregar agora</option>'; return; }
-  const peso={vivo:0,breve:1,final:2};
-  kt_jogos=r.jogos.sort((a,b)=>{ const sa=status(a), sb=status(b); if(sa!==sb) return peso[sa]-peso[sb];
-    return sa==='breve' ? String(a.dataHora).localeCompare(String(b.dataHora)) : String(b.dataHora).localeCompare(String(a.dataHora)); });
+  const tempo=j=>{ const d=dataJogo(j); return d?d.getTime():0; };
+  kt_jogos=r.jogos.sort((a,b)=>tempo(b)-tempo(a)); // data decrescente: os jogos mais distantes no futuro em cima, os antigos embaixo
   if(!kt_jogos.length){ sel.innerHTML='<option value="">Nenhum jogo do '+cat+' por enquanto</option>'; $('jogo').innerHTML=''; return; }
   sel.innerHTML='<option value="">— escolha o jogo ('+kt_jogos.length+') —</option>'+kt_jogos.map(j=>`<option value="${j.id}">${esc(kt_rotulo(j))}</option>`).join('');
   if(kt_atual && kt_jogos.some(j=>j.id===kt_atual)) sel.value=kt_atual;

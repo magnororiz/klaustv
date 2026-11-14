@@ -112,6 +112,7 @@ button:hover{background:#0f6fd1;}
 .salvos input{padding:7px;border-radius:8px;border:none;font-size:13px;}
 .jogoItem{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#0b1220;border:1px solid #2c3e50;border-radius:8px;padding:8px;margin:6px 0;font-size:13px;flex-wrap:wrap;}
 .jogoItem .meta{color:#9fb3c8;font-size:11px;}
+.jogoItem .placar{color:#ffd54f;background:#1c2738;border-radius:6px;padding:1px 7px;margin:0 4px;}
 .vazio{color:#7f93a8;text-align:center;font-size:12px;padding:10px;}
 #kt_aviso{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#ffd54f;color:#000;padding:10px 16px;border-radius:10px;font-weight:bold;font-size:13px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.5);cursor:pointer;display:none;max-width:90%;text-align:center;}
 /*ktFooterCSS*/
@@ -302,7 +303,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
     <div class="filtro">
         <label>Mostrar<select id="filtroTipo" onchange="kt_listarSalvos()"><option value="vivo">🔴 Ao vivo e em breve</option><option value="enc">⚪ Jogos encerrados</option></select></label>
         <label>Data do jogo<input type="date" id="filtroData" onchange="kt_listarSalvos()"></label>
-        <button onclick="document.getElementById('filtroData').value='';kt_listarSalvos()">Ver todos</button>
+        <button id="btLimparData" style="display:none" onclick="document.getElementById('filtroData').value='';kt_listarSalvos()">✖ Limpar data</button>
     </div>
     <div id="listaSalvos"></div>
 </div>
@@ -630,20 +631,22 @@ async function kt_sincronizar(){
     const r = await kt_api({acao:'listarJogos'});
     if(!r.ok) return;
     const loc = kt_lerSalvos();
-    const srv = r.jogos.map(g=>{ const m=g.meta||{}; const o=m.oficiais||{}; return {id:g.id, categoria:g.categoria, dataHora:String(g.dataHora||'').slice(0,16), ginasio:g.ginasio||m.ginasio||'', mandante:m.mandante||'', arbitro:o.arbitro||'', fiscal:o.fiscal||'', apontador:o.apontador||'', cronometrista:o.cronometrista||'', relogio:o.relogio||'', timeA:m.timeA, timeB:m.timeB, jogoFed:g.jogoFed||m.jogoFed||'', dataFed:m.dataFed||'', avulso:!!m.avulso, timesFed:!!m.timesFed, catFed:m.catFed||'', status:g.status||'', atualizadoEm:m.atualizadoEm||''}; }).filter(g=>g.timeA&&g.timeB);
+    const srv = r.jogos.map(g=>{ const m=g.meta||{}; const o=m.oficiais||{}; return {id:g.id, categoria:g.categoria, dataHora:String(g.dataHora||'').replace(' ','T').slice(0,16), ginasio:g.ginasio||m.ginasio||'', placarA:Number(g.placarA||0), placarB:Number(g.placarB||0), mandante:m.mandante||'', arbitro:o.arbitro||'', fiscal:o.fiscal||'', apontador:o.apontador||'', cronometrista:o.cronometrista||'', relogio:o.relogio||'', timeA:m.timeA, timeB:m.timeB, jogoFed:g.jogoFed||m.jogoFed||'', dataFed:m.dataFed||'', avulso:!!m.avulso, timesFed:!!m.timesFed, catFed:m.catFed||'', status:g.status||'', atualizadoEm:m.atualizadoEm||''}; }).filter(g=>g.timeA&&g.timeB);
     const ids = new Set(srv.map(g=>g.id));
     kt_gravarSalvos(srv.concat(loc.filter(g=>!ids.has(g.id))));
     kt_listarSalvos();
 }
 
-function kt_fmtData(dh){ if(!dh) return '—'; const [d,h]=dh.split('T'); const [a,m,dd]=d.split('-'); return `${dd}/${m}/${a}`+(h?' às '+h:''); }
+function kt_fmtData(dh){ const x=String(dh||'').match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/); if(!x) return dh||'—'; return x[3]+'/'+x[2]+'/'+x[1]+(x[4]?' · '+x[4]+'h'+x[5]:''); }
 
 function kt_listarSalvos(){
     const f = document.getElementById('filtroData').value, enc = document.getElementById('filtroTipo').value==='enc';
-    const lista = kt_lerSalvos().filter(j=>(!f || (j.dataHora||'').startsWith(f)) && kt_encerrado(j)===enc).sort((a,b)=>enc?(b.dataHora||'').localeCompare(a.dataHora||''):(a.dataHora||'').localeCompare(b.dataHora||''));
+    const btL=document.getElementById('btLimparData'); if(btL) btL.style.display=f?'':'none';
+    const lista = kt_lerSalvos().map(j=>Object.assign(j,{dataHora:String(j.dataHora||'').replace(' ','T')})).filter(j=>(!f || (j.dataHora||'').startsWith(f)) && kt_encerrado(j)===enc).sort((a,b)=>(b.dataHora||'').localeCompare(a.dataHora||''));
     const box = document.getElementById('listaSalvos');
     if(!lista.length){ box.innerHTML = '<div class="vazio">'+(enc?'Nenhum jogo encerrado':'Nenhum jogo ao vivo ou em breve')+(f?' nesta data.':'.')+'</div>'; return; }
-    box.innerHTML = lista.map(j=>`<div class="jogoItem"><div><b>${kt_esc(j.timeA.sigla)} x ${kt_esc(j.timeB.sigla)}</b> · ${kt_esc(j.categoria)}${j.avulso?' · <span style="color:#ffd54f">AVULSO</span>':''}
+    const temPl=j=>enc || (+j.placarA||0)+(+j.placarB||0)>0;
+    box.innerHTML = lista.map(j=>`<div class="jogoItem"><div><b>${kt_esc(j.timeA.sigla)}${temPl(j)?' <span class="placar">'+(+j.placarA||0)+' x '+(+j.placarB||0)+'</span> ':' x '}${kt_esc(j.timeB.sigla)}</b> · ${kt_esc(j.categoria)}${j.jogoFed?' · <b>Jogo '+kt_esc(j.jogoFed)+'</b>':''}${j.avulso?' · <span style="color:#ffd54f">AVULSO</span>':''}
         <div class="meta">${kt_fmtData(j.dataHora)} · ${j.ginasio||'ginásio não informado'} · ${j.timeA.atletas.length} x ${j.timeB.atletas.length} atletas${j.arbitro?' · Árb.: '+j.arbitro:''}</div></div>
         <div><button onclick="kt_abrir('${j.id}')">✏️ Abrir / editar</button><button onclick="kt_excluir('${j.id}')" style="background:#c0392b;">🗑️ Excluir</button></div></div>`).join('');
 }

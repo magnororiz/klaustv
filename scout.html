@@ -398,7 +398,7 @@ html.ktLeitura .team{border-color:#c77700 !important;}
 <button type="button" class="ktBtSalvar" onclick="kt_salvarAndamento()">💾 Salvar jogo em andamento</button>
 <input type="hidden" id="ktDataJogo">
 <label for="ktSelAnt">📚 Jogos anteriores</label>
-<span class="ktAntSel"><select id="ktSelAntCat" onchange="kt_listarAnteriores()"><option value="">Categoria</option></select><select id="ktSelAnt" onchange="kt_verAnterior(this.value)"><option value="">Escolha primeiro o jogo montado</option></select></span>
+<span class="ktAntSel"><select id="ktSelAntCat" onchange="kt_listarAnteriores()"><option value="">Categoria</option></select><select id="ktSelAnt" onchange="kt_verAnterior(this.value)"><option value="">Carregando jogos encerrados…</option></select></span>
 <button type="button" onclick="kt_editarAnterior()">✏️ Editar</button>
 <div id="ktFaixaTrava"></div>
 <div id="ktFaixaLeitura">👁️ SEGUNDA TELA — só leitura · acompanhando o que o outro computador marca</div>
@@ -1405,11 +1405,12 @@ async function kt_listarMontados(){
     if(c){ r={ok:true,jogos:c}; kt_msg('⚠️ Sem internet: usando a última lista de jogos guardada neste computador. Os números continuam sendo guardados aqui.'); }
     else { sel.innerHTML='<option value="">Não foi possível carregar: '+(r.erro||'tente de novo')+'</option>'; return; } }
   const hoje=new Date(); const h=hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0')+'-'+String(hoje.getDate()).padStart(2,'0');
-  KT_MONTADOS=(r.jogos||[]).map(j=>Object.assign(j,{dataHora:String(j.dataHora||'').slice(0,16)})).filter(j=>(j.meta||{}).timeA&&(j.meta||{}).timeB);
-  const futuros=KT_MONTADOS.filter(j=>j.dataHora.slice(0,10)>=h).sort((x,y)=>x.dataHora.localeCompare(y.dataHora));
-  const passados=KT_MONTADOS.filter(j=>j.dataHora.slice(0,10)<h).sort((x,y)=>y.dataHora.localeCompare(x.dataHora));
+  KT_MONTADOS=(r.jogos||[]).map(j=>Object.assign(j,{dataHora:String(j.dataHora||'').replace(' ','T').slice(0,16)})).filter(j=>(j.meta||{}).timeA&&(j.meta||{}).timeB);
+  let aberto=KT_JOGO_ID||atual; if(!aberto){ try{ const a=JSON.parse(localStorage.getItem('kt_scout_atual')||'null'); if(a&&Date.now()-a.ts<KT_RASC_H) aberto=a.id; }catch(e){} }
+  const ativos=KT_MONTADOS.filter(j=>!kt_encerrado(j)||j.id===aberto).sort((x,y)=>y.dataHora.localeCompare(x.dataHora));
   const op=j=>'<option value="'+j.id+'">'+kt_rotuloJM(j).replace(/</g,'&lt;')+'</option>';
-  sel.innerHTML='<option value="">— escolha o jogo montado ('+KT_MONTADOS.length+') —</option>'+(futuros.length?futuros.map(op).join(''):'')+(passados.length?passados.map(op).join(''):'');
+  sel.innerHTML='<option value="">'+(ativos.length?'— jogos ao vivo e em breve ('+ativos.length+') —':'Nenhum jogo ao vivo ou em breve')+'</option>'+ativos.map(op).join('');
+  kt_listarAnteriores();
   if(atual && KT_MONTADOS.some(j=>j.id===atual)) sel.value=atual;
 }
 function kt_temNumeros(){ return Object.keys(stats).some(k=>['pts','reb','ast','stl','blk','to','foul','twoMiss','threeMiss','ftMiss'].some(c=>+stats[k][c])); }
@@ -1541,10 +1542,14 @@ function kt_desfazer(){ if(!KT_SNAP) return; if(!confirm('Voltar todos os númer
 function kt_listarAnteriores(atual){
   if(atual) KT_ANT_REF=atual; const ref=KT_ANT_REF||{};
   const sc=document.getElementById('ktSelAntCat'), sel=document.getElementById('ktSelAnt');
-  if(atual){ const cats=[...new Set(KT_MONTADOS.map(j=>j.categoria).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true})); sc.innerHTML=cats.map(c=>'<option value="'+c.replace(/"/g,'&quot;')+'">'+c.replace(/</g,'&lt;')+'</option>').join(''); sc.value=atual.categoria; }
+  const enc=KT_MONTADOS.filter(j=>kt_encerrado(j) && j.id!==KT_JOGO_ID);
+  const cats=[...new Set(enc.map(j=>j.categoria).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
+  const antes=sc.value;
+  sc.innerHTML=cats.length?cats.map(c=>'<option value="'+c.replace(/"/g,'&quot;')+'">'+c.replace(/</g,'&lt;')+'</option>').join(''):'<option value="">Categoria</option>';
+  if(atual && cats.includes(atual.categoria)) sc.value=atual.categoria; else if(cats.includes(antes)) sc.value=antes;
   const cat=sc.value;
-  const js=KT_MONTADOS.filter(j=>j.id!==ref.id && j.categoria===cat && kt_encerrado(j)).sort((x,y)=>String(y.dataHora).localeCompare(String(x.dataHora)));
-  sel.innerHTML='<option value="">'+(js.length?'— jogos encerrados do '+cat+' ('+js.length+') —':'Nenhum jogo encerrado do '+cat)+'</option>'+js.map(j=>'<option value="'+j.id+'">'+kt_rotuloJM(j).replace(/</g,'&lt;')+'</option>').join('');
+  const js=enc.filter(j=>j.categoria===cat).sort((x,y)=>String(y.dataHora).localeCompare(String(x.dataHora)));
+  sel.innerHTML='<option value="">'+(js.length?'— jogos encerrados do '+cat+' ('+js.length+') —':'Nenhum jogo encerrado'+(cat?' do '+cat:''))+'</option>'+js.map(j=>'<option value="'+j.id+'">'+kt_rotuloJM(j).replace(/</g,'&lt;')+'</option>').join('');
   document.getElementById('ktAnterior').innerHTML=''; KT_ANT=null;
 }
 const KT_CAMPOS=[['twoMade','2P certos'],['twoMiss','2P erros'],['threeMade','3P certos'],['threeMiss','3P erros'],['ftMade','LL certos'],['ftMiss','LL erros'],['reb','REB'],['ast','AST'],['stl','STL'],['blk','BLK'],['to','TO'],['foul','F']];
