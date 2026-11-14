@@ -59,7 +59,7 @@ table.st tr.fora td{opacity:.4;}
 .conf{margin-top:10px;padding:8px 10px;border-radius:8px;font-weight:700;font-size:13px;}
 .conf.bom{background:#123d24;color:#9ff0bf;}.conf.ruim{background:#4a1a18;color:#ffb4ae;}
 .selF{padding:5px;border-radius:6px;border:1px solid #2c3e50;}
-.bExc{background:#16243a;border:1px solid #2a3b55;border-radius:6px;cursor:pointer;padding:3px 8px;}
+.bExc{background:#5c1a1a;color:#fff;font-size:12px;border:1px solid #c0392b;border-radius:6px;cursor:pointer;padding:3px 8px;}
 .btSalvar{background:#27ae60;color:#fff;border:none;border-radius:9px;padding:12px 22px;font-size:15px;font-weight:800;cursor:pointer;}
 .lista .item{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #22324d;padding:7px 2px;font-size:13px;gap:8px;}
 .lista button{background:#c0392b;color:#fff;border:none;border-radius:7px;padding:6px 10px;font-weight:700;cursor:pointer;}
@@ -191,7 +191,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 
 <div id="secF" style="display:none">
  <div class="painel"><b style="color:#ffd54f">🏛️ FBERJ — Mesa e Arbitragem</b>
-  <div class="dica">Lista única, em ordem alfabética, usada em todos os campos de arbitragem e mesa do Montar Jogo (árbitro, fiscal, apontador, cronometrista e relógio). Nome novo digitado no Montar Jogo entra sozinho aqui. Nomes da lista oficial da FBERJ não podem ser excluídos; os incluídos pelo site, sim (ex.: erro de digitação).</div>
+  <div class="dica">Lista única, em ordem alfabética, usada em todos os campos de arbitragem e mesa do Montar Jogo (árbitro, fiscal, apontador, cronometrista e relógio). Nome novo digitado no Montar Jogo entra sozinho aqui. Para tirar um nome, use o botão 🗑️ Excluir da linha (nomes da lista oficial da FBERJ pedem confirmação duas vezes).</div>
   <div class="filtros" style="margin-top:8px"><label style="flex:1;min-width:220px">Buscar<input id="fBusca" oninput="kt_fMostrar()" placeholder="Digite parte do nome"></label>
   <label style="flex:1;min-width:220px">Incluir nome novo<input id="fNovo" placeholder="Nome completo" onkeydown="if(event.key==='Enter')kt_fIncluir()"></label>
   <label>Função<select id="fFuncao"><option value="">— escolha —</option><option>Árbitro(a)</option><option>Oficial de mesa</option></select></label>
@@ -228,12 +228,12 @@ async function kt_fListar(){ const r=await api({acao:'listarArbitragem'}); if(!r
 function kt_fMostrar(){ const q=String($('fBusca').value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
   const ls=ARB.filter(x=>!q||x.nome.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q));
   $('fCont').textContent=ls.length+' de '+ARB.length+' nomes';
-  $('fLista').innerHTML=ls.length?'<table class="bd"><tr><th style="text-align:left">Nome</th><th>Função</th><th>Origem</th><th></th></tr>'+ls.map(x=>'<tr><td style="text-align:left">'+esc(x.nome)+'</td><td>'+(x.origem==='FBERJ'?esc(x.funcao||'—'):'<select class="selF" data-n="'+esc(x.nome)+'" onchange="kt_fFuncao(this)"><option value="">— escolha —</option>'+['Árbitro(a)','Oficial de mesa'].map(o=>'<option'+(o===x.funcao?' selected':'')+'>'+o+'</option>').join('')+'</select>')+'</td><td>'+(x.origem==='FBERJ'?'Lista oficial':'Incluído pelo site')+'</td><td>'+(x.origem==='FBERJ'?'':'<button class="bExc" onclick="kt_fExcluir(this)" data-n="'+esc(x.nome)+'">🗑️</button>')+'</td></tr>').join('')+'</table>':'<div class="dica">Nenhum nome encontrado.</div>'; }
+  $('fLista').innerHTML=ls.length?'<table class="bd"><tr><th style="text-align:left">Nome</th><th>Função</th><th>Origem</th><th></th></tr>'+ls.map(x=>'<tr><td style="text-align:left">'+esc(x.nome)+'</td><td>'+(x.origem==='FBERJ'?esc(x.funcao||'—'):'<select class="selF" data-n="'+esc(x.nome)+'" onchange="kt_fFuncao(this)"><option value="">— escolha —</option>'+['Árbitro(a)','Oficial de mesa'].map(o=>'<option'+(o===x.funcao?' selected':'')+'>'+o+'</option>').join('')+'</select>')+'</td><td>'+(x.origem==='FBERJ'?'Lista oficial':'Incluído pelo site')+'</td><td>'+'<button class="bExc" onclick="kt_fExcluir(this)" data-n="'+esc(x.nome)+'" data-of="'+(x.origem==='FBERJ'?1:'')+'" title="Excluir da lista">🗑️ Excluir</button>'+'</td></tr>').join('')+'</table>':'<div class="dica">Nenhum nome encontrado.</div>'; }
 async function kt_fIncluir(){ const n=String($('fNovo').value||'').replace(/\s+/g,' ').trim(); if(n.length<3) return aviso('Digite o nome completo.');
   const f=$('fFuncao').value; if(!f) return aviso('Escolha a função: Árbitro(a) ou Oficial de mesa.');
   const r=await api({acao:'incluirArbitragem',nomes:[{nome:n,funcao:f}]}); if(!r.ok) return aviso('Não salvou: '+(r.erro||'')); aviso(r.incluidos&&r.incluidos.length?'✅ '+n+' incluído na lista.':'Esse nome já está na lista.'); $('fNovo').value=''; kt_fListar(); }
 async function kt_fFuncao(sel){ const r=await api({acao:'funcaoArbitragem',nome:sel.dataset.n,funcao:sel.value}); aviso(r.ok?'✅ Função salva.':'Não salvou: '+(r.erro||'')); const x=ARB.find(a=>a.nome===sel.dataset.n); if(r.ok&&x) x.funcao=sel.value; }
-async function kt_fExcluir(b){ const n=b.dataset.n; if(!confirm('Excluir "'+n+'" da lista?')) return; b.disabled=true; const r=await api({acao:'excluirArbitragem',nome:n}); if(!r.ok){ b.disabled=false; return aviso(r.erro||'Não excluiu.'); } aviso('Excluído.'); kt_fListar(); }
+async function kt_fExcluir(b){ const n=b.dataset.n; if(!confirm('Excluir "'+n+'" da lista?')) return; if(b.dataset.of && !confirm('"'+n+'" é da lista oficial da FBERJ. Confirma a exclusão?')) return; b.disabled=true; const r=await api({acao:'excluirArbitragem',nome:n}); if(!r.ok){ b.disabled=false; return aviso(r.erro||'Não excluiu.'); } aviso('Excluído.'); kt_fListar(); }
 const catOpts=()=>'<option value="">— escolha —</option>'+D.ordem.map(c=>'<option>'+c+'</option>').join('');
 function timesDe(cat){ return Object.keys(D.elencos[cat]||{}).sort((a,b)=>nomeEq(a).localeCompare(nomeEq(b),'pt-BR')); }
 /* ---------- Jogadores ---------- */
