@@ -33,6 +33,7 @@ function doPost(e) {
       case 'listarJogos': return responder(listarJogos(p.token, p.data));
       case 'excluirJogo': return responder(excluirJogo(p.token, p.id));
       case 'salvarStats': return responder(salvarStats(p.token, p.id, p.stats, p.status, p.dataHora));
+      case 'salvarData': return responder(salvarData(p.token, p.id, p.dataHora));
       case 'salvarFoto': return responder(salvarFoto(p.token, p.chave, p.imagem));
       case 'listarFotos': return responder(listarFotos(p.token));
       case 'salvarApelido': return responder(salvarApelido(p.token, p.reg, p.apelido));
@@ -202,7 +203,7 @@ function salvarJogo(token, j) {
   const sh = abaJogos(); const todos = lerJogos();
   const id = j.id || ('KT-' + Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'yyyyMMddHHmmss') + '-' + Math.floor(Math.random() * 1000));
   const atual = todos.find(x => x.id === id);
-  const meta = { timeA: j.timeA, timeB: j.timeB, oficiais: j.oficiais || {}, ginasio: j.ginasio || '', mandante: j.mandante || '', jogoFed: j.jogoFed || '', dataFed: j.dataFed || '', avulso: !!j.avulso, atualizadoEm: new Date().toISOString() };
+  const meta = { timeA: j.timeA, timeB: j.timeB, oficiais: j.oficiais || {}, ginasio: j.ginasio || '', mandante: j.mandante || '', jogoFed: j.jogoFed || '', dataFed: j.dataFed || '', avulso: !!j.avulso, timesFed: !!j.timesFed, catFed: j.catFed || '', atualizadoEm: new Date().toISOString() };
   const linha = [id, j.categoria, j.dataHora || '', j.timeA.sigla || '', j.timeB.sigla || '', j.ginasio || '', j.jogoFed || '', JSON.stringify(meta),
     atual ? atual.stats : '', atual ? atual.status : '', atual ? atual.placarA : 0, atual ? atual.placarB : 0, new Date(), u.usuario];
   if (atual) sh.getRange(atual.linha, 1, 1, COLS.length).setValues([linha]); else sh.appendRow(linha);
@@ -230,6 +231,14 @@ function salvarStats(token, id, stats, status, dataHora) {
   if (dataHora && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(String(dataHora))) { const c = sh.getRange(j.linha, 3); c.setNumberFormat('@'); c.setValue(String(dataHora).slice(0, 16)); }
   const c = CacheService.getScriptCache(); c.remove('j_' + id); c.remove('lista');
   return { ok: true, placar: pl };
+}
+function salvarData(token, id, dataHora) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(String(dataHora || ''))) return { ok: false, erro: 'Data inválida.' };
+  const j = lerJogos().find(x => x.id === id); if (!j) return { ok: false, erro: 'Jogo não encontrado.' };
+  const c = abaJogos().getRange(j.linha, 3); c.setNumberFormat('@'); c.setValue(String(dataHora).slice(0, 16));
+  const k = CacheService.getScriptCache(); k.remove('j_' + id); k.remove('lista');
+  return { ok: true };
 }
 function aoVivoLista(categoria) {
   const c = CacheService.getScriptCache(); let lista = jsonOu(c.get('lista'), null);

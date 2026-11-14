@@ -355,7 +355,7 @@ function kt_bolaLetra(l,c){ return 'data:image/svg+xml,'+encodeURIComponent('<sv
 function kt_render(j){
   KT_ULT=j;
   const m=j.meta||{}, A=m.timeA||{}, B=m.timeB||{}, sa=A.sigla, sb=B.sigla;
-  if(m.avulso){ [[sa,'A','#1e5bd8'],[sb,'B','#e8590c']].forEach(([s,l,c])=>{ if(!s) return; D.escudos[s]=kt_bolaLetra(l,c); D.cores[s]=[c,'#ffffff']; if(!D.equipes[s]) D.equipes[s]=s; }); }
+  if(m.avulso){ [[sa,'A','#1e5bd8',A],[sb,'B','#e8590c',B]].forEach(([s,l,c,tm])=>{ if(!s || tm.fed) return; D.escudos[s]=tm.escudo||kt_bolaLetra(l,c); D.cores[s]=[c,'#ffffff']; if(!D.equipes[s]) D.equipes[s]=s; }); }
   const ja=jogadores(j,'A'), jb=jogadores(j,'B'), todos=ja.concat(jb);
   const pa=soma(ja,'pts'), pb=soma(jb,'pts');
   const d=dataJogo(j), cat=j.categoria;

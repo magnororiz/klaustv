@@ -229,6 +229,11 @@ hr{
 .ktJM .ktModo{position:absolute;top:-13px;right:14px;width:auto !important;padding:3px 10px !important;font-size:11px !important;border-radius:20px;background:#1f9a55;border:1px solid #43c97b;box-shadow:none;z-index:2;}
 html.ktLeitura .ktJM .ktModo{background:#c77700;border-color:#ffb74d;}
 html.ktLeitura .team .buttons button,html.ktLeitura .ktQ input,html.ktLeitura #ktDataJogo,html.ktLeitura .ktBtSalvar,html.ktLeitura .ktPremL select,html.ktLeitura .ktPremL button,html.ktLeitura .ktPrem>button,html.ktLeitura #ktSelJogo,html.ktLeitura .ktBtExcluir,html.ktLeitura .ktJM button[onclick^="kt_editarAnterior"],html.ktLeitura .ktAntBt button{opacity:.35;pointer-events:none;filter:grayscale(.6);}
+html.ktTravado .team .buttons button,html.ktTravado .ktQ input,html.ktTravado .ktBtSalvar,html.ktTravado .ktPremL select,html.ktTravado .ktPremL button,html.ktTravado .ktPrem>button{opacity:.35;pointer-events:none;filter:grayscale(.6);}
+.ktAntSel{display:flex;gap:6px;min-width:0;}.ktAntSel select{min-width:0;}.ktAntSel #ktSelAntCat{flex:0 0 110px;}.ktAntSel #ktSelAnt{flex:1;}
+#ktFaixaTrava{display:none;grid-column:1/-1;text-align:center;border-radius:8px;padding:6px;font-weight:800;font-size:13px;}
+#ktFaixaTrava.on{display:block;background:#2b1010;border:1px solid #e57373;color:#ffcdd2;}#ktFaixaTrava.ed{display:block;background:#10261a;border:1px solid #66bb6a;color:#c8e6c9;}
+#ktFaixaTrava button{margin-left:10px;padding:4px 12px;font-size:13px;width:auto;}
 #ktFaixaLeitura{display:none;grid-column:1/-1;text-align:center;background:#3a2600;border:1px solid #ffb74d;color:#ffd08a;border-radius:8px;padding:6px;font-weight:800;font-size:13px;letter-spacing:.5px;}
 html.ktLeitura #ktFaixaLeitura{display:block;}
 html.ktLeitura .team{border-color:#c77700 !important;}
@@ -391,11 +396,11 @@ html.ktLeitura .team{border-color:#c77700 !important;}
 <label for="ktSelJogo">🏀 Jogo montado</label>
 <select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select>
 <button type="button" class="ktBtSalvar" onclick="kt_salvarAndamento()">💾 Salvar jogo em andamento</button>
-<label class="ktData" title="Data e hora reais do jogo (podem ser diferentes da tabela da FBERJ)">📅 Data real<input type="datetime-local" id="ktDataJogo" onchange="kt_dataMudou()"></label>
+<input type="hidden" id="ktDataJogo">
 <label for="ktSelAnt">📚 Jogos anteriores</label>
-<select id="ktSelAnt" onchange="kt_verAnterior(this.value)"><option value="">Escolha primeiro o jogo montado</option></select>
-<button type="button" onclick="kt_editarAnterior()">✏️ Abrir / editar</button>
-<button type="button" class="ktBtExcluir" onclick="kt_excluirAnterior(this)">🗑️ Excluir jogo</button>
+<span class="ktAntSel"><select id="ktSelAntCat" onchange="kt_listarAnteriores()"><option value="">Categoria</option></select><select id="ktSelAnt" onchange="kt_verAnterior(this.value)"><option value="">Escolha primeiro o jogo montado</option></select></span>
+<button type="button" onclick="kt_editarAnterior()">✏️ Editar</button>
+<div id="ktFaixaTrava"></div>
 <div id="ktFaixaLeitura">👁️ SEGUNDA TELA — só leitura · acompanhando o que o outro computador marca</div>
 <div id="ktJMmsg" class="ktJMmsg"></div>
 </div><!--/ktJogoMontado-->
@@ -1440,7 +1445,7 @@ async function kt_abrirMontado(id,restaurando){
   ['A','B'].forEach(t=>{
     const tm=m['time'+t]||{}; const atl=(tm.atletas||[]).slice(0,12).slice().sort((x,y)=>{ const nx=parseInt(x.numero,10), ny=parseInt(y.numero,10); const vx=isNaN(nx)?9999:nx, vy=isNaN(ny)?9999:ny; return vx-vy || String(x.nome||'').localeCompare(String(y.nome||''),'pt-BR'); });
     document.getElementById('title'+t).innerText=kt_nomeTime(Object.assign({avulso:m.avulso},tm));
-    { const im=document.getElementById('ktEsc'+t); im.style.display=''; im.src=m.avulso?kt_bolaLetra(t,t==='A'?'#1e5bd8':'#e8590c'):('escudos/'+encodeURIComponent(tm.sigla||'')+'.png'); }
+    { const im=document.getElementById('ktEsc'+t); im.style.display=''; im.src=m.avulso?(tm.escudo||kt_bolaLetra(t,t==='A'?'#1e5bd8':'#e8590c')):('escudos/'+encodeURIComponent(tm.sigla||'')+'.png'); }
     const linhas=document.querySelectorAll('#table'+t+' tr'); KT_REGS[t]=[]; KT_INFO[t]=[];
     for(let i=1;i<=12;i++){ const a=atl[i-1]; const c=linhas[i].querySelectorAll('td'); const k=t+'-'+i;
       c[0].innerText=a?(a.numero||''):'';
@@ -1452,7 +1457,6 @@ async function kt_abrirMontado(id,restaurando){
   });
   document.getElementById('ktDataJogo').value=String(j.dataHora||'').slice(0,16);
   const rasc=(typeof KT_LEITURA!=='undefined'&&KT_LEITURA)?null:kt_rascLer(id);
-  if(rasc && rasc.dataHora) document.getElementById('ktDataJogo').value=rasc.dataHora;
   if(rasc && rasc.stats){ ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; const v=reg&&rasc.stats[t]&&rasc.stats[t][reg]; if(v) stats[t+'-'+i]=Object.assign({},KT_ZERO,v); } const pq=((rasc.stats.periodos||{})[t])||[]; for(let q=1;q<=4;q++){ const v=pq[q-1]; document.getElementById('ktQ'+t+q).value=(v===undefined||v===null)?'':v; } }); }
   if(typeof atualizarTodasAsLinhas==='function') atualizarTodasAsLinhas();
   KT_JOGO_ID=id;
@@ -1462,6 +1466,7 @@ async function kt_abrirMontado(id,restaurando){
   KT_SUJO=!!rasc;
   if(KT_LEITURA){ KT_SUJO=false; kt_lerLoop(); } else if(!KT_DONO_TS){ const ed=st.editor; KT_DONO_TS=(ed&&ed.dev===KT_DEV)?(+ed.ts||Date.now()):Date.now(); }
   kt_listarAnteriores(j);
+  KT_TRAVADO=kt_encerrado(j) && !rasc; KT_SNAP=null; kt_pintarTrava();
   document.querySelectorAll('.ktPremL').forEach(l=>{ if(typeof kt_premOpcoes==='function') kt_premOpcoes(l); });
   if(KT_RASC_PREM){ const ls=document.getElementById('ktPremLista'); ls.innerHTML=''; KT_RASC_PREM.forEach(([pv,jv,man])=>{ kt_premLinha(+pv||0); const l=ls.lastElementChild; l.querySelector('.pP').value=pv; kt_premOpcoes(l); if(man==='1'){ l.querySelector('.pJ').value=jv; l.querySelector('.pJ').dataset.manual='1'; } else kt_premOpcoes(l); }); KT_RASC_PREM=null; }
   if(typeof kt_premAuto==='function') kt_premAuto();
@@ -1478,8 +1483,8 @@ async function kt_enviarAuto(){
   if(typeof KT_LEITURA!=='undefined' && KT_LEITURA) return;
   if(!KT_JOGO_ID || !KT_SUJO || KT_ENVIANDO) return;
   KT_ENVIANDO=true; KT_SUJO=false; const id=KT_JOGO_ID;
-  const st=kt_statsDaTela(); const dh=document.getElementById('ktDataJogo').value;
-  const r=await kt_apiSc({acao:'salvarStats',id,stats:st,dataHora:dh});
+  const st=kt_statsDaTela(); const dh='';
+  const r=await kt_apiSc({acao:'salvarStats',id,stats:st});
   KT_ENVIANDO=false;
   if(r.ok && id===KT_JOGO_ID){ KT_STATS_SALVOS=st; kt_msg('📡 Enviado ao Ao vivo às '+new Date().toLocaleTimeString('pt-BR')+(r.placar?' · placar '+r.placar[0]+' x '+r.placar[1]:'')); }
   else if(!r.ok){ KT_SUJO=true; kt_msg('⚠️ Sem conexão com a planilha — os números estão guardados neste computador e serão enviados quando a conexão voltar.'); }
@@ -1511,26 +1516,35 @@ async function kt_lerLoop(){ clearTimeout(kt_lerT); if(!KT_LEITURA) return;
 // quem marca confere a cada 10 s se outro computador assumiu
 setInterval(async()=>{ if(KT_LEITURA||!KT_JOGO_ID||!KT_DONO_TS) return; const j=await kt_buscarRemoto(); const ed=j&&j.stats&&j.stats.editor;
   if(ed && ed.dev!==KT_DEV && +ed.ts>KT_DONO_TS){ KT_LEITURA=true; try{ localStorage.setItem('kt_leitura','1'); }catch(e){} kt_pintarModo(); kt_msg('👁️ Outro computador assumiu a marcação. Esta tela virou segunda tela (só leitura).'); kt_lerLoop(); } },10000);
-['addMade','addMiss','removeMade','removeMiss','addOther'].forEach(n=>{ const f=window[n]; if(typeof f==='function') window[n]=function(){ if(KT_LEITURA) return; return f.apply(this,arguments); }; });
+['addMade','addMiss','removeMade','removeMiss','addOther'].forEach(n=>{ const f=window[n]; if(typeof f==='function') window[n]=function(){ if(KT_LEITURA||KT_TRAVADO) return; return f.apply(this,arguments); }; });
 try{ if(localStorage.getItem('kt_leitura')==='1'){ KT_LEITURA=true; } }catch(e){}
 kt_pintarModo();
 async function kt_salvarAndamento(){
   if(!KT_JOGO_ID) return alert('Escolha primeiro o jogo montado.');
   kt_msg('Salvando na planilha…');
   const st=kt_statsDaTela();
-  const dh=document.getElementById('ktDataJogo').value; KT_SUJO=false;
-  const r=await kt_apiSc({acao:'salvarStats',id:KT_JOGO_ID,stats:st,dataHora:dh});
+  const dh=''; KT_SUJO=false;
+  const r=await kt_apiSc({acao:'salvarStats',id:KT_JOGO_ID,stats:st});
   if(!r.ok) KT_SUJO=true;
   if(r.ok){ KT_STATS_SALVOS=st; const jm=KT_MONTADOS.find(x=>x.id===KT_JOGO_ID); if(jm&&dh&&jm.dataHora!==dh){ jm.dataHora=dh; const o=document.querySelector('#ktSelJogo option[value="'+KT_JOGO_ID+'"]'); if(o) o.textContent=kt_rotuloJM(jm); } kt_msg('✅ Jogo salvo na planilha às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(r.placar?' · placar '+r.placar[0]+' x '+r.placar[1]:'')+'.'); }
   else { kt_msg(''); alert('Não foi possível salvar: '+(r.erro||'tente de novo')); }
 }
 /* ---------- Jogos anteriores da mesma categoria ---------- */
 let KT_ANT=null, KT_ANT_EDIT=false;
+var KT_ANT_REF=null, KT_TRAVADO=false, KT_SNAP=null;
+function kt_encerrado(j){ if(j.status==='FINAL') return true; const d=new Date(j.dataHora); return !isNaN(d) && Date.now()>d.getTime()+3*3600e3; }
+function kt_pintarTrava(){ document.documentElement.classList.toggle('ktTravado',KT_TRAVADO); const f=document.getElementById('ktFaixaTrava'); if(!f) return;
+  f.className=KT_TRAVADO?'on':(KT_SNAP?'ed':'');
+  f.innerHTML=KT_TRAVADO?'🔒 JOGO ENCERRADO — travado para não mudar sem querer <button type="button" onclick="kt_destravar()">✏️ Editar</button>':(KT_SNAP?'✏️ EDITANDO JOGO ENCERRADO — as mudanças vão para a planilha <button type="button" style="background:#7f8c8d" onclick="kt_desfazer()">↩️ Desfazer alterações</button><button type="button" onclick="KT_TRAVADO=true;kt_pintarTrava()">🔒 Travar de novo</button>':''); }
+function kt_destravar(){ if(!confirm('Você vai alterar um jogo encerrado. Continuar?')) return; KT_SNAP=kt_statsDaTela(); KT_TRAVADO=false; kt_pintarTrava(); }
+function kt_desfazer(){ if(!KT_SNAP) return; if(!confirm('Voltar todos os números ao que eram antes de você mexer?')) return; kt_aplicarRemoto(KT_SNAP); KT_SUJO=true; kt_rascSalvar(); kt_msg('↩️ Números voltaram ao que eram antes da edição.'); }
 function kt_listarAnteriores(atual){
-  const sel=document.getElementById('ktSelAnt');
-  const hoje=new Date(); const h=hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0')+'-'+String(hoje.getDate()).padStart(2,'0');
-  const js=KT_MONTADOS.filter(j=>j.id!==atual.id && j.categoria===atual.categoria && (j.dataHora.slice(0,10)<h || j.status==='FINAL')).sort((x,y)=>y.dataHora.localeCompare(x.dataHora));
-  sel.innerHTML='<option value="">'+(js.length?'— escolha um jogo anterior do '+atual.categoria+' ('+js.length+') —':'Nenhum jogo anterior do '+atual.categoria)+'</option>'+js.map(j=>'<option value="'+j.id+'">'+kt_rotuloJM(j).replace(/</g,'&lt;')+'</option>').join('');
+  if(atual) KT_ANT_REF=atual; const ref=KT_ANT_REF||{};
+  const sc=document.getElementById('ktSelAntCat'), sel=document.getElementById('ktSelAnt');
+  if(atual){ const cats=[...new Set(KT_MONTADOS.map(j=>j.categoria).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true})); sc.innerHTML=cats.map(c=>'<option value="'+c.replace(/"/g,'&quot;')+'">'+c.replace(/</g,'&lt;')+'</option>').join(''); sc.value=atual.categoria; }
+  const cat=sc.value;
+  const js=KT_MONTADOS.filter(j=>j.id!==ref.id && j.categoria===cat && kt_encerrado(j)).sort((x,y)=>String(y.dataHora).localeCompare(String(x.dataHora)));
+  sel.innerHTML='<option value="">'+(js.length?'— jogos encerrados do '+cat+' ('+js.length+') —':'Nenhum jogo encerrado do '+cat)+'</option>'+js.map(j=>'<option value="'+j.id+'">'+kt_rotuloJM(j).replace(/</g,'&lt;')+'</option>').join('');
   document.getElementById('ktAnterior').innerHTML=''; KT_ANT=null;
 }
 const KT_CAMPOS=[['twoMade','2P certos'],['twoMiss','2P erros'],['threeMade','3P certos'],['threeMiss','3P erros'],['ftMade','LL certos'],['ftMiss','LL erros'],['reb','REB'],['ast','AST'],['stl','STL'],['blk','BLK'],['to','TO'],['foul','F']];
@@ -1550,7 +1564,7 @@ function kt_desenharAnterior(){
     const totL=KT_ANT_EDIT?'':'<tr class="tot"><td colspan="2">TOTAL</td><td>'+tot.pts+'</td><td>'+kt_pctF(tot.twoMade,tot.twoMiss)+'</td><td>'+kt_pctF(tot.threeMade,tot.threeMiss)+'</td><td>'+kt_pctF(tot.ftMade,tot.ftMiss)+'</td><td>'+tot.reb+'</td><td>'+tot.ast+'</td><td>'+tot.stl+'</td><td>'+tot.blk+'</td><td>'+tot.to+'</td><td>'+tot.foul+'</td><td>'+tot.eff+'</td></tr>';
     return '<div class="ktAntBox"><h3>'+kt_nomeTime(Object.assign({avulso:m.avulso},tm)).replace(/</g,'&lt;')+' · '+tot.pts+'</h3><table>'+cab+linhas+totL+'</table></div>'; };
   box.innerHTML='<div class="ktAntCab">📚 Jogo anterior'+(KT_ANT_EDIT?' — editando':'')+'<small>'+data+' · '+kt_rotuloJM(j).replace(/^[^·]*· /,'').replace(/</g,'&lt;')+'</small></div><div class="ktAntGrid">'+tab('A')+tab('B')+'</div>'+
-    (KT_ANT_EDIT?'<div class="ktAntBt"><button type="button" onclick="kt_salvarAnterior()">💾 Salvar alterações do jogo anterior</button> <button type="button" style="background:#7f8c8d" onclick="kt_verAnterior(KT_ANT.id)">Cancelar</button></div>':'');
+    (KT_ANT_EDIT?'<div class="ktAntBt"><button type="button" onclick="kt_salvarAnterior()">💾 Salvar alterações do jogo anterior</button> <button type="button" style="background:#7f8c8d" onclick="kt_verAnterior(KT_ANT.id)">↩️ Desfazer alterações</button></div>':'');
   if(KT_ANT_EDIT) box.querySelectorAll('input').forEach(i=>i.oninput=()=>{ const S=KT_ANT.stats[i.dataset.t]; S[i.dataset.r]=Object.assign({},KT_ZERO,S[i.dataset.r]||{}); S[i.dataset.r][i.dataset.c]=Math.max(0,parseInt(i.value)||0); const tr=i.closest('tr'); const s=kt_calc(S[i.dataset.r]); const b=tr.querySelectorAll('td b'); b[0].textContent=s.pts; b[1].textContent=s.eff; });
 }
 async function kt_verAnterior(id){
@@ -1562,6 +1576,7 @@ async function kt_verAnterior(id){
 }
 function kt_editarAnterior(){
   if(!KT_ANT){ const v=document.getElementById('ktSelAnt').value; if(!v) return alert('Escolha um jogo anterior na lista.'); }
+  if(!confirm('Você vai alterar um jogo encerrado. Continuar?')) return;
   KT_ANT_EDIT=true; kt_desenharAnterior(); document.getElementById('ktAnterior').scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function kt_excluirAnterior(bt){
