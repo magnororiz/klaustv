@@ -472,13 +472,14 @@ function kt_tinta(hex,f){ const n=parseInt(String(hex||'#888888').slice(1),16); 
 function kt_celTime(s,i,txt,venceu,lado){ const c=cor(s); const bg=kt_tinta(c,i%2?0.80:0.90); const mk=venceu?`<span class="vant" title="Na frente neste item" style="background:${c};color:${txt2(c)}">✓</span>`:'';
   return `<td style="background:${bg}!important">${lado==='A'?mk+txt:txt+mk}</td>`; }
 function txt2(c){ try{ return txt(c); }catch(e){ return '#fff'; } }
-function kt_confr(j,sa,sb){ const L=((KT_HIS&&KT_HIS.confrontos)||[]).filter(g=>g.c===j.categoria && g.id!==j.id && ((g.a===sa&&g.b===sb)||(g.a===sb&&g.b===sa))).sort((x,y)=>String(y.d).localeCompare(String(x.d)));
-  return KT_CONF==='ult'?L.slice(0,1):L; }
-function kt_confrTopo(j,sa,sb,tit){ const L=((KT_HIS&&KT_HIS.confrontos)||[]).filter(g=>g.c===j.categoria && g.id!==j.id && ((g.a===sa&&g.b===sb)||(g.a===sb&&g.b===sa)));
+function kt_confrTodos(j,sa,sb){ return ((KT_HIS&&KT_HIS.confrontos)||[]).filter(g=>g.c===j.categoria && ((g.a===sa&&g.b===sb)||(g.a===sb&&g.b===sa))).sort((x,y)=>String(y.d).replace(' ','T').localeCompare(String(x.d).replace(' ','T'))); }
+function kt_confrAnt(j,sa,sb){ const dj=String(j.dataHora||'').replace(' ','T'); return kt_confrTodos(j,sa,sb).filter(g=>g.id!==j.id && (!dj || String(g.d).replace(' ','T')<dj)); }
+function kt_confr(j,sa,sb){ const ant=kt_confrAnt(j,sa,sb); return (KT_CONF==='ult'&&ant.length)?ant.slice(0,1):kt_confrTodos(j,sa,sb); }
+function kt_confrTopo(j,sa,sb,tit){ const L=kt_confrTodos(j,sa,sb);
   const n=L.length; const fd=d=>{ const m=String(d||'').match(/^(\d{4})-(\d{2})-(\d{2})/); return m?m[3]+'/'+m[2]+'/'+m[1]:''; };
-  const ult=L.slice().sort((x,y)=>String(y.d).localeCompare(String(x.d)))[0];
-  return `<div class="abaTopo">${tit} · ${esc(D.curto[sa]||sa)} x ${esc(D.curto[sb]||sb)} · ${esc(j.categoria)}${n?`<label class="ord">Mostrar <select onchange="KT_CONF=this.value;kt_render(KT_ULT)"><option value="todos"${KT_CONF==='todos'?' selected':''}>Todos os confrontos (${n})</option><option value="ult"${KT_CONF==='ult'?' selected':''}>Só o último confronto${ult?' ('+fd(ult.d)+')':''}</option></select></label>`:''}</div>`; }
-const kt_semConfr='<div class="vazio" style="padding:24px">Primeiro confronto destes dois times com estatística do Klaus TV nesta categoria. A comparação aparece a partir do próximo encontro entre eles.</div>';
+  const ult=kt_confrAnt(j,sa,sb)[0];
+  return `<div class="abaTopo">${tit} · ${esc(D.curto[sa]||sa)} x ${esc(D.curto[sb]||sb)} · ${esc(j.categoria)}${n?`<label class="ord">Mostrar <select onchange="KT_CONF=this.value;kt_render(KT_ULT)"><option value="todos"${KT_CONF==='todos'?' selected':''}>Todos os confrontos da temporada (${n})</option>${ult?`<option value="ult"${KT_CONF==='ult'?' selected':''}>Só o confronto anterior (${fd(ult.d)})</option>`:''}</select></label>`:''}</div>`; }
+const kt_semConfr='<div class="vazio" style="padding:24px">Ainda não há números destes dois times com estatística do Klaus TV nesta categoria. Os troféus e medalhas aparecem assim que o jogo tiver estatística.</div>';
 function kt_abaHTML(j,ja,jb){
   const cat=j.categoria, m=j.meta||{}, sa=(m.timeA||{}).sigla, sb=(m.timeB||{}).sigla, todos=ja.concat(jb);
   if(KT_ABA==='ces'){
@@ -514,7 +515,7 @@ function kt_abaHTML(j,ja,jb){
     const NM={G:'Geral (todas)',PTS:'Pontos',"2P":'Cestas de 2',"3P":'Cestas de 3',LL:'Lances livres',REB:'Rebotes',AST:'Assistências',ROU:'Roubos de bola',TOC:'Tocos',EF:'Eficiência'};
     return kt_confrTopo(j,sa,sb,'🏅 Medalhas nos confrontos')+`<div class="abaTopo" style="border-top:none;padding-top:0"><label class="ord">Classificar por <select onchange="KT_ORDMED=this.value;kt_render(KT_ULT)">${cols.map(([k])=>`<option value="${k}"${k===ord?' selected':''}>${NM[k]||k}</option>`).join('')}</select></label></div>
       <table class="ab"><tr><th>Pos.</th><th></th><th class="l">Atleta</th><th class="l">Equipe</th>${cols.map(([k,n])=>`<th class="${k===ord?'ordOn':''}" title="${NM[k]||k}">${n}</th>`).join('')}</tr>${tr}</table>
-      <div class="abaNota">Medalhas só dos jogos entre ${esc(D.curto[sa]||sa)} e ${esc(D.curto[sb]||sb)} no ${esc(cat)} com estatística do Klaus TV (este jogo não entra: os números dele estão no Resumo). Quem joga em duas categorias tem uma conta em cada. Em cada jogo, os 3 melhores do jogo (os dois times juntos) em cada item ganham 🥇 ouro, 🥈 prata e 🥉 bronze; empate divide a medalha. A classificação é por mais ouros, depois pratas, depois bronzes — no item escolhido ou no Geral (soma de todos os itens). Erros e faltas não dão medalha.</div>`;
+      <div class="abaNota">Medalhas só dos jogos entre ${esc(D.curto[sa]||sa)} e ${esc(D.curto[sb]||sb)} no ${esc(cat)} com estatística do Klaus TV (soma de todos os confrontos da temporada, inclusive este jogo; ou só o confronto anterior, se escolhido). Quem joga em duas categorias tem uma conta em cada. Em cada jogo, os 3 melhores do jogo (os dois times juntos) em cada item ganham 🥇 ouro, 🥈 prata e 🥉 bronze; empate divide a medalha. A classificação é por mais ouros, depois pratas, depois bronzes — no item escolhido ou no Geral (soma de todos os itens). Erros e faltas não dão medalha.</div>`;
   }
   if(KT_ABA==='tro'){
     const I=KT_HIS.itens, GS=kt_confr(j,sa,sb);
@@ -527,7 +528,7 @@ function kt_abaHTML(j,ja,jb){
       <table class="ab cmp"><tr><th style="width:38%">${kt_tm(sa)}</th><th></th><th style="width:38%">${kt_tm(sb)}</th></tr>
       <tr>${kt_celTime(sa,0,'<span class="trofN">🏆 '+ta+'</span>',ta>tb,'A')}<td class="it">TOTAL</td>${kt_celTime(sb,0,'<span class="trofN">🏆 '+tb+'</span>',tb>ta,'B')}</tr>
       <tr>${kt_celTime(sa,1,A.j,false,'A')}<td class="it">Confrontos contados</td>${kt_celTime(sb,1,B.j,false,'B')}</tr>${lin}</table>
-      <div class="abaNota">Só os jogos entre ${esc(D.curto[sa]||sa)} e ${esc(D.curto[sb]||sb)} no ${esc(cat)} com estatística do Klaus TV (este jogo não entra: os números dele estão no Resumo). Em cada confronto, o time que vence um item do Resumo ganha 🏆 naquele item (empate com valor dá troféu aos dois). A marca ✓ mostra quem tem mais troféus em cada item.</div>`;
+      <div class="abaNota">Só os jogos entre ${esc(D.curto[sa]||sa)} e ${esc(D.curto[sb]||sb)} no ${esc(cat)} com estatística do Klaus TV (soma de todos os confrontos da temporada, inclusive este jogo; ou só o confronto anterior, se escolhido). Em cada confronto, o time que vence um item do Resumo ganha 🏆 naquele item (empate com valor dá troféu aos dois). A marca ✓ mostra quem tem mais troféus em cada item.</div>`;
   }
   if(KT_ABA==='cla'){
     if(!KT_CLA){ kt_abaCarregar('cla'); return kt_carregando('a classificação'); }
