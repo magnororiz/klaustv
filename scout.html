@@ -252,19 +252,19 @@ html.ktLeitura .team{border-color:#c77700 !important;}
 .ktTopo .ktCabTx{text-align:left;}
 .ktTopo .teamTitle{font-size:17px;margin:0;line-height:1.1;}
 .ktTopo .score{font-size:40px;margin:0;line-height:1;}
-#ktQBar{display:none;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;margin:8px 0 2px 0;}
-#ktQBar.on{display:flex;}
-#ktQBar b{color:#ffd54f;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-right:4px;}
-#ktQBar button{width:auto!important;min-width:0!important;flex:0 0 auto;margin:0!important;border:0;border-radius:8px;padding:7px 11px;font-weight:800;font-size:13px;cursor:pointer;background:#1e5bd8;color:#fff;}
-#ktQBar button.fech{background:#1f6f43;cursor:default;}
-#ktQBar button.prox{background:#e8590c;}
-#ktQBar button:disabled:not(.fech){background:#3a4656;color:#9aa7b6;cursor:not-allowed;}
-#ktQBar button.ed{background:#7f8c8d;}
-#ktQBar.edit{outline:2px dashed #ffd54f;outline-offset:4px;border-radius:8px;}
 .ktQ input[readonly]{background:#e9eef4;color:#1b2533;}
 .ktQ input.ktQcur{box-shadow:0 0 0 2px #e8590c;}
-html.ktLeitura #ktQBar button,html.ktTravado #ktQBar button{opacity:.35;pointer-events:none;}
-.ktQ{display:grid;grid-template-columns:repeat(4,56px);gap:4px 8px;align-items:end;font-size:12px;color:#cfd8e3;}
+html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktTravado .ktQck,html.ktTravado .ktQed{opacity:.35;pointer-events:none;}
+.ktQf{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;font-weight:700;color:#9fb3c8;text-transform:lowercase;}
+.ktQck{width:18px;height:18px;min-width:0;border-radius:4px;border:2px solid #9fb3c8;background:transparent;padding:0;margin:0;cursor:pointer;color:#fff;font-size:12px;line-height:14px;font-weight:900;}
+.ktQck.on{background:#1f9d55;border-color:#1f9d55;cursor:default;}
+.ktQck.prox{border-color:#e8590c;box-shadow:0 0 0 2px rgba(232,89,12,.4);}
+.ktQck:disabled:not(.on){opacity:.3;cursor:default;}
+.ktQck.on.reab{cursor:pointer;box-shadow:0 0 0 2px #ffd54f;}
+.ktQedL{display:flex;flex-direction:column;align-items:center;gap:2px;}.ktQedTx{font-weight:700;font-size:12px;color:#cfd8e3;}.ktQf small{font-size:10px;}
+.ktQed{width:34px;height:31px;min-width:0;border-radius:7px;border:1px solid #2c3e50;background:#7f8c8d;color:#fff;padding:0;margin:0;cursor:pointer;font-size:15px;}
+.ktQed.on{background:#ffd54f;}
+.ktQ{display:grid;grid-template-columns:repeat(4,52px) 38px;gap:4px 16px;align-items:end;font-size:12px;color:#cfd8e3;}
 .ktQ span{grid-column:1/-1;text-align:center;}
 @media(max-width:520px){.ktTopo{flex-wrap:wrap;justify-content:center;}}
 .ktQ span{font-weight:800;color:#ffd54f;text-transform:uppercase;letter-spacing:1px;font-size:12px;}
@@ -413,7 +413,6 @@ html.ktLeitura #ktQBar button,html.ktTravado #ktQBar button{opacity:.35;pointer-
 <span class="ktAntSel"><select id="ktSelAntCat" onchange="kt_listarAnteriores()"><option value="">Categoria</option></select><select id="ktSelAnt" onchange="kt_verAnterior(this.value)"><option value="">Carregando jogos encerrados…</option></select></span>
 <button type="button" onclick="kt_editarAnterior()">✏️ Editar</button>
 <div id="ktFaixaTrava"></div>
-<div id="ktQBar"></div>
 <div id="ktFaixaLeitura">👁️ SEGUNDA TELA — só leitura · acompanhando o que o outro computador marca</div>
 <div id="ktJMmsg" class="ktJMmsg"></div>
 </div><!--/ktJogoMontado-->
@@ -1567,31 +1566,33 @@ function kt_qAuto(){
     for(let q=KT_QF+1;q<=4;q++){ const el=document.getElementById('ktQ'+t+q); const v=(q===KT_QF+1)?cur:''; if(el.value!==v){ el.value=v; mudou=true; } } });
   if(mudou) kt_rascSalvar(); }
 function kt_qPintar(){
-  const bar=document.getElementById('ktQBar'); if(!bar) return;
-  bar.className=KT_JOGO_ID?('on'+(KT_QEDIT?' edit':'')):'';
-  const nA=document.getElementById('titleA').innerText, nB=document.getElementById('titleB').innerText;
-  let h='<b>Quartos</b>';
-  for(let q=1;q<=4;q++){
-    if(q<=KT_QF) h+=`<button type="button" class="fech" disabled title="Quarto fechado e travado">✅ ${q}º Q · ${kt_qVal('A',q)} x ${kt_qVal('B',q)}</button>`;
-    else h+=`<button type="button" class="${q===KT_QF+1?'prox':''}" ${q===KT_QF+1&&!KT_QEDIT?'':'disabled'} onclick="kt_qFechar(${q})" title="Clique no fim do ${q}º quarto para travar o placar dele">🏁 Fim do ${q}º quarto</button>`;
-  }
-  h+=KT_QEDIT?`<button type="button" onclick="kt_qEditar(false)">🔒 Travar quartos</button>${KT_QF>0?`<button type="button" class="ed" onclick="kt_qReabrir()">↩️ Reabrir o ${KT_QF}º quarto</button>`:''}`
-             :`<button type="button" class="ed" onclick="kt_qEditar(true)" title="Liberar as caixinhas dos quartos para corrigir à mão">✏️ Editar quartos</button>`;
-  bar.innerHTML=h;
-  ['A','B'].forEach(t=>{ for(let q=1;q<=4;q++){ const el=document.getElementById('ktQ'+t+q); el.readOnly=!KT_QEDIT; el.classList.toggle('ktQcur',!KT_QEDIT&&q===KT_QF+1); } });
+  document.querySelectorAll('.ktQ').forEach(box=>{ const inp=box.querySelector('input[id^="ktQ"]'); if(!inp) return; const t=inp.id.charAt(3);
+    if(!box.dataset.qok){ box.dataset.qok='1';
+      box.insertAdjacentHTML('beforeend','<div class="ktQedL"><b class="ktQedTx">editar</b><button type="button" class="ktQed" onclick="kt_qEditar(!KT_QEDIT)"></button></div>');
+      for(let q=1;q<=4;q++) box.insertAdjacentHTML('beforeend','<div class="ktQf"><small>fim</small><button type="button" class="ktQck" data-q="'+q+'" onclick="kt_qClique('+q+')"></button></div>'); }
+    box.querySelectorAll('.ktQck').forEach(b=>{ const q=+b.dataset.q, fech=q<=KT_QF, prox=!KT_QEDIT&&q===KT_QF+1, reab=KT_QEDIT&&q===KT_QF&&q>0;
+      b.className='ktQck'+(fech?' on':'')+(prox?' prox':'')+(reab?' reab':''); b.textContent=fech?'✓':'';
+      b.disabled=!(prox||reab);
+      b.title=fech?(reab?'Clique para reabrir o '+q+'º quarto':q+'º quarto fechado e travado'):(prox?'Clique no fim do '+q+'º quarto para travar o placar dele':'');
+    });
+    const ed=box.querySelector('.ktQed'); ed.textContent=KT_QEDIT?'🔒':'✏️'; ed.classList.toggle('on',KT_QEDIT); ed.title=KT_QEDIT?'Travar os quartos de novo':'Editar os quartos à mão';
+    box.querySelector('.ktQedTx').textContent=KT_QEDIT?'travar':'editar';
+    for(let q=1;q<=4;q++){ const el=document.getElementById('ktQ'+t+q); el.readOnly=!KT_QEDIT; el.classList.toggle('ktQcur',!KT_QEDIT&&q===KT_QF+1); }
+  });
 }
+function kt_qClique(q){ if(KT_QEDIT){ if(q===KT_QF) kt_qReabrir(); } else if(q===KT_QF+1) kt_qFechar(q); }
 function kt_qFechar(q){
   if(q!==KT_QF+1||KT_QEDIT) return; kt_qAuto();
   const a=kt_qVal('A',q), b=kt_qVal('B',q);
-  if(!confirm(`Encerrar o ${q}º quarto?\n\nPlacar do quarto: ${document.getElementById('titleA').innerText} ${a} x ${b} ${document.getElementById('titleB').innerText}\n\nDepois de encerrado, ele fica travado (só muda com "Editar quartos").`)) return;
+  if(!confirm(`Encerrar o ${q}º quarto?\n\nPlacar do quarto: ${document.getElementById('titleA').innerText} ${a} x ${b} ${document.getElementById('titleB').innerText}\n\nDepois de encerrado, ele fica travado (só muda pelo ✏️ editar).`)) return;
   KT_QF=q; kt_rascSalvar(); kt_qAuto(); kt_qPintar();
   kt_msg(q<4?`✅ ${q}º quarto travado (${a} x ${b}). Agora os pontos vão para o ${q+1}º quarto.`:`✅ 4º quarto travado (${a} x ${b}).`); }
 function kt_qEditar(on){
   if(on && !confirm('Liberar as caixinhas dos quartos para corrigir à mão?\n\nEnquanto estiver editando, o quarto em andamento não se calcula sozinho.')) return;
   KT_QEDIT=!!on; kt_qPintar();
   if(!on){ kt_rascSalvar(); kt_qAuto(); kt_qPintar(); kt_msg('🔒 Quartos travados de novo — o quarto em andamento volta a se calcular sozinho.'); }
-  else kt_msg('✏️ Editando os quartos: corrija as caixinhas e clique em "Travar quartos".'); }
-function kt_qReabrir(){ if(KT_QF<1) return; if(!confirm(`Reabrir o ${KT_QF}º quarto? Ele volta a somar os pontos marcados.`)) return; KT_QF--; KT_QEDIT=false; kt_rascSalvar(); kt_qAuto(); kt_qPintar(); kt_msg('↩️ Quarto reaberto.'); }
+  else kt_msg('✏️ Editando os quartos: corrija as caixinhas (ou desmarque o último "fim" para reabrir) e clique no 🔒 para travar.'); }
+function kt_qReabrir(){ if(KT_QF<1) return; if(!confirm(`Reabrir o ${KT_QF}º quarto? Ele volta a somar os pontos marcados.`)) return; KT_QF--; kt_rascSalvar(); kt_qAuto(); kt_qPintar(); kt_msg('↩️ Quarto reaberto.'); }
 (function(){ const f=window.atualizarTotaisEquipe; if(typeof f==='function') window.atualizarTotaisEquipe=function(){ const r=f.apply(this,arguments); try{ kt_qAuto(); }catch(e){} return r; }; })();
 /* ---------- Jogos anteriores da mesma categoria ---------- */
 let KT_ANT=null, KT_ANT_EDIT=false;
