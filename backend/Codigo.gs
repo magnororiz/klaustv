@@ -20,6 +20,8 @@ function doPost(e) {
   if (p.acao === 'dadosFed') return responder(comExtras(dadosFed()));
   if (p.acao === 'dadosCestinhas') return responder(dadosCestinhas());
   if (p.acao === 'dadosSumulas') return responder(dadosSumulas());
+  if (p.acao === 'historicoKT') return responder(historicoKT());
+  if (p.acao === 'dadosClassificacao') return responder(dadosClassificacao());
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     switch (p.acao) {
@@ -377,6 +379,7 @@ function salvarCamisa(token, reg, camisa) {
 const FED_CESTINHAS_ID = '1wekGITrAep1-1pAttzs0hpY9e5-pPY_8';
 const FED_TABELA_ID = '1SsTnHglFy0oSvFUT6i9OH_ZBAQmxtlxVIEnFCEYKNiE';
 const FED_TABELA_FEM_ID = '1AEGj7wdpXq0lRWRnv3ZMA_RVyI7qvDs2pRX08LhiiNc'; // 3ª Taça Magaly Costa (feminino)
+const FED_CLASSIF_ID = '1jNpBvc5bfNuRFjGYjnHqoNnqXAjtgaTj'; // CEMB 2026.xlsx — classificação por categoria (sem o adulto)
 const FED_SUMULAS_ID = '1ApNK5Ke04dY31uOZQvLfZoEFFDpmMCfy'; // pasta CEMB 2026 da FBERJ
 const FED_MAP = {"ABIG - IGUABA GRANDE": "IG", "ABIG / IGUABA GRANDE": "IG", "ABIG / JIC / SHARK'S": "ABIG", "ACEAR / IRAJÁ A. C. / PJMC": "ACEAR", "ACEAR / IRAJÁ A.C. / PJMC": "ACEAR", "ACEAR / IRAJÁ A.C. / PROJETO MC": "ACEAR", "ASP C. MUNICIPAL": "ASPCM", "ASP CLUB MUNICIPAL": "ASPCM", "BASQUETE S.A": "BSA", "BASQUETE S.A.": "BSA", "BOTAFOGO F. R.": "BFR", "BOTAFOGO F.R.": "BFR", "C. R. FLAMENGO": "CRF", "C.R. FLAMENGO": "CRF", "CARIOCA KING'S": "CK", "CCL": "CCL", "CESC": "CESC", "CFCSN": "CFCSN", "E. E. PASSO ZERO": "EEPZ", "E.E. PASSO ZERO": "EEPZ", "FLUMINENSE F. C.": "FFC", "FLUMINENSE F.C.": "FFC", "FLUMINESE F. C.": "FFC", "IDEC": "IDEC", "ITAIPU BASQUETE": "IB", "ITDA": "ITDA", "JACAREPAGUÁ T. C.": "JTC", "JACAREPAGUÁ T.C.": "JTC", "K ESPORTES": "KE", "MESQUITA BASQUETE": "MB", "NBR CAMPOS": "NBR", "NITERÓI B. C.": "NBC", "NITERÓI B.C.": "NBC", "TEAM KLUN ACADEMY": "TKA", "TIJUCA BASKET": "TTC", "TIJUCA T. C. / RAIZEIRAS": "TTC"};
 const FED_GYM = { 'NBA STORE ARENA': 'NBA Store Arena Rio - Uptown' };
@@ -534,8 +537,17 @@ function backupFBERJ() {
     sh.getRange(2, 1, t.linhas.length, 11).setNumberFormat('@').setValues(t.linhas);
     det.push('Feminino: ' + t.linhas.length + ' jogos');
   } catch (err) { ok = false; det.push('Feminino: ERRO — ' + err.message); }
+  // 4) classificação por categoria: troca só se veio completa
+  try {
+    const c = fedLerClassificacao(); const sh = fedAba('FBERJ_Classificacao', CLA_CAB);
+    const antes = Math.max(0, sh.getLastRow() - 1);
+    if (c.length < Math.max(20, antes * 0.8)) throw new Error('leitura veio com ' + c.length + ' linhas (antes ' + antes + '); mantive o backup anterior');
+    if (antes) sh.getRange(2, 1, antes, CLA_CAB.length).clearContent();
+    sh.getRange(2, 1, c.length, CLA_CAB.length).setNumberFormat('@').setValues(c);
+    det.push('Classificação: ' + c.length + ' linhas');
+  } catch (err) { ok = false; det.push('Classificação: ERRO — ' + err.message); }
   log.appendRow([agora, ok ? 'OK' : 'COM ERRO', det.join(' | ')]);
-  fedLimparCache(); ['ces_n', 'sum_n', 'fem'].forEach(k => CacheService.getScriptCache().remove(k));
+  fedLimparCache(); ['ces_n', 'sum_n', 'fem', 'cla_n'].forEach(k => CacheService.getScriptCache().remove(k));
   return { ok: ok, detalhes: det };
 }
 
@@ -770,4 +782,98 @@ function dadosSumulas() {
   const sf = ss.getSheetByName('FBERJ_TabelaFem'); const fem = sf ? sf.getDataRange().getDisplayValues().slice(1).filter(r => r[0] && r[5] && r[6]) : [];
   const res = { ok: true, atualizado: fedQuando(), equipes: equipes, lista: lista, feminino: fem };
   cachePut('sum', res, 1800); return res;
+}
+
+
+/* ================= CLASSIFICAÇÃO FBERJ (CEMB 2026.xlsx) ================= */
+const CLA_CAB = ['categoria', 'tabela', 'bloco', 'rotulo', 'pos', 'equipe', 'sigla', 'PG', 'J', 'V', 'D', 'PP', 'PF', 'PC', 'SALDO', 'CAV', 'atualizado'];
+const CLA_GEN = { CLUBE: 1, CLUB: 1, BASQUETE: 1, ESPORTES: 1, ESPORTE: 1, TENIS: 1, FUTEBOL: 1, REGATAS: 1, ATLETICO: 1, FOOTBALL: 1, ASSOCIACAO: 1, ESCOLINHA: 1, DE: 1, DA: 1, DO: 1, DOS: 1, DAS: 1, E: 1, A: 1, C: 1, S: 1, IC: 1, AC: 1 };
+function claNorm(x) { return String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim(); }
+function claToks(x) { return claNorm(x).split(' ').filter(t => t && !CLA_GEN[t]); }
+function claIndiceSiglas() {
+  const idx = []; Object.keys(FED_MAP).forEach(k => idx.push([k, FED_MAP[k]]));
+  try { const se = SpreadsheetApp.openById(PLANILHA_ID).getSheetByName('FBERJ_Equipes'); if (se) se.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0] && r[1]) idx.push([r[1], r[0]]); }); } catch (e) {}
+  return idx.map(x => ({ n: claNorm(x[0]), t: claToks(x[0]), s: x[1] }));
+}
+function claSigla(nome, idx) {
+  const n = claNorm(nome); const ex = idx.find(x => x.n === n); if (ex) return ex.s;
+  const t = claToks(nome); if (!t.length) return '';
+  const pont = {}; idx.forEach(x => { const sc = t.filter(y => x.t.indexOf(y) >= 0).length; if (sc > 0) pont[x.s] = Math.max(pont[x.s] || 0, sc); });
+  const ord = Object.keys(pont).sort((a, b) => pont[b] - pont[a]);
+  if (!ord.length || (ord.length > 1 && pont[ord[0]] === pont[ord[1]])) return '';
+  return ord[0];
+}
+function claCategoria(txt) { const m = claNorm(txt).match(/^SUB ?(\d{2})$/); if (m) return 'Sub-' + m[1]; return /^ADULTO$/.test(claNorm(txt)) ? 'Adulto' : ''; }
+function fedLerClassificacao() {
+  const tmp = fedConverterXlsx(FED_CLASSIF_ID); const out = []; const idx = claIndiceSiglas();
+  try {
+    SpreadsheetApp.openById(tmp).getSheets().forEach(ws => {
+      let cat = claCategoria(ws.getName()); const rows = ws.getDataRange().getDisplayValues(); let tab = 0, bloco = 0;
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i].map(fedNorm);
+        const catLinha = r.filter(x => x).length === 1 ? claCategoria(r.find(x => x)) : ''; if (catLinha) { if (catLinha !== cat) { cat = catLinha; tab = 0; } continue; }
+        const c0 = r.indexOf('#'); if (c0 < 0 || claNorm(r[c0 + 1]) !== 'EQUIPE' || !cat) continue;
+        const col = {}; r.forEach((h, c) => { const k = claNorm(h); if (['PG', 'J', 'V', 'D', 'PP', 'PF', 'PC', 'SALDO', 'CAV'].indexOf(k) >= 0 && col[k] === undefined) col[k] = c; });
+        let rot = '', atu = '';
+        const acharAtu = l => (l || []).map(fedNorm).find(x => /^Atualizado/i.test(x)) || '';
+        atu = acharAtu(rows[i]) || acharAtu(rows[i - 1]) || acharAtu(rows[i - 2]);
+        for (let k = i - 1; k >= Math.max(0, i - 2); k--) { const t = fedNorm(rows[k][c0]) || fedNorm(rows[k][0]); if (t && !/^Atualizado/i.test(t) && !claCategoria(t) && !/^Legenda/i.test(t) && t !== '#') { rot = t; break; } }
+        const linhas = [];
+        let k = i + 1;
+        for (; k < rows.length; k++) { const q = rows[k].map(fedNorm); const pm = q[c0].match(/^(\d+)\s*[ºª°o]?$/); if (!pm || !q[c0 + 1]) break; linhas.push([Number(pm[1]), q]); }
+        if (!linhas.length) continue;
+        if (!atu) for (let z = k; z < Math.min(rows.length, k + 3); z++) { atu = acharAtu(rows[z]); if (atu) break; }
+        if (linhas[0][0] === 1 || !tab) tab++; bloco++;
+        linhas.forEach(([pos, q]) => { const nome = q[c0 + 1]; const g = x => (col[x] === undefined ? '' : q[col[x]]);
+          out.push([cat, String(tab), String(bloco), rot, String(pos), nome, claSigla(nome, idx), g('PG'), g('J'), g('V'), g('D'), g('PP'), g('PF'), g('PC'), g('SALDO'), g('CAV'), atu.replace(/^Atualizado\s*/i, '')]); });
+        i = k - 1;
+      }
+    });
+  } finally { try { DriveApp.getFileById(tmp).setTrashed(true); } catch (e) {} }
+  return out;
+}
+function dadosClassificacao() {
+  const hit = cacheGet('cla'); if (hit) return hit;
+  const sh = SpreadsheetApp.openById(PLANILHA_ID).getSheetByName('FBERJ_Classificacao');
+  if (!sh || sh.getLastRow() < 2) return { ok: false, erro: 'A classificação ainda não foi copiada da FBERJ.' };
+  const res = { ok: true, atualizado: fedQuando(), cab: CLA_CAB, linhas: sh.getDataRange().getDisplayValues().slice(1).filter(r => r[0]) };
+  cachePut('cla', res, 3600); return res;
+}
+/* Instalar/rodar só a classificação (para testar sem esperar as 20h) */
+function testarClassificacao() { const c = fedLerClassificacao(); Logger.log(c.length + ' linhas'); Logger.log(JSON.stringify(c.slice(0, 12))); const sem = c.filter(r => !r[6]).map(r => r[5]); Logger.log('Sem sigla: ' + JSON.stringify([...new Set(sem)])); }
+
+/* ================= HISTÓRICO KLAUS TV: medalhas dos atletas e troféus dos times ================= */
+const KT_CRIT = [['pts', 'PTS'], ['twoMade', '2P'], ['threeMade', '3P'], ['ftMade', 'LL'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'ROU'], ['blk', 'TOC'], ['eff', 'EF']];
+const KT_ITENS = ['PTS', 'AQ', '2P', '3P', 'LL', 'REB', 'AST', 'RB', 'T', 'ERR', 'FP', 'EF'];
+function ktNum(s) { const o = {}; ['twoMade', 'twoMiss', 'threeMade', 'threeMiss', 'ftMade', 'ftMiss', 'reb', 'ast', 'stl', 'blk', 'to', 'foul'].forEach(k => o[k] = Number(s && s[k] || 0));
+  o.pts = (s && s.pts !== undefined && s.pts !== '') ? Number(s.pts) : 2 * o.twoMade + 3 * o.threeMade + o.ftMade;
+  o.eff = (s && s.eff !== undefined && s.eff !== '') ? Number(s.eff) : o.pts + o.reb + o.ast + o.blk + o.stl - (o.twoMiss + o.threeMiss + o.ftMiss + o.to); return o; }
+function historicoKT() {
+  const hit = cacheGet('hkt'); if (hit) return hit;
+  const J = {}, T = {}; let nj = 0;
+  lerJogos().forEach(x => {
+    const m = jsonOu(x.meta, {}), st = jsonOu(x.stats, {}), cat = String(x.categoria || '');
+    const ps = []; ['A', 'B'].forEach(l => { const tm = m['time' + l] || {}; (tm.atletas || []).forEach(a => { if (!a.reg) return; ps.push({ reg: String(a.reg), nome: a.nome, sig: tm.sigla, l: l, s: ktNum((st[l] || {})[a.reg]) }); }); });
+    if (!ps.some(p => ['pts', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'twoMiss', 'threeMiss', 'ftMiss'].some(k => p.s[k]))) return;
+    nj++;
+    ps.forEach(p => { const o = J[p.reg] = J[p.reg] || { n: p.nome, s: p.sig, c: cat, j: 0, m: {} }; o.j++; });
+    KT_CRIT.forEach(([k, lab]) => ps.forEach(p => { const v = p.s[k]; if (v <= 0) return; const pos = 1 + ps.filter(q => q.s[k] > v).length; if (pos > 3) return; const mm = J[p.reg].m[lab] = J[p.reg].m[lab] || [0, 0, 0]; mm[pos - 1]++; }));
+    if (m.avulso && !m.timesFed) return;
+    const tot = l => { const o = {}; ps.filter(p => p.l === l).forEach(p => Object.keys(p.s).forEach(k => o[k] = (o[k] || 0) + p.s[k])); ['pts', 'twoMade', 'twoMiss', 'threeMade', 'threeMiss', 'ftMade', 'ftMiss', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'eff'].forEach(k => o[k] = o[k] || 0); return o; };
+    const ta = tot('A'), tb = tot('B'); const pct = (mk, a) => a ? Math.round(mk * 100 / a) : 0;
+    const arr = (o, mk, ms) => ({ v: pct(o[mk], o[mk] + o[ms]), tem: (o[mk] + o[ms]) > 0 });
+    const aq = o => { const mk = o.twoMade + o.threeMade, a = mk + o.twoMiss + o.threeMiss; return { v: pct(mk, a), tem: a > 0 }; };
+    const num = (o, k) => ({ v: o[k], tem: true });
+    const L = [['PTS', num(ta, 'pts'), num(tb, 'pts'), 1], ['AQ', aq(ta), aq(tb), 1], ['2P', arr(ta, 'twoMade', 'twoMiss'), arr(tb, 'twoMade', 'twoMiss'), 1], ['3P', arr(ta, 'threeMade', 'threeMiss'), arr(tb, 'threeMade', 'threeMiss'), 1],
+      ['LL', arr(ta, 'ftMade', 'ftMiss'), arr(tb, 'ftMade', 'ftMiss'), 1], ['REB', num(ta, 'reb'), num(tb, 'reb'), 1], ['AST', num(ta, 'ast'), num(tb, 'ast'), 1], ['RB', num(ta, 'stl'), num(tb, 'stl'), 1],
+      ['T', num(ta, 'blk'), num(tb, 'blk'), 1], ['ERR', num(ta, 'to'), num(tb, 'to'), -1], ['FP', num(ta, 'foul'), num(tb, 'foul'), -1], ['EF', num(ta, 'eff'), num(tb, 'eff'), 1]];
+    const sa = (m.timeA || {}).sigla, sb = (m.timeB || {}).sigla; if (!sa || !sb) return;
+    const tc = T[cat] = T[cat] || {}; const oa = tc[sa] = tc[sa] || { j: 0, t: {} }, ob = tc[sb] = tc[sb] || { j: 0, t: {} }; oa.j++; ob.j++;
+    L.forEach(([it, a, b, dir]) => { let ga = false, gb = false;
+      if ((a.tem || b.tem) && a.v !== b.v && !(a.v === 0 && b.v === 0)) { if ((a.v - b.v) * dir > 0) ga = true; else gb = true; }
+      if (a.v === b.v && a.v !== 0 && dir > 0) { ga = gb = true; }
+      if (ga) oa.t[it] = (oa.t[it] || 0) + 1; if (gb) ob.t[it] = (ob.t[it] || 0) + 1; });
+  });
+  const res = { ok: true, jogos: nj, crit: KT_CRIT.map(x => x[1]), itens: KT_ITENS, jogadores: J, times: T, fotos: mapaFotos(), apelidos: mapaApelidos(), agora: new Date().toISOString() };
+  cachePut('hkt', res, 120); return res;
 }
