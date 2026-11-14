@@ -264,8 +264,8 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktTravado .ktQck,html.ktTravado
 .ktQedL{display:flex;flex-direction:column;align-items:center;gap:2px;}.ktQedTx{font-weight:700;font-size:12px;color:#cfd8e3;}.ktQf small{font-size:10px;}
 .ktQed{width:34px;height:31px;min-width:0;border-radius:7px;border:1px solid #2c3e50;background:#7f8c8d;color:#fff;padding:0;margin:0;cursor:pointer;font-size:15px;}
 .ktQed.on{background:#ffd54f;}
-.ktQ{display:grid;grid-template-columns:repeat(4,52px) 38px;gap:4px 16px;align-items:end;font-size:12px;color:#cfd8e3;}
-.ktQ span{grid-column:1/-1;text-align:center;}
+.ktQ{display:grid;grid-template-columns:auto repeat(4,52px) 38px;gap:4px 14px;flex:1;justify-content:center;align-items:end;font-size:12px;color:#cfd8e3;}
+.ktQ span{grid-column:1;grid-row:1 / span 2;align-self:center;text-align:right;line-height:1.25;margin-right:4px;}
 @media(max-width:520px){.ktTopo{flex-wrap:wrap;justify-content:center;}}
 .ktQ span{font-weight:800;color:#ffd54f;text-transform:uppercase;letter-spacing:1px;font-size:12px;}
 .ktQ label{display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:700;}
@@ -423,7 +423,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktTravado .ktQck,html.ktTravado
 <!-- ================= TIME A ================= -->
 <div class="team">
 
-<div class="ktTopo"><div class="ktCab"><img id="ktEscA" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleA">Time A</h2><div class="score" id="scoreA">0</div></div></div><div class="ktQ"><span>Placar</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQA1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQA2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQA3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQA4" oninput="kt_qMudou()"></label></div></div>
+<div class="ktTopo"><div class="ktCab"><img id="ktEscA" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleA">Time A</h2><div class="score" id="scoreA">0</div></div></div><div class="ktQ"><span>Placar<br>parcial</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQA1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQA2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQA3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQA4" oninput="kt_qMudou()"></label></div></div>
 
 <table class="table" id="tableA"></table>
 
@@ -478,7 +478,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktTravado .ktQck,html.ktTravado
 <!-- ================= TIME B ================= -->
 <div class="team">
 
-<div class="ktTopo"><div class="ktCab"><img id="ktEscB" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleB">Time B</h2><div class="score" id="scoreB">0</div></div></div><div class="ktQ"><span>Placar</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQB1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQB2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQB3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQB4" oninput="kt_qMudou()"></label></div></div>
+<div class="ktTopo"><div class="ktCab"><img id="ktEscB" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleB">Time B</h2><div class="score" id="scoreB">0</div></div></div><div class="ktQ"><span>Placar<br>parcial</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQB1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQB2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQB3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQB4" oninput="kt_qMudou()"></label></div></div>
 
 <table class="table" id="tableB"></table>
 
