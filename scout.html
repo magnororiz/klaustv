@@ -225,6 +225,11 @@ hr{
 .ktJM label{min-width:170px;text-align:right;}
 .ktJM button{width:230px;font-size:13px;padding:9px 10px;}
 .ktJM .ktBtSalvar{background:#27ae60;}
+.ktBtPar{display:flex;gap:6px;width:230px;}
+.ktJM .ktBtPar button{width:auto;flex:1 1 0;padding:9px 4px;font-size:13px;}
+.ktJM .ktBtFim{background:#8e44ad;}
+@media(max-width:800px){.ktBtPar{width:100%;}}
+html.ktLeitura .ktBtFim,html.ktTravado .ktBtFim{opacity:.35;pointer-events:none;filter:grayscale(.6);}
 .ktJM{position:relative;}
 .ktJM .ktModo{position:absolute;top:-13px;right:14px;width:auto !important;padding:3px 10px !important;font-size:11px !important;border-radius:20px;background:#1f9a55;border:1px solid #43c97b;box-shadow:none;z-index:2;}
 html.ktLeitura .ktJM .ktModo{background:#c77700;border-color:#ffb74d;}
@@ -264,7 +269,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktTravado .ktQck,html.ktTravado
 .ktQedL{display:flex;flex-direction:column;align-items:center;gap:2px;}.ktQedTx{font-weight:700;font-size:12px;color:#cfd8e3;}.ktQf small{font-size:10px;}
 .ktQed{width:34px;height:31px;min-width:0;border-radius:7px;border:1px solid #2c3e50;background:#7f8c8d;color:#fff;padding:0;margin:0;cursor:pointer;font-size:15px;}
 .ktQed.on{background:#ffd54f;}
-.ktQ{display:grid;grid-template-columns:auto repeat(4,52px) 38px;gap:4px 14px;flex:1;justify-content:end;padding-right:22px;align-items:end;font-size:12px;color:#cfd8e3;}
+.ktQ{display:grid;grid-template-columns:auto repeat(5,50px) 38px;gap:4px 11px;flex:1;justify-content:end;padding-right:22px;align-items:end;font-size:12px;color:#cfd8e3;}
 .ktQ span{grid-column:1;grid-row:1 / span 2;align-self:center;text-align:right;line-height:1.25;margin-right:4px;}
 @media(max-width:520px){.ktTopo{flex-wrap:wrap;justify-content:center;}}
 .ktQ span{font-weight:800;color:#ffd54f;text-transform:uppercase;letter-spacing:1px;font-size:12px;}
@@ -407,7 +412,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktTravado .ktQck,html.ktTravado
 <!--ktJogoMontado--><div class="ktJM"><button type="button" id="ktModo" class="ktModo" onclick="kt_trocarModoTela()" title="Trocar entre marcar o jogo e só acompanhar (segunda tela)">✏️ Marcando</button>
 <label for="ktSelJogo">🏀 Jogo montado</label>
 <select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select>
-<button type="button" class="ktBtSalvar" onclick="kt_salvarAndamento()">💾 Salvar jogo em andamento</button>
+<div class="ktBtPar"><button type="button" class="ktBtSalvar" onclick="kt_salvarAndamento()" title="Grava o jogo na planilha agora">Salvar jogo</button><button type="button" class="ktBtFim" onclick="kt_finalizar(this)" title="Encerra o jogo: o Ao vivo para de atualizar e mostra JOGO FINALIZADO">Finalizar jogo</button></div>
 <input type="hidden" id="ktDataJogo">
 <label for="ktSelAnt">📚 Jogos anteriores</label>
 <span class="ktAntSel"><select id="ktSelAntCat" onchange="kt_listarAnteriores()"><option value="">Categoria</option></select><select id="ktSelAnt" onchange="kt_verAnterior(this.value)"><option value="">Carregando jogos encerrados…</option></select></span>
@@ -423,7 +428,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktTravado .ktQck,html.ktTravado
 <!-- ================= TIME A ================= -->
 <div class="team">
 
-<div class="ktTopo"><div class="ktCab"><img id="ktEscA" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleA">Time A</h2><div class="score" id="scoreA">0</div></div></div><div class="ktQ"><span>Placar<br>parcial</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQA1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQA2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQA3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQA4" oninput="kt_qMudou()"></label></div></div>
+<div class="ktTopo"><div class="ktCab"><img id="ktEscA" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleA">Time A</h2><div class="score" id="scoreA">0</div></div></div><div class="ktQ"><span>Placar<br>parcial</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQA1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQA2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQA3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQA4" oninput="kt_qMudou()"></label><label title="Prorrogação (overtime)">OT<input type="number" min="0" inputmode="numeric" id="ktQA5" oninput="kt_qMudou()"></label></div></div>
 
 <table class="table" id="tableA"></table>
 
@@ -478,7 +483,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktTravado .ktQck,html.ktTravado
 <!-- ================= TIME B ================= -->
 <div class="team">
 
-<div class="ktTopo"><div class="ktCab"><img id="ktEscB" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleB">Time B</h2><div class="score" id="scoreB">0</div></div></div><div class="ktQ"><span>Placar<br>parcial</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQB1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQB2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQB3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQB4" oninput="kt_qMudou()"></label></div></div>
+<div class="ktTopo"><div class="ktCab"><img id="ktEscB" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleB">Time B</h2><div class="score" id="scoreB">0</div></div></div><div class="ktQ"><span>Placar<br>parcial</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQB1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQB2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQB3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQB4" oninput="kt_qMudou()"></label><label title="Prorrogação (overtime)">OT<input type="number" min="0" inputmode="numeric" id="ktQB5" oninput="kt_qMudou()"></label></div></div>
 
 <table class="table" id="tableB"></table>
 
@@ -1408,7 +1413,7 @@ function kt_abrev(n){ const w=String(n||'').trim().split(/\s+/); const core=w.ma
 function kt_nomeTime(t){ return t.avulso? (t.nome||t.sigla) : (KT_CURTO[t.sigla]||t.nome||t.sigla); }
 function kt_rotuloJM(j){ const d=String(j.dataHora||''); const dt=d.slice(8,10)+'/'+d.slice(5,7)+(d.length>11?' '+d.slice(11,16):'');
   const m=j.meta||{}; const a=m.timeA||{}, b=m.timeB||{};
-  return dt+' · '+(j.categoria||'')+' · '+kt_nomeTime(Object.assign({avulso:m.avulso},a))+' x '+kt_nomeTime(Object.assign({avulso:m.avulso},b))+(j.jogoFed?' · Jogo '+j.jogoFed:'')+(m.avulso?' · avulso':'')+(j.status==='FINAL'?' · FINAL':''); }
+  return dt+' · '+(j.categoria||'')+' · '+kt_nomeTime(Object.assign({avulso:m.avulso},a))+' x '+kt_nomeTime(Object.assign({avulso:m.avulso},b))+(j.jogoFed?' · Jogo '+j.jogoFed:'')+(m.avulso?' · avulso':'')+(j.status==='FINAL'?' · finalizado':''); }
 async function kt_listarMontados(){
   const sel=document.getElementById('ktSelJogo'); const atual=sel.value;
   let r=await kt_apiSc({acao:'listarJogos'});
@@ -1453,7 +1458,7 @@ async function kt_abrirMontado(id,restaurando){
   let st={};
   if(r.ok && r.jogo){ j=Object.assign({},j,{meta:r.jogo.meta||j.meta,ginasio:r.jogo.ginasio||j.ginasio,status:r.jogo.status}); st=r.jogo.stats||{}; }
   KT_STATS_SALVOS=st;
-  ['A','B'].forEach(t=>{ const pq=((st.periodos||{})[t])||[]; for(let q=1;q<=4;q++){ const v=pq[q-1]; document.getElementById('ktQ'+t+q).value=(v===undefined||v===null||v==='')?'':v; } });
+  ['A','B'].forEach(t=>{ const pq=((st.periodos||{})[t])||[]; for(let q=1;q<=5;q++){ const v=pq[q-1]; document.getElementById('ktQ'+t+q).value=(v===undefined||v===null||v==='')?'':v; } });
   const m=j.meta||{};
   ['A','B'].forEach(t=>{
     const tm=m['time'+t]||{}; const atl=(tm.atletas||[]).slice(0,12).slice().sort((x,y)=>{ const nx=parseInt(x.numero,10), ny=parseInt(y.numero,10); const vx=isNaN(nx)?9999:nx, vy=isNaN(ny)?9999:ny; return vx-vy || String(x.nome||'').localeCompare(String(y.nome||''),'pt-BR'); });
@@ -1470,7 +1475,7 @@ async function kt_abrirMontado(id,restaurando){
   });
   document.getElementById('ktDataJogo').value=String(j.dataHora||'').slice(0,16);
   const rasc=(typeof KT_LEITURA!=='undefined'&&KT_LEITURA)?null:kt_rascLer(id);
-  if(rasc && rasc.stats){ ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; const v=reg&&rasc.stats[t]&&rasc.stats[t][reg]; if(v) stats[t+'-'+i]=Object.assign({},KT_ZERO,v); } const pq=((rasc.stats.periodos||{})[t])||[]; for(let q=1;q<=4;q++){ const v=pq[q-1]; document.getElementById('ktQ'+t+q).value=(v===undefined||v===null)?'':v; } }); }
+  if(rasc && rasc.stats){ ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; const v=reg&&rasc.stats[t]&&rasc.stats[t][reg]; if(v) stats[t+'-'+i]=Object.assign({},KT_ZERO,v); } const pq=((rasc.stats.periodos||{})[t])||[]; for(let q=1;q<=5;q++){ const v=pq[q-1]; document.getElementById('ktQ'+t+q).value=(v===undefined||v===null)?'':v; } }); }
   if(typeof atualizarTodasAsLinhas==='function') atualizarTodasAsLinhas();
   KT_JOGO_ID=id;
   try{ localStorage.setItem('kt_scout_atual',JSON.stringify({id,ts:Date.now()})); }catch(e){}
@@ -1490,7 +1495,7 @@ function kt_statsDaTela(){
   ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; if(!reg) continue; const s=stats[t+'-'+i]||{}; const o={}; Object.keys(KT_ZERO).forEach(c=>o[c]=+s[c]||0); out[t][reg]=o; } });
   out.editor={dev:KT_DEV,ts:KT_DONO_TS||Date.now()};
   out.periodos={A:[],B:[]};
-  ['A','B'].forEach(t=>{ for(let q=1;q<=4;q++){ const v=document.getElementById('ktQ'+t+q).value; out.periodos[t].push(v===''?null:Math.max(0,parseInt(v)||0)); } });
+  ['A','B'].forEach(t=>{ for(let q=1;q<=5;q++){ const v=document.getElementById('ktQ'+t+q).value; out.periodos[t].push(v===''?null:Math.max(0,parseInt(v)||0)); } });
   out.qFech=KT_QF;
   return out;
 }
@@ -1511,7 +1516,7 @@ const KT_DEV=(()=>{ try{ let d=localStorage.getItem('kt_dev'); if(!d){ d='D'+Mat
 function kt_pintarModo(){ document.documentElement.classList.toggle('ktLeitura',KT_LEITURA); const b=document.getElementById('ktModo'); b.textContent=KT_LEITURA?'👁️ Segunda tela':'✏️ Marcando'; b.title=KT_LEITURA?'Só leitura. Clique para assumir a marcação neste computador.':'Este computador está marcando. Clique para virar segunda tela (só leitura).'; }
 function kt_aplicarRemoto(st){
   if(!st) return; ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; if(!reg) continue; stats[t+'-'+i]=Object.assign({},KT_ZERO,(st[t]&&st[t][reg])||{}); }
-    const pq=((st.periodos||{})[t])||[]; for(let q=1;q<=4;q++){ const v=pq[q-1]; const el=document.getElementById('ktQ'+t+q); if(el!==document.activeElement) el.value=(v===undefined||v===null)?'':v; } });
+    const pq=((st.periodos||{})[t])||[]; for(let q=1;q<=5;q++){ const v=pq[q-1]; const el=document.getElementById('ktQ'+t+q); if(el!==document.activeElement) el.value=(v===undefined||v===null)?'':v; } });
   if(st.qFech!==undefined) KT_QF=+st.qFech||0;
   const was=KT_LEITURA; atualizarTodasAsLinhas(); kt_qPintar(); }
 async function kt_buscarRemoto(){ if(!KT_JOGO_ID) return null; const r=await kt_apiSc({acao:'aoVivoJogo',id:KT_JOGO_ID}); return (r.ok&&r.jogo)?r.jogo:null; }
@@ -1550,50 +1555,77 @@ async function kt_salvarAndamento(){
    Quarto em andamento = placar total do time − soma dos quartos já fechados.
    O botão "Fim do Xº quarto" trava aquele quarto; "Editar quartos" libera para corrigir à mão. */
 var KT_QF=0, KT_QEDIT=false, KT_QLOAD=false;
+const kt_qNome=q=>q===5?'OT (prorrogação)':q+'º quarto';
 function kt_qTotal(t){ let p=0; for(let i=1;i<=12;i++){ if(!KT_REGS[t]||!KT_REGS[t][i]) continue; p+=(+((stats[t+'-'+i]||{}).pts)||0); } return p; }
 function kt_qVal(t,q){ return parseInt(document.getElementById('ktQ'+t+q).value)||0; }
 function kt_qCarregar(qf){
   if(qf===undefined||qf===null){ // jogo de antes deste recurso: se já tem quarto digitado, fica tudo como está
-    let tem=false; ['A','B'].forEach(t=>{ for(let q=1;q<=4;q++) if(document.getElementById('ktQ'+t+q).value!=='') tem=true; });
-    KT_QF=tem?4:0;
-  } else KT_QF=Math.max(0,Math.min(4,+qf||0));
+    let tem=false; ['A','B'].forEach(t=>{ for(let q=1;q<=5;q++) if(document.getElementById('ktQ'+t+q).value!=='') tem=true; });
+    KT_QF=tem?5:0;
+  } else KT_QF=Math.max(0,Math.min(5,+qf||0));
   KT_QLOAD=false; kt_qAuto(); kt_qPintar(); }
 function kt_qAuto(){
-  if(!KT_JOGO_ID || KT_QLOAD || KT_LEITURA || KT_TRAVADO || KT_QEDIT || KT_QF>=4) return;
+  if(!KT_JOGO_ID || KT_QLOAD || KT_LEITURA || KT_TRAVADO || KT_QEDIT || KT_QF>=5) return;
   let mudou=false;
   ['A','B'].forEach(t=>{ let fech=0; for(let q=1;q<=KT_QF;q++) fech+=kt_qVal(t,q);
-    const cur=String(Math.max(0,kt_qTotal(t)-fech));
-    for(let q=KT_QF+1;q<=4;q++){ const el=document.getElementById('ktQ'+t+q); const v=(q===KT_QF+1)?cur:''; if(el.value!==v){ el.value=v; mudou=true; } } });
+    let cur=String(Math.max(0,kt_qTotal(t)-fech)); if(KT_QF===4 && cur==='0') cur=''; // OT só aparece se houver pontos na prorrogação
+    for(let q=KT_QF+1;q<=5;q++){ const el=document.getElementById('ktQ'+t+q); const v=(q===KT_QF+1)?cur:''; if(el.value!==v){ el.value=v; mudou=true; } } });
   if(mudou) kt_rascSalvar(); }
 function kt_qPintar(){
   document.querySelectorAll('.ktQ').forEach(box=>{ const inp=box.querySelector('input[id^="ktQ"]'); if(!inp) return; const t=inp.id.charAt(3);
     if(!box.dataset.qok){ box.dataset.qok='1';
       box.insertAdjacentHTML('beforeend','<div class="ktQedL"><b class="ktQedTx">editar</b><button type="button" class="ktQed" onclick="kt_qEditar(!KT_QEDIT)"></button></div>');
-      for(let q=1;q<=4;q++) box.insertAdjacentHTML('beforeend','<div class="ktQf"><small>fim</small><button type="button" class="ktQck" data-q="'+q+'" onclick="kt_qClique('+q+')"></button></div>'); }
+      for(let q=1;q<=5;q++) box.insertAdjacentHTML('beforeend','<div class="ktQf"><small>fim</small><button type="button" class="ktQck" data-q="'+q+'" onclick="kt_qClique('+q+')"></button></div>'); }
     box.querySelectorAll('.ktQck').forEach(b=>{ const q=+b.dataset.q, fech=q<=KT_QF, prox=!KT_QEDIT&&q===KT_QF+1, reab=KT_QEDIT&&q===KT_QF&&q>0;
       b.className='ktQck'+(fech?' on':'')+(prox?' prox':'')+(reab?' reab':''); b.textContent=fech?'✓':'';
       b.disabled=!(prox||reab);
-      b.title=fech?(reab?'Clique para reabrir o '+q+'º quarto':q+'º quarto fechado e travado'):(prox?'Clique no fim do '+q+'º quarto para travar o placar dele':'');
+      b.title=fech?(reab?'Clique para reabrir: '+kt_qNome(q):kt_qNome(q)+' fechado e travado'):(prox?'Clique no fim do(a) '+kt_qNome(q)+' para travar o placar':'');
     });
     const ed=box.querySelector('.ktQed'); ed.textContent=KT_QEDIT?'🔒':'✏️'; ed.classList.toggle('on',KT_QEDIT); ed.title=KT_QEDIT?'Travar os quartos de novo':'Editar os quartos à mão';
     box.querySelector('.ktQedTx').textContent=KT_QEDIT?'travar':'editar';
-    for(let q=1;q<=4;q++){ const el=document.getElementById('ktQ'+t+q); el.readOnly=!KT_QEDIT; el.classList.toggle('ktQcur',!KT_QEDIT&&q===KT_QF+1); }
+    for(let q=1;q<=5;q++){ const el=document.getElementById('ktQ'+t+q); el.readOnly=!KT_QEDIT; el.classList.toggle('ktQcur',!KT_QEDIT&&q===KT_QF+1); }
   });
 }
 function kt_qClique(q){ if(KT_QEDIT){ if(q===KT_QF) kt_qReabrir(); } else if(q===KT_QF+1) kt_qFechar(q); }
 function kt_qFechar(q){
   if(q!==KT_QF+1||KT_QEDIT) return; kt_qAuto();
   const a=kt_qVal('A',q), b=kt_qVal('B',q);
-  if(!confirm(`Encerrar o ${q}º quarto?\n\nPlacar do quarto: ${document.getElementById('titleA').innerText} ${a} x ${b} ${document.getElementById('titleB').innerText}\n\nDepois de encerrado, ele fica travado (só muda pelo ✏️ editar).`)) return;
+  if(!confirm(`Encerrar ${q===5?'a prorrogação (OT)':'o '+q+'º quarto'}?\n\nPlacar ${q===5?'da prorrogação':'do quarto'}: ${document.getElementById('titleA').innerText} ${a} x ${b} ${document.getElementById('titleB').innerText}\n\nDepois de encerrado, ele fica travado (só muda pelo ✏️ editar).`)) return;
   KT_QF=q; kt_rascSalvar(); kt_qAuto(); kt_qPintar();
-  kt_msg(q<4?`✅ ${q}º quarto travado (${a} x ${b}). Agora os pontos vão para o ${q+1}º quarto.`:`✅ 4º quarto travado (${a} x ${b}).`); }
+  kt_msg(q<4?`✅ ${q}º quarto travado (${a} x ${b}). Agora os pontos vão para o ${q+1}º quarto.`:(q===4?`✅ 4º quarto travado (${a} x ${b}). Se houver prorrogação, os pontos vão para o OT.`:`✅ Prorrogação travada (${a} x ${b}).`)); }
 function kt_qEditar(on){
   if(on && !confirm('Liberar as caixinhas dos quartos para corrigir à mão?\n\nEnquanto estiver editando, o quarto em andamento não se calcula sozinho.')) return;
   KT_QEDIT=!!on; kt_qPintar();
   if(!on){ kt_rascSalvar(); kt_qAuto(); kt_qPintar(); kt_msg('🔒 Quartos travados de novo — o quarto em andamento volta a se calcular sozinho.'); }
   else kt_msg('✏️ Editando os quartos: corrija as caixinhas (ou desmarque o último "fim" para reabrir) e clique no 🔒 para travar.'); }
-function kt_qReabrir(){ if(KT_QF<1) return; if(!confirm(`Reabrir o ${KT_QF}º quarto? Ele volta a somar os pontos marcados.`)) return; KT_QF--; kt_rascSalvar(); kt_qAuto(); kt_qPintar(); kt_msg('↩️ Quarto reaberto.'); }
+function kt_qReabrir(){ if(KT_QF<1) return; if(!confirm(`Reabrir: ${kt_qNome(KT_QF)}? Volta a somar os pontos marcados.`)) return; KT_QF--; kt_rascSalvar(); kt_qAuto(); kt_qPintar(); kt_msg('↩️ Quarto reaberto.'); }
 (function(){ const f=window.atualizarTotaisEquipe; if(typeof f==='function') window.atualizarTotaisEquipe=function(){ const r=f.apply(this,arguments); try{ kt_qAuto(); }catch(e){} return r; }; })();
+
+/* ---------- Finalizar jogo (Ao vivo para e mostra JOGO FINALIZADO) e Reabrir ---------- */
+async function kt_finalizar(bt){
+  if(!KT_JOGO_ID) return alert('Escolha primeiro o jogo montado.');
+  const nA=document.getElementById('titleA').innerText, nB=document.getElementById('titleB').innerText;
+  if(!confirm(`Finalizar o jogo?\n\n${nA} ${kt_qTotal('A')} x ${kt_qTotal('B')} ${nB}\n\nO Ao vivo para de atualizar e o jogo passa a aparecer como JOGO FINALIZADO. O jogo vai para "Jogos anteriores" e fica travado (dá para corrigir e reabrir pelo Editar).`)) return;
+  kt_qAuto(); KT_QF=5; KT_QEDIT=false; const st=kt_statsDaTela();
+  bt.disabled=true; kt_msg('Finalizando o jogo…');
+  const r=await kt_apiSc({acao:'salvarStats',id:KT_JOGO_ID,stats:st,status:'FINAL'}); bt.disabled=false;
+  if(!r.ok){ kt_qPintar(); return alert('Não foi possível finalizar: '+(r.erro||'tente de novo')); }
+  KT_SUJO=false; KT_STATS_SALVOS=st; try{ localStorage.removeItem('kt_rasc_'+KT_JOGO_ID); }catch(e){}
+  const j=KT_MONTADOS.find(x=>x.id===KT_JOGO_ID); if(j) j.status='FINAL';
+  KT_TRAVADO=true; KT_SNAP=null; kt_pintarTrava(); kt_qPintar();
+  const o=document.querySelector('#ktSelJogo option[value="'+KT_JOGO_ID+'"]'); if(o&&j) o.textContent=kt_rotuloJM(j);
+  kt_msg('🏁 Jogo finalizado'+(r.placar?' · placar final '+r.placar[0]+' x '+r.placar[1]:'')+'. O Ao vivo já mostra JOGO FINALIZADO.');
+}
+async function kt_reabrirJogo(id){
+  const j=KT_MONTADOS.find(x=>x.id===id); if(!j) return;
+  if(!confirm('Reabrir este jogo?\n\nEle deixa de ser JOGO FINALIZADO e volta para a lista "Jogo montado" (se ainda estiver no horário do jogo, o Ao vivo volta a atualizar).')) return;
+  const st=(KT_ANT&&KT_ANT.id===id&&KT_ANT.stats)||(id===KT_JOGO_ID?kt_statsDaTela():null);
+  const r=await kt_apiSc(Object.assign({acao:'salvarStats',id,status:'ABERTO'},st?{stats:st}:{}));
+  if(!r.ok) return alert('Não foi possível reabrir: '+(r.erro||'tente de novo'));
+  j.status='ABERTO'; KT_ANT=null; KT_ANT_EDIT=false; if(typeof kt_desenharAnterior==='function') kt_desenharAnterior();
+  if(id===KT_JOGO_ID){ KT_TRAVADO=kt_encerrado(j); kt_pintarTrava(); kt_qPintar(); }
+  await kt_listarMontados(); kt_msg('↩️ Jogo reaberto.');
+}
 /* ---------- Jogos anteriores da mesma categoria ---------- */
 let KT_ANT=null, KT_ANT_EDIT=false;
 var KT_ANT_REF=null, KT_TRAVADO=false, KT_SNAP=null;
@@ -1633,7 +1665,7 @@ function kt_desenharAnterior(){
     const totL=KT_ANT_EDIT?'':'<tr class="tot"><td colspan="2">TOTAL</td><td>'+tot.pts+'</td><td>'+kt_pctF(tot.twoMade,tot.twoMiss)+'</td><td>'+kt_pctF(tot.threeMade,tot.threeMiss)+'</td><td>'+kt_pctF(tot.ftMade,tot.ftMiss)+'</td><td>'+tot.reb+'</td><td>'+tot.ast+'</td><td>'+tot.stl+'</td><td>'+tot.blk+'</td><td>'+tot.to+'</td><td>'+tot.foul+'</td><td>'+tot.eff+'</td></tr>';
     return '<div class="ktAntBox"><h3>'+kt_nomeTime(Object.assign({avulso:m.avulso},tm)).replace(/</g,'&lt;')+' · '+tot.pts+'</h3><table>'+cab+linhas+totL+'</table></div>'; };
   box.innerHTML='<div class="ktAntCab">📚 Jogo anterior'+(KT_ANT_EDIT?' — editando':'')+'<small>'+data+' · '+kt_rotuloJM(j).replace(/^[^·]*· /,'').replace(/</g,'&lt;')+'</small></div><div class="ktAntGrid">'+tab('A')+tab('B')+'</div>'+
-    (KT_ANT_EDIT?'<div class="ktAntBt"><button type="button" onclick="kt_salvarAnterior()">💾 Salvar alterações do jogo anterior</button> <button type="button" style="background:#7f8c8d" onclick="kt_verAnterior(KT_ANT.id)">↩️ Desfazer alterações</button></div>':'');
+    (KT_ANT_EDIT?'<div class="ktAntBt"><button type="button" onclick="kt_salvarAnterior()">💾 Salvar alterações do jogo anterior</button> <button type="button" style="background:#7f8c8d" onclick="kt_verAnterior(KT_ANT.id)">↩️ Desfazer alterações</button>'+((KT_MONTADOS.find(x=>x.id===KT_ANT.id)||{}).status==='FINAL'?' <button type="button" style="background:#8e44ad" onclick="kt_reabrirJogo(KT_ANT.id)">Reabrir jogo</button>':'')+'</div>':'');
   if(KT_ANT_EDIT) box.querySelectorAll('input').forEach(i=>i.oninput=()=>{ const S=KT_ANT.stats[i.dataset.t]; S[i.dataset.r]=Object.assign({},KT_ZERO,S[i.dataset.r]||{}); S[i.dataset.r][i.dataset.c]=Math.max(0,parseInt(i.value)||0); const tr=i.closest('tr'); const s=kt_calc(S[i.dataset.r]); const b=tr.querySelectorAll('td b'); b[0].textContent=s.pts; b[1].textContent=s.eff; });
 }
 async function kt_verAnterior(id){

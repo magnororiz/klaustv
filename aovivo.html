@@ -290,7 +290,7 @@ function status(j){
   if(agora>d.getTime()+3*3600e3) return 'final';
   return 'vivo';
 }
-const SELO={vivo:'AO VIVO',breve:'EM BREVE',final:'FINAL'};
+const SELO={vivo:'AO VIVO',breve:'EM BREVE',final:'JOGO FINALIZADO'};
 function fmtData(d){ return d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'}); }
 function fmtHora(d){ return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
 
@@ -312,7 +312,7 @@ async function kt_abrirMaisProximo(){
   kt_lista(esc1.id);
 }
 function kt_rotulo(j){ const st=status(j), d=dataJogo(j);
-  const ic={vivo:'🔴 AO VIVO',breve:'🟡 EM BREVE',final:'⚪ FINAL'}[st];
+  const ic={vivo:'🔴 AO VIVO',breve:'🟡 EM BREVE',final:'⚪ JOGO FINALIZADO'}[st];
   const pl=st==='breve'?'x':(j.placarA+' x '+j.placarB);
   return ic+' · '+(D.curto[j.timeA]||j.timeA)+' '+pl+' '+(D.curto[j.timeB]||j.timeB)+(d?' · '+d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+fmtHora(d):''); }
 async function kt_lista(abrir,silencio){
@@ -422,9 +422,10 @@ function kt_render(j){
     + `<button class="maisLid" id="btLid" onclick="kt_lidToggle()">${kt_todosLid?'▲ Mostrar menos':'▼ Ver todos os líderes'}</button>`;
   const per=(j.stats||{}).periodos||{};
   const qv=(l,i)=>{ const v=(per[l]||[])[i]; return (v===undefined||v===null||v==='')?'—':v; };
-  const parcial=`<div class="parcial"><div class="pt cond">Placar parcial</div><table><tr><th></th><th>1º Q</th><th>2º Q</th><th>3º Q</th><th>4º Q</th></tr>
-    <tr><td class="tn">${esc(D.curto[sa]||sa)}</td>${[0,1,2,3].map(i=>`<td>${qv('A',i)}</td>`).join('')}</tr>
-    <tr><td class="tn">${esc(D.curto[sb]||sb)}</td>${[0,1,2,3].map(i=>`<td>${qv('B',i)}</td>`).join('')}</tr></table></div>`;
+  const temOT=['A','B'].some(l=>{ const v=(per[l]||[])[4]; return v!==undefined&&v!==null&&v!==''; }); const QI=temOT?[0,1,2,3,4]:[0,1,2,3];
+  const parcial=`<div class="parcial"><div class="pt cond">Placar parcial</div><table><tr><th></th><th>1º Q</th><th>2º Q</th><th>3º Q</th><th>4º Q</th>${temOT?'<th title="Prorrogação">OT</th>':''}</tr>
+    <tr><td class="tn">${esc(D.curto[sa]||sa)}</td>${QI.map(i=>`<td>${qv('A',i)}</td>`).join('')}</tr>
+    <tr><td class="tn">${esc(D.curto[sb]||sb)}</td>${QI.map(i=>`<td>${qv('B',i)}</td>`).join('')}</tr></table></div>`;
   const antes={}, valAntes={};
   document.querySelectorAll('#jogo tr[data-reg]').forEach(tr=>{ antes[tr.dataset.reg]=tr.getBoundingClientRect().top; });
   document.querySelectorAll('#jogo td[data-k]').forEach(td=>{ valAntes[td.dataset.k]=td.dataset.v; });
