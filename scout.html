@@ -289,6 +289,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktTravado .ktQck,html.ktTravado
 .ktAntBox table{width:100%;border-collapse:collapse;font-size:12px;}
 .ktAntBox th{background:#1e90ff;color:#fff;padding:5px 3px;}
 .ktAntBox td{border:1px solid #2c3e50;padding:4px 3px;text-align:center;color:#fff;}
+.ktAntBox .ktAp{display:block;font-size:10.5px;font-weight:600;color:#ffd54f;line-height:1.1;}
 .ktAntBox td.l{text-align:left;}
 .ktAntBox tr.tot td{background:#0d3b66;font-weight:700;}
 .ktAntBox input{width:30px;padding:2px;border-radius:4px;border:1px solid #ffd54f;text-align:center;font-size:12px;}
@@ -1659,13 +1660,13 @@ function kt_desenharAnterior(){
     let tot=Object.assign({},KT_ZERO);
     const linhas=atl.map(a=>{ const s=kt_calc(Object.assign({},KT_ZERO,S[a.reg]||{})); Object.keys(KT_ZERO).forEach(c=>tot[c]+=+s[c]||0);
       const cel=(c)=>KT_ANT_EDIT?'<input data-t="'+t+'" data-r="'+a.reg+'" data-c="'+c+'" value="'+(+s[c]||0)+'" inputmode="numeric">':'';
-      if(KT_ANT_EDIT) return '<tr><td>'+(a.numero||'')+'</td><td class="l">'+kt_abrev(a.nome)+'</td>'+KT_CAMPOS.map(x=>'<td>'+cel(x[0])+'</td>').join('')+'<td><b>'+s.pts+'</b></td><td><b>'+s.eff+'</b></td></tr>';
-      return '<tr><td>'+(a.numero||'')+'</td><td class="l">'+kt_abrev(a.nome)+(a.apelido?' ('+a.apelido+')':'')+'</td><td><b>'+s.pts+'</b></td><td>'+kt_pctF(s.twoMade,s.twoMiss)+'</td><td>'+kt_pctF(s.threeMade,s.threeMiss)+'</td><td>'+kt_pctF(s.ftMade,s.ftMiss)+'</td><td>'+s.reb+'</td><td>'+s.ast+'</td><td>'+s.stl+'</td><td>'+s.blk+'</td><td>'+s.to+'</td><td>'+s.foul+'</td><td><b>'+s.eff+'</b></td></tr>'; }).join('');
+      if(KT_ANT_EDIT) return '<tr><td>'+(a.numero||'')+'</td><td class="l">'+kt_e(kt_curtoNome(a.nome))+(a.apelido?'<span class="ktAp">'+kt_e(a.apelido)+'</span>':'')+'</td>'+KT_CAMPOS.map(x=>'<td>'+cel(x[0])+'</td>').join('')+'<td><b>'+s.pts+'</b></td><td><b>'+s.eff+'</b></td></tr>';
+      return '<tr><td>'+(a.numero||'')+'</td><td class="l">'+kt_e(kt_curtoNome(a.nome))+(a.apelido?'<span class="ktAp">'+kt_e(a.apelido)+'</span>':'')+'</td><td><b>'+s.pts+'</b></td><td>'+kt_pctF(s.twoMade,s.twoMiss)+'</td><td>'+kt_pctF(s.threeMade,s.threeMiss)+'</td><td>'+kt_pctF(s.ftMade,s.ftMiss)+'</td><td>'+s.reb+'</td><td>'+s.ast+'</td><td>'+s.stl+'</td><td>'+s.blk+'</td><td>'+s.to+'</td><td>'+s.foul+'</td><td><b>'+s.eff+'</b></td></tr>'; }).join('');
     const cab=KT_ANT_EDIT?'<tr><th>#</th><th>Nome</th>'+KT_CAMPOS.map(x=>'<th>'+x[1]+'</th>').join('')+'<th>PTS</th><th>EFF</th></tr>':'<tr><th>#</th><th>Nome</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>F</th><th>EFF</th></tr>';
     const totL=KT_ANT_EDIT?'':'<tr class="tot"><td colspan="2">TOTAL</td><td>'+tot.pts+'</td><td>'+kt_pctF(tot.twoMade,tot.twoMiss)+'</td><td>'+kt_pctF(tot.threeMade,tot.threeMiss)+'</td><td>'+kt_pctF(tot.ftMade,tot.ftMiss)+'</td><td>'+tot.reb+'</td><td>'+tot.ast+'</td><td>'+tot.stl+'</td><td>'+tot.blk+'</td><td>'+tot.to+'</td><td>'+tot.foul+'</td><td>'+tot.eff+'</td></tr>';
     return '<div class="ktAntBox"><h3>'+kt_nomeTime(Object.assign({avulso:m.avulso},tm)).replace(/</g,'&lt;')+' · '+tot.pts+'</h3><table>'+cab+linhas+totL+'</table></div>'; };
   box.innerHTML='<div class="ktAntCab">📚 Jogo anterior'+(KT_ANT_EDIT?' — editando':'')+'<small>'+data+' · '+kt_rotuloJM(j).replace(/^[^·]*· /,'').replace(/</g,'&lt;')+'</small></div><div class="ktAntGrid">'+tab('A')+tab('B')+'</div>'+
-    (KT_ANT_EDIT?'<div class="ktAntBt"><button type="button" onclick="kt_salvarAnterior()">💾 Salvar alterações do jogo anterior</button> <button type="button" style="background:#7f8c8d" onclick="kt_verAnterior(KT_ANT.id)">↩️ Desfazer alterações</button>'+((KT_MONTADOS.find(x=>x.id===KT_ANT.id)||{}).status==='FINAL'?' <button type="button" style="background:#8e44ad" onclick="kt_reabrirJogo(KT_ANT.id)">Reabrir jogo</button>':'')+'</div>':'');
+    (KT_ANT_EDIT?'<div class="ktAntBt"><button type="button" onclick="kt_salvarAnterior()">💾 Salvar alterações do jogo anterior</button> <button type="button" style="background:#7f8c8d" onclick="kt_verAnterior(KT_ANT.id)">↩️ Desfazer alterações</button>'+' <button type="button" style="background:#c0392b" onclick="kt_excluirAnterior(this)">Excluir jogo anterior</button>'+((KT_MONTADOS.find(x=>x.id===KT_ANT.id)||{}).status==='FINAL'?' <button type="button" style="background:#8e44ad" onclick="kt_reabrirJogo(KT_ANT.id)">Reabrir jogo</button>':'')+'</div>':'');
   if(KT_ANT_EDIT) box.querySelectorAll('input').forEach(i=>i.oninput=()=>{ const S=KT_ANT.stats[i.dataset.t]; S[i.dataset.r]=Object.assign({},KT_ZERO,S[i.dataset.r]||{}); S[i.dataset.r][i.dataset.c]=Math.max(0,parseInt(i.value)||0); const tr=i.closest('tr'); const s=kt_calc(S[i.dataset.r]); const b=tr.querySelectorAll('td b'); b[0].textContent=s.pts; b[1].textContent=s.eff; });
 }
 async function kt_verAnterior(id){
@@ -1681,14 +1682,14 @@ function kt_editarAnterior(){
   KT_ANT_EDIT=true; kt_desenharAnterior(); document.getElementById('ktAnterior').scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function kt_excluirAnterior(bt){
-  const id=document.getElementById('ktSelAnt').value; if(!id) return alert('Escolha na lista o jogo anterior que quer excluir.');
+  const id=(KT_ANT&&KT_ANT.id)||document.getElementById('ktSelAnt').value; if(!id) return alert('Escolha na lista o jogo anterior que quer excluir.');
   const j=KT_MONTADOS.find(x=>x.id===id); if(!j) return;
   if(!confirm('Excluir o jogo '+kt_rotuloJM(j)+'?\n\nO jogo e as estatísticas dele saem da planilha e do Ao vivo. Não dá para desfazer.')) return;
   if(!confirm('Tem certeza? Confirme de novo para excluir.')) return;
   bt.disabled=true; const r=await kt_apiSc({acao:'excluirJogo',id}); bt.disabled=false;
   if(!r.ok) return alert('Não foi possível excluir: '+(r.erro||'tente de novo'));
   KT_MONTADOS=KT_MONTADOS.filter(x=>x.id!==id); KT_ANT=null; KT_ANT_EDIT=false; kt_desenharAnterior();
-  const atual=KT_MONTADOS.find(x=>x.id===KT_JOGO_ID); if(atual) kt_listarAnteriores(atual);
+  const atual=KT_MONTADOS.find(x=>x.id===KT_JOGO_ID); kt_listarAnteriores(atual||undefined);
   const sel=document.getElementById('ktSelJogo'); [...sel.options].forEach(o=>{ if(o.value===id) o.remove(); });
   kt_msg('🗑️ Jogo excluído.');
 }
