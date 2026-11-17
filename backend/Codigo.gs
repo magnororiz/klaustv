@@ -41,6 +41,7 @@ function doPost(e) {
       case 'listarFotos': return responder(listarFotos(p.token));
       case 'salvarApelido': return responder(salvarApelido(p.token, p.reg, p.apelido));
       case 'salvarCamisa': return responder(salvarCamisa(p.token, p.reg, p.camisa));
+      case 'dadosCalendario': return responder(dadosCalendario());
       case 'aoVivoLista': return responder(aoVivoLista(p.categoria));
       case 'aoVivoJogo': return responder(aoVivoJogo(p.id));
       case 'listarArbitragem': return responder(listarArbitragem(p.token));
@@ -843,6 +844,25 @@ function dadosSumulas() {
   const sf = ss.getSheetByName('FBERJ_TabelaFem'); const fem = sf ? sf.getDataRange().getDisplayValues().slice(1).filter(r => r[0] && r[5] && r[6]) : [];
   const res = { ok: true, atualizado: fedQuando(), equipes: equipes, lista: lista, feminino: fem };
   cachePut('sum', res, 1800); return res;
+}
+
+/* ================= CALENDÁRIO (tabela de jogos de todas as categorias, da NOSSA planilha) ================= */
+function dadosCalendario() {
+  const hit = cacheGet('cal'); if (hit) return hit;
+  const ss = SpreadsheetApp.openById(PLANILHA_ID);
+  const ler = n => { const sh = ss.getSheetByName(n); return sh && sh.getLastRow() > 1 ? sh.getDataRange().getDisplayValues().slice(1).filter(r => r[0] && r[5] && r[6]).map(r => r.slice(0, 11)) : []; };
+  const masc = ler('FBERJ_Tabela'), fem = ler('FBERJ_TabelaFem');
+  if (!masc.length && !fem.length) return { ok: false, erro: 'A tabela de jogos ainda está sendo copiada da FBERJ.' };
+  // súmulas: categoria|nº do jogo -> id do PDF no Drive
+  const sum = {}; const ssu = ss.getSheetByName('FBERJ_Sumulas');
+  if (ssu && ssu.getLastRow() > 1) ssu.getDataRange().getValues().slice(1).filter(r => r[4]).forEach(r => {
+    const catP = String(r[1]).toUpperCase().replace(/\s+/g, ''); const cat = catP === 'ADULTO' ? 'Adulto' : (catP.match(/^SUB(\d+)/) ? 'Sub-' + catP.match(/^SUB(\d+)/)[1] : r[1]);
+    const num = (String(r[3]).match(/^\s*(?:jg|jogo)\.?\s*(?:n[º°o]?\.?\s*)?(\d+)/i) || [])[1]; if (num && !sum[cat + '|' + num]) sum[cat + '|' + num] = String(r[4]); });
+  // jogos do Klaus (estatística): categoria|nº -> [id, status]
+  const kt = {}; lerJogos().forEach(j => { if (jsonOu(j.meta, {}).avulso) return; const num = String(j.jogoFed || '').split(' ')[0]; if (num) kt[j.categoria + '|' + num] = [j.id, j.status]; });
+  const se = ss.getSheetByName('FBERJ_Equipes'); const equipes = {}; if (se) se.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0]) equipes[r[0]] = r[1]; });
+  const res = { ok: true, atualizado: fedQuando(), equipes: equipes, masc: masc, fem: fem, sum: sum, kt: kt };
+  cachePut('cal', res, 120); return res;
 }
 
 
