@@ -15,6 +15,7 @@ body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding
 .filtro h2{margin:0 8px 6px 0;font-size:22px;}
 .filtro select,.filtro input{padding:9px 12px;border-radius:8px;border:none;font-size:15px;font-weight:700;width:100%;box-sizing:border-box;}
 .fl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#9fb3c8;min-width:150px;}
+.fl.curto{min-width:100px;}
 .fl.grande{flex:1;min-width:220px;}
 .intro{color:#c8d4e2;font-size:14px;line-height:1.45;margin:10px 0 0 0;}
 .atual{font-size:12px;color:#7f93a8;margin-top:10px;}
@@ -162,12 +163,13 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 <!--/ktMenu-->
 <div class="pag">
   <div class="filtro">
-    <div class="topo"><h2 class="cond">🏀 Cestinhas 2026</h2>
+    <div class="topo"><h2 class="cond" id="titulo">🏀 Cestinhas 2026</h2>
+      <label class="fl curto">Temporada<select id="selTemp" onchange="kt_temp()"><option value="2026">2026</option><option value="2025">2025</option></select></label>
       <label class="fl">Categoria<select id="selCat" onchange="kt_eqs();kt_desenha()"></select></label>
       <label class="fl">Equipe<select id="selEq" onchange="kt_desenha()"></select></label>
       <label class="fl">Ordenar por<select id="selOrd" onchange="kt_desenha()"><option value="4">Pontos</option><option value="m">Média por jogo</option><option value="5">Cestas de 3</option><option value="6">Jogos</option></select></label>
       <label class="fl grande">Buscar atleta<input id="busca" type="search" placeholder="Digite o nome..." oninput="kt_desenha()"></label></div>
-    <p class="intro">Ranking oficial de pontos do Campeonato Estadual da FBERJ, de todas as categorias. Os dados são copiados todo dia da planilha da federação para o Klaus TV, então continuam aqui mesmo depois que o campeonato acabar.</p>
+    <p class="intro" id="intro">Ranking oficial de pontos do Campeonato Estadual da FBERJ, de todas as categorias. Os dados são copiados todo dia da planilha da federação para o Klaus TV, então continuam aqui mesmo depois que o campeonato acabar.</p>
   </div>
   <div id="conteudo"><div class="vazio">Carregando cestinhas...</div></div>
   <div class="atual" id="atual"></div>
@@ -187,7 +189,9 @@ function abrev(n){ const w=String(n||'').trim().split(/\s+/); const core=w.map((
   if(c>=5) ab=core.slice(1,c-2); else if(c===4) ab=[core[2]]; else if(c===3) ab=[core[1]];
   ab.forEach(i=>{ w[i]=w[i].charAt(0).toUpperCase()+'.'; }); return w.join(' '); }
 
-let C=null, kt_todos=false;
+let C=null, C26=null, C25=null, kt_todos=false;
+const KT_INTRO26='Ranking oficial de pontos do Campeonato Estadual da FBERJ, de todas as categorias. Os dados são copiados todo dia da planilha da federação para o Klaus TV, então continuam aqui mesmo depois que o campeonato acabar.';
+const KT_INTRO25='Temporada 2025 encerrada: ranking final de pontos do Campeonato Estadual da FBERJ, guardado no Klaus TV. As fotos são as mesmas do cadastro de 2026 (pela matrícula ou, se ela mudou, pelo nome completo). A categoria Minibasquete de 2025 aparece como Sub-12.';
 function med(r){ return r[6]?r[4]/r[6]:0; }
 function ap(reg){ return (C.apelidos||{})[reg]||''; }
 function foto(reg){ return (C.fotos||{})[reg]||'bola_fiba.png'; }
@@ -195,7 +199,7 @@ function kt_eqs(){ const cat=$('selCat').value; const ss=[...new Set(C.lista.fil
   const v=$('selEq').value; $('selEq').innerHTML='<option value="">Todas</option>'+ss.map(s=>`<option value="${s}">${esc(nomeT(s,C.equipes))}</option>`).join(''); if(ss.includes(v)) $('selEq').value=v; }
 function kt_desenha(){
   const cat=$('selCat').value, eq=$('selEq').value, ord=$('selOrd').value, q=$('busca').value.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-  const u=new URL(location); u.searchParams.set('cat',cat); history.replaceState(null,'',u);
+  const u=new URL(location); u.searchParams.set('cat',cat); if($('selTemp').value==='2025') u.searchParams.set('temp','2025'); else u.searchParams.delete('temp'); history.replaceState(null,'',u);
   const val=r=>ord==='m'?med(r):r[+ord];
   // posição no campeonato (por pontos, empate divide a posição)
   const todos=C.lista.filter(r=>r[0]===cat && r[4]>0).sort((a,b)=>b[4]-a[4]); const pos={}; let p=0,ult=null; todos.forEach((r,i)=>{ if(r[4]!==ult){ p=i+1; ult=r[4]; } pos[r[1]+'|'+r[2]]=p; });
@@ -216,14 +220,25 @@ function kt_desenha(){
     ${(!kt_todos&&!q&&!eq&&lsB.length>50)?`<button class="mais" onclick="kt_todos=true;kt_desenha()">▼ Ver todos os ${lsB.length} atletas</button>`:''}</div>`;
   document.querySelectorAll('table.rk .'+col).forEach(e=>e.classList.add('ordOn'));
 }
+function kt_cats(){ const cats=D.ordem.filter(c=>C.lista.some(x=>x[0]===c)); const v=$('selCat').value||new URL(location).searchParams.get('cat');
+  $('selCat').innerHTML=cats.map(c=>`<option>${c}</option>`).join(''); $('selCat').value=cats.includes(v)?v:(cats.includes('Sub-13')?'Sub-13':cats[0]); }
+async function kt_temp(){
+  const t=$('selTemp').value; kt_todos=false; $('titulo').textContent='🏀 Cestinhas '+t; $('intro').textContent=t==='2025'?KT_INTRO25:KT_INTRO26;
+  if(t==='2025'){
+    if(!C25){ $('conteudo').innerHTML='<div class="vazio">Carregando cestinhas 2025...</div>';
+      try{ const r=await (await fetch('cestinhas2025.json')).json();
+        // r.lista: [cat, sigla, matrícula 2025, nome, pontos, cestas de 3, jogos, matrícula 2026 (para foto e apelido)]
+        C25={ok:true, equipes:r.equipes, fotos:C26.fotos, apelidos:C26.apelidos, lista:r.lista.map(x=>[x[0],x[1],x[7]||x[2],x[3],x[4],x[5],x[6]])};
+      }catch(e){ $('conteudo').innerHTML='<div class="vazio">Não foi possível carregar os cestinhas de 2025 agora.</div>'; return; } }
+    C=C25; $('atual').textContent='Fonte: planilha de cestinhas 2025 da FBERJ · temporada encerrada · cópia do Klaus TV';
+  } else { C=C26; $('atual').textContent='Fonte: planilha de cestinhas da FBERJ · cópia do Klaus TV'+(C.atualizado?' · atualizada em '+C.atualizado:''); }
+  kt_cats(); kt_eqs(); kt_desenha();
+}
 async function kt_init(){
   const r=await api({acao:'dadosCestinhas'});
   if(!r.ok){ $('conteudo').innerHTML='<div class="vazio">'+esc(r.erro||'Não foi possível carregar os cestinhas agora.')+'</div>'; return; }
-  C=r; const cats=D.ordem.filter(c=>C.lista.some(x=>x[0]===c));
-  const pc=new URL(location).searchParams.get('cat');
-  $('selCat').innerHTML=cats.map(c=>`<option>${c}</option>`).join(''); $('selCat').value=cats.includes(pc)?pc:(cats.includes('Sub-13')?'Sub-13':cats[0]);
-  kt_eqs(); kt_desenha();
-  $('atual').textContent='Fonte: planilha de cestinhas da FBERJ · cópia do Klaus TV'+(C.atualizado?' · atualizada em '+C.atualizado:'');
+  C26=r; if(new URL(location).searchParams.get('temp')==='2025') $('selTemp').value='2025';
+  kt_temp();
 }
 kt_init();
 </script>
