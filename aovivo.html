@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Klaus TV · Estatísticas ao vivo</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="app/apple-touch-icon.png">
+<meta name="theme-color" content="#0f1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Klaus TV">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding:0 16px 16px 16px;}
 .pag{max-width:1200px;margin:0 auto;}
@@ -17,6 +24,26 @@ body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding
 .filtro .topo{margin-bottom:0;}
 .fl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#9fb3c8;min-width:150px;}
 .fl.grande{flex:1;min-width:260px;}
+/* app (instalar) */
+.btnApp{margin-left:auto;align-self:center;padding:9px 14px;border-radius:10px;border:2px solid #ffd54f;background:transparent;color:#ffd54f;font-weight:800;font-size:14px;cursor:pointer;font-family:'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+.btnApp:hover{background:#ffd54f;color:#0b0b0b;}
+.appFundo{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;}
+.appFundo.on{display:flex;}
+.appCx{background:#0f1a2e;border:1px solid #1e3a66;border-radius:16px;max-width:430px;width:100%;max-height:90vh;overflow:auto;padding:18px;color:#fff;box-shadow:0 10px 40px rgba(0,0,0,.6);}
+.appCx .cab{display:flex;gap:12px;align-items:center;margin-bottom:10px;}
+.appCx .cab img{width:56px;height:56px;border-radius:12px;}
+.appCx h3{margin:0;font-size:20px;}
+.appCx .sub{color:#9fb3c8;font-size:13px;margin-top:2px;}
+.appCx ol{margin:10px 0 6px 0;padding-left:22px;line-height:1.5;font-size:15px;}
+.appCx ol li{margin-bottom:8px;}
+.appCx .ic{display:inline-block;background:#1e3a66;border-radius:6px;padding:0 6px;font-weight:700;}
+.appCx .nota{font-size:12px;color:#9fb3c8;margin-top:8px;}
+.appCx .acoes{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;}
+.appCx .acoes button{padding:9px 14px;border-radius:8px;border:none;font-weight:800;cursor:pointer;}
+.appCx .ok{background:#ffd54f;color:#0b0b0b;}
+.appCx .fechar{background:#2a3c5c;color:#fff;}
+.appCx .outros{margin-top:10px;font-size:13px;}
+.appCx .outros summary{cursor:pointer;color:#ffd54f;}
 .maisLid{display:block;width:100%;padding:11px;border:none;background:#e9ecf1;color:#222;font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Oswald','Arial Narrow',Arial;}
 .maisLid:hover{background:#dfe3ea;}
 .dia{color:#ffd54f;font-size:13px;margin:12px 0 6px 0;}
@@ -260,7 +287,8 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
   <div class="filtro">
     <div class="topo"><h2 class="cond">📺 Jogos</h2>
       <label class="fl">Categoria<select id="selCat" onchange="kt_atual=null;$('jogo').innerHTML='';kt_lista()"></select></label>
-      <label class="fl grande">Jogo<select id="selJogo" onchange="if(this.value)kt_abrir(this.value)"><option>Carregando jogos...</option></select></label></div>
+      <label class="fl grande">Jogo<select id="selJogo" onchange="if(this.value)kt_abrir(this.value)"><option>Carregando jogos...</option></select></label>
+      <button class="btnApp" id="btnApp" style="display:none" onclick="kt_appAbrir()">📲 Instalar o app</button></div>
     <div id="lista" style="display:none"></div>
   </div>
   <div id="jogo"></div>
@@ -639,6 +667,45 @@ function kt_mapaFooter(nome){
   if(el.dataset.q !== q){ el.src = src; el.dataset.q = q; }
   document.getElementById('ktLocalNome').innerText = n ? n : 'Cristo Redentor, Rio de Janeiro';
 }
+</script>
+<!-- APP (PWA): botão Instalar e instruções por aparelho -->
+<div class="appFundo" id="appFundo" onclick="if(event.target===this)kt_appFechar()"><div class="appCx">
+  <div class="cab"><img src="app/icone-192.png" alt=""><div><h3 class="cond">App Klaus TV</h3><div class="sub">Estatísticas ao vivo na tela do seu celular, em tela cheia, atualizando sozinhas.</div></div></div>
+  <div id="appPassos"></div>
+  <details class="outros" id="appOutros"><summary>Usa outro aparelho ou navegador?</summary><div id="appTodos"></div></details>
+  <div class="acoes"><button class="fechar" onclick="kt_appFechar()">Fechar</button><button class="ok" id="appOk" style="display:none" onclick="kt_appInstalar()">Instalar agora</button></div>
+</div></div>
+<script>
+/* ---------- App (PWA) ---------- */
+let kt_appPrompt=null;
+const KT_APP={
+  android:{t:'Android · Chrome',p:['Toque em <b>Instalar agora</b> (aqui embaixo) e confirme em <b>Instalar</b>.','Se a janela não aparecer: toque nos <span class="ic">⋮</span> (três pontinhos, no canto de cima à direita) e escolha <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.','Pronto: o ícone <b>Klaus TV</b> aparece na tela do celular.']},
+  androidOutro:{t:'Android · Samsung Internet ou outro',p:['Toque no menu <span class="ic">☰</span> ou <span class="ic">⋮</span> do navegador.','Escolha <b>Adicionar página a</b> → <b>Tela inicial</b> (ou <b>Instalar app</b>).','Confirme. O ícone <b>Klaus TV</b> aparece na tela do celular.']},
+  iosSafari:{t:'iPhone · Safari',p:['Toque no botão <b>Compartilhar</b> <span class="ic">⬆️</span> (quadradinho com seta para cima, na barra de baixo).','Role a lista e toque em <b>Adicionar à Tela de Início</b>.','Toque em <b>Adicionar</b>, no canto de cima à direita. O ícone <b>Klaus TV</b> aparece na tela do iPhone.']},
+  iosChrome:{t:'iPhone · Chrome',p:['Toque no botão <b>Compartilhar</b> <span class="ic">⬆️</span>, ao lado do endereço do site (em cima, à direita).','Toque em <b>Adicionar à Tela de Início</b> (se não aparecer, role a lista ou toque em <b>Mais</b>).','Toque em <b>Adicionar</b>. O ícone <b>Klaus TV</b> aparece na tela do iPhone.']},
+  pc:{t:'Computador · Chrome ou Edge',p:['Clique em <b>Instalar agora</b> (aqui embaixo).','Se não aparecer: clique no ícone <span class="ic">⊕</span> no fim da barra de endereço, ou no menu <span class="ic">⋮</span> → <b>Transmitir, salvar e compartilhar</b> → <b>Instalar página como app</b>.','O Klaus TV abre numa janela própria e fica no menu Iniciar / Dock.']},
+  mac:{t:'Mac · Safari',p:['No menu de cima, clique em <b>Arquivo</b>.','Escolha <b>Adicionar ao Dock</b> e clique em <b>Adicionar</b>.']}
+};
+function kt_appTipo(){ const u=navigator.userAgent; const ios=/iPhone|iPad|iPod/.test(u)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(ios) return /CriOS/.test(u)?'iosChrome':'iosSafari';
+  if(/Android/.test(u)) return /SamsungBrowser|Firefox|OPR/.test(u)?'androidOutro':'android';
+  if(/Macintosh/.test(u)&&/Safari/.test(u)&&!/Chrome|Edg/.test(u)) return 'mac';
+  return 'pc'; }
+function kt_appLista(k){ const x=KT_APP[k]; return '<div><b>'+x.t+'</b><ol>'+x.p.map(i=>'<li>'+i+'</li>').join('')+'</ol></div>'; }
+function kt_appAbrir(){ const k=kt_appTipo();
+  document.getElementById('appPassos').innerHTML=kt_appLista(k)+'<div class="nota">O app é a própria página Estatísticas ao vivo: escolha a categoria e o jogo, e os números atualizam sozinhos a cada poucos segundos. Não ocupa espaço e se atualiza sozinho.</div>';
+  document.getElementById('appTodos').innerHTML=Object.keys(KT_APP).filter(x=>x!==k).map(kt_appLista).join('');
+  document.getElementById('appOk').style.display=kt_appPrompt?'':'none';
+  document.getElementById('appFundo').classList.add('on'); }
+function kt_appFechar(){ document.getElementById('appFundo').classList.remove('on'); }
+async function kt_appInstalar(){ if(!kt_appPrompt) return; kt_appPrompt.prompt(); try{ await kt_appPrompt.userChoice; }catch(e){} kt_appPrompt=null; kt_appFechar(); }
+(function(){
+  const instalado=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  if(!instalado) document.getElementById('btnApp').style.display='';
+  window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); kt_appPrompt=e; });
+  window.addEventListener('appinstalled',()=>{ document.getElementById('btnApp').style.display='none'; });
+  if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+})();
 </script>
 </body>
 </html>
