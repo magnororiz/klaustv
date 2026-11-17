@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klaus TV · Calendário</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+
+body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding:0 16px 16px 16px;}
+.pag{max-width:1200px;margin:0 auto;}
+.cond{font-family:'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;}
+.filtro{background:#0f1a2e;border:1px solid #1e3a66;border-radius:14px;padding:16px;margin-bottom:16px;}
+.filtro .topo{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;}
+.filtro h2{margin:0 8px 6px 0;font-size:22px;}
+.filtro select,.filtro input{padding:9px 12px;border-radius:8px;border:none;font-size:15px;font-weight:700;width:100%;box-sizing:border-box;}
+.fl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#9fb3c8;min-width:150px;}
+.fl.grande{flex:1;min-width:220px;}
+.intro{color:#c8d4e2;font-size:14px;line-height:1.45;margin:10px 0 0 0;}
+.atual{font-size:12px;color:#7f93a8;margin-top:10px;}
+.vazio{color:#9fb3c8;font-size:15px;padding:30px 10px;text-align:center;}
+.esc{width:30px;height:30px;object-fit:contain;flex:0 0 30px;}
+.ini{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#1e5bd8;color:#fff;font-weight:800;font-size:12px;flex:0 0 30px;}
+
+.ler{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.ler div{background:#132039;border:1px solid #24406b;border-radius:10px;padding:10px 12px;font-size:13px;color:#c8d4e2;line-height:1.4;}
+.ler b{display:block;color:#ffd54f;font-family:'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;font-size:14px;margin-bottom:3px;}
+@media(max-width:760px){.ler{grid-template-columns:1fr;}}
+.res{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
+.res button{background:#132039;border:1px solid #24406b;color:#c8d4e2;border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer;font-size:13px;}
+.res button.on{background:#1e5bd8;border-color:#1e5bd8;color:#fff;}
+.grupo{font-family:'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;color:#ffd54f;font-size:16px;margin:18px 0 8px 0;}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;}
+.card{background:#fff;color:#111;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+.card .top{display:flex;justify-content:space-between;gap:8px;background:#0f1a2e;color:#c8d4e2;font-size:12px;font-weight:700;padding:7px 12px;}
+.card .top .nj{color:#ffd54f;}
+.card .pl{display:grid;grid-template-columns:6px 1fr auto 16px auto 1fr 6px;align-items:center;gap:8px;padding:12px 0;}
+.card .pl .b{align-self:stretch;}
+.card .pl .t{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px;min-width:0;}
+.card .pl .t span{overflow:hidden;text-overflow:ellipsis;}
+.card .pl .t.dir{flex-direction:row-reverse;text-align:right;}
+.card .pl .esc,.card .pl .ini{width:38px;height:38px;flex-basis:38px;}
+.card .pl .p{font-family:'Oswald','Arial Narrow',Arial;font-size:34px;font-weight:700;min-width:34px;text-align:center;}
+.card .pl .p.v{color:#1e5bd8;}
+.card .pl .x{color:#9aa5b5;font-weight:800;text-align:center;}
+.card .dest{border-top:1px solid #eef0f3;font-size:13px;}
+.card .dest div{display:flex;justify-content:space-between;gap:8px;padding:6px 12px;border-bottom:1px solid #f1f3f6;}
+.card .dest span:first-child{color:#666;font-weight:700;}
+.card .dest span:last-child{font-weight:800;text-align:right;}
+.card .tim{display:grid;grid-template-columns:1fr auto 1fr;font-size:12px;border-top:1px solid #eef0f3;}
+.card .tim div{padding:5px 12px;font-weight:800;}
+.card .tim .m{color:#666;text-align:center;font-weight:700;background:#fafbfc;}
+.card .tim .r{text-align:right;}
+.mvpS{display:inline-block;background:linear-gradient(90deg,#ff8f00,#ffd54f);color:#111;font-size:11px;font-weight:800;border-radius:6px;padding:1px 7px;margin-right:4px;}
+.card .bt{display:flex;gap:6px;padding:10px 12px;margin-top:auto;}
+.card .bt a{flex:1;text-align:center;text-decoration:none;font-weight:800;font-size:13px;padding:9px;border-radius:8px;font-family:'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;}
+.card .bt a.s{background:#1e5bd8;color:#fff;}
+.card .bt a.e{background:#e9ecf1;color:#1e5bd8;}
+.card .sem{color:#888;font-size:12px;padding:0 12px 10px;}
+/*ktMenuCSS*/
+html,body{overflow-x:hidden;}
+body{padding-top:0 !important;}
+.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
+  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#1d0f0a 100%);
+  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
+.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
+.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;z-index:4;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 85%,rgba(0,0,0,.4));}
+.ktMenu .bola{position:absolute;right:14px;top:6px;height:136px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));z-index:4;}
+.ktMenu .bola.logoKT{height:142px;top:3px;right:10px;}
+.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
+.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
+.ktMenu .marca span{color:#1e90ff;}
+.ktMenu .marca{text-align:center;line-height:1;}
+.ktMenu .marca small{display:block;font-family:'Barlow',Arial,sans-serif;font-size:12px;font-weight:600;letter-spacing:4px;color:#ffd54f;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,.8);}
+.ktFaixa a.vivo:before{content:'';width:8px;height:8px;border-radius:50%;background:#ff3b30;margin-right:7px;box-shadow:0 0 6px #ff3b30;animation:ktPisca 1.2s infinite;}
+@keyframes ktPisca{50%{opacity:.3;}}
+.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:170px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 100px,rgba(30,91,216,.95) 170px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
+  border-top:1px solid rgba(255,255,255,.12);}
+.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
+.ktFaixa a:hover{background:rgba(255,255,255,.12);}
+.ktFaixa a.soDono{display:none;}
+html.ktDono .ktFaixa a.soDono{display:flex;}
+.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;background:rgba(255,255,255,.16);box-shadow:inset 0 -3px 0 #ffd54f;}
+.ktFaixa{overflow-x:auto;scrollbar-width:none;}
+.ktFaixa a{white-space:nowrap;}
+.ktFaixa{padding-right:150px;}
+@media(min-width:821px){.ktFaixa a{padding:0 11px;font-size:14px;letter-spacing:1px;}}
+@media(min-width:821px) and (max-width:1180px){.ktFaixa a{padding:0 8px;font-size:12.5px;letter-spacing:.5px;}}
+@media(max-width:820px){.ktFaixa{padding-right:110px;}}
+@media(max-width:480px){.ktFaixa{padding-right:80px;}}
+@media(max-width:820px){.ktMenu .marca small{font-size:9px;letter-spacing:2px;margin-top:4px;}.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
+  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
+@media(max-width:480px){.ktMenu .bola{height:82px !important;top:6px !important;right:6px !important;}.ktMenu .miolo{padding-right:80px;}.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
+/*fim*//*ktFooterCSS*/
+.ktFooter{position:relative;width:100vw;left:50%;margin-left:-50vw;margin-top:40px;margin-bottom:-16px;color:#c9d4e2;font-family:'Barlow',Arial,sans-serif;font-size:14px;text-align:left;
+  background:linear-gradient(180deg,#0a1428 0%,#070d1b 100%);border-top:3px solid #1e5bd8;}
+.ktFooter .lema{font-family:'Oswald','Arial Narrow',Arial;text-align:center;font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:22px 16px 18px 16px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0%,rgba(30,91,216,.25) 50%,rgba(30,91,216,0) 100%);border-bottom:1px solid rgba(255,255,255,.06);}
+.ktFooter .lema span{color:#ffd54f;}
+.ktFooter .wrap{max-width:1200px;margin:0 auto;padding:26px 20px 10px 20px;display:grid;grid-template-columns:1.25fr .8fr 1.1fr 1.5fr;gap:28px;}
+@media(max-width:980px){.ktFooter .wrap{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.ktFooter .wrap{grid-template-columns:1fr;}.ktFooter .lema{font-size:18px;letter-spacing:2px;}}
+.ktFooter h4{font-family:'Oswald','Arial Narrow',Arial;color:#fff;margin:0 0 12px 0;font-size:16px;letter-spacing:2px;text-transform:uppercase;padding-bottom:8px;border-bottom:2px solid #1e5bd8;display:inline-block;}
+.ktFooter a{color:#e6edf5;text-decoration:none;transition:.15s;}
+.ktFooter a:hover{color:#ffd54f;}
+.ktFooter .marca{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.ktFooter .marca img{width:56px;height:56px;border-radius:50%;background:#132039;border:2px solid #1e5bd8;object-fit:cover;}
+.ktFooter .marca b{font-family:'Oswald','Arial Narrow',Arial;font-size:24px;letter-spacing:2px;color:#fff;display:block;line-height:1;}
+.ktFooter .marca b span{color:#1e90ff;}
+.ktFooter .marca small{display:block;font-size:11px;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;margin-top:4px;}
+.ktFooter .sobre{line-height:1.55;color:#aebbd0;margin:0 0 14px 0;}
+.ktFooter .redes{display:flex;gap:8px;}
+.ktFooter .redes a{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#132039;border:1px solid #24406b;font-size:17px;}
+.ktFooter .redes a:hover{background:#1e5bd8;border-color:#1e5bd8;}
+.ktFooter ul{list-style:none;margin:0;padding:0;}
+.ktFooter li{margin:0 0 9px 0;}
+.ktFooter li a:before{content:'›';color:#1e90ff;font-weight:800;margin-right:8px;}
+.ktFooter .ct{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.ktFooter .ct i{font-style:normal;width:30px;height:30px;border-radius:8px;background:#132039;display:flex;align-items:center;justify-content:center;flex:0 0 30px;}
+.ktFooter .patro{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#132039,#0f1a2e);border:1px solid #24406b;border-radius:12px;padding:10px 12px;margin-top:6px;}
+.ktFooter .patro b{display:block;color:#ffd54f;font-family:'Oswald','Arial Narrow',Arial;letter-spacing:1px;font-size:15px;}
+.ktFooter .patro small{color:#aebbd0;}
+.ktFooter .local{font-size:13px;color:#fff;margin:-4px 0 8px 0;}
+.ktFooter .mapa{width:100%;height:190px;border:0;border-radius:12px;background:#101826;box-shadow:0 6px 18px rgba(0,0,0,.4);}
+.ktFooter .copy{border-top:1px solid rgba(255,255,255,.06);text-align:center;color:#6f819a;font-size:12px;padding:14px 16px 18px 16px;margin-top:14px;letter-spacing:.5px;}
+.ktFooter .copy b{color:#9fb3c8;font-weight:600;}
+/*fimF*/</style>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="favicon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<!--ktMenu-->
+<header class="ktMenu">
+<canvas id="ktMenuCanvas"></canvas>
+<img class="cristo" src="cristo.png" alt="Cristo Redentor">
+<img class="bola logoKT" src="logo_klaustv_tv.png" alt="Klaus TV">
+<div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span><small>Basket RJ Stats PRO 4.0</small></a></div>
+<style>/*ktFaixa11*//*ktParc*/.ktFooter .parc{margin-top:18px;}.ktFooter .parcLista{display:flex;flex-wrap:nowrap;gap:6px;}.ktFooter .parcLista a.patro{flex:1 1 0;min-width:0;display:flex !important;align-items:center;justify-content:center;margin-top:0;padding:8px 9px;display:block;text-align:center;}.ktFooter .parcLista a.patro b{font-size:12.5px;line-height:1.15;letter-spacing:.5px;}.ktFooter .parcLista a.patro small{display:none;}.ktFaixa a.soLog,.ktFooter li.soLog{display:none;}html.ktLog .ktFaixa a.soLog{display:flex;}html.ktLog .ktFooter li.soLog{display:list-item;}.ktFaixa a.ktLogin .on{display:none;}html.ktLog .ktFaixa a.ktLogin .on{display:inline;}html.ktLog .ktFaixa a.ktLogin .off{display:none;}.ktFaixa a.ktLogin{color:#ffd54f;}.ktFooter a.patro{margin-top:8px;}.ktFooter a.patro:hover{border-color:#ffd54f;}@media(min-width:821px){.ktFaixa a{padding:0 8px;font-size:13px;letter-spacing:.5px;}}@media(min-width:821px) and (max-width:1300px){.ktFaixa a{padding:0 6px;font-size:11.5px;letter-spacing:0;}}</style><script>/*ktLog*/try{if(localStorage.getItem('klaustv_token_v1')){document.documentElement.classList.add('ktLog');if(localStorage.getItem('klaustv_perfil')==='Dono')document.documentElement.classList.add('ktDono');}}catch(e){}</script><nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="bancodados.html" class="soLog ">Banco de dados</a><a href="montar-jogo.html" class="soLog ">Montar Jogo</a><a href="scout.html" class="soLog ">Scout</a><a href="cestinhas.html" class="">Cestinhas</a><a href="sumulas.html" class="">Súmulas</a><a href="classificacao.html" class="">Classificação</a><a href="usuarios.html" class="soDono">Usuários</a><a href="https://klauschagas.blogspot.com/" class="ext" target="_blank" rel="noopener">Blog</a><a href="calendario.html" class="ativo">Calendário</a><a href="aovivo.html" class="vivo">Estatísticas ao vivo</a><a href="index.html?login=1" class="ktLogin" onclick="if(window.kt_abrirLogin){kt_abrirLogin();return false;}"><span class="off">🔑 Login</span><span class="on">👤 Minha conta</span></a></nav>
+</header>
+<script>
+(function(){
+ const cv=document.getElementById('ktMenuCanvas'); if(!cv) return;
+ function mix(a,b,t){return a.map((v,i)=>Math.round(v+(b[i]-v)*t));}
+ const pedra=[222,228,238], laranja=[205,88,40], creme=[240,232,218];
+ function desenhar(){
+  const r=cv.getBoundingClientRect(), dpr=window.devicePixelRatio||1;
+  cv.width=r.width*dpr; cv.height=r.height*dpr; const c=cv.getContext('2d'); c.scale(dpr,dpr);
+  const W=r.width,H=r.height; let seed=7; const rnd=()=>((seed=(seed*9301+49297)%233280)/233280);
+  const ini=Math.min(125,W*0.16), fim=W-Math.min(150,W*0.22);
+  const g=c.createLinearGradient(0,0,W,0);
+  g.addColorStop(0,'rgba(222,228,238,0.10)'); g.addColorStop(0.5,'rgba(180,150,120,0.06)'); g.addColorStop(1,'rgba(205,88,40,0.20)');
+  c.fillStyle=g; c.fillRect(0,0,W,H);
+  const n=Math.round(W*0.9);
+  for(let i=0;i<n;i++){
+   const t=rnd(); const x=ini+(fim-ini)*t;
+   const dens=Math.max(1-t*1.6,0)+Math.max(t*1.6-0.6,0)+0.25; if(rnd()>dens) continue;
+   const y=H*0.5+(rnd()-0.5)*H*(0.35+0.6*Math.abs(t-0.5));
+   const alvo=(rnd()<0.3)?creme:laranja; const col=mix(pedra,alvo,Math.min(1,Math.max(0,(t-0.15)/0.75)));
+   const a=0.25+0.55*(Math.abs(t-0.5)*1.6); const s=0.6+rnd()*2.2*(1-Math.abs(t-0.5));
+   c.fillStyle=`rgba(${col[0]},${col[1]},${col[2]},${Math.min(a,0.85)})`;
+   c.beginPath(); c.arc(x,y,s,0,Math.PI*2); c.fill();
+  }
+ }
+ desenhar(); let tm; window.addEventListener('resize',()=>{clearTimeout(tm);tm=setTimeout(desenhar,150);});
+})();
+</script>
+<!--/ktMenu-->
+<div class="pag">
+  <div class="filtro">
+    <div class="topo"><h2 class="cond">📅 Calendário de jogos</h2>
+      <label class="fl">Naipe<select id="selNaipe" onchange="kt_cats();kt_desenha()"><option value="M">Masculino</option><option value="F">Feminino</option></select></label>
+      <label class="fl">Categoria<select id="selCat" onchange="kt_eqs();kt_desenha()"></select></label>
+      <label class="fl">Fase<select id="selFase" onchange="kt_desenha()"></select></label>
+      <label class="fl grande">Equipe<select id="selEq" onchange="kt_desenha()"></select></label></div>
+    <p class="intro">Todos os jogos do Campeonato Estadual da FBERJ, de todas as categorias, num lugar só. Escolha a categoria e o seu time para ver data, hora e ginásio de cada jogo. Quando o Klaus TV estiver no jogo, aparece o botão <b>📊 Ao vivo</b>.</p>
+    <div class="res" id="quando"><button class="on" data-q="prox">Próximos jogos</button><button data-q="res">Resultados</button><button data-q="">Todos</button></div>
+  </div>
+  <div id="conteudo"><div class="vazio">Carregando calendário...</div></div>
+  <div class="atual" id="atual"></div>
+</div>
+<style>
+.dia{display:flex;align-items:center;gap:10px;margin:22px 0 8px;font-family:'Oswald','Arial Narrow',Arial;text-transform:uppercase;letter-spacing:1px;font-size:17px;color:#ffd54f;}
+.dia small{color:#7f93a8;font-size:12px;letter-spacing:.5px;}
+.dia.hoje{color:#ff5a3c;}
+.lista{display:flex;flex-direction:column;gap:8px;}
+.jg{display:grid;grid-template-columns:78px 1fr auto;gap:12px;align-items:center;background:#0f1a2e;border:1px solid #1e3a66;border-radius:12px;padding:10px 14px;}
+.jg.breve{border-color:#f5c400;box-shadow:0 0 0 1px rgba(245,196,0,.25) inset;}
+.jg.vivo{border-color:#ff3b30;box-shadow:0 0 14px rgba(255,59,48,.35);}
+.hr{text-align:center;line-height:1.2;}
+.hr b{display:block;font-family:'Oswald','Arial Narrow',Arial;font-size:22px;}
+.hr span{font-size:11px;color:#7f93a8;}
+.meio{min-width:0;}
+.conf{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;}
+.tm{display:flex;align-items:center;gap:8px;min-width:0;font-weight:700;font-size:15px;}
+.tm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tm.dir{flex-direction:row-reverse;text-align:right;}
+.tm.ven span{color:#ffd54f;}
+.pc{font-family:'Oswald','Arial Narrow',Arial;font-size:22px;white-space:nowrap;text-align:center;min-width:70px;}
+.pc .x{color:#7f93a8;font-size:15px;margin:0 6px;}
+.info{font-size:12px;color:#9fb3c8;margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;}
+.tag.cat{background:#1e3a66;color:#c8d4e2;}
+.tag.breve{background:#f5c400;color:#111;}
+.tag.vivo{background:#ff3b30;color:#fff;animation:pisca 1.2s infinite;}
+.tag.obs{background:#24406b;color:#ffd54f;}
+@keyframes pisca{50%{opacity:.45;}}
+.acoes{display:flex;flex-direction:column;gap:6px;}
+.acoes a{display:block;text-align:center;text-decoration:none;border-radius:8px;padding:6px 10px;font-size:12.5px;font-weight:700;white-space:nowrap;}
+.acoes a.v{background:#ff3b30;color:#fff;}
+.acoes a.e{background:#1e5bd8;color:#fff;}
+.acoes a.s{background:#f5c400;color:#111;}
+.acoes a.m{background:#132039;color:#c8d4e2;border:1px solid #24406b;}
+@media(max-width:700px){.jg{grid-template-columns:58px 1fr;}.acoes{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;}.acoes a{flex:1;}.tm{font-size:13.5px;}.pc{font-size:19px;min-width:56px;}.hr b{font-size:19px;}}
+</style>
+<script>
+const KT_API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
+const D={"curto":{"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN":"Funcionários","FFC":"Fluminense","TTC":"Tijuca","NBC":"Niterói","CCL":"Leopoldinense","IG":"Iguaba Grande","ABIG":"Jequiá","ACEAR":"Irajá","CESC":"Suzano Costa","EEPZ":"Passo Zero","IDEC":"IDEC","ITDA":"Atitude","KE":"K. Esportes","MB":"Mesquita","JTC":"Jacarepaguá","TKA":"Team Klun","ASPCM":"Municipal","CK":"Carioca King's","IB":"Itaipu","NBR":"NBR Campos"},"cores":{"ABIG":["#1F4E79","#FFFFFF"],"ACEAR":["#E2231A","#FFFFFF"],"ASPCM":["#2E3192","#E2231A"],"BFR":["#000000","#FFFFFF"],"BSA":["#F28C28","#FFFFFF"],"CCL":["#1F5FBF","#FFFFFF"],"CESC":["#000000","#FFFFFF"],"CFCSN":["#7B1E22","#FFFFFF"],"CK":["#1A1A1A","#B8860B"],"CRF":["#C8102E","#000000"],"EEPZ":["#1B2A4A","#F28C28"],"FFC":["#7A0026","#00613C"],"IB":["#E06A2C","#000000"],"IDEC":["#1F4E5F","#A4C639"],"IG":["#1F2E8A","#F07A1A"],"ITDA":["#0B1F4B","#FFFFFF"],"JTC":["#2E3448","#F2D33B"],"KE":["#000000","#FFD200"],"MB":["#1A1A1A","#F28C28"],"NBC":["#E2231A","#000000"],"TKA":["#1E8C3A","#F2C200"],"TTC":["#E2231A","#FFFFFF"]},"ordem":["Sub-12","Sub-13","Sub-14","Sub-15","Sub-16","Sub-17","Sub-19","Sub-22","Adulto"],"escudos":{"ABIG":"escudos/ABIG.png","ACEAR":"escudos/ACEAR.png","ASPCM":"escudos/ASPCM.png","BFR":"escudos/BFR.png","BSA":"escudos/BSA.png","CCL":"escudos/CCL.png","CESC":"escudos/CESC.png","CFCSN":"escudos/CFCSN.png","CK":"escudos/CK.png","CRF":"escudos/CRF.png","EEPZ":"escudos/EEPZ.png","FFC":"escudos/FFC.png","IB":"escudos/IB.png","IDEC":"escudos/IDEC.png","IG":"escudos/IG.png","ITDA":"escudos/ITDA.png","JTC":"escudos/JTC.png","KE":"escudos/KE.png","MB":"escudos/MB.png","NBC":"escudos/NBC.png","TKA":"escudos/TKA.png","TTC":"escudos/TTC.png"}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+async function api(d){ try{ const r=await fetch(KT_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(d)}); return await r.json(); }catch(e){ return {ok:false,erro:'Sem conexão com o servidor.'}; } }
+function escudo(s){ return D.escudos[s]?`<img class="esc" src="${D.escudos[s]}" alt="">`:`<span class="ini">${esc(String(s||'?').slice(0,3))}</span>`; }
+function nomeT(s){ return D.curto[s]||(S.equipes&&S.equipes[s])||s||'A definir'; }
+const SEM=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+let S=null, kt_q='prox';
+document.querySelectorAll('#quando button').forEach(b=>b.onclick=()=>{ kt_q=b.dataset.q; document.querySelectorAll('#quando button').forEach(x=>x.classList.toggle('on',x===b)); kt_desenha(); });
+function quando(j){ const m=String(j.data||'').match(/(\d\d)\/(\d\d)\/(\d{4})/); if(!m) return null; const h=String(j.hora||'').match(/(\d\d?):(\d\d)/); return new Date(+m[3],+m[2]-1,+m[1],h?+h[1]:12,h?+h[2]:0); }
+function jogos(){
+  const f=$('selNaipe').value==='F'; const rows=(f?S.fem:S.masc)||[];
+  let ls=rows.map(r=>{ const j={cat:r[0],fase:r[1],num:r[2],data:r[3],hora:r[4],a:r[5],b:r[6],gin:r[7],pa:r[8],pb:r[9],obs:r[10]||''}; j.dt=quando(j); const k=j.cat+'|'+j.num; j.sum=f?null:(S.sum||{})[k]; j.kt=f?null:(S.kt||{})[k]; return j; });
+  // a planilha da FBERJ às vezes traz linhas da temporada passada: fica só a temporada atual
+  const anos={}; ls.forEach(j=>{ if(j.dt){ const y=j.dt.getFullYear(); anos[y]=(anos[y]||0)+1; } }); const ano=+Object.keys(anos).sort((a,b)=>anos[b]-anos[a])[0];
+  return ls.filter(j=>!j.dt||j.dt.getFullYear()===ano);
+}
+function kt_cats(){ const ls=jogos(); const cats=D.ordem.filter(c=>ls.some(j=>j.cat===c)).concat([...new Set(ls.map(j=>j.cat))].filter(c=>!D.ordem.includes(c)));
+  const v=$('selCat').value; $('selCat').innerHTML='<option value="">Todas</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join(''); $('selCat').value=cats.includes(v)?v:''; kt_eqs(); }
+function kt_eqs(){ const cat=$('selCat').value; const ls=jogos().filter(j=>!cat||j.cat===cat);
+  const fs=[...new Set(ls.map(j=>j.fase).filter(Boolean))]; const vf=$('selFase').value; $('selFase').innerHTML='<option value="">Todas</option>'+fs.map(f=>`<option>${esc(f)}</option>`).join(''); if(fs.includes(vf)) $('selFase').value=vf;
+  const es=[...new Set(ls.flatMap(j=>[j.a,j.b]).filter(Boolean))].sort((x,y)=>nomeT(x).localeCompare(nomeT(y),'pt-BR'));
+  const ve=$('selEq').value; $('selEq').innerHTML='<option value="">Todas</option>'+es.map(s=>`<option value="${esc(s)}">${esc(nomeT(s))}</option>`).join(''); if(es.includes(ve)) $('selEq').value=ve; }
+function temP(j){ return j.pa!==''&&j.pa!=null&&j.pb!==''&&j.pb!=null; }
+function linha(j,agora){
+  const p=temP(j), va=p&&+j.pa>+j.pb, vb=p&&+j.pb>+j.pa;
+  const vivo=j.kt&&j.kt[1]==='ABERTO'&&!p; const ms=j.dt?j.dt-agora:null; const breve=!p&&!vivo&&ms!=null&&ms>-3*36e5&&ms<3*864e5;
+  const tags=[]; if(!$('selCat').value) tags.push(`<span class="tag cat">${esc(j.cat)}</span>`);
+  if(vivo) tags.push('<span class="tag vivo">● Ao vivo</span>'); else if(breve) tags.push('<span class="tag breve">Em breve</span>');
+  if(j.obs) tags.push(`<span class="tag obs">${esc(j.obs)}</span>`);
+  const det=[j.fase, j.num?'Jogo '+j.num:''].filter(Boolean).join(' · ');
+  const ac=[];
+  if(j.kt) ac.push(`<a class="${vivo?'v':'e'}" href="aovivo.html?cat=${encodeURIComponent(j.cat)}&jogo=${encodeURIComponent(j.kt[0])}" target="_blank" rel="noopener">📊 ${vivo?'Ao vivo':'Estatísticas'}</a>`);
+  if(j.sum) ac.push(`<a class="s" href="https://drive.google.com/file/d/${esc(j.sum)}/view" target="_blank" rel="noopener">📄 Súmula</a>`);
+  if(j.gin) ac.push(`<a class="m" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(j.gin+', Rio de Janeiro, RJ')}" target="_blank" rel="noopener">📍 Mapa</a>`);
+  return `<div class="jg ${vivo?'vivo':breve?'breve':''}"><div class="hr"><b>${esc(j.hora||'--:--')}</b><span>${j.dt?SEM[j.dt.getDay()].slice(0,3):'a definir'}</span></div>
+    <div class="meio"><div class="conf"><div class="tm ${va?'ven':''}">${escudo(j.a)}<span>${esc(nomeT(j.a))}</span></div>
+      <div class="pc">${p?`${esc(j.pa)}<span class="x">x</span>${esc(j.pb)}`:'<span class="x">x</span>'}</div>
+      <div class="tm dir ${vb?'ven':''}">${escudo(j.b)}<span>${esc(nomeT(j.b))}</span></div></div>
+      <div class="info">${tags.join('')}<span>${esc(det)}</span>${j.gin?'<span>· 🏟️ '+esc(j.gin)+'</span>':''}</div></div>
+    ${ac.length?`<div class="acoes">${ac.join('')}</div>`:''}</div>`;
+}
+function kt_desenha(){
+  const cat=$('selCat').value, fase=$('selFase').value, eq=$('selEq').value, agora=new Date(), hoje=new Date(agora.getFullYear(),agora.getMonth(),agora.getDate());
+  let ls=jogos().filter(j=>(!cat||j.cat===cat)&&(!fase||j.fase===fase)&&(!eq||j.a===eq||j.b===eq));
+  if(kt_q==='prox') ls=ls.filter(j=>!temP(j)&&(!j.dt||j.dt>=hoje)&&!/encerrada/i.test(j.obs));
+  if(kt_q==='res') ls=ls.filter(j=>temP(j));
+  const ord=(x,y)=>(x.dt?x.dt.getTime():9e15)-(y.dt?y.dt.getTime():9e15)||(+x.num||0)-(+y.num||0);
+  ls.sort(kt_q==='res'?(x,y)=>ord(y,x):ord);
+  if(!ls.length){ $('conteudo').innerHTML='<div class="vazio">'+(kt_q==='prox'?'Nenhum jogo marcado com esses filtros. Veja a aba Resultados.':'Nenhum jogo encontrado com esses filtros.')+'</div>'; return; }
+  const g=[]; ls.forEach(j=>{ const k=j.dt?j.data:'A definir'; let x=g.find(z=>z.k===k); if(!x) g.push(x={k,d:j.dt,ls:[]}); x.ls.push(j); });
+  $('conteudo').innerHTML=g.map(x=>{ const eHoje=x.d&&x.d.toDateString()===agora.toDateString(); const am=x.d&&new Date(hoje.getTime()+864e5).toDateString()===x.d.toDateString();
+    const tit=x.d?`${eHoje?'Hoje':am?'Amanhã':SEM[x.d.getDay()]} · ${x.k}`:'Data a definir';
+    return `<div class="dia ${eHoje?'hoje':''}">${tit} <small>${x.ls.length} ${x.ls.length>1?'jogos':'jogo'}</small></div><div class="lista">${x.ls.map(j=>linha(j,agora)).join('')}</div>`; }).join('');
+}
+async function kt_init(){
+  const r=window.KT_DEMO||await api({acao:'dadosCalendario'});
+  if(!r.ok){ $('conteudo').innerHTML='<div class="vazio">'+esc(r.erro||'Não foi possível carregar o calendário agora.')+'</div>'; return; }
+  S=r; kt_cats(); const u=new URL(location).searchParams; const pc=u.get('cat'), pe=u.get('time');
+  if(pc&&[...$('selCat').options].some(o=>o.value===pc)){ $('selCat').value=pc; kt_eqs(); } if(pe&&[...$('selEq').options].some(o=>o.value===pe)) $('selEq').value=pe;
+  kt_desenha(); $('atual').textContent='Fonte: tabela oficial da FBERJ · cópia do Klaus TV'+(S.atualizado?' · atualizada em '+S.atualizado:'');
+  if(!window.KT_DEMO) setInterval(async()=>{ const n=await api({acao:'dadosCalendario'}); if(n.ok){ S=n; kt_desenha(); } },60000);
+}
+kt_init();
+</script>
+
+
+<footer class="ktFooter">
+  <div class="lema">🏀 No basquete, <span>tudo pode acontecer!</span></div>
+  <div class="wrap">
+    <div>
+      <div class="marca"><img src="favicon-180.png" alt="Klaus Chagas"><div><b>Klaus <span>TV</span></b><small>Basket RJ Stats PRO 4.0</small></div></div>
+      <p class="sobre">Basquete do Rio de Janeiro com narração de Klaus Chagas. Desde 2007 registrando a base carioca.</p>
+      <div class="redes">
+        <a href="https://www.youtube.com/@klauschagas" target="_blank" rel="noopener" title="YouTube">▶️</a>
+        <a href="https://www.instagram.com/basquete.rj/" target="_blank" rel="noopener" title="Instagram">📸</a>
+        <a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener" title="Blog">📰</a>
+        <a href="https://wa.me/5521998092305" target="_blank" rel="noopener" title="WhatsApp">💬</a>
+      </div>
+      <div class="parc"><h4>Parceiros</h4><div class="parcLista"><a class="patro" href="https://www.instagram.com/coachmarciasantos12/" target="_blank" rel="noopener" title="Instagram de Coach Márcia Santos"><div><b>Coach Márcia Santos</b><small>📸 @coachmarciasantos12</small></div></a><a class="patro" href="https://www.instagram.com/jdjacademy.oficial/" target="_blank" rel="noopener" title="Instagram de JDJ Academy"><div><b>JDJ Academy</b><small>📸 @jdjacademy.oficial</small></div></a><a class="patro" href="https://www.instagram.com/resultnutritionoficial/" target="_blank" rel="noopener" title="Instagram de Result Nutrition"><div><b>Result Nutrition</b><small>📸 @resultnutritionoficial</small></div></a></div></div>
+    </div>
+    <div>
+      <h4>Páginas</h4>
+      <ul>
+        <li><a href="index.html">Início</a></li>
+        <li class="soLog"><a href="montar-jogo.html">Montar Jogo</a></li>
+        <li class="soLog"><a href="scout.html">Scout</a></li>
+        <li><a href="cestinhas.html">Cestinhas</a></li>
+        <li><a href="sumulas.html">Súmulas</a></li>
+        <li><a href="classificacao.html">Classificação</a></li>
+        <li class="soLog"><a href="bancodados.html">Banco de dados</a></li>
+        <li><a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener">Blog</a></li>
+        <li><a href="calendario.html">Calendário</a></li>
+        <li><a href="aovivo.html">Estatísticas ao vivo</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contato</h4>
+      <div class="ct"><i>💬</i><a href="https://wa.me/5521998092305" target="_blank" rel="noopener">(21) 99809-2305</a></div>
+      <div class="ct"><i>📸</i><a href="https://www.instagram.com/basquete.rj/" target="_blank" rel="noopener">@basquete.rj</a></div>
+      <div class="ct"><i>✉️</i><a href="mailto:klaustv.rj@gmail.com">klaustv.rj@gmail.com</a></div>
+    </div>
+    <div>
+      <h4>Local do jogo</h4>
+      <div class="local" id="ktLocalNome">Cristo Redentor, Rio de Janeiro</div>
+      <iframe class="mapa" id="ktMapa" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q=Cristo%20Redentor%2C%20Rio%20de%20Janeiro&output=embed"></iframe>
+    </div>
+  </div>
+  <div class="copy">© 2026 <b>Klaus TV</b> · klaustv.com · Basket RJ Stats PRO 4.0</div>
+</footer>
+<script>
+function kt_mapaFooter(nome){
+  const n = (nome||'').trim();
+  const q = n ? n + ', Rio de Janeiro, RJ' : 'Cristo Redentor, Rio de Janeiro';
+  const el = document.getElementById('ktMapa'); if(!el) return;
+  const src = 'https://www.google.com/maps?q=' + encodeURIComponent(q) + '&output=embed';
+  if(el.dataset.q !== q){ el.src = src; el.dataset.q = q; }
+  document.getElementById('ktLocalNome').innerText = n ? n : 'Cristo Redentor, Rio de Janeiro';
+}
+</script>
+</body>
+</html>
