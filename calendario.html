@@ -248,7 +248,7 @@ function linha(j,agora){
   const det=[j.fase, j.num?'Jogo '+j.num:''].filter(Boolean).join(' · ');
   const ac=[];
   if(j.kt) ac.push(`<a class="${vivo?'v':'e'}" href="aovivo.html?cat=${encodeURIComponent(j.cat)}&jogo=${encodeURIComponent(j.kt[0])}" target="_blank" rel="noopener">📊 ${vivo?'Ao vivo':'Estatísticas'}</a>`);
-  if(j.sum) ac.push(`<a class="s" href="https://drive.google.com/file/d/${esc(j.sum)}/view" target="_blank" rel="noopener">📄 Súmula</a>`);
+  if(j.sum&&p) ac.push(`<a class="s" href="https://drive.google.com/file/d/${esc(j.sum)}/view" target="_blank" rel="noopener">📄 Súmula</a>`);
   if(j.gin) ac.push(`<a class="m" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(j.gin+', Rio de Janeiro, RJ')}" target="_blank" rel="noopener">📍 Mapa</a>`);
   return `<div class="jg ${vivo?'vivo':breve?'breve':''}"><div class="hr"><b>${esc(j.hora||'--:--')}</b><span>${j.dt?SEM[j.dt.getDay()].slice(0,3):'a definir'}</span></div>
     <div class="meio"><div class="conf"><div class="tm ${va?'ven':''}">${escudo(j.a)}<span>${esc(nomeT(j.a))}</span></div>
