@@ -23,6 +23,7 @@ function doPost(e) {
   if (p.acao === 'dadosSumulas') return responder(dadosSumulas());
   if (p.acao === 'historicoKT') return responder(historicoKT());
   if (p.acao === 'dadosClassificacao') return responder(dadosClassificacao());
+  if (p.acao === 'dadosCalendario') return responder(dadosCalendario());
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     switch (p.acao) {
@@ -41,7 +42,6 @@ function doPost(e) {
       case 'listarFotos': return responder(listarFotos(p.token));
       case 'salvarApelido': return responder(salvarApelido(p.token, p.reg, p.apelido));
       case 'salvarCamisa': return responder(salvarCamisa(p.token, p.reg, p.camisa));
-      case 'dadosCalendario': return responder(dadosCalendario());
       case 'aoVivoLista': return responder(aoVivoLista(p.categoria));
       case 'aoVivoJogo': return responder(aoVivoJogo(p.id));
       case 'listarArbitragem': return responder(listarArbitragem(p.token));
