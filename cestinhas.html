@@ -226,11 +226,13 @@ async function kt_temp(){
   const t=$('selTemp').value; kt_todos=false; $('titulo').textContent='🏀 Cestinhas '+t; $('intro').textContent=t==='2025'?KT_INTRO25:KT_INTRO26;
   if(t==='2025'){
     if(!C25){ $('conteudo').innerHTML='<div class="vazio">Carregando cestinhas 2025...</div>';
-      try{ const r=await (await fetch('cestinhas2025.json')).json();
-        // r.lista: [cat, sigla, matrícula 2025, nome, pontos, cestas de 3, jogos, matrícula 2026 (para foto e apelido)]
-        C25={ok:true, equipes:r.equipes, fotos:C26.fotos, apelidos:C26.apelidos, lista:r.lista.map(x=>[x[0],x[1],x[7]||x[2],x[3],x[4],x[5],x[6]])};
-      }catch(e){ $('conteudo').innerHTML='<div class="vazio">Não foi possível carregar os cestinhas de 2025 agora.</div>'; return; } }
-    C=C25; $('atual').textContent='Fonte: planilha de cestinhas 2025 da FBERJ · temporada encerrada · cópia do Klaus TV';
+      // 1º: cópia da nossa planilha (backup das 20h); se não responder, a cópia guardada no site
+      // lista: [cat, sigla, matrícula 2025, nome, pontos, cestas de 3, jogos, matrícula 2026 (para foto e apelido)]
+      let r=await api({acao:'dadosCestinhas2025'}), fonte='planilha';
+      if(!r.ok){ try{ r=await (await fetch('cestinhas2025.json')).json(); r.fotos=C26.fotos; r.apelidos=C26.apelidos; fonte='site'; }
+        catch(e){ $('conteudo').innerHTML='<div class="vazio">Não foi possível carregar os cestinhas de 2025 agora.</div>'; return; } }
+      C25={ok:true, fonte:fonte, atualizado:r.atualizado||'', equipes:r.equipes, fotos:r.fotos||{}, apelidos:r.apelidos||{}, lista:r.lista.map(x=>[x[0],x[1],x[7]||x[2],x[3],x[4],x[5],x[6]])}; }
+    C=C25; $('atual').textContent='Fonte: planilha de cestinhas 2025 da FBERJ · temporada encerrada · cópia do Klaus TV'+(C.fonte==='planilha'&&C.atualizado?' · atualizada em '+C.atualizado:'');
   } else { C=C26; $('atual').textContent='Fonte: planilha de cestinhas da FBERJ · cópia do Klaus TV'+(C.atualizado?' · atualizada em '+C.atualizado:''); }
   kt_cats(); kt_eqs(); kt_desenha();
 }

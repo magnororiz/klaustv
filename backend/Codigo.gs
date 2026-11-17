@@ -19,6 +19,7 @@ function doPost(e) {
   if (p.acao === 'aoVivoJogo') return responder(aoVivoJogo(p.id));
   if (p.acao === 'dadosFed') return responder(comExtras(dadosFed()));
   if (p.acao === 'dadosCestinhas') return responder(dadosCestinhas());
+  if (p.acao === 'dadosCestinhas2025') return responder(dadosCestinhas2025());
   if (p.acao === 'dadosSumulas') return responder(dadosSumulas());
   if (p.acao === 'historicoKT') return responder(historicoKT());
   if (p.acao === 'dadosClassificacao') return responder(dadosClassificacao());
@@ -546,8 +547,17 @@ function backupFBERJ() {
     sh.getRange(2, 1, c.length, CLA_CAB.length).setNumberFormat('@').setValues(c);
     det.push('Classificação: ' + c.length + ' linhas');
   } catch (err) { ok = false; det.push('Classificação: ERRO — ' + err.message); }
+  // 5) cestinhas 2025 (temporada encerrada): troca só se veio completa
+  try {
+    const l = fedLerCestinhas2025(); const sh = fedAba('FBERJ_Cestinhas2025', CES25_CAB);
+    const antes = Math.max(0, sh.getLastRow() - 1);
+    if (l.length < Math.max(500, antes * 0.8)) throw new Error('leitura veio com ' + l.length + ' atletas (antes ' + antes + '); mantive o backup anterior');
+    if (antes) sh.getRange(2, 1, antes, CES25_CAB.length).clearContent();
+    sh.getRange(2, 1, l.length, CES25_CAB.length).setNumberFormat('@').setValues(l.map(r => r.map(String)));
+    det.push('Cestinhas 2025: ' + l.length);
+  } catch (err) { ok = false; det.push('Cestinhas 2025: ERRO — ' + err.message); }
   log.appendRow([agora, ok ? 'OK' : 'COM ERRO', det.join(' | ')]);
-  fedLimparCache(); ['ces_n', 'sum_n', 'fem', 'cla_n'].forEach(k => CacheService.getScriptCache().remove(k));
+  fedLimparCache(); ['ces25_n', 'ces_n', 'sum_n', 'fem', 'cla_n'].forEach(k => CacheService.getScriptCache().remove(k));
   return { ok: ok, detalhes: det };
 }
 
@@ -750,6 +760,57 @@ function dadosCestinhas() {
   const lista = sr.getDataRange().getValues().slice(1).filter(r => r[0]).map(r => [r[0], r[1], String(r[2]), r[3], Number(r[4] || 0), Number(r[5] || 0), Number(r[6] || 0)]);
   const res = { ok: true, atualizado: fedQuando(), equipes: equipes, apelidos: mapaApelidos(), fotos: mapaFotos(), lista: lista };
   cachePut('ces', res, 3600); return res;
+}
+
+/* ================= CESTINHAS 2025 (Cestinhas_CEMB_2025.xlsx, temporada encerrada) =================
+ * Lê a última aba de cada categoria (acumulada) e guarda em FBERJ_Cestinhas2025.
+ * A planilha de 2025 não tem a sigla do time: a sigla vem pela maioria das matrículas do elenco 2026.
+ * reg2026 = matrícula de 2026 do mesmo atleta (a mesma, ou pelo nome completo) para usar foto e apelido. */
+const FED_CEST2025_ID = '17LnrFESE95ECeSMqd73CnJXcg0KP9kWM';
+const FED_FINAL25 = { 'MINIP': 'Sub-12', 'SUB13P': 'Sub-13', 'SUB14F': 'Sub-14', 'SUB15P': 'Sub-15', 'SUB16P': 'Sub-16', 'SUB17P': 'Sub-17', 'SUB19SF': 'Sub-19', 'SUB22P': 'Sub-22', 'ADULTO': 'Adulto' };
+const CES25_CAB = ['categoria', 'sigla', 'matricula', 'nome', 'total', 'tres', 'jogos', 'reg2026', 'equipe'];
+function fedNomeChave(x) { return fedNorm(x).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim(); }
+function fedLerCestinhas2025() {
+  // elenco 2026 (backup + atletas extras) para sigla e foto
+  const ss = SpreadsheetApp.openById(PLANILHA_ID); const regSig = {}; const porNome = {};
+  ['FBERJ_Atletas', 'AtletasExtras'].forEach(n => { const sh = ss.getSheetByName(n); if (!sh) return;
+    sh.getDataRange().getDisplayValues().slice(1).forEach(r => { const reg = String(r[2]).replace(/^'/, ''); if (!reg) return;
+      (regSig[reg] = regSig[reg] || {})[r[1]] = 1; const k = fedNomeChave(r[3]); if (k) (porNome[k] = porNome[k] || {})[reg] = 1; }); });
+  const tmp = fedConverterXlsx(FED_CEST2025_ID); const brutos = [];
+  try {
+    SpreadsheetApp.openById(tmp).getSheets().forEach(ws => {
+      const cat = FED_FINAL25[ws.getName().toUpperCase().trim()]; if (!cat) return;
+      const rows = ws.getDataRange().getValues();
+      for (let i = 0; i < rows.length; i++) {
+        if (fedNorm(rows[i][0]) !== 'Reg') continue;
+        let time = ''; for (let k = i - 1; k >= Math.max(0, i - 4); k--) { const t = fedNorm(rows[k][0]); if (t) { time = t; break; } }
+        const H = rows[i].map(h => typeof h === 'string' ? fedNorm(h).toLowerCase() : '');
+        const js = []; H.forEach((h, c) => { if (h.indexOf('nº de jogos') === 0) js.push(c); }); if (!js.length) continue; const j = js[js.length - 1];
+        let tc = -1, c3 = -1; for (let c = 0; c < j; c++) { if (H[c] === 'total') tc = c; if (H[c].indexOf('cestas') === 0) c3 = c; }
+        const n = x => typeof x === 'number' ? Math.round(x) : 0;
+        for (let k = i + 1; k < rows.length; k++) {
+          const r = rows[k]; const r0 = fedNorm(r[0]); if (!r0 || r0.toUpperCase() === 'TOTAL' || r[1] === '' || r[1] == null) break;
+          const reg = r0.replace(/[.,]0+$/, '').split(' ')[0]; if (!/^\d+$/.test(reg)) continue;
+          brutos.push([cat, time, reg, fedNorm(r[1]), tc >= 0 ? n(r[tc]) : 0, c3 >= 0 ? n(r[c3]) : 0, n(r[j])]);
+        }
+      }
+    });
+  } finally { try { DriveApp.getFileById(tmp).setTrashed(true); } catch (e) {} }
+  // sigla de cada time pela maioria das matrículas
+  const votos = {}; brutos.forEach(b => Object.keys(regSig[b[2]] || {}).forEach(s => { const v = votos[b[1]] = votos[b[1]] || {}; v[s] = (v[s] || 0) + 1; }));
+  const sigla = t => { const v = votos[t]; if (!v) return t; return Object.keys(v).sort((a, b) => v[b] - v[a])[0]; };
+  return brutos.map(b => { let r26 = '';
+    if (regSig[b[2]]) r26 = b[2]; else { const c = Object.keys(porNome[fedNomeChave(b[3])] || {}); if (c.length === 1) r26 = c[0]; }
+    return [b[0], sigla(b[1]), b[2], b[3], b[4], b[5], b[6], r26, b[1]]; });
+}
+function dadosCestinhas2025() {
+  const hit = cacheGet('ces25'); if (hit) return hit;
+  const ss = SpreadsheetApp.openById(PLANILHA_ID); const sh = ss.getSheetByName('FBERJ_Cestinhas2025');
+  if (!sh || sh.getLastRow() < 2) return { ok: false, erro: 'Os cestinhas de 2025 ainda não foram copiados da FBERJ.' };
+  const equipes = {}; const lista = sh.getDataRange().getDisplayValues().slice(1).filter(r => r[0]).map(r => { if (r[8]) equipes[r[1]] = r[8];
+    return [r[0], r[1], r[2], r[3], Number(r[4] || 0), Number(r[5] || 0), Number(r[6] || 0), r[7]]; });
+  const res = { ok: true, atualizado: fedQuando(), equipes: equipes, apelidos: mapaApelidos(), fotos: mapaFotos(), lista: lista };
+  cachePut('ces25', res, 3600); return res;
 }
 
 function dadosSumulas() {
