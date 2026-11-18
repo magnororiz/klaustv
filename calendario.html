@@ -174,12 +174,13 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
       <label class="fl">Fase<select id="selFase" onchange="kt_desenha()"></select></label>
       <label class="fl grande">Equipe<select id="selEq" onchange="kt_desenha()"></select></label></div>
     <p class="intro">Todos os jogos do Campeonato Estadual da FBERJ, de todas as categorias, num lugar só. Escolha a categoria e o seu time para ver data, hora e ginásio de cada jogo. Quando o Klaus TV estiver no jogo, aparece o botão <b>📊 Ao vivo</b>.</p>
-    <div class="res" id="quando"><button class="on" data-q="prox">Próximos jogos</button><button data-q="res">Resultados</button><button data-q="">Todos</button></div>
+    <div class="rodape"><div class="res" id="quando"><button class="on" data-q="prox">Próximos jogos</button><button data-q="res">Resultados</button><button data-q="">Todos</button></div><div class="fed" id="fed"></div></div>
   </div>
   <div id="conteudo"><div class="vazio">Carregando calendário...</div></div>
   <div class="atual" id="atual"></div>
 </div>
 <style>
+.rodape{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;}.rodape .fed{font-size:12.5px;color:#9fb3c8;margin-left:auto;}.rodape .fed b{color:#ffd54f;}
 .dia{display:flex;align-items:center;gap:10px;margin:22px 0 8px;font-family:'Oswald','Arial Narrow',Arial;text-transform:uppercase;letter-spacing:1px;font-size:17px;color:#ffd54f;}
 .dia small{color:#7f93a8;font-size:12px;letter-spacing:.5px;}
 .dia.hoje{color:#ff5a3c;}
@@ -258,6 +259,7 @@ function linha(j,agora){
     ${ac.length?`<div class="acoes">${ac.join('')}</div>`:''}</div>`;
 }
 function kt_desenha(){
+  const fd=$('selNaipe').value==='F'?S.fberjFem:S.fberj; $('fed').innerHTML=fd?'Atualização FBERJ: <b>'+esc(fd)+'</b>':'';
   const cat=$('selCat').value, fase=$('selFase').value, eq=$('selEq').value, agora=new Date(), hoje=new Date(agora.getFullYear(),agora.getMonth(),agora.getDate());
   let ls=jogos().filter(j=>(!cat||j.cat===cat)&&(!fase||j.fase===fase)&&(!eq||j.a===eq||j.b===eq));
   if(kt_q==='prox') ls=ls.filter(j=>!temP(j)&&(!j.dt||j.dt>=hoje)&&!/encerrada/i.test(j.obs));

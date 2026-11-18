@@ -861,7 +861,9 @@ function dadosCalendario() {
   // jogos do Klaus (estatística): categoria|nº -> [id, status]
   const kt = {}; lerJogos().forEach(j => { if (jsonOu(j.meta, {}).avulso) return; const num = String(j.jogoFed || '').split(' ')[0]; if (num) kt[j.categoria + '|' + num] = [j.id, j.status]; });
   const se = ss.getSheetByName('FBERJ_Equipes'); const equipes = {}; if (se) se.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0]) equipes[r[0]] = r[1]; });
-  const res = { ok: true, atualizado: fedQuando(), equipes: equipes, masc: masc, fem: fem, sum: sum, kt: kt };
+  // data da última alteração da planilha da própria FBERJ (Drive)
+  const dFed = id => { try { return Utilities.formatDate(DriveApp.getFileById(id).getLastUpdated(), 'America/Sao_Paulo', 'dd/MM/yyyy'); } catch (e) { return ''; } };
+  const res = { ok: true, atualizado: fedQuando(), fberj: dFed(FED_TABELA_ID), fberjFem: dFed(FED_TABELA_FEM_ID), equipes: equipes, masc: masc, fem: fem, sum: sum, kt: kt };
   cachePut('cal', res, 120); return res;
 }
 
