@@ -753,13 +753,15 @@ function cachePut(pref, obj, seg) { try { const s = JSON.stringify(obj); const p
 function cacheGet(pref) { const c = CacheService.getScriptCache(); const n = Number(c.get(pref + '_n') || 0); if (!n) return null; const p = c.getAll(Array.from({ length: n }, (_, i) => pref + '_' + i)); if (Object.keys(p).length !== n) return null; try { return JSON.parse(Array.from({ length: n }, (_, i) => p[pref + '_' + i]).join('')); } catch (e) { return null; } }
 function fedQuando() { const sl = SpreadsheetApp.openById(PLANILHA_ID).getSheetByName('FBERJ_Backup'); if (!sl || sl.getLastRow() < 2) return ''; const v = sl.getRange(2, 1, sl.getLastRow() - 1, 2).getValues().filter(r => r[1] === 'OK' || r[1] === 'COM ERRO'); const u = v[v.length - 1]; return u ? Utilities.formatDate(new Date(u[0]), 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm') : ''; }
 
+// data (dd/mm/aaaa) da última alteração de um arquivo da FBERJ no Drive
+function fedDataArquivo(id) { try { return Utilities.formatDate(DriveApp.getFileById(id).getLastUpdated(), 'America/Sao_Paulo', 'dd/MM/yyyy'); } catch (e) { return ''; } }
 function dadosCestinhas() {
   const hit = cacheGet('ces'); if (hit) return hit;
   const ss = SpreadsheetApp.openById(PLANILHA_ID); const sr = ss.getSheetByName('FBERJ_Cestinhas');
   if (!sr || sr.getLastRow() < 2) return { ok: false, erro: 'Os cestinhas ainda não foram copiados da FBERJ.' };
   const se = ss.getSheetByName('FBERJ_Equipes'); const equipes = {}; if (se) se.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0]) equipes[r[0]] = r[1]; });
   const lista = sr.getDataRange().getValues().slice(1).filter(r => r[0]).map(r => [r[0], r[1], String(r[2]), r[3], Number(r[4] || 0), Number(r[5] || 0), Number(r[6] || 0)]);
-  const res = { ok: true, atualizado: fedQuando(), equipes: equipes, apelidos: mapaApelidos(), fotos: mapaFotos(), lista: lista };
+  const res = { ok: true, atualizado: fedQuando(), fberj: fedDataArquivo(FED_CESTINHAS_ID), equipes: equipes, apelidos: mapaApelidos(), fotos: mapaFotos(), lista: lista };
   cachePut('ces', res, 3600); return res;
 }
 
@@ -810,7 +812,7 @@ function dadosCestinhas2025() {
   if (!sh || sh.getLastRow() < 2) return { ok: false, erro: 'Os cestinhas de 2025 ainda não foram copiados da FBERJ.' };
   const equipes = {}; const lista = sh.getDataRange().getDisplayValues().slice(1).filter(r => r[0]).map(r => { if (r[8]) equipes[r[1]] = r[8];
     return [r[0], r[1], r[2], r[3], Number(r[4] || 0), Number(r[5] || 0), Number(r[6] || 0), r[7]]; });
-  const res = { ok: true, atualizado: fedQuando(), equipes: equipes, apelidos: mapaApelidos(), fotos: mapaFotos(), lista: lista };
+  const res = { ok: true, atualizado: fedQuando(), fberj: fedDataArquivo(FED_CEST2025_ID), equipes: equipes, apelidos: mapaApelidos(), fotos: mapaFotos(), lista: lista };
   cachePut('ces25', res, 3600); return res;
 }
 
@@ -862,7 +864,7 @@ function dadosCalendario() {
   const kt = {}; lerJogos().forEach(j => { if (jsonOu(j.meta, {}).avulso) return; const num = String(j.jogoFed || '').split(' ')[0]; if (num) kt[j.categoria + '|' + num] = [j.id, j.status]; });
   const se = ss.getSheetByName('FBERJ_Equipes'); const equipes = {}; if (se) se.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0]) equipes[r[0]] = r[1]; });
   // data da última alteração da planilha da própria FBERJ (Drive)
-  const dFed = id => { try { return Utilities.formatDate(DriveApp.getFileById(id).getLastUpdated(), 'America/Sao_Paulo', 'dd/MM/yyyy'); } catch (e) { return ''; } };
+  const dFed = fedDataArquivo;
   const res = { ok: true, atualizado: fedQuando(), fberj: dFed(FED_TABELA_ID), fberjFem: dFed(FED_TABELA_FEM_ID), equipes: equipes, masc: masc, fem: fem, sum: sum, kt: kt };
   cachePut('cal', res, 120); return res;
 }

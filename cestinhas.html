@@ -18,6 +18,7 @@ body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding
 .fl.curto{min-width:100px;}
 .fl.grande{flex:1;min-width:220px;}
 .intro{color:#c8d4e2;font-size:14px;line-height:1.45;margin:10px 0 0 0;}
+.filtro .fed{font-size:12.5px;color:#9fb3c8;text-align:right;margin-top:8px;}.filtro .fed b{color:#ffd54f;}
 .atual{font-size:12px;color:#7f93a8;margin-top:10px;}
 .vazio{color:#9fb3c8;font-size:15px;padding:30px 10px;text-align:center;}
 .esc{width:30px;height:30px;object-fit:contain;flex:0 0 30px;}
@@ -170,6 +171,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
       <label class="fl">Ordenar por<select id="selOrd" onchange="kt_desenha()"><option value="4">Pontos</option><option value="m">Média por jogo</option><option value="5">Cestas de 3</option><option value="6">Jogos</option></select></label>
       <label class="fl grande">Buscar atleta<input id="busca" type="search" placeholder="Digite o nome..." oninput="kt_desenha()"></label></div>
     <p class="intro" id="intro">Ranking oficial de pontos do Campeonato Estadual da FBERJ, de todas as categorias. Os dados são copiados todo dia da planilha da federação para o Klaus TV, então continuam aqui mesmo depois que o campeonato acabar.</p>
+    <div class="fed" id="fed"></div>
   </div>
   <div id="conteudo"><div class="vazio">Carregando cestinhas...</div></div>
   <div class="atual" id="atual"></div>
@@ -231,9 +233,10 @@ async function kt_temp(){
       let r=await api({acao:'dadosCestinhas2025'}), fonte='planilha';
       if(!r.ok){ try{ r=await (await fetch('cestinhas2025.json')).json(); r.fotos=C26.fotos; r.apelidos=C26.apelidos; fonte='site'; }
         catch(e){ $('conteudo').innerHTML='<div class="vazio">Não foi possível carregar os cestinhas de 2025 agora.</div>'; return; } }
-      C25={ok:true, fonte:fonte, atualizado:r.atualizado||'', equipes:r.equipes, fotos:r.fotos||{}, apelidos:r.apelidos||{}, lista:r.lista.map(x=>[x[0],x[1],x[7]||x[2],x[3],x[4],x[5],x[6]])}; }
+      C25={ok:true, fonte:fonte, atualizado:r.atualizado||'', fberj:r.fberj||'', equipes:r.equipes, fotos:r.fotos||{}, apelidos:r.apelidos||{}, lista:r.lista.map(x=>[x[0],x[1],x[7]||x[2],x[3],x[4],x[5],x[6]])}; }
     C=C25; $('atual').textContent='Fonte: planilha de cestinhas 2025 da FBERJ · temporada encerrada · cópia do Klaus TV'+(C.fonte==='planilha'&&C.atualizado?' · atualizada em '+C.atualizado:'');
   } else { C=C26; $('atual').textContent='Fonte: planilha de cestinhas da FBERJ · cópia do Klaus TV'+(C.atualizado?' · atualizada em '+C.atualizado:''); }
+  $('fed').innerHTML=C.fberj?'Atualização FBERJ: <b>'+esc(C.fberj)+'</b>':'';
   kt_cats(); kt_eqs(); kt_desenha();
 }
 async function kt_init(){
