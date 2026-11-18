@@ -1611,8 +1611,8 @@ async function kt_finalizar(bt){
   bt.disabled=true; kt_msg('Finalizando o jogo…');
   const r=await kt_apiSc({acao:'salvarStats',id:KT_JOGO_ID,stats:st,status:'FINAL'}); bt.disabled=false;
   if(!r.ok){ kt_qPintar(); return alert('Não foi possível finalizar: '+(r.erro||'tente de novo')); }
-  KT_SUJO=false; KT_STATS_SALVOS=st; try{ localStorage.removeItem('kt_rasc_'+KT_JOGO_ID); }catch(e){}
-  const j=KT_MONTADOS.find(x=>x.id===KT_JOGO_ID); if(j) j.status='FINAL';
+  KT_SUJO=false; KT_STATS_SALVOS=st; try{ localStorage.removeItem('kt_rasc_'+KT_JOGO_ID); localStorage.removeItem('kt_scout_atual'); }catch(e){}
+  const j=KT_MONTADOS.find(x=>x.id===KT_JOGO_ID); if(j){ j.status='FINAL'; kt_listarAnteriores(j); }
   KT_TRAVADO=true; KT_SNAP=null; kt_pintarTrava(); kt_qPintar();
   const o=document.querySelector('#ktSelJogo option[value="'+KT_JOGO_ID+'"]'); if(o&&j) o.textContent=kt_rotuloJM(j);
   kt_msg('🏁 Jogo finalizado'+(r.placar?' · placar final '+r.placar[0]+' x '+r.placar[1]:'')+'. O Ao vivo já mostra JOGO FINALIZADO.');
@@ -1639,7 +1639,7 @@ function kt_desfazer(){ if(!KT_SNAP) return; if(!confirm('Voltar todos os númer
 function kt_listarAnteriores(atual){
   if(atual) KT_ANT_REF=atual; const ref=KT_ANT_REF||{};
   const sc=document.getElementById('ktSelAntCat'), sel=document.getElementById('ktSelAnt');
-  const enc=KT_MONTADOS.filter(j=>kt_encerrado(j) && j.id!==KT_JOGO_ID);
+  const enc=KT_MONTADOS.filter(j=>kt_encerrado(j) && (j.id!==KT_JOGO_ID || j.status==='FINAL')); // o jogo aberto entra quando já foi finalizado
   const cats=[...new Set(enc.map(j=>j.categoria).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
   const antes=sc.value;
   sc.innerHTML=cats.length?cats.map(c=>'<option value="'+c.replace(/"/g,'&quot;')+'">'+c.replace(/</g,'&lt;')+'</option>').join(''):'<option value="">Categoria</option>';

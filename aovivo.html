@@ -75,6 +75,8 @@ body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding
 .placar .x{font-size:40px;font-weight:800;color:#9aa5b5;text-align:center;}
 .parcial{background:#fff;color:#111;display:flex;justify-content:center;align-items:center;gap:16px;padding:4px 10px 12px 10px;border-top:1px solid #eef0f3;}
 .parcial .pt{font-size:13px;color:#555;font-weight:700;}
+.parcial .encerr{background:#c0392b;color:#fff;font-size:14px;font-weight:800;letter-spacing:.5px;padding:5px 12px;border-radius:6px;white-space:nowrap;}
+@media(max-width:520px){.parcial{flex-wrap:wrap;gap:8px;}}
 .parcial table{border-collapse:collapse;font-size:13px;}
 .parcial th{font-size:11px;color:#666;padding:3px 10px;font-weight:700;}
 .parcial td{padding:3px 10px;text-align:center;font-weight:800;border-top:1px solid #eef0f3;}
@@ -353,6 +355,7 @@ async function kt_lista(abrir,silencio){
   if(!kt_jogos.length){ sel.innerHTML='<option value="">Nenhum jogo do '+cat+' por enquanto</option>'; $('jogo').innerHTML=''; return; }
   sel.innerHTML='<option value="">— escolha o jogo ('+kt_jogos.length+') —</option>'+kt_jogos.map(j=>`<option value="${j.id}">${esc(kt_rotulo(j))}</option>`).join('');
   if(kt_atual && kt_jogos.some(j=>j.id===kt_atual)) sel.value=kt_atual;
+  if(silencio && kt_atual){ const ja=kt_jogos.find(j=>j.id===kt_atual); if(ja && status(ja)==='final' && KT_ULT_ST && KT_ULT_ST!=='final') kt_carregar(); } // acabou de ser encerrado: redesenha com JOGO ENCERRADO
   if(abrir) kt_abrir(abrir);
   else if(!kt_atual && !silencio){ const v=kt_jogos.find(j=>status(j)==='vivo'); if(v) kt_abrir(v.id); }
 }
@@ -397,7 +400,8 @@ function abrev(n){ const w=String(n||'').trim().split(/\s+/); const core=w.map((
 function soma(js,k){ return js.reduce((s,p)=>s+(+p[k]||0),0); }
 function pct(m,a){ return a?Math.round(m*100/a):0; }
 function kt_bolaLetra(l,c){ return 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="'+c+'" stroke="#fff" stroke-width="5"/><text x="50" y="68" font-family="Arial Black,Arial" font-weight="900" font-size="52" fill="#fff" text-anchor="middle">'+l+'</text></svg>'); }
-function kt_render(j){
+let KT_ULT_ST='';
+function kt_render(j){ KT_ULT_ST=status(j);
   KT_ULT=j;
   const m=j.meta||{}, A=m.timeA||{}, B=m.timeB||{}, sa=A.sigla, sb=B.sigla;
   if(m.avulso){ [[sa,'A','#1e5bd8',A],[sb,'B','#e8590c',B]].forEach(([s,l,c,tm])=>{ if(!s || tm.fed) return; D.escudos[s]=tm.escudo||kt_bolaLetra(l,c); D.cores[s]=[c,'#ffffff']; if(!D.equipes[s]) D.equipes[s]=s; }); }
@@ -451,7 +455,7 @@ function kt_render(j){
   const per=(j.stats||{}).periodos||{};
   const qv=(l,i)=>{ const v=(per[l]||[])[i]; return (v===undefined||v===null||v==='')?'—':v; };
   const temOT=['A','B'].some(l=>{ const v=(per[l]||[])[4]; return v!==undefined&&v!==null&&v!==''; }); const QI=temOT?[0,1,2,3,4]:[0,1,2,3];
-  const parcial=`<div class="parcial"><div class="pt cond">Placar parcial</div><table><tr><th></th><th>1º Q</th><th>2º Q</th><th>3º Q</th><th>4º Q</th>${temOT?'<th title="Prorrogação">OT</th>':''}</tr>
+  const parcial=`<div class="parcial">${status(j)==='final'?'<div class="encerr cond">🏁 JOGO ENCERRADO</div><div class="pt cond">Placar final</div>':'<div class="pt cond">Placar parcial</div>'}<table><tr><th></th><th>1º Q</th><th>2º Q</th><th>3º Q</th><th>4º Q</th>${temOT?'<th title="Prorrogação">OT</th>':''}</tr>
     <tr><td class="tn">${esc(D.curto[sa]||sa)}</td>${QI.map(i=>`<td>${qv('A',i)}</td>`).join('')}</tr>
     <tr><td class="tn">${esc(D.curto[sb]||sb)}</td>${QI.map(i=>`<td>${qv('B',i)}</td>`).join('')}</tr></table></div>`;
   const antes={}, valAntes={};
@@ -471,7 +475,7 @@ function kt_render(j){
      <div class="box comp"><div class="cab" style="justify-content:space-between;"><span style="display:flex;gap:8px;align-items:center;"><img src="${escudo(sa)}" alt="">${esc(D.curto[sa]||sa)}</span><span style="display:flex;gap:8px;align-items:center;">${esc(D.curto[sb]||sb)}<img src="${escudo(sb)}" alt=""></span></div><table>${comp}</table></div>
      <div class="box lid">${lider}</div>
    </div>`:'<div class="box" id="abaC">'+kt_abaHTML(j,ja,jb)+'</div>'}
-   <div class="atual">${status(j)==='vivo'?'🔴 Atualizando ao vivo · ':''}Atualizado às ${new Date().toLocaleTimeString('pt-BR')}</div>`;
+   <div class="atual">${status(j)==='vivo'?'🔴 Atualizando ao vivo · ':(status(j)==='final'?'🏁 Jogo encerrado · ':'')}Atualizado às ${new Date().toLocaleTimeString('pt-BR')}</div>`;
   if(typeof kt_mapaFooter==='function') kt_mapaFooter(j.ginasio||m.ginasio||'');
   document.querySelectorAll('#jogo table.jog .c-'+KT_ORD).forEach(e=>e.classList.add('ordOn'));
   if(Object.keys(antes).length){
