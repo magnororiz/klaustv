@@ -75,6 +75,7 @@ body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding
 .placar .x{font-size:40px;font-weight:800;color:#9aa5b5;text-align:center;}
 .parcial{background:#fff;color:#111;display:flex;justify-content:center;align-items:center;gap:16px;padding:4px 10px 12px 10px;border-top:1px solid #eef0f3;}
 .parcial .pt{font-size:13px;color:#555;font-weight:700;}
+.ktBaixar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0 4px;}.ktBaixar button{background:#1e5bd8;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;padding:12px 18px;width:280px;max-width:46%;cursor:pointer;}.ktBaixar button:hover{background:#2b6cf0;}.ktBaixar button:disabled{opacity:.6;cursor:wait;}@media(max-width:560px){.ktBaixar button{max-width:100%;width:100%;}}
 .parcial .encerr{background:#c0392b;color:#fff;font-size:14px;font-weight:800;letter-spacing:.5px;padding:5px 12px;border-radius:6px;white-space:nowrap;}
 @media(max-width:520px){.parcial{flex-wrap:wrap;gap:8px;}}
 .parcial table{border-collapse:collapse;font-size:13px;}
@@ -401,6 +402,10 @@ function soma(js,k){ return js.reduce((s,p)=>s+(+p[k]||0),0); }
 function pct(m,a){ return a?Math.round(m*100/a):0; }
 function kt_bolaLetra(l,c){ return 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="'+c+'" stroke="#fff" stroke-width="5"/><text x="50" y="68" font-family="Arial Black,Arial" font-weight="900" font-size="52" fill="#fff" text-anchor="middle">'+l+'</text></svg>'); }
 let KT_ULT_ST='';
+async function kt_baixar(tipo,bt){ const j=KT_ULT; if(!j||!window.KTSumula) return; const m=j.meta||{};
+  const nomeTime=t=>{ const tm=m['time'+t]||{}; return m.avulso?(tm.nome||tm.sigla||'Time '+t):(D.curto[tm.sigla]||tm.nome||tm.sigla||'Time '+t); };
+  const txt=bt.textContent; bt.disabled=true; bt.textContent='Gerando…';
+  try{ await KTSumula.exportar(tipo,j,{nomeTime,apelidos:KT_AP||{}}); } finally { bt.disabled=false; bt.textContent=txt; } }
 function kt_render(j){ KT_ULT_ST=status(j);
   KT_ULT=j;
   const m=j.meta||{}, A=m.timeA||{}, B=m.timeB||{}, sa=A.sigla, sb=B.sigla;
@@ -475,7 +480,8 @@ function kt_render(j){ KT_ULT_ST=status(j);
      <div class="box comp"><div class="cab" style="justify-content:space-between;"><span style="display:flex;gap:8px;align-items:center;"><img src="${escudo(sa)}" alt="">${esc(D.curto[sa]||sa)}</span><span style="display:flex;gap:8px;align-items:center;">${esc(D.curto[sb]||sb)}<img src="${escudo(sb)}" alt=""></span></div><table>${comp}</table></div>
      <div class="box lid">${lider}</div>
    </div>`:'<div class="box" id="abaC">'+kt_abaHTML(j,ja,jb)+'</div>'}
-   <div class="atual">${status(j)==='vivo'?'🔴 Atualizando ao vivo · ':(status(j)==='final'?'🏁 Jogo encerrado · ':'')}Atualizado às ${new Date().toLocaleTimeString('pt-BR')}</div>`;
+   <div class="atual">${status(j)==='vivo'?'🔴 Atualizando ao vivo · ':(status(j)==='final'?'🏁 Jogo encerrado · ':'')}Atualizado às ${new Date().toLocaleTimeString('pt-BR')}</div>
+   ${status(j)!=='breve'?`<div class="ktBaixar"><button type="button" onclick="kt_baixar('pdf',this)">📄 Baixar PDF do jogo</button><button type="button" onclick="kt_baixar('img',this)">🖼️ Baixar imagem para WhatsApp</button></div>`:''}`;
   if(typeof kt_mapaFooter==='function') kt_mapaFooter(j.ginasio||m.ginasio||'');
   document.querySelectorAll('#jogo table.jog .c-'+KT_ORD).forEach(e=>e.classList.add('ordOn'));
   if(Object.keys(antes).length){
@@ -712,5 +718,6 @@ async function kt_appInstalar(){ if(!kt_appPrompt) return; kt_appPrompt.prompt()
   if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 })();
 </script>
+<script src="sumula.js"></script>
 </body>
 </html>
