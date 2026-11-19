@@ -1399,7 +1399,7 @@ if(win){
 <div id="ktPremLista"></div>
 <button type="button" onclick="kt_premLinha()">➕ Adicionar prêmio</button></div>
 <div class="ktFimBt"><button type="button" onclick="kt_exportar('pdf')">📄 Baixar PDF do jogo</button><button type="button" onclick="kt_exportar('img')">🖼️ Baixar imagem para WhatsApp</button></div>
-<div id="ktSumula"></div>
+<div id="ktSumula"></div><script src="sumula.js"></script>
 </div><!--/ktFimJogo-->
 <!--ktJMjs--><script>
 const KT_API_SC='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
@@ -1481,7 +1481,7 @@ async function kt_abrirMontado(id,restaurando){
   KT_JOGO_ID=id;
   try{ localStorage.setItem('kt_scout_atual',JSON.stringify({id,ts:Date.now()})); }catch(e){}
   kt_msg(rasc?(restaurando?'🔄 Jogo recuperado depois de atualizar a página — os números da tela foram mantidos.':'🔄 Números da tela recuperados deste aparelho.'):((st.A||st.B)?'Jogo aberto com os números salvos na planilha.':''));
-  KT_RASC_PREM=rasc&&rasc.prem||null;
+  KT_RASC_PREM=(rasc&&rasc.prem)||kt_premDaPlanilha(st.prem)||null;
   KT_SUJO=!!rasc;
   if(KT_LEITURA){ KT_SUJO=false; kt_lerLoop(); } else if(!KT_DONO_TS){ const ed=st.editor; KT_DONO_TS=(ed&&ed.dev===KT_DEV)?(+ed.ts||Date.now()):Date.now(); }
   kt_listarAnteriores(j);
@@ -1498,6 +1498,7 @@ function kt_statsDaTela(){
   out.periodos={A:[],B:[]};
   ['A','B'].forEach(t=>{ for(let q=1;q<=5;q++){ const v=document.getElementById('ktQ'+t+q).value; out.periodos[t].push(v===''?null:Math.max(0,parseInt(v)||0)); } });
   out.qFech=KT_QF;
+  try{ const nomes=kt_premNomes(); out.prem=[...document.querySelectorAll('.ktPremL')].filter(l=>!l.dataset.extra).map(l=>{ const pv=l.querySelector('.pP').value; const k=l.querySelector('.pJ').value; const mt=/^([AB])-(\d+)$/.exec(k); return [pv,k,l.querySelector('.pJ').dataset.manual||'',nomes[+pv]||'',mt?(KT_REGS[mt[1]][+mt[2]]||''):'']; }); }catch(e){}
   return out;
 }
 async function kt_enviarAuto(){
@@ -1666,14 +1667,14 @@ function kt_desenharAnterior(){
     const totL=KT_ANT_EDIT?'':'<tr class="tot"><td colspan="2">TOTAL</td><td>'+tot.pts+'</td><td>'+kt_pctF(tot.twoMade,tot.twoMiss)+'</td><td>'+kt_pctF(tot.threeMade,tot.threeMiss)+'</td><td>'+kt_pctF(tot.ftMade,tot.ftMiss)+'</td><td>'+tot.reb+'</td><td>'+tot.ast+'</td><td>'+tot.stl+'</td><td>'+tot.blk+'</td><td>'+tot.to+'</td><td>'+tot.foul+'</td><td>'+tot.eff+'</td></tr>';
     return '<div class="ktAntBox"><h3>'+kt_nomeTime(Object.assign({avulso:m.avulso},tm)).replace(/</g,'&lt;')+' · '+tot.pts+'</h3><table>'+cab+linhas+totL+'</table></div>'; };
   box.innerHTML='<div class="ktAntCab">📚 Jogo anterior'+(KT_ANT_EDIT?' — editando':'')+'<small>'+data+' · '+kt_rotuloJM(j).replace(/^[^·]*· /,'').replace(/</g,'&lt;')+'</small></div><div class="ktAntGrid">'+tab('A')+tab('B')+'</div>'+
-    (KT_ANT_EDIT?'<div class="ktAntBt"><button type="button" onclick="kt_salvarAnterior()">💾 Salvar alterações do jogo anterior</button> <button type="button" style="background:#7f8c8d" onclick="kt_verAnterior(KT_ANT.id)">↩️ Desfazer alterações</button>'+' <button type="button" style="background:#c0392b" onclick="kt_excluirAnterior(this)">Excluir jogo anterior</button>'+((KT_MONTADOS.find(x=>x.id===KT_ANT.id)||{}).status==='FINAL'?' <button type="button" style="background:#8e44ad" onclick="kt_reabrirJogo(KT_ANT.id)">Reabrir jogo</button>':'')+'</div>':'');
+    (KT_ANT_EDIT?'<div class="ktAntBt"><button type="button" onclick="kt_salvarAnterior()">💾 Salvar alterações do jogo anterior</button> <button type="button" style="background:#7f8c8d" onclick="kt_verAnterior(KT_ANT.id)">↩️ Desfazer alterações</button>'+' <button type="button" style="background:#c0392b" onclick="kt_excluirAnterior(this)">Excluir jogo anterior</button>'+((KT_MONTADOS.find(x=>x.id===KT_ANT.id)||{}).status==='FINAL'?' <button type="button" style="background:#8e44ad" onclick="kt_reabrirJogo(KT_ANT.id)">Reabrir jogo</button>':'')+'</div>':'<div class="ktAntBt"><button type="button" onclick="kt_exportarJogo(KT_ANT.id,\'pdf\')">📄 Baixar PDF do jogo</button> <button type="button" onclick="kt_exportarJogo(KT_ANT.id,\'img\')">🖼️ Baixar imagem para WhatsApp</button></div>');
   if(KT_ANT_EDIT) box.querySelectorAll('input').forEach(i=>i.oninput=()=>{ const S=KT_ANT.stats[i.dataset.t]; S[i.dataset.r]=Object.assign({},KT_ZERO,S[i.dataset.r]||{}); S[i.dataset.r][i.dataset.c]=Math.max(0,parseInt(i.value)||0); const tr=i.closest('tr'); const s=kt_calc(S[i.dataset.r]); const b=tr.querySelectorAll('td b'); b[0].textContent=s.pts; b[1].textContent=s.eff; });
 }
 async function kt_verAnterior(id){
   KT_ANT_EDIT=false; if(!id){ KT_ANT=null; kt_desenharAnterior(); return; }
   const base=KT_MONTADOS.find(x=>x.id===id);
   const r=await kt_apiSc({acao:'aoVivoJogo',id});
-  KT_ANT=Object.assign({},base,r.ok&&r.jogo?{meta:r.jogo.meta||base.meta,stats:r.jogo.stats||{}}:{stats:{}});
+  KT_ANT=Object.assign({},base,r.ok&&r.jogo?{meta:r.jogo.meta||base.meta,stats:r.jogo.stats||{},apelidos:r.apelidos||{}}:{stats:{}});
   kt_desenharAnterior(); document.getElementById('ktAnterior').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function kt_editarAnterior(){
@@ -1702,6 +1703,8 @@ async function kt_salvarAnterior(){
 }
 kt_listarMontados().then(()=>kt_restaurar());
 /* ---------- Prêmios do jogo ---------- */
+function kt_premDaPlanilha(pr){ if(!Array.isArray(pr)||!pr.length) return null;
+  return pr.map(x=>{ let pv=String(x[0]); if(+pv>=6 && x[3]){ const ex=kt_premExtras(); if(!ex.includes(x[3])){ ex.push(x[3]); try{ localStorage.setItem('klaustv_premios_v1',JSON.stringify(ex)); }catch(e){} } pv=String(6+kt_premExtras().indexOf(x[3])); } return [pv,x[1]||'',x[2]||'']; }); }
 const KT_PREM_BASE=['MVP do jogo','Cestinha do jogo','Reboteiro do jogo','Defensor do jogo','Destaque do Time A','Destaque do Time B'];
 function kt_premExtras(){ try{ return JSON.parse(localStorage.getItem('klaustv_premios_v1')||'[]'); }catch(e){ return []; } }
 function kt_premNomes(){ const ta=document.getElementById('titleA').innerText.trim()||'Time A', tb=document.getElementById('titleB').innerText.trim()||'Time B';
@@ -1750,51 +1753,19 @@ if(typeof atualizarTotaisEquipe==='function'){ const _atz=atualizarTotaisEquipe;
 /* ---------- PDF e imagem ---------- */
 function kt_carregarLib(src){ return new Promise((ok,erro)=>{ if(document.querySelector('script[src="'+src+'"]')) return ok(); const e=document.createElement('script'); e.src=src; e.onload=ok; e.onerror=erro; document.head.appendChild(e); }); }
 function kt_esc2(x){ return String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-function kt_montarSumula(){
-  const j=KT_MONTADOS.find(x=>x.id===KT_JOGO_ID)||{}; const m=j.meta||{};
-  const tn=t=>document.getElementById('title'+t).innerText.trim()||('Time '+t);
-  const js=kt_jogadores(); const tot=t=>js.filter(p=>p.t===t).reduce((a,p)=>a+(+p.s.pts||0),0);
-  const dt=String(j.dataHora||''); const data=dt?dt.slice(8,10)+'/'+dt.slice(5,7)+'/'+dt.slice(0,4)+(dt.length>11?' às '+dt.slice(11,16):''):new Date().toLocaleDateString('pt-BR');
-  const fr=(mk,ms)=>mk+'/'+(mk+ms);
-  const tab=t=>{ const ps=js.filter(p=>p.t===t).sort((a,b)=>(+b.s.pts||0)-(+a.s.pts||0)||(+b.s.eff||0)-(+a.s.eff||0));
-    const sum=k=>ps.reduce((a,p)=>a+(+p.s[k]||0),0);
-    return '<div class="sT">'+kt_esc2(tn(t))+'</div><table><tr><th>#</th><th class="l">Jogador</th><th>PTS</th><th>2P</th><th>3P</th><th>LL</th><th>REB</th><th>AST</th><th>ROU</th><th>TOC</th><th>ERR</th><th>FP</th><th>EF</th></tr>'+
-    ps.map(p=>{ const s=p.s; return '<tr><td>'+kt_esc2(p.num)+'</td><td class="l">'+kt_esc2(p.nome)+'</td><td><b>'+(+s.pts||0)+'</b></td><td>'+fr(+s.twoMade||0,+s.twoMiss||0)+'</td><td>'+fr(+s.threeMade||0,+s.threeMiss||0)+'</td><td>'+fr(+s.ftMade||0,+s.ftMiss||0)+'</td><td>'+(+s.reb||0)+'</td><td>'+(+s.ast||0)+'</td><td>'+(+s.stl||0)+'</td><td>'+(+s.blk||0)+'</td><td>'+(+s.to||0)+'</td><td>'+(+s.foul||0)+'</td><td><b>'+(+s.eff||0)+'</b></td></tr>'; }).join('')+
-    '<tr class="tot"><td colspan="2" class="l">Total</td><td>'+sum('pts')+'</td><td>'+fr(sum('twoMade'),sum('twoMiss'))+'</td><td>'+fr(sum('threeMade'),sum('threeMiss'))+'</td><td>'+fr(sum('ftMade'),sum('ftMiss'))+'</td><td>'+sum('reb')+'</td><td>'+sum('ast')+'</td><td>'+sum('stl')+'</td><td>'+sum('blk')+'</td><td>'+sum('to')+'</td><td>'+sum('foul')+'</td><td>'+sum('eff')+'</td></tr></table>'; };
-  const nomes=kt_premNomes(); const prem=[...document.querySelectorAll('.ktPremL')].map(l=>{ const p=nomes[+l.querySelector('.pP').value]; const k=l.querySelector('.pJ').value; const pl=js.find(x=>x.k===k); return (p&&pl)?{p,pl}:null; }).filter(Boolean);
-  const premHtml=prem.length?'<div class="sT">🏆 Destaques do jogo</div><div class="prem">'+prem.map(x=>'<div><span>'+kt_esc2(x.p)+'</span><b>'+kt_esc2(x.pl.nome)+'</b><small>'+kt_esc2(x.pl.tn)+'</small></div>').join('')+'</div>':'';
-  const info=[j.categoria, data, j.ginasio||m.ginasio, j.jogoFed?'Jogo FBERJ nº '+j.jogoFed:''].filter(Boolean).map(kt_esc2).join(' · ');
-  const fin=j.status==='FINAL';
-  const qv=(t,q)=>{ const v=document.getElementById('ktQ'+t+q); return v?v.value:''; };
-  const temOT=qv('A',5)!==''||qv('B',5)!=='';
-  const QQ=temOT?[1,2,3,4,5]:[1,2,3,4];
-  const temQ=QQ.some(q=>qv('A',q)!==''||qv('B',q)!=='');
-  const qzHtml=temQ?'<table class="qz"><tr><th class="l">Placar parcial</th>'+QQ.map(q=>'<th>'+(q===5?'OT':q+'º Q')+'</th>').join('')+'<th>Final</th></tr>'+['A','B'].map(t=>'<tr><td class="l">'+kt_esc2(tn(t))+'</td>'+QQ.map(q=>'<td>'+(qv(t,q)===''?'—':kt_esc2(qv(t,q)))+'</td>').join('')+'<td><b>'+tot(t)+'</b></td></tr>').join('')+'</table>':'';
-  const el=document.getElementById('ktSumula');
-  el.innerHTML='<div id="ktSumBox"><style>#ktSumBox .stJ{display:inline-block;margin-top:6px;padding:3px 12px;border-radius:12px;background:#fff3cd;color:#8a6100;font-size:12px;font-weight:900;letter-spacing:1px}#ktSumBox .stJ.fin{background:#e7e9ee;color:#333}#ktSumBox table.qz{width:auto;margin:14px auto 4px;border-collapse:collapse;font-size:14px}#ktSumBox table.qz th,#ktSumBox table.qz td{border:1px solid #c9d3e3;padding:5px 14px;text-align:center;width:auto!important;min-width:44px}#ktSumBox table.qz th{background:#1e5bd8;color:#fff}#ktSumBox table.qz .l{text-align:left;font-weight:700}#ktSumBox{width:1000px;background:#fff;color:#111;font-family:Arial,sans-serif;padding:26px 30px;box-sizing:border-box}#ktSumBox .cab{display:flex;align-items:center;gap:18px;border-bottom:4px solid #1e5bd8;padding-bottom:14px}#ktSumBox .cab img{height:96px}#ktSumBox .pl{flex:1;text-align:center}#ktSumBox .pl .t{display:flex;align-items:center;justify-content:center;gap:18px;font-weight:900;font-size:24px}#ktSumBox .pl .n{font-size:54px;color:#1e5bd8;font-family:Oswald,Arial}#ktSumBox .pl .x{font-size:26px;color:#999}#ktSumBox .inf{color:#555;font-size:14px;margin-top:6px}#ktSumBox .sT{background:#1e5bd8;color:#fff;font-weight:800;font-size:17px;padding:7px 12px;margin-top:18px;border-radius:6px 6px 0 0}#ktSumBox table{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:fixed}#ktSumBox th:first-child{width:38px}#ktSumBox th:nth-child(2){width:300px}#ktSumBox th{background:#e8eefb;color:#1a2c55;padding:6px 4px;font-size:12px}#ktSumBox td{padding:5px 4px;text-align:center;border-bottom:1px solid #e4e7ec}#ktSumBox .l{text-align:left}#ktSumBox tr.tot td{background:#0d1a33;color:#ffd54f;font-weight:800}#ktSumBox .prem{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;background:#fff8e1;border:1px solid #ffd54f;border-top:none}#ktSumBox .prem div{display:flex;flex-direction:column;background:#fff;border-radius:8px;padding:8px 10px;border:1px solid #f0e2a8}#ktSumBox .prem span{font-size:12px;color:#8a6d00;font-weight:700;text-transform:uppercase}#ktSumBox .prem b{font-size:15px}#ktSumBox .prem small{color:#666}#ktSumBox .rod{margin-top:18px;border-top:2px solid #e4e7ec;padding-top:10px;display:flex;justify-content:space-between;color:#555;font-size:13px}</style>'+
-   '<div class="cab"><img src="logo_klaustv_tv.png" alt=""><div class="pl"><div class="t"><span>'+kt_esc2(tn('A'))+'</span><span class="n">'+tot('A')+'</span><span class="x">x</span><span class="n">'+tot('B')+'</span><span>'+kt_esc2(tn('B'))+'</span></div><div class="inf">'+info+'</div><div class="stJ'+(fin?' fin':'')+'">'+(fin?'JOGO FINALIZADO':'JOGO EM ANDAMENTO · placar parcial')+'</div></div></div>'+qzHtml+
-   tab('A')+tab('B')+premHtml+'<div class="rod"><span>📸 @basquete.rj</span><span>💬 (21) 99809-2305</span><span>🌐 klaustv.com</span></div></div>';
-  return {el:document.getElementById('ktSumBox'), nome:('KlausTV '+tn('A')+' x '+tn('B')+' '+data.slice(0,10)).replace(/[\/\\:*?"<>|]+/g,'-')};
+// PDF/imagem de qualquer jogo (gerador único em sumula.js, o mesmo das Estatísticas ao vivo)
+function kt_optsSumula(j,apelidos){ const m=j.meta||{}; return {nomeTime:t=>kt_nomeTime(Object.assign({avulso:m.avulso},m['time'+t]||{})), apelidos:apelidos||{}}; }
+async function kt_exportarJogo(id,tipo){ // jogo anterior: usa os dados salvos na planilha
+  if(!id) return; let j=(KT_ANT&&KT_ANT.id===id)?KT_ANT:null;
+  if(!j){ const base=KT_MONTADOS.find(x=>x.id===id)||{}; const r=await kt_apiSc({acao:'aoVivoJogo',id}); if(!r.ok||!r.jogo) return alert('Não foi possível abrir o jogo agora.'); j=Object.assign({},base,{meta:r.jogo.meta||base.meta,stats:r.jogo.stats||{},apelidos:r.apelidos||{}}); }
+  kt_msg('Gerando '+(tipo==='pdf'?'o PDF':'a imagem')+'…');
+  if(await KTSumula.exportar(tipo,j,kt_optsSumula(j,j.apelidos))) kt_msg((tipo==='pdf'?'📄 PDF':'🖼️ Imagem')+' do jogo anterior gerado.');
 }
-async function kt_exportar(tipo){
-  try{
-    await kt_carregarLib('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
-    if(tipo==='pdf') await kt_carregarLib('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-  }catch(e){ alert('Não foi possível carregar o gerador. Confira a internet e tente de novo.'); return; }
-  const r=kt_montarSumula();
-  const cv=await html2canvas(r.el,{scale:2,backgroundColor:'#ffffff',useCORS:true});
-  if(tipo==='img'){
-    cv.toBlob(async b=>{ const f=new File([b],r.nome+'.png',{type:'image/png'});
-      if(navigator.canShare && navigator.canShare({files:[f]}) && /Android|iPhone|iPad/i.test(navigator.userAgent)){ try{ await navigator.share({files:[f],title:r.nome}); return; }catch(e){} }
-      const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=r.nome+'.png'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); },'image/png');
-  } else {
-    const {jsPDF}=window.jspdf; const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    const W=200, H=cv.height*W/cv.width, pg=285; const img=cv.toDataURL('image/jpeg',0.92);
-    if(H<=pg) pdf.addImage(img,'JPEG',5,5,W,H);
-    else { let y=0; while(y<H){ pdf.addImage(img,'JPEG',5,5-y,W,H); y+=pg; if(y<H) pdf.addPage(); } }
-    pdf.save(r.nome+'.pdf');
-  }
-  document.getElementById('ktSumula').innerHTML='';
+async function kt_exportar(tipo){ // jogo aberto na tela
+  if(!KT_JOGO_ID) return alert('Escolha primeiro o jogo montado.');
+  const j=Object.assign({},KT_MONTADOS.find(x=>x.id===KT_JOGO_ID)||{}); j.stats=kt_statsDaTela(); const dh=document.getElementById('ktDataJogo').value; if(dh) j.dataHora=dh;
+  const ap={}; ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const r=KT_REGS[t][i], inf=(KT_INFO[t]||[])[i]; if(r&&inf&&inf.apelido) ap[r]=inf.apelido; } });
+  await KTSumula.exportar(tipo,j,kt_optsSumula(j,ap));
 }
 </script><!--/ktJMjs-->
 
