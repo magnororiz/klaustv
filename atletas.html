@@ -133,7 +133,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .atCorpo{background:linear-gradient(135deg,#eef3f8,#e2e9f1);color:#111;padding:22px;border-radius:0 0 14px 14px;}
 .atTopo{display:grid;grid-template-columns:1fr 230px;gap:24px;align-items:start;}
 .atNm{font:400 50px 'Oswald','Arial Narrow',Arial;line-height:1.05;margin:4px 0 14px;}.atNm b{font-weight:700;}.atNm small{display:block;font-size:15px;color:#555;letter-spacing:.5px;font-family:Arial,sans-serif;margin-top:4px;}
-.atCards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.atCards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 .atCard{background:linear-gradient(#3a3a3a,#262626);color:#fff;border-radius:16px;text-align:center;padding:14px 8px 12px;box-shadow:0 4px 10px rgba(0,0,0,.25);}
 .atCard span{display:block;font:700 15px 'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;}
 .atCard b{display:block;font:700 50px 'Oswald','Arial Narrow',Arial;line-height:1.05;}.atCard small{font-size:11px;color:#bbb;}
@@ -327,13 +327,13 @@ function kt_premios(R,reg){ const o={mvp:[],ces:[],def:[],dest:[],d2:[],d3:[],d4
   return o; }
 function kt_perfil(s,cat,reg,nome,js,m,R){
   const q=js.length;
-  const cards=[['pts','Pontos'],['reb','Rebotes'],['ast','Assistências'],['eff','Eficiência']].map(([k,n])=>`<div class="atCard"><span>${n}</span><b>${f1(m[k])}</b><small>média por jogo</small></div>`).join('');
+  const cards=[['pts','Pontos'],['reb','Rebotes'],['ast','Assistências'],['stl','Roubos de bola'],['blk','Tocos'],['eff','Eficiência']].map(([k,n])=>`<div class="atCard"><span>${n}</span><b>${f1(m[k])}</b><small>média por jogo</small></div>`).join('');
   const ficha=[['Nome',esc(nome),'Equipe',`${esc(nomeT(s,FED.equipes))}`],['Apelido',esc(ap(reg)||'—'),'Categoria',esc(cat)],['Matrícula FBERJ',esc(reg),'Jogos narrados',q+' em '+ANO]]
     .map(r=>`<tr><td class="k">${r[0]}</td><td class="v">${r[1]}</td><td class="k">${r[2]}</td><td class="v">${r[3]}</td></tr>`).join('');
   // média da equipe: média das médias dos atletas do mesmo time na categoria, com jogo narrado
   const comp=elenco(cat,s).map(([r])=>kt_jogosDe(R,r)).filter(x=>x.length).map(kt_med);
   const eq={}; ['pts','reb','ast','threeMade','twoMade','ftMade','eff'].forEach(k=>eq[k]=comp.length?comp.reduce((t,x)=>t+x[k],0)/comp.length:0);
-  const recs=[['pts','PTS','Pontos'],['reb','REB','Rebotes'],['ast','AST','Assistências'],['stl','ROU','Roubos de bola'],['blk','TOC','Tocos'],['threeMade','3PC','Cestas de 3 certas'],['twoMade','2PC','Cestas de 2 certas'],['ftMade','LLC','Lances livres certos']].map(([k,s2,t])=>{
+  const recs=[['pts','PTS','Pontos'],['reb','REB','Rebotes'],['ast','AST','Assistências'],['stl','ROU','Roubos de bola'],['blk','TOC','Tocos'],['threeMade','3PC','Cestas de 3 certas'],['twoMade','2PC','Cestas de 2 certas'],['ftMade','LLC','Lances livres certos'],['eff','EF','Eficiência']].map(([k,s2,t])=>{
     const mx=Math.max(...js.map(j=>j.s[k])); if(!(mx>0)) return ''; // sem recorde: não aparece
     const qs=js.filter(j=>j.s[k]===mx);
     return `<div class="rec" title="${t}"><div class="n"><b>${mx}</b><span>${s2}</span></div><div class="t">${qs.length>1?`<b>em ${qs.length} partidas</b><span>${qs.map(j=>dataBR(j.d).slice(0,5)).join(' · ')}</span>`:`<b>VS. <img src="${escUrl(qs[0].opp)}" alt="">${esc(nomeT(qs[0].opp,FED.equipes))}</b><span>${dataBR(qs[0].d)}</span>`}</div></div>`; }).join('');
