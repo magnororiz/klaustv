@@ -41,7 +41,7 @@
 html,body{margin:0;height:100%;background:transparent;color:#fff;font-family:Arial,Helvetica,sans-serif;overflow:hidden;}
 body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::before{content:'(aqui aparece a imagem da câmera do Klaus)';position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font:700 22px Arial;color:rgba(255,255,255,.18);}
 .palco{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,177.78vh);aspect-ratio:16/9;overflow:hidden;}
-.qd{position:absolute;left:50%;bottom:-2.3%;transform:translateX(-50%);height:88.3%;aspect-ratio:765/1005;background:url(quadra_escalacao.webp) center/100% 100% no-repeat;}
+.qd{position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:86%;aspect-ratio:1121/963;background:url(quadra_escalacao.webp) center/100% 100% no-repeat;}
 .time{position:absolute;inset:0;display:none;}
 .time.on{display:block;}
 .escGrande{position:absolute;left:50%;top:4%;transform:translateX(-50%);height:34%;opacity:.45;filter:drop-shadow(0 0 30px rgba(0,0,0,.8));pointer-events:none;}
@@ -52,7 +52,7 @@ body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::befo
 .cab{position:absolute;left:0;right:0;top:9%;z-index:2;text-align:center;font:700 clamp(18px,3.4vh,34px) 'Oswald',Arial;letter-spacing:2px;text-transform:uppercase;text-shadow:0 2px 8px #000,0 0 2px #000;}
 .tec{position:absolute;left:2%;top:3%;display:flex;align-items:center;gap:10px;z-index:4;}.tec.dir{left:auto;right:2%;flex-direction:row-reverse;text-align:right;}.tec .tf{width:clamp(30px,5.5vh,56px);aspect-ratio:1;border-radius:50%;border:3px solid var(--cor);background:#1a2233 center/cover;box-shadow:0 4px 12px rgba(0,0,0,.7);}.tec div{font:700 clamp(12px,2vh,20px) Arial;text-shadow:0 2px 6px #000;}.tec small{display:block;font:700 clamp(10px,1.4vh,13px) 'Oswald',Arial;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;}
 .cab small{display:block;font:600 clamp(11px,1.6vh,16px) Arial;letter-spacing:.5px;text-transform:none;opacity:.9;}
-.jog{position:absolute;transform:translate(-50%,-50%) scale(var(--e,1));display:flex;flex-direction:column;align-items:center;cursor:pointer;width:14%;}
+.jog{position:absolute;transform:translate(-50%,-50%) scale(var(--e,1));display:flex;flex-direction:column;align-items:center;cursor:pointer;width:10.5%;}
 .jog .foto{position:relative;width:100%;aspect-ratio:1;border-radius:50%;border:3px solid var(--cor);background:#1a2233 center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.7);}
 .jog .num{position:absolute;right:-8%;bottom:-4%;min-width:38%;padding:2px 4px;border-radius:8px;background:var(--cor);color:var(--txt);font:700 clamp(11px,1.8vh,18px) 'Oswald',Arial;text-align:center;border:2px solid #fff;}
 .jog .nm{margin-top:5px;padding:3px 8px;border-radius:7px;background:rgba(0,0,0,.78);font:700 clamp(10px,1.55vh,16px) Arial;white-space:nowrap;text-align:center;line-height:1.15;}
@@ -84,8 +84,12 @@ body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::befo
   <div class="dica" id="dica"></div></div></div>
 <script src="sumula.js"></script>
 <script>
-// posições dos 12 na quadra (em % da quadra) e escala pela perspectiva (mais longe = menor)
-const POS=[[26,23.8,.78],[50,22.1,.78],[74,23.8,.78],[14,37.4,.86],[38,36.2,.86],[62,36.2,.86],[86,37.4,.86],[22,51.5,.94],[50,50.4,.94],[78,51.5,.94],[34,66.4,1],[66,66.4,1]];
+// posições dos 12 na quadra (em % da imagem da quadra) e escala pela profundidade (Magno, 20/11/2026):
+// frente (maiores) = quem mais jogou no time na temporada; fundo (menores) = quem menos jogou
+const POS=[[15.2,73.7,1],[38.4,73.7,1],[61.6,73.7,1],[84.8,73.7,1],
+  [20.5,53,.86],[50,53,.86],[79.4,53,.86],
+  [29.4,36.3,.74],[50,36.3,.74],[70.5,36.3,.74],
+  [41.9,21.8,.62],[58,21.8,.62]];
 const D={"cores":{"ABIG":["#1F4E79","#FFFFFF"],"ACEAR":["#E2231A","#FFFFFF"],"ASPCM":["#2E3192","#E2231A"],"BFR":["#000000","#FFFFFF"],"BSA":["#F28C28","#FFFFFF"],"CCL":["#1F5FBF","#FFFFFF"],"CESC":["#000000","#FFFFFF"],"CFCSN":["#7B1E22","#FFFFFF"],"CK":["#1A1A1A","#B8860B"],"CRF":["#C8102E","#000000"],"EEPZ":["#1B2A4A","#F28C28"],"FFC":["#7A0026","#00613C"],"IB":["#E06A2C","#000000"],"IDEC":["#1F4E5F","#A4C639"],"IG":["#1F2E8A","#F07A1A"],"ITDA":["#0B1F4B","#FFFFFF"],"JTC":["#2E3448","#F2D33B"],"KE":["#000000","#FFD200"],"MB":["#1A1A1A","#F28C28"],"NBC":["#E2231A","#000000"],"TKA":["#1E8C3A","#F2C200"],"TTC":["#E2231A","#FFFFFF"]},"escudos":{"ABIG":"escudos/ABIG.png","ACEAR":"escudos/ACEAR.png","ASPCM":"escudos/ASPCM.png","BFR":"escudos/BFR.png","BSA":"escudos/BSA.png","CCL":"escudos/CCL.png","CESC":"escudos/CESC.png","CFCSN":"escudos/CFCSN.png","CK":"escudos/CK.png","CRF":"escudos/CRF.png","EEPZ":"escudos/EEPZ.png","FFC":"escudos/FFC.png","IB":"escudos/IB.png","IDEC":"escudos/IDEC.png","IG":"escudos/IG.png","ITDA":"escudos/ITDA.png","JTC":"escudos/JTC.png","KE":"escudos/KE.png","MB":"escudos/MB.png","NBC":"escudos/NBC.png","TKA":"escudos/TKA.png","TTC":"escudos/TTC.png"},"curto":{"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN":"Funcionários","FFC":"Fluminense","TTC":"Tijuca","NBC":"Niterói","CCL":"Leopoldinense","IG":"Iguaba Grande","ABIG":"Jequiá","ACEAR":"Irajá","CESC":"Suzano Costa","EEPZ":"Passo Zero","IDEC":"IDEC","ITDA":"Atitude","KE":"K. Esportes","MB":"Mesquita","JTC":"Jacarepaguá","TKA":"Team Klun","ASPCM":"Municipal","CK":"Carioca King's","IB":"Itaipu","NBR":"NBR Campos"}}; // cores, escudos e nomes curtos (cópia do Ao vivo)
 const KT_API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
 async function api(d){ try{ const r=await fetch(KT_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(d)}); return await r.json(); }catch(e){ return {ok:false}; } }
@@ -120,12 +124,12 @@ async function abrir(id){ $('times').innerHTML='<div class="msg">Carregando a es
   if(!r||!r.ok||!r.jogo){ $('times').innerHTML='<div class="msg">Não foi possível abrir este jogo agora.</div>'; return; }
   J=r.jogo; FOTOS=r.fotos||{}; APS=r.apelidos||{}; TEMP=null; monta();
   const ano=String(J.dataHora||'').slice(0,4)||String(new Date().getFullYear());
-  if(J.categoria) api({acao:'atletasKT',categoria:J.categoria,ano}).then(x=>{ TEMP=(x&&x.ok)?x:{ok:false}; }); }
+  if(J.categoria) api({acao:'atletasKT',categoria:J.categoria,ano}).then(x=>{ TEMP=(x&&x.ok)?x:{ok:false}; const l=$('tB')&&$('tB').classList.contains('on')?'B':'A'; monta(); aba(l); }); }
 
 function timeDe(l){ const m=J.meta||{}, t=m['time'+l]||{}, sig=t.sigla||(l==='A'?J.timeA:J.timeB); const c=cor(sig);
   const kTec='TEC-'+sig+'-'+String(J.categoria||'').replace(/[^A-Za-z0-9]/g,'');
   return {sig,nome:D.curto[sig]||t.nome||sig||'',cor:c,txt:txt(c),tec:((t.tecnico&&t.tecnico.nome)||APS[kTec]||'').trim(),tecF:FOTOS[kTec]||'bola_fiba.png',
-    js:(t.atletas||[]).slice().sort((a,b)=>(parseInt(a.numero)||999)-(parseInt(b.numero)||999)).slice(0,12)}; }
+    js:(t.atletas||[]).slice().sort((a,b)=>{ const x=somaTemp(a.reg)||{qtd:0,pts:0}, y=somaTemp(b.reg)||{qtd:0,pts:0}; return (y.qtd-x.qtd)||((y.pts||0)-(x.pts||0))||((parseInt(a.numero)||999)-(parseInt(b.numero)||999)); }).slice(0,12)}; }
 function monta(){ const T={A:timeDe('A'),B:timeDe('B')}; window.KT_T=T;
   $('times').innerHTML=['A','B'].map(l=>{ const t=T[l];
     return `<div class="time${l==='A'?' on':''}" id="t${l}" style="--cor:${t.cor};--txt:${t.txt}">
