@@ -1,13 +1,42 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<!--ktTrava--><style>html.ktTravado body{visibility:hidden;}#painel{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(5,10,20,.88);}
+#painel.fora{display:none;}
+#painel .pc{width:min(92vw,560px);background:#0f1a2e;border:1px solid #2b3d5c;border-radius:14px;padding:18px 18px 14px;box-shadow:0 12px 40px rgba(0,0,0,.6);}
+#painel h1{margin:0 0 10px;font:700 22px 'Oswald',Arial;letter-spacing:2px;text-transform:uppercase;}
+#painel .tp{display:flex;gap:6px;margin-bottom:10px;}#painel .tp button{flex:1;padding:9px;border-radius:8px;border:1px solid #2b3d5c;background:#16233b;color:#cfd8e6;font-weight:800;cursor:pointer;}#painel .tp button.on{background:#1e5bd8;color:#fff;border-color:#1e5bd8;}
+#painel select{width:100%;padding:10px;border-radius:8px;font-size:15px;margin-bottom:10px;}
+#painel .ok{width:100%;padding:11px;border:none;border-radius:8px;background:#e8590c;color:#fff;font-weight:900;font-size:15px;cursor:pointer;}
+#painel .dica{font-size:12.5px;color:#9fb0c8;line-height:1.45;margin-top:12px;}#painel .dica code{background:#16233b;padding:2px 6px;border-radius:5px;color:#ffd54f;word-break:break-all;}
+#painel .cp{margin-top:6px;padding:6px 10px;border-radius:6px;border:1px solid #2b3d5c;background:#16233b;color:#fff;cursor:pointer;font-weight:700;}
+#engr{position:fixed;left:8px;bottom:8px;z-index:15;width:34px;height:34px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;font-size:17px;cursor:pointer;opacity:.35;}#engr:hover{opacity:1;}body.obs #engr{display:none;}
+.msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:12px 18px;border-radius:10px;background:rgba(0,0,0,.7);font-weight:700;}
+</style>
+<script>
+(function(){
+ var d=document.documentElement; d.classList.add('ktTravado');
+ var pag=location.pathname.split('/').pop()||'index.html';
+ function fora(){ location.replace('index.html?voltar='+encodeURIComponent(pag)); }
+ var tok=''; try{ tok=localStorage.getItem('klaustv_token_v1')||''; }catch(e){}
+ if(!tok){ fora(); return; }
+ try{ var ok=sessionStorage.getItem('kt_ok'); if(ok && ok.split('|')[0]===tok && Date.now()<+ok.split('|')[1]){ var pf=localStorage.getItem('klaustv_perfil'); if(pag==='usuarios.html' && pf!=='Dono'){ location.replace('index.html'); return; } if(pf==='Dono') d.classList.add('ktDono'); d.classList.remove('ktTravado'); return; } }catch(e){}
+ fetch('https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({acao:'eu',token:tok})})
+  .then(function(r){return r.json();}).then(function(r){
+   if(r.ok && !r.usuario.trocarSenha){ try{ localStorage.setItem('klaustv_perfil',r.usuario.perfil); sessionStorage.setItem('kt_ok',tok+'|'+(Date.now()+10*60*1000)); }catch(e){}
+     if(pag==='usuarios.html' && r.usuario.perfil!=='Dono'){ location.replace('index.html'); return; }
+     if(r.usuario.perfil==='Dono') d.classList.add('ktDono'); d.classList.remove('ktTravado'); }
+   else { try{ if(!r.ok) localStorage.removeItem('klaustv_token_v1'); }catch(e){} fora(); }
+  }).catch(function(){ if(pag==='usuarios.html'){ fora(); return; } d.classList.remove('ktTravado'); });
+})();
+</script><!--/ktTrava-->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Escalação · Klaus TV</title>
 <link rel="icon" href="favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 <style>
-/* PRÉVIA (20/11/2026): página Escalação — dados de exemplo, ainda sem ligação com o Montar Jogo */
+/* Página Escalação (Magno, 20/11/2026): os 12 de cada time do Montar Jogo sobre a quadra, fundo transparente para a câmera do Klaus no OBS. Só com login. */
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:transparent;color:#fff;font-family:Arial,Helvetica,sans-serif;overflow:hidden;}
 body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::before{content:'(aqui aparece a imagem da câmera do Klaus)';position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font:700 22px Arial;color:rgba(255,255,255,.18);}
@@ -47,31 +76,86 @@ body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::befo
   <div class="abas" id="abas"></div>
   <div id="ficha" onclick="if(event.target===this)this.classList.remove('on')"><div class="c" id="fichaC"></div></div>
 </div>
+<button id="engr" title="Escolher outro jogo" onclick="painel(true)">⚙</button>
+<div id="painel" class="fora"><div class="pc"><h1>Escalação</h1>
+  <div class="tp"><button id="tpP" class="on" onclick="tipo('P')">Próximos jogos</button><button id="tpA" onclick="tipo('A')">Jogos anteriores</button></div>
+  <select id="selJ"><option>Carregando jogos…</option></select>
+  <button class="ok" onclick="escolher()">Mostrar escalação</button>
+  <div class="dica" id="dica"></div></div></div>
+<script src="sumula.js"></script>
 <script>
-// posições dos 12 na quadra (em % do palco) e escala pela perspectiva (mais longe = menor)
-const POS=[[26,28,.78],[50,26,.78],[74,28,.78],[14,44,.86],[38,42.5,.86],[62,42.5,.86],[86,44,.86],[22,60.5,.94],[50,59.3,.94],[78,60.5,.94],[34,78,1],[66,78,1]]; // % da quadra
-const EX={ // exemplo só para a prévia
-  A:{nome:'Flamengo',sig:'CRF',cor:'#c4161c',txt:'#fff',tec:'Técnico de exemplo',js:[['4','Heitor Roriz','Tozo'],['5','Lucas Almeida',''],['6','Pedro Henrique','PH'],['7','Gabriel Souza',''],['8','Rafael Lima','Rafa'],['9','João Victor','JV'],['10','Matheus Costa',''],['11','Bruno Dias',''],['12','Enzo Ribeiro',''],['13','Davi Santos','Davizinho'],['14','Arthur Melo',''],['15','Miguel Rocha','']]},
-  B:{nome:'Jacarepaguá',sig:'JTC',cor:'#0b4ea2',txt:'#fff',tec:'Técnico de exemplo',js:[['1','Caio Nunes',''],['2','Igor Pires',''],['3','Leo Martins','Leozinho'],['5','Vitor Gomes',''],['7','Samuel Reis',''],['8','Theo Cardoso',''],['9','Nicolas Prado','Nico'],['10','Felipe Moura',''],['11','Diego Farias',''],['12','Kauã Teixeira',''],['13','Otávio Lins',''],['14','Ruan Castro','']]}};
+// posições dos 12 na quadra (em % da quadra) e escala pela perspectiva (mais longe = menor)
+const POS=[[26,28,.78],[50,26,.78],[74,28,.78],[14,44,.86],[38,42.5,.86],[62,42.5,.86],[86,44,.86],[22,60.5,.94],[50,59.3,.94],[78,60.5,.94],[34,78,1],[66,78,1]];
+const D={"cores":{"ABIG":["#1F4E79","#FFFFFF"],"ACEAR":["#E2231A","#FFFFFF"],"ASPCM":["#2E3192","#E2231A"],"BFR":["#000000","#FFFFFF"],"BSA":["#F28C28","#FFFFFF"],"CCL":["#1F5FBF","#FFFFFF"],"CESC":["#000000","#FFFFFF"],"CFCSN":["#7B1E22","#FFFFFF"],"CK":["#1A1A1A","#B8860B"],"CRF":["#C8102E","#000000"],"EEPZ":["#1B2A4A","#F28C28"],"FFC":["#7A0026","#00613C"],"IB":["#E06A2C","#000000"],"IDEC":["#1F4E5F","#A4C639"],"IG":["#1F2E8A","#F07A1A"],"ITDA":["#0B1F4B","#FFFFFF"],"JTC":["#2E3448","#F2D33B"],"KE":["#000000","#FFD200"],"MB":["#1A1A1A","#F28C28"],"NBC":["#E2231A","#000000"],"TKA":["#1E8C3A","#F2C200"],"TTC":["#E2231A","#FFFFFF"]},"escudos":{"ABIG":"escudos/ABIG.png","ACEAR":"escudos/ACEAR.png","ASPCM":"escudos/ASPCM.png","BFR":"escudos/BFR.png","BSA":"escudos/BSA.png","CCL":"escudos/CCL.png","CESC":"escudos/CESC.png","CFCSN":"escudos/CFCSN.png","CK":"escudos/CK.png","CRF":"escudos/CRF.png","EEPZ":"escudos/EEPZ.png","FFC":"escudos/FFC.png","IB":"escudos/IB.png","IDEC":"escudos/IDEC.png","IG":"escudos/IG.png","ITDA":"escudos/ITDA.png","JTC":"escudos/JTC.png","KE":"escudos/KE.png","MB":"escudos/MB.png","NBC":"escudos/NBC.png","TKA":"escudos/TKA.png","TTC":"escudos/TTC.png"},"curto":{"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN":"Funcionários","FFC":"Fluminense","TTC":"Tijuca","NBC":"Niterói","CCL":"Leopoldinense","IG":"Iguaba Grande","ABIG":"Jequiá","ACEAR":"Irajá","CESC":"Suzano Costa","EEPZ":"Passo Zero","IDEC":"IDEC","ITDA":"Atitude","KE":"K. Esportes","MB":"Mesquita","JTC":"Jacarepaguá","TKA":"Team Klun","ASPCM":"Municipal","CK":"Carioca King's","IB":"Itaipu","NBR":"NBR Campos"}}; // cores, escudos e nomes curtos (cópia do Ao vivo)
+const KT_API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
+async function api(d){ try{ const r=await fetch(KT_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(d)}); return await r.json(); }catch(e){ return {ok:false}; } }
+const $=id=>document.getElementById(id);
 const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function monta(){
-  document.getElementById('times').innerHTML=['A','B'].map(l=>{ const t=EX[l];
+const cor=s=>(D.cores[s]||['#1e90ff','#ffffff'])[0];
+const txt=h=>{ const n=parseInt(String(h).slice(1),16); return ((n>>16)*.299+((n>>8)&255)*.587+(n&255)*.114)>150?'#000':'#fff'; };
+const escudo=s=>D.escudos[s]||'favicon.svg';
+const nome2=n=>{ const w=String(n||'').trim().split(/\s+/).filter(Boolean); return w.length<=1?(w[0]||''):w[0]+' '+w[w.length-1]; };
+const dataJ=j=>{ const d=new Date(String(j.dataHora||'').replace(' ','T')); return isNaN(d)?null:d; };
+function status(j){ if(j.status==='FINAL') return 'final'; const d=dataJ(j); if(!d) return 'breve'; const a=Date.now(); if(a<d.getTime()-10*60e3) return 'breve'; if(a>d.getTime()+3*3600e3) return 'final'; return 'vivo'; }
+let LISTA=[], TIPO='P', J=null, FOTOS={}, APS={}, TEMP=null;
+const Q=new URLSearchParams(location.search);
+if(Q.has('teste')) document.body.classList.add('teste');
+if(Q.has('obs')) document.body.classList.add('obs');
+
+function rotulo(j){ const d=dataJ(j); return (j.categoria||'Avulso')+' · '+(D.curto[j.timeA]||j.timeA)+' x '+(D.curto[j.timeB]||j.timeB)+(d?' · '+d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''); }
+async function carregarLista(){ const r=await api({acao:'aoVivoLista',categoria:''}); LISTA=(r&&r.ok&&r.jogos)||[]; tipo(TIPO); }
+function tipo(t){ TIPO=t; $('tpP').classList.toggle('on',t==='P'); $('tpA').classList.toggle('on',t==='A');
+  const tm=j=>{ const d=dataJ(j); return d?d.getTime():0; };
+  const ls=LISTA.filter(j=>t==='A'?status(j)==='final':status(j)!=='final').sort((a,b)=>t==='A'?tm(b)-tm(a):tm(a)-tm(b));
+  $('selJ').innerHTML=ls.length?ls.map(j=>`<option value="${esc(j.id)}">${esc(rotulo(j))}</option>`).join(''):`<option value="">Nenhum jogo ${t==='A'?'anterior':'montado para os próximos dias'}</option>`;
+  if(J&&ls.some(x=>x.id===J.id)) $('selJ').value=J.id; dica(); }
+function dica(){ const id=$('selJ').value; const base=location.origin+location.pathname;
+  $('dica').innerHTML=id?`<b>No OBS</b> (fonte <b>Navegador</b>, 1920 × 1080), use este endereço:<br><code id="urlObs">${esc(base+'?jogo='+encodeURIComponent(id)+'&obs=1')}</code><br><button class="cp" onclick="navigator.clipboard&&navigator.clipboard.writeText($('urlObs').textContent);this.textContent='Copiado ✓'">Copiar endereço</button><br>A troca entre Casa e Visitante é feita nas abas (no OBS, pelo botão <b>Interagir</b>). O fundo fica transparente: aparece a câmera.`:''; }
+function painel(on){ $('painel').classList.toggle('fora',!on); if(on&&!LISTA.length) carregarLista(); }
+function escolher(){ const id=$('selJ').value; if(!id) return; const u=new URL(location); u.searchParams.set('jogo',id); history.replaceState(null,'',u); painel(false); abrir(id); }
+document.addEventListener('change',e=>{ if(e.target.id==='selJ') dica(); });
+
+async function abrir(id){ $('times').innerHTML='<div class="msg">Carregando a escalação…</div>'; $('abas').innerHTML='';
+  const r=await api({acao:'aoVivoJogo',id});
+  if(!r||!r.ok||!r.jogo){ $('times').innerHTML='<div class="msg">Não foi possível abrir este jogo agora.</div>'; return; }
+  J=r.jogo; FOTOS=r.fotos||{}; APS=r.apelidos||{}; TEMP=null; monta();
+  const ano=String(J.dataHora||'').slice(0,4)||String(new Date().getFullYear());
+  if(J.categoria) api({acao:'atletasKT',categoria:J.categoria,ano}).then(x=>{ TEMP=(x&&x.ok)?x:{ok:false}; }); }
+
+function timeDe(l){ const m=J.meta||{}, t=m['time'+l]||{}, sig=t.sigla||(l==='A'?J.timeA:J.timeB); const c=cor(sig);
+  const kTec='TEC-'+sig+'-'+String(J.categoria||'').replace(/[^A-Za-z0-9]/g,'');
+  return {sig,nome:D.curto[sig]||t.nome||sig||'',cor:c,txt:txt(c),tec:((t.tecnico&&t.tecnico.nome)||APS[kTec]||'').trim(),tecF:FOTOS[kTec]||'bola_fiba.png',
+    js:(t.atletas||[]).slice().sort((a,b)=>(parseInt(a.numero)||999)-(parseInt(b.numero)||999)).slice(0,12)}; }
+function monta(){ const T={A:timeDe('A'),B:timeDe('B')}; window.KT_T=T;
+  $('times').innerHTML=['A','B'].map(l=>{ const t=T[l];
     return `<div class="time${l==='A'?' on':''}" id="t${l}" style="--cor:${t.cor};--txt:${t.txt}">
-      <div class="tec${l==='B'?' dir':''}"><div class="tf" style="background-image:url(bola_fiba.png)"></div><div><small>Técnico</small>${esc(t.tec)}</div></div>
+      ${t.tec?`<div class="tec${l==='B'?' dir':''}"><div class="tf" style="background-image:url('${esc(t.tecF)}')"></div><div><small>Técnico</small>${esc(t.tec)}</div></div>`:''}
       <div class="cab">${esc(t.nome)}</div>
-      <div class="qd">${t.js.map((j,i)=>{ const [x,y,e]=POS[i]; return `<div class="jog" style="left:${x}%;top:${y}%;--e:${e}" onclick="ficha('${l}',${i})"><div class="foto" style="background-image:url(bola_fiba.png)"><span class="num">${esc(j[0])}</span></div><div class="nm">${esc(j[1])}${j[2]?'<small>'+esc(j[2])+'</small>':''}</div></div>`; }).join('')}</div></div>`; }).join('');
-  const bt=l=>`<button id="b${l}" class="${l==='A'?'on':''}" style="--cor:${EX[l].cor};--txt:${EX[l].txt}" onclick="aba('${l}')">${l==='A'?'Casa':'Visitante'} · ${esc(EX[l].nome)}</button>`;
-  document.getElementById('abas').innerHTML=`<img class="abEsc" src="escudos/${EX.A.sig}.png" alt="">${bt('A')}${bt('B')}<img class="abEsc" src="escudos/${EX.B.sig}.png" alt="">`;
-}
-function aba(l){ ['A','B'].forEach(x=>{ document.getElementById('t'+x).classList.toggle('on',x===l); document.getElementById('b'+x).classList.toggle('on',x===l); }); document.getElementById('ficha').classList.remove('on'); }
-function ficha(l,i){ const t=EX[l], j=t.js[i];
-  const st=[['JOGOS',5],['PTS',42],['REB',18],['AST',9],['ROU',7],['TOC',3],['EF',8.4],['MVP',1]];
-  const c=document.getElementById('fichaC'); c.style.setProperty('--cor',t.cor);
-  c.innerHTML=`<div class="t"><div class="f" style="background-image:url(bola_fiba.png)"></div><div><b>${esc(j[1])}</b>${j[2]?'<i>'+esc(j[2])+'</i>':''}<div style="margin-top:6px;font-weight:800">#${esc(j[0])} · ${esc(t.nome)}</div></div></div>
-    <div class="tit">Temporada 2026 · jogos narrados (exemplo)</div><div class="g">${st.map(([s,v])=>`<div><b>${String(v).replace('.',',')}</b><span>${s}</span></div>`).join('')}</div>`;
-  document.getElementById('ficha').classList.add('on'); }
-if(new URLSearchParams(location.search).has('teste')) document.body.classList.add('teste');
-monta();
+      <div class="qd">${t.js.map((a,i)=>{ const [x,y,e]=POS[i]; const ap=APS[a.reg]||a.apelido||'';
+        return `<div class="jog" style="left:${x}%;top:${y}%;--e:${e}" onclick="ficha('${l}',${i})"><div class="foto" style="background-image:url('${esc(FOTOS[a.reg]||'bola_fiba.png')}')"><span class="num">${esc(a.numero||'-')}</span></div><div class="nm">${esc(nome2(a.nome))}${ap?'<small>'+esc(ap)+'</small>':''}</div></div>`; }).join('')}</div></div>`; }).join('');
+  const bt=l=>`<button id="b${l}" class="${l==='A'?'on':''}" style="--cor:${T[l].cor};--txt:${T[l].txt}" onclick="aba('${l}')">${l==='A'?'Casa':'Visitante'} · ${esc(T[l].nome)}</button>`;
+  $('abas').innerHTML=`<img class="abEsc" src="${escudo(T.A.sig)}" alt="">${bt('A')}${bt('B')}<img class="abEsc" src="${escudo(T.B.sig)}" alt="">`;
+  // pré-carrega as fotos dos dois times: a troca de aba é instantânea
+  [...T.A.js,...T.B.js].forEach(a=>{ if(FOTOS[a.reg]){ const im=new Image(); im.src=FOTOS[a.reg]; } }); }
+function aba(l){ ['A','B'].forEach(x=>{ $('t'+x).classList.toggle('on',x===l); $('b'+x).classList.toggle('on',x===l); }); $('ficha').classList.remove('on'); }
+
+// ficha: estatística geral do atleta na temporada (jogos narrados pelo Klaus TV)
+function somaTemp(reg){ if(!TEMP||!TEMP.ok) return null; const KS=TEMP.ks; let o={qtd:0}; KS.forEach(k=>o[k]=0); let mvp=0;
+  (TEMP.jogos||[]).forEach(g=>{ const ps=g.p.map(r=>{ const s={}; KS.forEach((k,i)=>s[k]=+r[3+i]||0); return {reg:String(r[0]),s}; });
+    const me=ps.find(p=>p.reg===String(reg)); if(!me) return; o.qtd++; KS.forEach(k=>o[k]+=me.s[k]);
+    const top=ps.slice().sort((a,b)=>(b.s.eff-a.s.eff)||(b.s.pts-a.s.pts))[0]; if(top&&top.reg===String(reg)&&top.s.eff>0) mvp++; });
+  o.mvp=mvp; return o; }
+function ficha(l,i){ const t=KT_T[l], a=t.js[i]; const ap=APS[a.reg]||a.apelido||''; const o=somaTemp(a.reg);
+  const f1=x=>(Math.round(x*10)/10).toFixed(1).replace('.',',');
+  const md=k=>o&&o.qtd?f1((+o[k]||0)/o.qtd):'0,0';
+  const st=o?[['JOGOS',o.qtd],['PTS',md('pts')],['REB',md('reb')],['AST',md('ast')],['ROU',md('stl')],['TOC',md('blk')],['EF',md('eff')],['MVP',o.mvp]]:null;
+  const c=$('fichaC'); c.style.setProperty('--cor',t.cor);
+  c.innerHTML=`<div class="t"><div class="f" style="background-image:url('${esc(FOTOS[a.reg]||'bola_fiba.png')}')"></div><div><b>${esc(a.nome)}</b>${ap?'<i>'+esc(ap)+'</i>':''}<div style="margin-top:6px;font-weight:800">#${esc(a.numero||'-')} · ${esc(t.nome)}</div></div></div>
+    <div class="tit">Temporada ${esc(String(J.dataHora||'').slice(0,4))} · ${esc(J.categoria||'')} · média por jogo narrado</div>
+    ${st?`<div class="g">${st.map(([s,v])=>`<div><b>${v}</b><span>${s}</span></div>`).join('')}</div>`:`<div style="padding:14px;text-align:center;color:#666">${TEMP?'Sem estatísticas da temporada agora.':'Carregando as estatísticas…'}</div>`}`;
+  $('ficha').classList.add('on'); }
+
+if(Q.get('jogo')) abrir(Q.get('jogo')); else painel(true);
 </script>
 </body>
 </html>
