@@ -205,7 +205,7 @@ table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444
 .lpF{width:62px;height:62px;border-radius:8px;object-fit:cover;background:#eee;cursor:pointer;flex:none;}.lp1 .lpF{width:78px;height:78px;}
 .lpCorpo{flex:1;min-width:0;}.lpCab{display:flex;align-items:flex-start;gap:8px;}.lpNm{flex:1;min-width:0;}.lpNm b{display:block;font-size:16px;font-weight:800;cursor:pointer;line-height:1.15;}.lpNm b:hover{text-decoration:underline;}.lpNm>span{display:block;font-size:12px;color:#666;font-weight:700;margin-top:2px;}.lpDet{display:block;font-size:12px;color:#444;margin-top:2px;}
 .lpTag{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;font:800 10px Arial,sans-serif;letter-spacing:1px;color:#fff!important;vertical-align:1px;}.lpTag.lpMvp{background:#1e5bd8;}.lpTag.lpCes{background:#e8590c;}
-.lpVal{font:700 34px 'Oswald','Arial Narrow',Arial;line-height:1;text-align:right;}.lpVal small{display:block;font-size:10px;letter-spacing:1px;color:#777;}
+.lpVal{font:700 34px 'Oswald','Arial Narrow',Arial;line-height:1;text-align:center;background:rgba(0,0,0,.08);border-radius:10px;padding:5px 10px 4px;min-width:46px;}.lpI.lpOn{background:rgba(0,0,0,.12);border-radius:7px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);}.lpVal small{display:block;font-size:10px;letter-spacing:1px;color:#777;}
 .lpJogo{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;margin-top:7px;background:#f3f5f8;border-radius:7px;padding:4px 2px;}.lpI{text-align:center;font-size:10px;font-weight:800;color:#888;letter-spacing:.5px;}.lpI b{display:block;font:700 19px 'Oswald','Arial Narrow',Arial;color:#111;line-height:1.1;}
 .lpArr{font-size:12px;color:#555;margin-top:5px;}.lpArr b{color:#111;}
 .lpTemp{display:grid;grid-template-columns:auto repeat(6,1fr);gap:2px;align-items:center;margin-top:5px;border-top:1px dashed #dde1e7;padding-top:5px;}.lpTemp .lpI b{font-size:14px;color:#333;}.lpTt{font-size:10.5px;font-weight:800;color:#1e5bd8;text-transform:uppercase;letter-spacing:.5px;padding-right:6px;line-height:1.1;}.lpTt small{display:block;text-transform:none;letter-spacing:0;color:#888;font-weight:600;}.lpCarr{grid-column:span 6;font-size:12px;color:#888;}.lpVazio{padding:14px;color:#999;text-align:center;}
@@ -646,7 +646,7 @@ function kt_render(j){ KT_ULT_ST=status(j);
 }
 /* ---------- Abas: Times, Cestinhas, Medalhas, Classificação ---------- */
 const KT_ABAS=[['res','Resumo'],['lid','Líderes da partida'],['tro','Times'],['ces','Cestinhas'],['med','Medalhas'],['cla','Classificação']];
-let KT_TMODO='todos'; // aba Times: 'todos' (confrontos da temporada) ou 'jogo' (só este jogo)
+let KT_TMODO='jogo'; // aba Times: começa sempre em 'jogo' (Este jogo); o Klaus pode trocar para 'todos' na transmissão (Magno, 20/11)
 // depois do Resumo, Líderes e Times, uma aba para cada time do jogo (o da casa, à esquerda, primeiro); o nome troca sozinho em cada jogo
 function kt_abasDe(j){ const m=(j&&j.meta)||{}; const nm=l=>{ const t=m['time'+l]||{}; return m.avulso?(t.nome||t.sigla||'Time '+l):(D.curto[t.sigla]||t.nome||t.sigla||'Time '+l); };
   return KT_ABAS.slice(0,3).concat([['tA',nm('A')],['tB',nm('B')]],KT_ABAS.slice(3)); } // Resumo · Líderes · Times · times do jogo (Magno, 20/11)
@@ -801,23 +801,23 @@ function kt_lidHTML(j,ja,jb){
   const mvpTop=todos.slice().sort(ordem('eff'))[0]; const mvp=(mvpTop&&g(mvpTop,'eff')>0)?String(mvpTop.reg):null;
   const mxP=Math.max(0,...todos.map(p=>g(p,'pts')));
   const arr=(p,f)=>{ const mk=g(p,f+'Made'), a=mk+g(p,f+'Miss'); return mk+'/'+a; };
-  const ci=(v,s,t)=>`<span class="lpI" title="${t}"><b>${v}</b>${s}</span>`;
-  const linha=(p,pos,val,unid,det)=>{ const o=OUT?OUT[String(p.reg)]:null, q=o?o.qtd:0;
+  const ci=(v,s,t,on)=>`<span class="lpI${on?' lpOn':''}" title="${t}"><b>${v}</b>${s}</span>`;
+  const linha=(p,pos,val,unid,det,hk)=>{ const H=k=>(hk||[]).includes(k); /* hk: itens do bloco, destacados (Magno, 20/11) */ const o=OUT?OUT[String(p.reg)]:null, q=o?o.qtd:0;
     const tags=(String(p.reg)===mvp?'<span class="lpTag lpMvp">MVP</span>':'')+(mxP>0&&g(p,'pts')===mxP?'<span class="lpTag lpCes">CESTINHA</span>':'');
     const temp=OUT?`<div class="lpTemp"><span class="lpTt">Temporada ${esc(ch.split('|')[1])}<small>${q} ${q===1?'jogo narrado':'jogos narrados'}</small></span>${ci(o?g(o,'pts'):0,'PTS','Pontos (soma)')}${ci(o?g(o,'reb'):0,'REB','Rebotes (soma)')}${ci(o?g(o,'ast'):0,'AST','Assistências (soma)')}${ci(o?g(o,'stl'):0,'ROU','Roubos de bola (soma)')}${ci(o?g(o,'blk'):0,'TOC','Tocos (soma)')}${ci(q?f1(g(o,'eff')/q):'0,0','EF méd.','Eficiência: média por jogo')}</div>`
       :`<div class="lpTemp"><span class="lpTt">Temporada</span><span class="lpCarr">${R&&!R.ok?esc(R.erro):'Carregando…'}</span></div>`;
     const abre=`onclick="kt_card('${p.reg}','${p.lado}')"`;
     return `<div class="lpJ${pos===1?' lp1':''}"><div class="lpPos">${pos}º</div><img class="lpF" src="${foto(p.reg)}" alt="" ${abre}>
       <div class="lpCorpo"><div class="lpCab"><div class="lpNm"><b ${abre}>${esc(kt_nome2(p.nome))}</b><span>${p.apelido?esc(p.apelido)+' · ':''}nº ${esc(p.numero||'-')}${tags}</span>${det?`<small class="lpDet">${esc(det)}</small>`:''}</div>${val!==''?`<div class="lpVal">${val}${unid?`<small>${unid}</small>`:''}</div>`:''}</div>
-        <div class="lpJogo">${ci(g(p,'pts'),'PTS','Pontos')}${ci(g(p,'reb'),'REB','Rebotes')}${ci(g(p,'ast'),'AST','Assistências')}${ci(g(p,'stl'),'ROU','Roubos de bola')}${ci(g(p,'blk'),'TOC','Tocos')}${ci(g(p,'eff'),'EF','Eficiência')}</div>
+        <div class="lpJogo">${ci(g(p,'pts'),'PTS','Pontos',H('pts'))}${ci(g(p,'reb'),'REB','Rebotes',H('reb'))}${ci(g(p,'ast'),'AST','Assistências',H('ast'))}${ci(g(p,'stl'),'ROU','Roubos de bola',H('stl'))}${ci(g(p,'blk'),'TOC','Tocos',H('blk'))}${ci(g(p,'eff'),'EF','Eficiência',H('eff'))}</div>
         <div class="lpArr">2P <b>${arr(p,'two')}</b> · 3P <b>${arr(p,'three')}</b> · LL <b>${arr(p,'ft')}</b> · Erros <b>${g(p,'to')}</b> · Faltas <b>${g(p,'foul')}</b></div>
         ${temp}</div></div>`; };
   const [ca,cb]=kt_coresTimes(sa,sb);
-  const col=(sig,c,lista,val,unid,det)=>`<div class="lpCol"><div class="lpTime" style="background:${c};color:${txt2(c)}"><img src="${escudo(sig)}" alt="">${esc(D.curto[sig]||sig)}</div>${lista.length?lista.slice(0,3).map((p,i)=>linha(p,i+1,val(p),unid,det?det(p):'')).join(''):'<div class="lpVazio">—</div>'}</div>`;
-  const bloco=(tit,lA,lB,val,unid,det)=>`<div class="lpBloco"><div class="lpTit">${tit}</div><div class="lpDuas">${col(sa,ca,lA,val,unid,det)}${col(sb,cb,lB,val,unid,det)}</div></div>`;
+  const col=(sig,c,lista,val,unid,det,hk)=>`<div class="lpCol"><div class="lpTime" style="background:${c};color:${txt2(c)}"><img src="${escudo(sig)}" alt="">${esc(D.curto[sig]||sig)}</div>${lista.length?lista.slice(0,3).map((p,i)=>linha(p,i+1,val(p),unid,det?det(p):'',hk)).join(''):'<div class="lpVazio">—</div>'}</div>`;
+  const bloco=(tit,lA,lB,val,unid,det,hk)=>`<div class="lpBloco"><div class="lpTit">${tit}</div><div class="lpDuas">${col(sa,ca,lA,val,unid,det,hk)}${col(sb,cb,lB,val,unid,det,hk)}</div></div>`;
   const cats=[['eff','Eficiência','EF'],['pts','Pontos','PTS'],['reb','Rebotes','REB'],['ast','Assistências','AST'],['blk','Tocos','TOC'],['stl','Roubos de bola','ROU']];
   const top3=(js,k)=>js.filter(p=>g(p,k)!==0).sort(ordem(k)).slice(0,3);
-  let h=cats.map(([k,t,u])=>bloco(t,top3(ja,k),top3(jb,k),p=>g(p,k),u)).join('');
+  let h=cats.map(([k,t,u])=>bloco(t,top3(ja,k),top3(jb,k),p=>g(p,k),u,null,[k])).join('');
   if(window.KTPremios){ let pr='';
     const dup=KTPremios.duplos(todos,g);
     [2,3,4,5].forEach(n=>{ const l=dup.filter(d=>d.n===n); if(!l.length) return; const tx={}; l.forEach(d=>tx[d.p.reg]=d.txt);
@@ -825,7 +825,7 @@ function kt_lidHTML(j,ja,jb){
     const def=KTPremios.defensores(todos,g); const sd=p=>g(p,'reb')+g(p,'blk')+g(p,'stl');
     // Defensor do jogo: um só (o que está na frente), centralizado na faixa do time dele (Magno, 20/11)
     if(def.length){ const dp=def[0], dc=dp.sig===sa?ca:cb;
-      pr+=`<div class="lpBloco"><div class="lpTit">🛡️ Defensor do jogo</div><div class="lpTime lpTimeC" style="background:${dc};color:${txt2(dc)}"><img src="${escudo(dp.sig)}" alt="">${esc(D.curto[dp.sig]||dp.sig)}</div><div class="lpUm">${linha(dp,1,sd(dp),'REB+TOC+ROU','')}</div></div>`; }
+      pr+=`<div class="lpBloco"><div class="lpTit">🛡️ Defensor do jogo</div><div class="lpTime lpTimeC" style="background:${dc};color:${txt2(dc)}"><img src="${escudo(dp.sig)}" alt="">${esc(D.curto[dp.sig]||dp.sig)}</div><div class="lpUm">${linha(dp,1,sd(dp),'REB+TOC+ROU','',['reb','blk','stl'])}</div></div>`; }
     const pm=(j.stats||{}).prem; const esc1=(i,js)=>{ const x=Array.isArray(pm)?pm.find(y=>+y[0]===i && y[4]):null; const p=x?js.find(q=>String(q.reg)===String(x[4]||'')):null;
       return p||js.filter(q=>g(q,'eff')>0||g(q,'pts')>0).sort((a,b)=>g(b,'eff')-g(a,'eff')||g(b,'pts')-g(a,'pts'))[0]; };
     const xA=esc1(4,ja), xB=esc1(5,jb);
