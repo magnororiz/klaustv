@@ -1,35 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<!--ktTrava--><style>html.ktTravado body{visibility:hidden;}#painel{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(5,10,20,.88);}
-#painel.fora{display:none;}
-#painel .pc{width:min(92vw,560px);background:#0f1a2e;border:1px solid #2b3d5c;border-radius:14px;padding:18px 18px 14px;box-shadow:0 12px 40px rgba(0,0,0,.6);}
-#painel h1{margin:0 0 10px;font:700 22px 'Oswald',Arial;letter-spacing:2px;text-transform:uppercase;}
-#painel .tp{display:flex;gap:6px;margin-bottom:10px;}#painel .tp button{flex:1;padding:9px;border-radius:8px;border:1px solid #2b3d5c;background:#16233b;color:#cfd8e6;font-weight:800;cursor:pointer;}#painel .tp button.on{background:#1e5bd8;color:#fff;border-color:#1e5bd8;}
-#painel select{width:100%;padding:10px;border-radius:8px;font-size:15px;margin-bottom:10px;}
-#painel .ok{width:100%;padding:11px;border:none;border-radius:8px;background:#e8590c;color:#fff;font-weight:900;font-size:15px;cursor:pointer;}
-#painel .dica{font-size:12.5px;color:#9fb0c8;line-height:1.45;margin-top:12px;}#painel .dica code{background:#16233b;padding:2px 6px;border-radius:5px;color:#ffd54f;word-break:break-all;}
-#painel .cp{margin-top:6px;padding:6px 10px;border-radius:6px;border:1px solid #2b3d5c;background:#16233b;color:#fff;cursor:pointer;font-weight:700;}
-#engr{position:fixed;left:8px;bottom:8px;z-index:15;width:34px;height:34px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;font-size:17px;cursor:pointer;opacity:.35;}#engr:hover{opacity:1;}body.obs #engr{opacity:0;}body.obs #engr:hover{opacity:1;} /* no OBS a engrenagem só aparece com o mouse em cima (janela Interagir) */
-.msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:12px 18px;border-radius:10px;background:rgba(0,0,0,.7);font-weight:700;}
-</style>
-<script>
-(function(){
- var d=document.documentElement; d.classList.add('ktTravado');
- var pag=location.pathname.split('/').pop()||'index.html';
- function fora(){ location.replace('index.html?voltar='+encodeURIComponent(pag)); }
- var tok=''; try{ tok=localStorage.getItem('klaustv_token_v1')||''; }catch(e){}
- if(!tok){ fora(); return; }
- try{ var ok=sessionStorage.getItem('kt_ok'); if(ok && ok.split('|')[0]===tok && Date.now()<+ok.split('|')[1]){ var pf=localStorage.getItem('klaustv_perfil'); if(pag==='usuarios.html' && pf!=='Dono'){ location.replace('index.html'); return; } if(pf==='Dono') d.classList.add('ktDono'); d.classList.remove('ktTravado'); return; } }catch(e){}
- fetch('https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({acao:'eu',token:tok})})
-  .then(function(r){return r.json();}).then(function(r){
-   if(r.ok && !r.usuario.trocarSenha){ try{ localStorage.setItem('klaustv_perfil',r.usuario.perfil); sessionStorage.setItem('kt_ok',tok+'|'+(Date.now()+10*60*1000)); }catch(e){}
-     if(pag==='usuarios.html' && r.usuario.perfil!=='Dono'){ location.replace('index.html'); return; }
-     if(r.usuario.perfil==='Dono') d.classList.add('ktDono'); d.classList.remove('ktTravado'); }
-   else { try{ if(!r.ok) localStorage.removeItem('klaustv_token_v1'); }catch(e){} fora(); }
-  }).catch(function(){ if(pag==='usuarios.html'){ fora(); return; } d.classList.remove('ktTravado'); });
-})();
-</script><!--/ktTrava-->
+<!-- Página oculta e sem senha, autorizado pelo Magno (20/11/2026): não aparece no menu nem em lugar nenhum; o Klaus abre direto klaustv.com/escalacao no OBS -->
+<meta name="robots" content="noindex,nofollow">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Escalação · Klaus TV</title>
