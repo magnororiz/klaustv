@@ -249,7 +249,52 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .ktFooter .mapa{width:100%;height:190px;border:0;border-radius:12px;background:#101826;box-shadow:0 6px 18px rgba(0,0,0,.4);}
 .ktFooter .copy{border-top:1px solid rgba(255,255,255,.06);text-align:center;color:#6f819a;font-size:12px;padding:14px 16px 18px 16px;margin-top:14px;letter-spacing:.5px;}
 .ktFooter .copy b{color:#9fb3c8;font-weight:600;}
-/*fimF*/</style>
+/*fimF*/
+/* aba Times (placar de TV) */
+#abaC .ttPalco{position:relative;padding:26px 18px 0;color:#fff;background:url(fundo_quadra.jpg) center bottom/100% auto no-repeat,#1d130a;}
+#abaC .ttPalco:before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,0) 40%);pointer-events:none;}
+#abaC .ttPalco>*{position:relative;z-index:1;}
+.ttTopo{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin:8px 0 26px;}
+.ttFaixa{position:relative;height:58px;display:flex;align-items:center;font:700 26px 'Oswald','Arial Narrow',Arial;text-transform:uppercase;letter-spacing:1.5px;box-shadow:0 0 0 3px #e6e9ee,0 6px 14px rgba(0,0,0,.45);white-space:nowrap;}
+.ttFaixa.ttA{border-radius:30px 0 0 30px;justify-content:flex-end;padding:0 26px 0 96px;}
+.ttFaixa.ttB{border-radius:0 30px 30px 0;justify-content:flex-start;padding:0 96px 0 26px;}
+.ttEsc{position:absolute;top:50%;width:104px;height:104px;object-fit:contain;transform:translateY(-50%);filter:drop-shadow(0 4px 8px rgba(0,0,0,.6));}
+.ttA .ttEsc{left:-14px;} .ttB .ttEsc{right:-14px;}
+.ttCentro{position:relative;z-index:2;background:linear-gradient(#1c1c1c,#000);border:4px solid #d9dde3;border-radius:16px;padding:22px 26px 8px;min-width:150px;text-align:center;margin:0 -6px;box-shadow:0 0 18px rgba(255,255,255,.35);}
+.ttTag{position:absolute;left:50%;top:-16px;transform:translateX(-50%);background:#000;border:3px solid #d9dde3;border-radius:10px;padding:3px 12px;white-space:nowrap;}
+.ttTag select{background:#000;color:#fff;border:none;font:700 12px 'Oswald','Arial Narrow',Arial;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;outline:none;padding:0 2px;}
+.ttPl{font:700 44px 'Oswald','Arial Narrow',Arial;line-height:1;white-space:nowrap;}
+.ttPl i{font-style:normal;opacity:.6;margin:0 8px;}
+.ttCentro small{display:block;font-size:10px;color:#c8cfda;letter-spacing:1px;margin-top:4px;white-space:nowrap;}
+.ttGrade{background:rgba(10,10,14,.55);backdrop-filter:blur(2px);border-radius:10px;padding:14px 18px;max-width:700px;margin:0 auto;}
+.ttCat{text-align:center;font:700 15px 'Oswald','Arial Narrow',Arial;letter-spacing:2px;text-transform:uppercase;margin:0 0 10px;text-shadow:0 1px 3px #000;}
+.ttCat span{color:#ffd54f;}
+.ttAviso{text-align:center;font-size:12px;color:#ffe08a;margin:-4px 0 8px;}
+.ttLin{display:flex;align-items:stretch;height:40px;margin:9px 0;border-radius:7px;overflow:hidden;box-shadow:0 0 0 2px #f4f6f9,0 3px 8px rgba(0,0,0,.5);}
+.ttV{position:relative;width:176px;flex:none;display:flex;align-items:center;justify-content:center;gap:5px;font:700 19px 'Oswald','Arial Narrow',Arial;white-space:nowrap;}
+.ttV small{font-size:.72em;opacity:.85;}
+.ttV .ttDif{font-size:.8em;opacity:.9;font-family:Arial,sans-serif;}
+.ttTr{font-size:.8em;}
+.ttLab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#111;line-height:1.05;background:linear-gradient(#ffffff 0%,#e3e6ea 45%,#c9ced5 55%,#f2f4f6 100%);}
+.ttLab b{font:700 17px 'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;}
+.ttLab span{font-size:10px;color:#555;}
+.ttEspaco{margin:0 -18px;aspect-ratio:765/270;}
+@media(max-width:560px){
+ #abaC .ttPalco{padding:22px 8px 0;}
+ .ttFaixa{height:44px;font-size:12px;letter-spacing:.4px;}
+ .ttFaixa.ttA{padding:0 8px 0 58px;} .ttFaixa.ttB{padding:0 58px 0 8px;}
+ .ttEsc{width:66px;height:66px;} .ttA .ttEsc{left:-3px;} .ttB .ttEsc{right:-3px;}
+ .ttCentro{min-width:104px;padding:18px 4px 6px;}
+ .ttPl{font-size:23px;} .ttPl i{margin:0 4px;} .ttSc{display:none;} .ttCentro small{font-size:9px;letter-spacing:0;}
+ .ttTag{padding:2px 6px;} .ttTag select{font-size:9px;letter-spacing:.2px;}
+ .ttGrade{padding:10px 6px;} .ttCat{font-size:13px;}
+ .ttLin{height:46px;margin:7px 0;}
+ .ttV{width:86px;flex-direction:column;gap:0;font-size:16px;line-height:1.05;}
+ .ttTr{position:absolute;top:3px;font-size:.62em;} .ttV:first-child .ttTr{left:5px;} .ttV:last-child .ttTr{right:5px;}
+ .ttLab b{font-size:12px;letter-spacing:.4px;white-space:nowrap;} .ttLab span{font-size:9px;}
+ .ttEspaco{margin:0 -8px;}
+}
+</style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 </head>
@@ -553,8 +598,9 @@ function kt_render(j){ KT_ULT_ST=status(j);
   }
   if(pAntes){ [...$('jogo').querySelectorAll('.placar .pts')].forEach((e,i)=>{ if(e.textContent!==pAntes[i]) e.classList.add('mudou'); }); }
 }
-/* ---------- Abas: Cestinhas, Medalhas, Troféus, Classificação ---------- */
-const KT_ABAS=[['res','Resumo'],['ces','Cestinhas'],['med','Medalhas'],['tro','Troféus'],['cla','Classificação']];
+/* ---------- Abas: Times, Cestinhas, Medalhas, Classificação ---------- */
+const KT_ABAS=[['res','Resumo'],['tro','Times'],['ces','Cestinhas'],['med','Medalhas'],['cla','Classificação']];
+let KT_TMODO='todos'; // aba Times: 'todos' (confrontos da temporada) ou 'jogo' (só este jogo)
 // depois do Resumo, uma aba para cada time do jogo (o da casa, à esquerda, primeiro); o nome troca sozinho em cada jogo
 function kt_abasDe(j){ const m=(j&&j.meta)||{}; const nm=l=>{ const t=m['time'+l]||{}; return m.avulso?(t.nome||t.sigla||'Time '+l):(D.curto[t.sigla]||t.nome||t.sigla||'Time '+l); };
   return [KT_ABAS[0],['tA',nm('A')],['tB',nm('B')]].concat(KT_ABAS.slice(1)); }
@@ -583,6 +629,14 @@ const kt_tm=s=>`<img class="esc" src="${escudo(s)}" alt="">${esc(D.curto[s]||s||
 function kt_tinta(hex,f){ const n=parseInt(String(hex||'#888888').slice(1),16); const r=n>>16,g=(n>>8)&255,b=n&255; const m=c=>Math.round(c+(255-c)*f); return 'rgb('+m(r)+','+m(g)+','+m(b)+')'; }
 function kt_celTime(s,i,txt,venceu,lado){ const c=cor(s); const bg=kt_tinta(c,i%2?0.80:0.90); const mk=venceu?`<span class="vant" title="Na frente neste item" style="background:${c};color:${txt2(c)}">✓</span>`:'';
   return `<td style="background:${bg}!important">${lado==='A'?mk+txt:txt+mk}</td>`; }
+function kt_escurece(hex,f){ const n=parseInt(String(hex||'#888888').slice(1),16); const m=c=>Math.round(c*(1-f)); return 'rgb('+m(n>>16)+','+m((n>>8)&255)+','+m(n&255)+')'; }
+// aba Times: se os dois times têm a mesma cor, o que tem uma segunda cor (sem ser branco) usa ela
+function kt_coresTimes(sa,sb){ const A=D.cores[sa]||[cor(sa),'#ffffff'], B=D.cores[sb]||[cor(sb),'#ffffff']; let ca=A[0], cb=B[0];
+  const br=c=>/^#?f{3}(f{3})?$/i.test(String(c||'').replace('#',''));
+  const rgb=h=>{ const n=parseInt(String(h||'#888888').slice(1),16); return [n>>16,(n>>8)&255,n&255]; };
+  const pareceida=(x,y)=>{ const a=rgb(x), b=rgb(y); return Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])<90; }; // cores muito parecidas (ex.: dois vermelhos)
+  if(pareceida(ca,cb)){ if(B[1]&&!br(B[1])) cb=B[1]; else if(A[1]&&!br(A[1])) ca=A[1]; }
+  return [ca,cb]; }
 function txt2(c){ try{ return txt(c); }catch(e){ return '#fff'; } }
 function kt_confrTodos(j,sa,sb){ return ((KT_HIS&&KT_HIS.confrontos)||[]).filter(g=>g.c===j.categoria && ((g.a===sa&&g.b===sb)||(g.a===sb&&g.b===sa))).sort((x,y)=>String(y.d).replace(' ','T').localeCompare(String(x.d).replace(' ','T'))); }
 function kt_confrAnt(j,sa,sb){ const dj=String(j.dataHora||'').replace(' ','T'); return kt_confrTodos(j,sa,sb).filter(g=>g.id!==j.id && (!dj || String(g.d).replace(' ','T')<dj)); }
@@ -708,7 +762,7 @@ function kt_abaHTML(j,ja,jb){
       <table class="ab"><tr><th title="Posição no ranking de cestinhas da FBERJ na categoria"><span class="lgN">Posição</span><span class="crN">Pos.</span><small class="thSub2">FBERJ</small></th><th></th><th class="l">Atleta</th><th class="l">Equipe</th><th>Jogos</th><th class="c4" title="Pontos: cestas de 2, cestas de 3 e lances livres">Pontos<small class="thSub2">2P + 3P + LL</small></th><th class="cm">Média</th><th class="c5">Cestas de 3</th></tr>${tr}</table>
       <div class="abaNota">Fonte: planilha oficial de cestinhas da FBERJ (cópia diária do Klaus TV). A FBERJ publica pontos e cestas de 3, mas não separa as cestas de 2. <a href="cestinhas.html?cat=${encodeURIComponent(cat)}" target="_blank">Ver todos os cestinhas do ${esc(cat)} →</a></div>`.replace(new RegExp('class="'+col+'"','g'),'class="'+col+' ordOn"');
   }
-  if(KT_ABA==='med'||KT_ABA==='tro'){
+  if(KT_ABA==='med'||(KT_ABA==='tro'&&KT_TMODO==='todos')){
     if(!KT_HIS||Date.now()-KT_HIS_T>120000){ kt_abaCarregar('his'); if(!KT_HIS) return kt_carregando('o histórico do Klaus TV'); }
     if(!KT_HIS.ok) return '<div class="vazio">'+esc(KT_HIS.erro)+'</div>';
   }
@@ -744,31 +798,39 @@ function kt_abaHTML(j,ja,jb){
       <div class="abaNota">Medalhas só dos jogos entre ${esc(D.curto[sa]||sa)} e ${esc(D.curto[sb]||sb)} no ${esc(cat)} com estatística do Klaus TV (soma de todos os confrontos da temporada, inclusive este jogo; ou só o confronto anterior, se escolhido). Quem joga em duas categorias tem uma conta em cada. Em cada jogo, os 3 melhores do jogo (os dois times juntos) em cada item ganham 🥇 ouro, 🥈 prata e 🥉 bronze; empate divide a medalha. A classificação é por mais ouros, depois pratas, depois bronzes — no item escolhido ou no Geral (soma de todos os itens). Erros e faltas não dão medalha.</div>`;
   }
   if(KT_ABA==='tro'){
-    const GS=kt_confr(j,sa,sb).filter(g=>g.sa&&g.sb);
-    if(!GS.length) return kt_confrTopo(j,sa,sb,'🏆 Troféus nos confrontos')+kt_semConfr;
     const KS=['pts','twoMade','twoMiss','threeMade','threeMiss','ftMade','ftMiss','reb','ast','stl','blk','to','foul','eff'];
     const S=()=>{ const o={}; KS.forEach(k=>o[k]=0); return o; }; const A=S(), B=S();
-    GS.forEach(g=>{ const xa=g.a===sa?g.sa:g.sb, xb=g.a===sa?g.sb:g.sa; KS.forEach((k,i)=>{ A[k]+=(+xa[i]||0); B[k]+=(+xb[i]||0); }); });
+    let GS=[], vit=[0,0];
+    if(KT_TMODO==='todos'){ GS=kt_confrTodos(j,sa,sb).filter(g=>g.sa&&g.sb);
+      GS.forEach(g=>{ const xa=g.a===sa?g.sa:g.sb, xb=g.a===sa?g.sb:g.sa; KS.forEach((k,i)=>{ A[k]+=(+xa[i]||0); B[k]+=(+xb[i]||0); }); if((+xa[0]||0)>(+xb[0]||0)) vit[0]++; else if((+xb[0]||0)>(+xa[0]||0)) vit[1]++; }); }
+    if(KT_TMODO==='jogo'||!GS.length){ KS.forEach(k=>{ A[k]=soma(ja,k); B[k]=soma(jb,k); }); }
+    const semConfr=KT_TMODO==='todos'&&!GS.length;
     const pc=(mk,a)=>a?Math.round(mk*100/a):0;
-    const arr=(o,mk,ms)=>{ const a=o[mk]+o[ms]; return {txt:`${o[mk]}/${a} <small>(${pc(o[mk],a)}%)</small>`,v:pc(o[mk],a),tem:a>0,p:1}; };
-    const aq=o=>{ const mk=o.twoMade+o.threeMade, a=mk+o.twoMiss+o.threeMiss; return {txt:`${mk}/${a} <small>(${pc(mk,a)}%)</small>`,v:pc(mk,a),tem:a>0,p:1}; };
-    const num=(o,k)=>({txt:String(o[k]),v:o[k],tem:true});
+    const arr=(o,mk,ms)=>{ const a=o[mk]+o[ms]; return {txt:o[mk]+'/'+a,pc:pc(o[mk],a)+'%',v:pc(o[mk],a),tem:a>0,p:1}; };
+    const aq=o=>{ const mk=o.twoMade+o.threeMade, a=mk+o.twoMiss+o.threeMiss; return {txt:mk+'/'+a,pc:pc(mk,a)+'%',v:pc(mk,a),tem:a>0,p:1}; };
+    const num=(o,k)=>({txt:String(o[k]),pc:'',v:o[k],tem:true});
     const L=[['PTS','Pontos',num(A,'pts'),num(B,'pts'),1],['AQ','Arremessos de quadra',aq(A),aq(B),1],['2P','Cestas de 2 pontos',arr(A,'twoMade','twoMiss'),arr(B,'twoMade','twoMiss'),1],
       ['3P','Cestas de 3 pontos',arr(A,'threeMade','threeMiss'),arr(B,'threeMade','threeMiss'),1],['LL','Lances livres',arr(A,'ftMade','ftMiss'),arr(B,'ftMade','ftMiss'),1],
       ['REB','Rebotes',num(A,'reb'),num(B,'reb'),1],['AST','Assistências',num(A,'ast'),num(B,'ast'),1],['RB','Roubos de bola',num(A,'stl'),num(B,'stl'),1],
-      ['T','Tocos',num(A,'blk'),num(B,'blk'),1],['ERR','Erros (menos é melhor)',num(A,'to'),num(B,'to'),-1],['FP','Faltas (menos é melhor)',num(A,'foul'),num(B,'foul'),-1],['EF','Eficiência',num(A,'eff'),num(B,'eff'),1]];
-    let na=0, nb=0;
-    const tr=(c,i,txt,ganhou,lado)=>{ const bg=kt_tinta(c,i%2?0.80:0.90); const t=ganhou?'<span class="trofeu">🏆</span>':''; return `<td style="background:${bg}!important;${ganhou?'font-weight:900':''}">${lado==='A'?t+txt:txt+t}</td>`; };
-    const dif=(a,b)=>{ const d=Math.abs(a.v-b.v); return d?` <small class="dif">${a.p?'+'+d+' p.p.':'+'+d}</small>`:''; };
-    const lin=L.map(([k,nome,a,b,dir],i)=>{ let ga=false,gb=false;
+      ['T','Tocos',num(A,'blk'),num(B,'blk'),1],['ERR','Erros',num(A,'to'),num(B,'to'),-1],['FP','Faltas',num(A,'foul'),num(B,'foul'),-1],['EF','Eficiência',num(A,'eff'),num(B,'eff'),1]];
+    const [ca,cb]=kt_coresTimes(sa,sb);
+    const grad=c=>`linear-gradient(${kt_tinta(c,.22)},${c} 55%,${kt_escurece(c,.32)})`;
+    const dif=(a,b)=>{ const d=Math.abs(a.v-b.v); return d?`<small class="ttDif">+${d}${a.p?' p.p.':''}</small>`:''; };
+    const cx=(o,ganhou,c,lado,d)=>`<div class="ttV" style="background:${grad(c)};color:${txt2(c)}">${ganhou&&lado==='a'?'<span class="ttTr">🏆</span>':''}<span>${o.txt}</span>${(o.pc||(ganhou&&d))?'<small>'+(o.pc||'')+(ganhou&&d?(o.pc?' ':'')+d:'')+'</small>':''}${ganhou&&lado==='b'?'<span class="ttTr">🏆</span>':''}</div>`;
+    const lin=L.map(([k,nome,a,b,dir])=>{ let ga=false,gb=false;
       if((a.tem||b.tem) && a.v!==b.v && !(a.v===0&&b.v===0)){ if((a.v-b.v)*dir>0) ga=true; else gb=true; }
       if(a.v===b.v && a.v!==0 && dir>0){ ga=gb=true; }
-      if(ga) na++; if(gb) nb++;
-      return `<tr>${tr(cor(sa),i+2,a.txt+(ga&&!gb?dif(a,b):''),ga,'A')}<td class="it" title="${nome}">${k}<br><small style="font-weight:600">${nome}</small></td>${tr(cor(sb),i+2,b.txt+(gb&&!ga?dif(a,b):''),gb,'B')}</tr>`; }).join('');
-    return kt_confrTopo(j,sa,sb,'🏆 Troféus nos confrontos')+`
-      <table class="ab cmp"><tr><th style="width:38%">${kt_tm(sa)}</th><th style="font-size:10px;color:#7a6a3a;text-transform:none">Soma dos confrontos · 🏆 = quem tem o melhor número</th><th style="width:38%">${kt_tm(sb)}</th></tr>
-      <tr>${kt_celTime(sa,0,GS.length,false,'A')}<td class="it">Confrontos na temporada</td>${kt_celTime(sb,0,GS.length,false,'B')}</tr><tr>${kt_celTime(sa,1,'<span class="trofN">🏆 '+na+'</span>',na>nb,'A')}<td class="it">TOTAL<br><small style="font-weight:600">itens vencidos</small></td>${kt_celTime(sb,1,'<span class="trofN">🏆 '+nb+'</span>',nb>na,'B')}</tr>${lin}</table>
-      <div class="abaNota">Só os jogos entre ${esc(D.curto[sa]||sa)} e ${esc(D.curto[sb]||sb)} no ${esc(cat)} com estatística do Klaus TV (soma de todos os confrontos da temporada, inclusive este jogo; ou só o confronto anterior, se escolhido). Cada linha mostra a soma dos números do Resumo; o 🏆 vai para quem tem o número maior (em erros e faltas, o menor; nos arremessos, o melhor aproveitamento). O número pequeno mostra a diferença para o outro time. Empate com valor dá troféu aos dois.</div>`;
+      const d=(ga&&gb)?'':dif(a,b);
+      return `<div class="ttLin">${cx(a,ga,ca,'a',d)}<div class="ttLab"><b>${nome}</b><span>${k}${dir<0?' · menos é melhor':''}</span></div>${cx(b,gb,cb,'b',d)}</div>`; }).join('');
+    const pl=KT_TMODO==='jogo'||semConfr?soma(ja,'pts')+'<i>–</i>'+soma(jb,'pts'):vit[0]+'<i>–</i>'+vit[1];
+    const sub=KT_TMODO==='todos'&&GS.length?`<small>${GS.length} confronto${GS.length>1?'s':''}<span class="ttSc"> na temporada</span></small>`:'';
+    const faixa=(s,c,lado)=>`<div class="ttFaixa tt${lado}" style="background:${grad(c)};color:${txt2(c)}"><img class="ttEsc" src="${escudo(s)}" alt="">${esc(D.curto[s]||s)}</div>`;
+    return `<div class="ttPalco">
+      <div class="ttTopo">${faixa(sa,ca,'A')}
+        <div class="ttCentro"><div class="ttTag"><select onchange="KT_TMODO=this.value;kt_render(KT_ULT)"><option value="todos"${KT_TMODO==='todos'?' selected':''}>Todos os confrontos</option><option value="jogo"${KT_TMODO==='jogo'?' selected':''}>Este jogo</option></select></div><div class="ttPl">${pl}</div>${sub}</div>
+        ${faixa(sb,cb,'B')}</div>
+      <div class="ttGrade"><div class="ttCat">Categoria <span>${esc(cat)}</span></div>${semConfr?'<div class="ttAviso">Ainda não há outros confrontos destes times com estatística do Klaus TV. Mostrando este jogo.</div>':''}${lin}</div>
+      <div class="ttEspaco"></div></div>`;
   }
   if(KT_ABA==='cla'){
     if(!KT_CLA||!KT_NOVO.cla){ kt_abaCarregar('cla'); if(!KT_CLA) return kt_carregando('a classificação'); }
