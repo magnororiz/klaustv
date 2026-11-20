@@ -1103,7 +1103,12 @@ async function kt_appInstalar(){ if(!kt_appPrompt) return; kt_appPrompt.prompt()
   if(!instalado) document.getElementById('btnApp').style.display='';
   window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); kt_appPrompt=e; });
   window.addEventListener('appinstalled',()=>{ document.getElementById('btnApp').style.display='none'; });
-  if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+  if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).catch(()=>{}));
+  // app sempre igual ao site (Magno, 20/11/2026): ao voltar para o app, confere (leve, só o cabeçalho) se saiu versão nova da página e recarrega sozinho
+  (function(){ let marca=null; const ver=()=>fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>r.headers.get('etag')||r.headers.get('last-modified')).catch(()=>null);
+    ver().then(v=>marca=v);
+    document.addEventListener('visibilitychange',()=>{ if(document.hidden||!marca) return; ver().then(v=>{ if(v&&v!==marca){ marca=v; location.reload(); } });
+      if(navigator.serviceWorker) navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{}); }); })();
 })();
 </script>
 <script src="sumula.js"></script>
