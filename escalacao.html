@@ -103,8 +103,26 @@ function tipo(t){ TIPO=t; $('tpP').classList.toggle('on',t==='P'); $('tpA').clas
   $('selJ').innerHTML=ls.length?ls.map(j=>`<option value="${esc(j.id)}">${esc(rotulo(j))}</option>`).join(''):`<option value="">Nenhum jogo ${t==='A'?'anterior':'montado para os próximos dias'}</option>`;
   if(J&&ls.some(x=>x.id===J.id)) $('selJ').value=J.id; dica(); }
 function dica(){ const id=$('selJ').value; const base=location.origin+location.pathname;
-  $('dica').innerHTML=id?`<b>No OBS</b> (fonte <b>Navegador</b>, 1920 × 1080), cole a <b>URL de saída</b> deste jogo (não pede login):<br><code id="urlObs">${esc(base+'?jogo='+encodeURIComponent(id)+'&obs=1')}</code><br><button class="cp" onclick="navigator.clipboard&&navigator.clipboard.writeText($('urlObs').textContent);this.textContent='Copiado ✓'">Copiar URL de saída</button><br>A troca entre Casa e Visitante é feita nas abas (no OBS, pelo botão <b>Interagir</b>). O fundo fica transparente: aparece a câmera.`:''; }
-function copiaSaida(b){ if(!J) return; const u=location.origin+location.pathname.replace(/\.html$/,'')+'?jogo='+encodeURIComponent(J.id)+'&obs=1'; (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{ b.textContent='✓ Copiado! Cole no OBS (fonte Navegador)'; setTimeout(()=>b.textContent='📋 Copiar URL de saída (OBS)',2500); }).catch(()=>prompt('Copie a URL de saída:',u)); }
+  $('dica').innerHTML=id?`<b>No OBS</b> (fonte <b>Navegador</b>, 1920 × 1080), cole a <b>URL de saída</b> deste jogo (não pede login):<br>clique em <b>Mostrar escalação</b> e depois no botão laranja <b>📋 Copiar URL de saída (OBS)</b>, no canto de baixo.<br>A troca entre Casa e Visitante é feita nas abas (no OBS, pelo botão <b>Interagir</b>). O fundo fica transparente: aparece a câmera.`:''; }
+/* URL de saída com os dados dentro (Magno, 20/11/2026): o navegador do OBS não consegue buscar no servidor do Google ("Failed to fetch"),
+   então o Chrome (com login) monta a escalação e põe tudo no endereço, depois do #. No OBS a página não busca nada na internet. */
+const b64e=o=>{ const by=new TextEncoder().encode(JSON.stringify(o)); let s=''; by.forEach(c=>s+=String.fromCharCode(c)); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); };
+const b64d=t=>{ t=t.replace(/-/g,'+').replace(/_/g,'/'); while(t.length%4) t+='='; const s=atob(t); const by=new Uint8Array(s.length); for(let i=0;i<s.length;i++) by[i]=s.charCodeAt(i); return JSON.parse(new TextDecoder().decode(by)); };
+const fid=u=>{ const m=/\/d\/([^=/?]+)/.exec(String(u||'')); return m?m[1]:''; };
+const furl=id=>id?'https://lh3.googleusercontent.com/d/'+id+'=w600':'';
+function pacote(){ const m=J.meta||{}; const o={v:1,id:J.id,c:J.categoria,d:J.dataHora};
+  ['A','B'].forEach(l=>{ const t=m['time'+l]||{}, sig=t.sigla||(l==='A'?J.timeA:J.timeB), kTec='TEC-'+sig+'-'+String(J.categoria||'').replace(/[^A-Za-z0-9]/g,'');
+    o[l]={s:sig,t:((t.tecnico&&t.tecnico.nome)||APS[kTec]||'').trim(),tf:fid(FOTOS[kTec]),
+      j:(t.atletas||[]).map(a=>{ const x=somaTemp(a.reg)||{qtd:0}; return [String(a.reg),a.nome||'',a.numero||'',APS[a.reg]||a.apelido||'',fid(FOTOS[a.reg]),x.qtd||0,x.pts||0,x.reb||0,x.ast||0,x.stl||0,x.blk||0,x.eff||0,x.mvp||0]; })}; });
+  return b64e(o); }
+function dePacote(t){ const o=b64d(t); FOTOS={}; APS={}; PRE={}; const meta={};
+  ['A','B'].forEach(l=>{ const x=o[l]||{j:[]}; const kTec='TEC-'+x.s+'-'+String(o.c||'').replace(/[^A-Za-z0-9]/g,''); if(x.tf) FOTOS[kTec]=furl(x.tf);
+    meta['time'+l]={sigla:x.s,tecnico:{nome:x.t||''},atletas:x.j.map(r=>{ if(r[4]) FOTOS[r[0]]=furl(r[4]); if(r[3]) APS[r[0]]=r[3];
+      PRE[r[0]]={qtd:r[5],pts:r[6],reb:r[7],ast:r[8],stl:r[9],blk:r[10],eff:r[11],mvp:r[12]}; return {reg:r[0],nome:r[1],numero:r[2]}; })}; });
+  J={id:o.id,categoria:o.c,dataHora:o.d,timeA:meta.timeA.sigla,timeB:meta.timeB.sigla,meta}; TEMP={ok:true,ks:[],jogos:[]}; }
+function copiaSaida(b){ if(!J) return; if(!TEMP){ b.textContent='Aguarde: carregando as estatísticas…'; setTimeout(()=>copiaSaida(b),800); return; }
+  const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1#d='+pacote();
+  (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{ b.textContent='✓ Copiado! Cole no OBS (fonte Navegador)'; setTimeout(()=>b.textContent='📋 Copiar URL de saída (OBS)',2500); }).catch(()=>prompt('Copie a URL de saída:',u)); }
 function painel(on){ $('painel').classList.toggle('fora',!on); if(on&&!LISTA.length) carregarLista(); }
 function escolher(){ const id=$('selJ').value; if(!id) return; try{ localStorage.setItem('kt_esc_jogo',id); }catch(e){} const u=new URL(location); u.searchParams.set('jogo',id); history.replaceState(null,'',u); painel(false); abrir(id); }
 document.addEventListener('change',e=>{ if(e.target.id==='selJ') dica(); });
@@ -139,7 +157,8 @@ function tecFicha(l){ const t=KT_T[l]; const c=$('fichaC'); c.style.setProperty(
 function aba(l){ ['A','B'].forEach(x=>{ $('t'+x).classList.toggle('on',x===l); $('b'+x).classList.toggle('on',x===l); }); $('ficha').classList.remove('on'); }
 
 // ficha: estatística geral do atleta na temporada (jogos narrados pelo Klaus TV)
-function somaTemp(reg){ if(!TEMP||!TEMP.ok) return null; const KS=TEMP.ks; let o={qtd:0}; KS.forEach(k=>o[k]=0); let mvp=0;
+let PRE=null; // estatísticas que vieram prontas dentro da URL de saída (OBS)
+function somaTemp(reg){ if(PRE) return PRE[String(reg)]||{qtd:0,pts:0,reb:0,ast:0,stl:0,blk:0,eff:0,mvp:0}; if(!TEMP||!TEMP.ok) return null; const KS=TEMP.ks; let o={qtd:0}; KS.forEach(k=>o[k]=0); let mvp=0;
   (TEMP.jogos||[]).forEach(g=>{ const ps=g.p.map(r=>{ const s={}; KS.forEach((k,i)=>s[k]=+r[3+i]||0); return {reg:String(r[0]),s}; });
     const me=ps.find(p=>p.reg===String(reg)); if(!me) return; o.qtd++; KS.forEach(k=>o[k]+=me.s[k]);
     const top=ps.slice().sort((a,b)=>(b.s.eff-a.s.eff)||(b.s.pts-a.s.pts))[0]; if(top&&top.reg===String(reg)&&top.s.eff>0) mvp++; });
@@ -155,7 +174,9 @@ function ficha(l,i){ const t=KT_T[l], a=t.js[i]; const ap=APS[a.reg]||a.apelido|
   $('ficha').classList.add('on'); }
 
 let ULT=''; try{ ULT=localStorage.getItem('kt_esc_jogo')||''; }catch(e){}
-if(Q.get('jogo')) abrir(Q.get('jogo')); else if(ULT) abrir(ULT); else painel(true); // abre o último jogo escolhido
+const HD=/[#&]d=([^&]+)/.exec(location.hash);
+if(HD){ try{ dePacote(HD[1]); document.body.classList.add('temJogo'); monta(); }catch(e){ $('times').innerHTML='<div class="msg">Endereço incompleto. Copie de novo a URL de saída no site.</div>'; } }
+else if(Q.get('jogo')) abrir(Q.get('jogo')); else if(ULT) abrir(ULT); else painel(true); // abre o último jogo escolhido
 </script>
 </body>
 </html>
