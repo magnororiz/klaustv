@@ -10,7 +10,7 @@
 #painel .ok{width:100%;padding:11px;border:none;border-radius:8px;background:#e8590c;color:#fff;font-weight:900;font-size:15px;cursor:pointer;}
 #painel .dica{font-size:12.5px;color:#9fb0c8;line-height:1.45;margin-top:12px;}#painel .dica code{background:#16233b;padding:2px 6px;border-radius:5px;color:#ffd54f;word-break:break-all;}
 #painel .cp{margin-top:6px;padding:6px 10px;border-radius:6px;border:1px solid #2b3d5c;background:#16233b;color:#fff;cursor:pointer;font-weight:700;}
-#engr{position:fixed;left:8px;bottom:8px;z-index:15;width:34px;height:34px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;font-size:17px;cursor:pointer;opacity:.35;}#engr:hover{opacity:1;}body.obs #engr{display:none;}
+#engr{position:fixed;left:8px;bottom:8px;z-index:15;width:34px;height:34px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;font-size:17px;cursor:pointer;opacity:.35;}#engr:hover{opacity:1;}body.obs #engr{opacity:0;}body.obs #engr:hover{opacity:1;} /* no OBS a engrenagem só aparece com o mouse em cima (janela Interagir) */
 .msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:12px 18px;border-radius:10px;background:rgba(0,0,0,.7);font-weight:700;}
 </style>
 <script>
@@ -105,7 +105,7 @@ function status(j){ if(j.status==='FINAL') return 'final'; const d=dataJ(j); if(
 let LISTA=[], TIPO='P', J=null, FOTOS={}, APS={}, TEMP=null;
 const Q=new URLSearchParams(location.search);
 if(Q.has('teste')) document.body.classList.add('teste');
-if(Q.has('obs')) document.body.classList.add('obs');
+if(Q.has('obs')||window.obsstudio) document.body.classList.add('obs'); // dentro do OBS o fundo fica transparente sozinho
 
 function rotulo(j){ const d=dataJ(j); return (j.categoria||'Avulso')+' · '+(D.curto[j.timeA]||j.timeA)+' x '+(D.curto[j.timeB]||j.timeB)+(d?' · '+d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''); }
 async function carregarLista(){ const r=await api({acao:'aoVivoLista',categoria:''}); LISTA=(r&&r.ok&&r.jogos)||[]; tipo(TIPO); }
@@ -115,9 +115,9 @@ function tipo(t){ TIPO=t; $('tpP').classList.toggle('on',t==='P'); $('tpA').clas
   $('selJ').innerHTML=ls.length?ls.map(j=>`<option value="${esc(j.id)}">${esc(rotulo(j))}</option>`).join(''):`<option value="">Nenhum jogo ${t==='A'?'anterior':'montado para os próximos dias'}</option>`;
   if(J&&ls.some(x=>x.id===J.id)) $('selJ').value=J.id; dica(); }
 function dica(){ const id=$('selJ').value; const base=location.origin+location.pathname;
-  $('dica').innerHTML=id?`<b>No OBS</b> (fonte <b>Navegador</b>, 1920 × 1080), use este endereço:<br><code id="urlObs">${esc(base+'?jogo='+encodeURIComponent(id)+'&obs=1')}</code><br><button class="cp" onclick="navigator.clipboard&&navigator.clipboard.writeText($('urlObs').textContent);this.textContent='Copiado ✓'">Copiar endereço</button><br>A troca entre Casa e Visitante é feita nas abas (no OBS, pelo botão <b>Interagir</b>). O fundo fica transparente: aparece a câmera.`:''; }
+  $('dica').innerHTML=id?`<b>No OBS</b> (fonte <b>Navegador</b>, 1920 × 1080), use sempre o endereço <code>klaustv.com/escalacao.html</code>: ele abre o último jogo escolhido aqui. Endereço fixo só deste jogo:<br><code id="urlObs">${esc(base+'?jogo='+encodeURIComponent(id)+'&obs=1')}</code><br><button class="cp" onclick="navigator.clipboard&&navigator.clipboard.writeText($('urlObs').textContent);this.textContent='Copiado ✓'">Copiar endereço</button><br>A troca entre Casa e Visitante é feita nas abas (no OBS, pelo botão <b>Interagir</b>). O fundo fica transparente: aparece a câmera.`:''; }
 function painel(on){ $('painel').classList.toggle('fora',!on); if(on&&!LISTA.length) carregarLista(); }
-function escolher(){ const id=$('selJ').value; if(!id) return; const u=new URL(location); u.searchParams.set('jogo',id); history.replaceState(null,'',u); painel(false); abrir(id); }
+function escolher(){ const id=$('selJ').value; if(!id) return; try{ localStorage.setItem('kt_esc_jogo',id); }catch(e){} const u=new URL(location); u.searchParams.set('jogo',id); history.replaceState(null,'',u); painel(false); abrir(id); }
 document.addEventListener('change',e=>{ if(e.target.id==='selJ') dica(); });
 
 async function abrir(id){ $('times').innerHTML='<div class="msg">Carregando a escalação…</div>'; $('abas').innerHTML='';
@@ -165,7 +165,8 @@ function ficha(l,i){ const t=KT_T[l], a=t.js[i]; const ap=APS[a.reg]||a.apelido|
     ${st?`<div class="g">${st.map(([s,v])=>`<div><b>${v}</b><span>${s}</span></div>`).join('')}</div>`:`<div style="padding:14px;text-align:center;color:#666">${TEMP?'Sem estatísticas da temporada agora.':'Carregando as estatísticas…'}</div>`}`;
   $('ficha').classList.add('on'); }
 
-if(Q.get('jogo')) abrir(Q.get('jogo')); else painel(true);
+let ULT=''; try{ ULT=localStorage.getItem('kt_esc_jogo')||''; }catch(e){}
+if(Q.get('jogo')) abrir(Q.get('jogo')); else if(ULT) abrir(ULT); else painel(true); // abre o último jogo escolhido
 </script>
 </body>
 </html>
