@@ -22,6 +22,7 @@ function doPost(e) {
   if (p.acao === 'dadosCestinhas2025') return responder(dadosCestinhas2025());
   if (p.acao === 'dadosSumulas') return responder(dadosSumulas());
   if (p.acao === 'historicoKT') return responder(historicoKT());
+  if (p.acao === 'atletasKT') return responder(atletasKT(p.categoria, p.ano));
   if (p.acao === 'dadosClassificacao') return responder(dadosClassificacao());
   if (p.acao === 'dadosCalendario') return responder(dadosCalendario());
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
@@ -969,4 +970,25 @@ function historicoKT() {
   });
   const res = { ok: true, jogos: nj, crit: KT_CRIT.map(x => x[1]), itens: KT_ITENS, confrontos: G, fotos: mapaFotos(), apelidos: mapaApelidos(), agora: new Date().toISOString() };
   cachePut('hkt4', res, 120); return res;
+}
+
+/* ================= ATLETAS NA TEMPORADA (abas dos times no Ao vivo) =================
+ * Todos os jogos narrados de uma categoria numa temporada (ano), com os números de cada atleta por jogo.
+ * O Ao vivo soma e calcula os prêmios (mesmas regras de sumula.js). Só leitura: não grava nada. */
+const KT_ATL_KS = ['pts', 'twoMade', 'twoMiss', 'threeMade', 'threeMiss', 'ftMade', 'ftMiss', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'eff'];
+function atletasKT(categoria, ano) {
+  const cat = String(categoria || ''), a = String(ano || new Date().getFullYear());
+  const ck = 'akt1_' + cat.replace(/[^A-Za-z0-9]/g, '') + '_' + a; const hit = cacheGet(ck); if (hit) return hit;
+  const G = [];
+  lerJogos().forEach(x => {
+    if (String(x.categoria || '') !== cat) return;
+    const d = String(x.dataHora instanceof Date ? x.dataHora.toISOString() : x.dataHora || '').slice(0, 16);
+    if (d.slice(0, 4) !== a) return;
+    const m = jsonOu(x.meta, {}), st = jsonOu(x.stats, {});
+    const ps = []; ['A', 'B'].forEach(l => { const tm = m['time' + l] || {}; (tm.atletas || []).forEach(at => { if (!at.reg) return; const s = ktNum((st[l] || {})[at.reg]); ps.push([String(at.reg), l, tm.sigla || ''].concat(KT_ATL_KS.map(k => s[k]))); }); });
+    if (!ps.some(p => p.slice(3).some((v, i) => v && KT_ATL_KS[i] !== 'eff'))) return; // jogo sem estatística
+    G.push({ id: x.id, d: d, p: ps, prem: Array.isArray(st.prem) ? st.prem : null });
+  });
+  const res = { ok: true, categoria: cat, ano: a, ks: KT_ATL_KS, jogos: G, agora: new Date().toISOString() };
+  cachePut(ck, res, 120); return res;
 }
