@@ -9,20 +9,20 @@
 <style>
 /* PRÉVIA (20/11/2026): página Escalação — dados de exemplo, ainda sem ligação com o Montar Jogo */
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif;}
-.palco{position:relative;height:100vh;aspect-ratio:765/1024;max-width:100vw;margin:0 auto;overflow:hidden;background:#000;}
-.palco .quadra{position:absolute;inset:0;background:url(fundo_escalacao.jpg) center/100% 100% no-repeat;}
+html,body{margin:0;height:100%;background:transparent;color:#fff;font-family:Arial,Helvetica,sans-serif;overflow:hidden;}
+body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::before{content:'(aqui aparece a imagem da câmera do Klaus)';position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font:700 22px Arial;color:rgba(255,255,255,.18);}
+.palco{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,177.78vh);aspect-ratio:16/9;overflow:hidden;}
+.qd{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);height:76%;aspect-ratio:765/855;background:url(quadra_escalacao.webp) center/100% 100% no-repeat;}
 .time{position:absolute;inset:0;display:none;}
 .time.on{display:block;}
-.escGrande{position:absolute;left:50%;top:5%;transform:translateX(-50%);height:40%;opacity:.5;filter:drop-shadow(0 0 30px rgba(0,0,0,.8));pointer-events:none;}
+.escGrande{position:absolute;left:50%;top:4%;transform:translateX(-50%);height:34%;opacity:.45;filter:drop-shadow(0 0 30px rgba(0,0,0,.8));pointer-events:none;}
 .abas{position:absolute;left:0;right:0;top:1.6%;display:flex;justify-content:center;gap:8px;z-index:5;}
 .abas button{font:700 clamp(12px,2vh,18px) 'Oswald',Arial;letter-spacing:1.5px;text-transform:uppercase;padding:.5em 1.1em;border-radius:999px;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.55);color:#ddd;cursor:pointer;display:flex;align-items:center;gap:.5em;}
-.abas button img{height:1.6em;}
 .abas button.on{background:var(--cor);color:var(--txt);border-color:#fff;}
-.cab{position:absolute;left:0;right:0;top:27%;text-align:center;font:700 clamp(18px,3.4vh,34px) 'Oswald',Arial;letter-spacing:2px;text-transform:uppercase;text-shadow:0 2px 8px #000,0 0 2px #000;}
-.tec{position:absolute;left:2.5%;top:8%;display:flex;align-items:center;gap:10px;z-index:4;}.tec .tf{width:clamp(48px,9vh,92px);aspect-ratio:1;border-radius:50%;border:3px solid var(--cor);background:#1a2233 center/cover;box-shadow:0 4px 12px rgba(0,0,0,.7);}.tec div{font:700 clamp(12px,2vh,20px) Arial;text-shadow:0 2px 6px #000;}.tec small{display:block;font:700 clamp(10px,1.4vh,13px) 'Oswald',Arial;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;}
+.cab{position:absolute;left:0;right:0;top:12%;z-index:2;text-align:center;font:700 clamp(18px,3.4vh,34px) 'Oswald',Arial;letter-spacing:2px;text-transform:uppercase;text-shadow:0 2px 8px #000,0 0 2px #000;}
+.tec{position:absolute;left:2%;top:3%;display:flex;align-items:center;gap:10px;z-index:4;}.tec .tf{width:clamp(30px,5.5vh,56px);aspect-ratio:1;border-radius:50%;border:3px solid var(--cor);background:#1a2233 center/cover;box-shadow:0 4px 12px rgba(0,0,0,.7);}.tec div{font:700 clamp(12px,2vh,20px) Arial;text-shadow:0 2px 6px #000;}.tec small{display:block;font:700 clamp(10px,1.4vh,13px) 'Oswald',Arial;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;}
 .cab small{display:block;font:600 clamp(11px,1.6vh,16px) Arial;letter-spacing:.5px;text-transform:none;opacity:.9;}
-.jog{position:absolute;transform:translate(-50%,-50%) scale(var(--e,1));display:flex;flex-direction:column;align-items:center;cursor:pointer;width:13%;}
+.jog{position:absolute;transform:translate(-50%,-50%) scale(var(--e,1));display:flex;flex-direction:column;align-items:center;cursor:pointer;width:14%;}
 .jog .foto{position:relative;width:100%;aspect-ratio:1;border-radius:50%;border:3px solid var(--cor);background:#1a2233 center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.7);}
 .jog .num{position:absolute;right:-8%;bottom:-4%;min-width:38%;padding:2px 4px;border-radius:8px;background:var(--cor);color:var(--txt);font:700 clamp(11px,1.8vh,18px) 'Oswald',Arial;text-align:center;border:2px solid #fff;}
 .jog .nm{margin-top:5px;padding:3px 8px;border-radius:7px;background:rgba(0,0,0,.78);font:700 clamp(10px,1.55vh,16px) Arial;white-space:nowrap;text-align:center;line-height:1.15;}
@@ -42,13 +42,13 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Arial,Helv
 </style>
 </head>
 <body>
-<div class="palco" id="palco"><div class="quadra"></div><div id="times"></div>
+<div class="palco" id="palco"><div id="times"></div>
   <div class="abas" id="abas"></div>
   <div id="ficha" onclick="if(event.target===this)this.classList.remove('on')"><div class="c" id="fichaC"></div></div>
 </div>
 <script>
 // posições dos 12 na quadra (em % do palco) e escala pela perspectiva (mais longe = menor)
-const POS=[[26,40,.78],[50,38,.78],[74,40,.78],[14,53,.86],[38,52,.86],[62,52,.86],[86,53,.86],[22,67,.94],[50,66,.94],[78,67,.94],[34,82,1],[66,82,1]];
+const POS=[[26,28,.78],[50,26,.78],[74,28,.78],[14,44,.86],[38,42.5,.86],[62,42.5,.86],[86,44,.86],[22,60.5,.94],[50,59.3,.94],[78,60.5,.94],[34,78,1],[66,78,1]]; // % da quadra
 const EX={ // exemplo só para a prévia
   A:{nome:'Flamengo',sig:'CRF',cor:'#c4161c',txt:'#fff',tec:'Técnico de exemplo',js:[['4','Heitor Roriz','Tozo'],['5','Lucas Almeida',''],['6','Pedro Henrique','PH'],['7','Gabriel Souza',''],['8','Rafael Lima','Rafa'],['9','João Victor','JV'],['10','Matheus Costa',''],['11','Bruno Dias',''],['12','Enzo Ribeiro',''],['13','Davi Santos','Davizinho'],['14','Arthur Melo',''],['15','Miguel Rocha','']]},
   B:{nome:'Jacarepaguá',sig:'JTC',cor:'#0b4ea2',txt:'#fff',tec:'Técnico de exemplo',js:[['1','Caio Nunes',''],['2','Igor Pires',''],['3','Leo Martins','Leozinho'],['5','Vitor Gomes',''],['7','Samuel Reis',''],['8','Theo Cardoso',''],['9','Nicolas Prado','Nico'],['10','Felipe Moura',''],['11','Diego Farias',''],['12','Kauã Teixeira',''],['13','Otávio Lins',''],['14','Ruan Castro','']]}};
@@ -58,8 +58,8 @@ function monta(){
     return `<div class="time${l==='A'?' on':''}" id="t${l}" style="--cor:${t.cor};--txt:${t.txt}"><img class="escGrande" src="escudos/${t.sig}.png" alt="">
       <div class="tec"><div class="tf" style="background-image:url(bola_fiba.png)"></div><div><small>Técnico</small>${esc(t.tec)}</div></div>
       <div class="cab">${esc(t.nome)}</div>
-      ${t.js.map((j,i)=>{ const [x,y,e]=POS[i]; return `<div class="jog" style="left:${x}%;top:${y}%;--e:${e}" onclick="ficha('${l}',${i})"><div class="foto" style="background-image:url(bola_fiba.png)"><span class="num">${esc(j[0])}</span></div><div class="nm">${esc(j[1])}${j[2]?'<small>'+esc(j[2])+'</small>':''}</div></div>`; }).join('')}</div>`; }).join('');
-  document.getElementById('abas').innerHTML=['A','B'].map(l=>`<button id="b${l}" class="${l==='A'?'on':''}" style="--cor:${EX[l].cor};--txt:${EX[l].txt}" onclick="aba('${l}')"><img src="escudos/${EX[l].sig}.png" alt="">${l==='A'?'Casa':'Visitante'} · ${esc(EX[l].nome)}</button>`).join('');
+      <div class="qd">${t.js.map((j,i)=>{ const [x,y,e]=POS[i]; return `<div class="jog" style="left:${x}%;top:${y}%;--e:${e}" onclick="ficha('${l}',${i})"><div class="foto" style="background-image:url(bola_fiba.png)"><span class="num">${esc(j[0])}</span></div><div class="nm">${esc(j[1])}${j[2]?'<small>'+esc(j[2])+'</small>':''}</div></div>`; }).join('')}</div></div>`; }).join('');
+  document.getElementById('abas').innerHTML=['A','B'].map(l=>`<button id="b${l}" class="${l==='A'?'on':''}" style="--cor:${EX[l].cor};--txt:${EX[l].txt}" onclick="aba('${l}')">${l==='A'?'Casa':'Visitante'} · ${esc(EX[l].nome)}</button>`).join('');
 }
 function aba(l){ ['A','B'].forEach(x=>{ document.getElementById('t'+x).classList.toggle('on',x===l); document.getElementById('b'+x).classList.toggle('on',x===l); }); document.getElementById('ficha').classList.remove('on'); }
 function ficha(l,i){ const t=EX[l], j=t.js[i];
@@ -68,6 +68,7 @@ function ficha(l,i){ const t=EX[l], j=t.js[i];
   c.innerHTML=`<div class="t"><div class="f" style="background-image:url(bola_fiba.png)"></div><div><b>${esc(j[1])}</b>${j[2]?'<i>'+esc(j[2])+'</i>':''}<div style="margin-top:6px;font-weight:800">#${esc(j[0])} · ${esc(t.nome)}</div></div></div>
     <div class="tit">Temporada 2026 · jogos narrados (exemplo)</div><div class="g">${st.map(([s,v])=>`<div><b>${String(v).replace('.',',')}</b><span>${s}</span></div>`).join('')}</div>`;
   document.getElementById('ficha').classList.add('on'); }
+if(new URLSearchParams(location.search).has('teste')) document.body.classList.add('teste');
 monta();
 </script>
 </body>
