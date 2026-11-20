@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klaus TV · Atleta FBERJ</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+
+body{font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;margin:0;padding:0 16px 16px 16px;}
+.pag{max-width:1200px;margin:0 auto;}
+.cond{font-family:'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;}
+.filtro{background:#0f1a2e;border:1px solid #1e3a66;border-radius:14px;padding:16px;margin-bottom:16px;}
+.filtro .topo{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;}
+.filtro h2{margin:0 8px 6px 0;font-size:22px;}
+.filtro select,.filtro input{padding:9px 12px;border-radius:8px;border:none;font-size:15px;font-weight:700;width:100%;box-sizing:border-box;}
+.fl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#9fb3c8;min-width:150px;}
+.fl.curto{min-width:100px;}
+.fl.grande{flex:1;min-width:220px;}
+.intro{color:#c8d4e2;font-size:14px;line-height:1.45;margin:10px 0 0 0;}
+.filtro .fed{font-size:12.5px;color:#9fb3c8;text-align:right;margin-top:8px;}.filtro .fed b{color:#ffd54f;}
+.atual{font-size:12px;color:#7f93a8;margin-top:10px;}
+.vazio{color:#9fb3c8;font-size:15px;padding:30px 10px;text-align:center;}
+.esc{width:30px;height:30px;object-fit:contain;flex:0 0 30px;}
+.ini{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#1e5bd8;color:#fff;font-weight:800;font-size:12px;flex:0 0 30px;}
+
+.podio{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+.pd{background:#fff;color:#111;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;align-items:center;padding:14px 10px 12px;position:relative;border-top:6px solid var(--c);}
+.pd .pos{position:absolute;top:8px;left:10px;font-size:26px;}
+.pd .ft{width:86px;height:86px;border-radius:50%;object-fit:cover;background:#eee;}
+.pd .n{font-weight:800;font-size:16px;text-align:center;margin-top:8px;line-height:1.15;}
+.pd .ap{font-size:12px;color:#777;font-weight:700;}
+.pd .tm{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#444;margin-top:6px;}
+.pd .tm .esc{width:22px;height:22px;flex-basis:22px;}
+.pd .v{font-family:'Oswald','Arial Narrow',Arial;font-size:40px;font-weight:700;line-height:1;margin-top:8px;}
+.pd .v small{font-size:13px;color:#666;letter-spacing:1px;}
+.pd .s{font-size:12px;color:#555;font-weight:700;margin-top:4px;}
+@media(max-width:700px){.podio{grid-template-columns:1fr;}.pd{flex-direction:row;gap:12px;padding:10px 12px;align-items:center;}.pd .pos{position:static;font-size:22px;}.pd .ft{width:56px;height:56px;}.pd .info{flex:1;}.pd .n{text-align:left;margin-top:0;}.pd .v{margin-top:0;font-size:30px;}}
+.box{background:#fff;color:#111;border-radius:10px;overflow:hidden;overflow-x:auto;}
+table.rk{width:100%;border-collapse:collapse;font-size:14px;}
+table.rk th{font-size:11px;color:#333;padding:8px 6px;text-align:center;border-bottom:1px solid #e4e7ec;text-transform:uppercase;}
+table.rk td{padding:6px;text-align:center;border-bottom:1px solid #eef0f3;font-weight:700;}
+table.rk tr:nth-child(even) td{background:#f5f6f8;}
+table.rk .l{text-align:left;}
+table.rk .pos{font-family:'Oswald','Arial Narrow',Arial;font-size:17px;width:44px;}
+table.rk .ft{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#eee;vertical-align:middle;}
+table.rk .nm{line-height:1.15;}
+table.rk .nm small{display:block;color:#777;font-size:11px;font-weight:700;}
+table.rk .tm{display:flex;align-items:center;gap:6px;white-space:nowrap;}
+table.rk .tm .esc{width:24px;height:24px;flex-basis:24px;}
+table.rk .ordOn{background:rgba(255,213,79,.25)!important;}
+table.rk th.ordOn{box-shadow:inset 0 -3px 0 #ffb300;}
+table.rk tr.hl td{background:#fff6d6!important;}
+table.rk td.mat{color:#1e5bd8;font-weight:600;font-size:.92em;white-space:nowrap;}
+@media(max-width:600px){table.rk .hf{display:none;}table.rk{font-size:12.5px;}table.rk .tm span{display:none;}}
+.mais{display:block;width:100%;padding:11px;border:none;background:#e9ecf1;color:#222;font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Oswald','Arial Narrow',Arial;}
+/*ktMenuCSS*/
+html,body{overflow-x:hidden;}
+body{padding-top:0 !important;}
+.ktMenu{position:relative;width:100vw;left:50%;margin-left:-50vw;height:150px;margin-bottom:18px;overflow:hidden;
+  background:linear-gradient(90deg,#0d1a33 0%,#0a1428 45%,#1d0f0a 100%);
+  font-family:'Oswald','Arial Narrow',Arial,sans-serif;text-align:left;}
+.ktMenu canvas{position:absolute;inset:0;width:100%;height:100%;}
+.ktMenu .cristo{position:absolute;left:0;top:0;height:150px;width:auto;z-index:4;-webkit-mask-image:linear-gradient(90deg,#000 80%,rgba(0,0,0,.35));mask-image:linear-gradient(90deg,#000 85%,rgba(0,0,0,.4));}
+.ktMenu .bola{position:absolute;right:14px;top:6px;height:136px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));z-index:4;}
+.ktMenu .bola.logoKT{height:142px;top:3px;right:10px;}
+.ktMenu .miolo{position:absolute;left:0;right:0;top:0;bottom:38px;z-index:2;display:flex;align-items:center;justify-content:center;}
+.ktMenu .marca{font-weight:700;font-size:34px;letter-spacing:3px;color:#fff;text-transform:uppercase;white-space:nowrap;text-decoration:none;text-shadow:0 2px 10px rgba(0,0,0,.7);}
+.ktMenu .marca span{color:#1e90ff;}
+.ktMenu .marca{text-align:center;line-height:1;}
+.ktMenu .marca small{display:block;font-family:'Barlow',Arial,sans-serif;font-size:12px;font-weight:600;letter-spacing:4px;color:#ffd54f;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,.8);}
+.ktFaixa a.vivo:before{content:'';width:8px;height:8px;border-radius:50%;background:#ff3b30;margin-right:7px;box-shadow:0 0 6px #ff3b30;animation:ktPisca 1.2s infinite;}
+@keyframes ktPisca{50%{opacity:.3;}}
+.ktFaixa{position:absolute;left:0;right:0;bottom:0;height:38px;z-index:3;display:flex;align-items:stretch;gap:4px;padding-left:170px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0,rgba(30,91,216,0) 100px,rgba(30,91,216,.95) 170px,rgba(30,91,216,.95) calc(100% - 170px),rgba(30,91,216,0) calc(100% - 70px));
+  border-top:1px solid rgba(255,255,255,.12);}
+.ktFaixa a{display:flex;align-items:center;padding:0 16px;color:#fff;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:3px solid transparent;transition:.15s;}
+.ktFaixa a:hover{background:rgba(255,255,255,.12);}
+.ktFaixa a.soDono{display:none;}
+html.ktDono .ktFaixa a.soDono{display:flex;}
+.ktFaixa a.ativo{border-bottom-color:#ffd54f;color:#ffd54f;background:rgba(255,255,255,.16);box-shadow:inset 0 -3px 0 #ffd54f;}
+.ktFaixa{overflow-x:auto;scrollbar-width:none;}
+.ktFaixa a{white-space:nowrap;}
+.ktFaixa{padding-right:150px;}
+@media(min-width:821px){.ktFaixa a{padding:0 11px;font-size:14px;letter-spacing:1px;}}
+@media(min-width:821px) and (max-width:1180px){.ktFaixa a{padding:0 8px;font-size:12.5px;letter-spacing:.5px;}}
+@media(max-width:820px){.ktFaixa{padding-right:110px;}}
+@media(max-width:480px){.ktFaixa{padding-right:80px;}}
+@media(max-width:820px){.ktMenu .marca small{font-size:9px;letter-spacing:2px;margin-top:4px;}.ktMenu{height:130px;}.ktMenu .cristo{height:130px;}.ktMenu .bola{height:112px;right:8px;top:4px;}.ktMenu .marca{font-size:24px;}
+  .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
+@media(max-width:480px){.ktMenu .bola{height:82px !important;top:6px !important;right:6px !important;}.ktMenu .miolo{padding-right:80px;}.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
+/*fim*//*ktFooterCSS*/
+.ktFooter{position:relative;width:100vw;left:50%;margin-left:-50vw;margin-top:40px;margin-bottom:-16px;color:#c9d4e2;font-family:'Barlow',Arial,sans-serif;font-size:14px;text-align:left;
+  background:linear-gradient(180deg,#0a1428 0%,#070d1b 100%);border-top:3px solid #1e5bd8;}
+.ktFooter .lema{font-family:'Oswald','Arial Narrow',Arial;text-align:center;font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:22px 16px 18px 16px;
+  background:linear-gradient(90deg,rgba(30,91,216,0) 0%,rgba(30,91,216,.25) 50%,rgba(30,91,216,0) 100%);border-bottom:1px solid rgba(255,255,255,.06);}
+.ktFooter .lema span{color:#ffd54f;}
+.ktFooter .wrap{max-width:1200px;margin:0 auto;padding:26px 20px 10px 20px;display:grid;grid-template-columns:1.25fr .8fr 1.1fr 1.5fr;gap:28px;}
+@media(max-width:980px){.ktFooter .wrap{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.ktFooter .wrap{grid-template-columns:1fr;}.ktFooter .lema{font-size:18px;letter-spacing:2px;}}
+.ktFooter h4{font-family:'Oswald','Arial Narrow',Arial;color:#fff;margin:0 0 12px 0;font-size:16px;letter-spacing:2px;text-transform:uppercase;padding-bottom:8px;border-bottom:2px solid #1e5bd8;display:inline-block;}
+.ktFooter a{color:#e6edf5;text-decoration:none;transition:.15s;}
+.ktFooter a:hover{color:#ffd54f;}
+.ktFooter .marca{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.ktFooter .marca img{width:56px;height:56px;border-radius:50%;background:#132039;border:2px solid #1e5bd8;object-fit:cover;}
+.ktFooter .marca b{font-family:'Oswald','Arial Narrow',Arial;font-size:24px;letter-spacing:2px;color:#fff;display:block;line-height:1;}
+.ktFooter .marca b span{color:#1e90ff;}
+.ktFooter .marca small{display:block;font-size:11px;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;margin-top:4px;}
+.ktFooter .sobre{line-height:1.55;color:#aebbd0;margin:0 0 14px 0;}
+.ktFooter .redes{display:flex;gap:8px;}
+.ktFooter .redes a{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#132039;border:1px solid #24406b;font-size:17px;}
+.ktFooter .redes a:hover{background:#1e5bd8;border-color:#1e5bd8;}
+.ktFooter ul{list-style:none;margin:0;padding:0;}
+.ktFooter li{margin:0 0 9px 0;}
+.ktFooter li a:before{content:'›';color:#1e90ff;font-weight:800;margin-right:8px;}
+.ktFooter .ct{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.ktFooter .ct i{font-style:normal;width:30px;height:30px;border-radius:8px;background:#132039;display:flex;align-items:center;justify-content:center;flex:0 0 30px;}
+.ktFooter .patro{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#132039,#0f1a2e);border:1px solid #24406b;border-radius:12px;padding:10px 12px;margin-top:6px;}
+.ktFooter .patro b{display:block;color:#ffd54f;font-family:'Oswald','Arial Narrow',Arial;letter-spacing:1px;font-size:15px;}
+.ktFooter .patro small{color:#aebbd0;}
+.ktFooter .local{font-size:13px;color:#fff;margin:-4px 0 8px 0;}
+.ktFooter .mapa{width:100%;height:190px;border:0;border-radius:12px;background:#101826;box-shadow:0 6px 18px rgba(0,0,0,.4);}
+.ktFooter .copy{border-top:1px solid rgba(255,255,255,.06);text-align:center;color:#6f819a;font-size:12px;padding:14px 16px 18px 16px;margin-top:14px;letter-spacing:.5px;}
+.ktFooter .copy b{color:#9fb3c8;font-weight:600;}
+/*ktAtleta*/
+.atCab{position:relative;border-radius:14px 14px 0 0;overflow:hidden;background:linear-gradient(90deg,#2c2f33,#45484d);border-bottom:4px solid var(--c);padding:18px 22px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:18px;}
+.atCab .tm{display:flex;align-items:center;gap:12px;font-size:22px;color:#fff;}.atCab .tm img{width:70px;height:70px;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6));}
+.atCab h1{margin:0;text-align:center;font:700 54px 'Oswald','Arial Narrow',Arial;letter-spacing:2px;text-transform:uppercase;line-height:1;}
+.atCab h1 small{display:block;font-size:15px;letter-spacing:3px;color:#ffd54f;margin-top:6px;}
+.abasA{display:flex;gap:4px;background:#2b2b2b;padding:10px 12px 0;}
+.abasA span{padding:10px 18px;border-radius:8px 8px 0 0;background:#e9ecf1;color:#c62828;font:700 15px 'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:2px solid transparent;border-bottom:none;}
+.abasA span.on{background:#fff;border-color:#c62828;}
+.atCorpo{background:linear-gradient(135deg,#eef3f8,#e2e9f1);color:#111;padding:22px;border-radius:0 0 14px 14px;}
+.atTopo{display:grid;grid-template-columns:1fr 230px;gap:24px;align-items:start;}
+.atNm{font:400 50px 'Oswald','Arial Narrow',Arial;line-height:1.05;margin:4px 0 14px;}.atNm b{font-weight:700;}.atNm small{display:block;font-size:15px;color:#555;letter-spacing:.5px;font-family:Arial,sans-serif;margin-top:4px;}
+.atCards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.atCard{background:linear-gradient(#3a3a3a,#262626);color:#fff;border-radius:16px;text-align:center;padding:14px 8px 12px;box-shadow:0 4px 10px rgba(0,0,0,.25);}
+.atCard span{display:block;font:700 15px 'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;}
+.atCard b{display:block;font:700 50px 'Oswald','Arial Narrow',Arial;line-height:1.05;}.atCard small{font-size:11px;color:#bbb;}
+.atFt{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:16px;background:#2d2d2d;box-shadow:0 4px 12px rgba(0,0,0,.25);cursor:zoom-in;}
+.atH{font:700 22px 'Oswald','Arial Narrow',Arial;text-transform:uppercase;letter-spacing:.5px;color:#0f2a5c;margin:22px 0 8px;}
+.atH small{display:block;font:400 12.5px Arial,sans-serif;color:#555;text-transform:none;letter-spacing:0;margin-top:3px;}
+.ficha{width:100%;border-collapse:collapse;background:#e7eaee;font-size:15px;}.ficha td{padding:11px 14px;border-bottom:1px solid #c9ced6;}.ficha td.k{color:#333;width:22%;}.ficha td.v{font-weight:700;}
+.atDuas{display:grid;grid-template-columns:1fr 1.25fr;gap:26px;align-items:start;}
+.radar{width:100%;max-width:520px;display:block;margin:0 auto;}
+.leg{display:flex;gap:16px;justify-content:center;font-size:13px;color:#333;margin-bottom:4px;}.leg i{display:inline-block;width:26px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;}
+.recs{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.rec{display:flex;background:#c9ccd6;border-radius:16px;overflow:hidden;min-height:92px;}
+.rec .n{background:linear-gradient(#333,#222);color:#fff;width:108px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:16px;}
+.rec .n b{font:700 46px 'Oswald','Arial Narrow',Arial;line-height:1;}.rec .n span{font:700 16px 'Oswald','Arial Narrow',Arial;letter-spacing:1px;}
+.rec .t{padding:10px 14px;display:flex;flex-direction:column;justify-content:space-between;}.rec .t b{font:700 19px 'Oswald','Arial Narrow',Arial;}.rec .t span{font-size:15px;color:#333;}.rec .t img{width:22px;height:22px;object-fit:contain;vertical-align:-5px;margin-right:4px;}
+.rec.zero{opacity:.55;}
+.tabJ{background:#2e2e2e;border-radius:0 0 14px 14px;padding:16px;}
+.tabJ .cx{background:#d9dce1;border-radius:6px;padding:12px;overflow-x:auto;}
+.tabJ h3{margin:0 0 8px;color:#111;font:400 22px Arial,sans-serif;}
+table.jg{width:100%;border-collapse:collapse;background:#fff;color:#111;font-size:14px;white-space:nowrap;}
+table.jg th{padding:10px 8px;font-weight:700;cursor:pointer;user-select:none;background:#fff;}table.jg th.on{background:#fff3c4;}table.jg th:after{content:' ⬍';color:#999;font-size:11px;}table.jg th.semOrd:after{content:'';}table.jg th.semOrd{cursor:default;}
+table.jg td{padding:9px 8px;text-align:center;}table.jg tr:nth-child(even) td{background:#f5f5f5;}table.jg td.l{text-align:left;}table.jg td.l img{width:24px;height:24px;object-fit:contain;vertical-align:-7px;margin-right:6px;}
+table.jg .res{font-weight:700;}table.jg .res i{font-style:normal;display:inline-block;width:20px;height:20px;line-height:20px;border-radius:4px;color:#fff;font-size:12px;margin-right:6px;}.res .v{background:#2e7d32;}.res .d{background:#c62828;}.res .e{background:#777;}
+table.jg small{color:#777;font-size:.8em;}
+table.jg tr.media td,table.jg tr.total td{font-weight:800;background:#e9ecf1!important;border-top:2px solid #bbb;}
+.cmp{background:#2e2e2e;color:#fff;border-radius:0 0 14px 14px;padding:22px 16px 26px;}
+.cmp h3{text-align:center;font:700 22px Arial,sans-serif;margin:0 0 4px;}.cmp .sub{text-align:center;font-size:12.5px;color:#bbb;margin-bottom:16px;}
+.cmpTopo{display:grid;grid-template-columns:1fr 80px 1fr;align-items:center;gap:10px;margin-bottom:14px;}
+.cmpJ{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;}.cmpJ img.f{width:92px;height:92px;border-radius:50%;object-fit:cover;background:#555;border:3px solid var(--c,#888);}
+.cmpJ b{font:700 30px Arial,sans-serif;line-height:1.1;}.cmpJ small{font-size:13px;color:#ccc;display:flex;align-items:center;gap:6px;}.cmpJ small img{width:22px;height:22px;object-fit:contain;}
+.cmpJ button{margin-top:4px;padding:9px 16px;border:none;border-radius:10px;background:#ebb840;color:#222;font-weight:800;font-size:14px;cursor:pointer;}
+.vs{width:72px;height:72px;border-radius:50%;background:#ebb840;color:#333;display:flex;align-items:center;justify-content:center;font:400 30px Arial,sans-serif;margin:0 auto;}
+.cmpL{display:grid;grid-template-columns:1fr 80px 1fr;align-items:center;gap:10px;margin:10px 0;}
+.cmpL .k{text-align:center;font-weight:800;font-size:19px;}.cmpL .k small{display:block;font-size:10px;color:#bbb;font-weight:600;}
+.bA,.bB{display:flex;}.bA{justify-content:flex-end;}
+.pill{min-width:max-content;height:38px;border-radius:19px;background:#ebb840;color:#222;font:700 20px Arial,sans-serif;display:flex;align-items:center;gap:10px;padding:0 14px;box-sizing:border-box;}
+.bA .pill{justify-content:space-between;}.bB .pill{justify-content:space-between;flex-direction:row-reverse;}.pill .ck{color:#2b3f8c;font-size:16px;}
+.cmpLeg{text-align:center;font-size:12.5px;color:#ddd;margin-top:12px;}
+#ktModal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:14px;}#ktModal.on{display:flex;}
+#ktModal .mx{background:#fff;color:#111;border-radius:14px;width:min(96vw,760px);max-height:88vh;overflow:auto;padding:18px;position:relative;}
+#ktModal h4{margin:0 0 12px;font:700 20px 'Oswald','Arial Narrow',Arial;text-transform:uppercase;}#ktModal .fx{position:absolute;top:10px;right:10px;border:none;background:#0b1626;color:#fff;border-radius:8px;width:34px;height:34px;font-size:18px;cursor:pointer;}
+.escGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;}.escGrid div{border:1px solid #e1e5ea;border-radius:12px;padding:10px;text-align:center;cursor:pointer;font-weight:700;font-size:13px;}.escGrid div:hover{background:#f3f6fa;border-color:#1e5bd8;}.escGrid img{width:64px;height:64px;object-fit:contain;display:block;margin:0 auto 6px;}
+.jogGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}.jogGrid div{border:1px solid #e1e5ea;border-radius:12px;padding:8px;text-align:center;cursor:pointer;font-size:13px;font-weight:700;line-height:1.2;}.jogGrid div:hover{background:#f3f6fa;border-color:#1e5bd8;}.jogGrid img{width:84px;height:84px;border-radius:10px;object-fit:cover;background:#eee;display:block;margin:0 auto 6px;}.jogGrid small{display:block;color:#777;font-weight:600;font-size:11px;margin-top:3px;}.jogGrid div.sem{opacity:.45;cursor:default;}
+.voltar{border:none;background:#e9ecf1;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;margin-bottom:10px;}
+@media(max-width:820px){.atTopo{grid-template-columns:1fr;}.atFt{max-width:240px;margin:0 auto;display:block;}.atDuas{grid-template-columns:1fr;}.atCab{grid-template-columns:1fr;text-align:center;}.atCab .tm{justify-content:center;}}
+@media(max-width:560px){.atCab h1{font-size:36px;}.atCab .tm{font-size:17px;}.atCab .tm img{width:50px;height:50px;}.atCorpo{padding:14px;}.atNm{font-size:34px;}.atCards{grid-template-columns:1fr 1fr;gap:10px;}.atCard b{font-size:40px;}.recs{grid-template-columns:1fr;}.rec .n{width:88px;}.rec .n b{font-size:38px;}.abasA span{padding:8px 10px;font-size:12.5px;}.cmpJ b{font-size:20px;}.cmpJ img.f{width:70px;height:70px;}.cmpTopo,.cmpL{grid-template-columns:1fr 58px 1fr;gap:6px;}.vs{width:52px;height:52px;font-size:22px;}.pill{height:32px;font-size:16px;padding:0 10px;}.cmpL .k{font-size:15px;}.ficha td{padding:8px 10px;font-size:13.5px;}}
+/*fimF*/</style>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="favicon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<!--ktMenu-->
+<header class="ktMenu">
+<canvas id="ktMenuCanvas"></canvas>
+<img class="cristo" src="cristo.png" alt="Cristo Redentor">
+<img class="bola logoKT" src="logo_klaustv_tv.png" alt="Klaus TV">
+<div class="miolo"><a class="marca" href="index.html">Klaus <span>TV</span><small>Basket RJ Stats PRO 4.0</small></a></div>
+<style>/*ktFaixa11*//*ktParc*/.ktFooter .parc{margin-top:18px;}.ktFooter .parcLista{display:flex;flex-wrap:nowrap;gap:6px;}.ktFooter .parcLista a.patro{flex:1 1 0;min-width:0;display:flex !important;align-items:center;justify-content:center;margin-top:0;padding:8px 9px;display:block;text-align:center;}.ktFooter .parcLista a.patro b{font-size:12.5px;line-height:1.15;letter-spacing:.5px;}.ktFooter .parcLista a.patro small{display:none;}.ktFaixa a.soLog,.ktFooter li.soLog{display:none;}html.ktLog .ktFaixa a.soLog{display:flex;}html.ktLog .ktFooter li.soLog{display:list-item;}.ktFaixa a.ktLogin .on{display:none;}html.ktLog .ktFaixa a.ktLogin .on{display:inline;}html.ktLog .ktFaixa a.ktLogin .off{display:none;}.ktFaixa a.ktLogin{color:#ffd54f;}.ktFooter a.patro{margin-top:8px;}.ktFooter a.patro:hover{border-color:#ffd54f;}@media(min-width:821px){.ktFaixa a{padding:0 8px;font-size:13px;letter-spacing:.5px;}}@media(min-width:821px) and (max-width:1300px){.ktFaixa a{padding:0 6px;font-size:11.5px;letter-spacing:0;}}</style><script>/*ktLog*/try{if(localStorage.getItem('klaustv_token_v1')){document.documentElement.classList.add('ktLog');if(localStorage.getItem('klaustv_perfil')==='Dono')document.documentElement.classList.add('ktDono');}}catch(e){}</script><nav class="ktFaixa"><a href="index.html" class="">Início</a><a href="bancodados.html" class="soLog ">Banco de dados</a><a href="montar-jogo.html" class="soLog ">Montar Jogo</a><a href="scout.html" class="soLog ">Scout</a><a href="atletas.html" class="ativo">Atletas</a><a href="cestinhas.html" class="">Cestinhas</a><a href="sumulas.html" class="">Súmulas</a><a href="classificacao.html" class="">Classificação</a><a href="usuarios.html" class="soDono">Usuários</a><a href="https://klauschagas.blogspot.com/" class="ext" target="_blank" rel="noopener">Blog</a><a href="calendario.html" class="">Calendário de jogos</a><a href="aovivo.html" class="vivo">Estatísticas ao vivo</a><a href="index.html?login=1" class="ktLogin" onclick="if(window.kt_abrirLogin){kt_abrirLogin();return false;}"><span class="off">🔑 Login</span><span class="on">👤 Minha conta</span></a></nav>
+</header>
+<script>
+(function(){
+ const cv=document.getElementById('ktMenuCanvas'); if(!cv) return;
+ function mix(a,b,t){return a.map((v,i)=>Math.round(v+(b[i]-v)*t));}
+ const pedra=[222,228,238], laranja=[205,88,40], creme=[240,232,218];
+ function desenhar(){
+  const r=cv.getBoundingClientRect(), dpr=window.devicePixelRatio||1;
+  cv.width=r.width*dpr; cv.height=r.height*dpr; const c=cv.getContext('2d'); c.scale(dpr,dpr);
+  const W=r.width,H=r.height; let seed=7; const rnd=()=>((seed=(seed*9301+49297)%233280)/233280);
+  const ini=Math.min(125,W*0.16), fim=W-Math.min(150,W*0.22);
+  const g=c.createLinearGradient(0,0,W,0);
+  g.addColorStop(0,'rgba(222,228,238,0.10)'); g.addColorStop(0.5,'rgba(180,150,120,0.06)'); g.addColorStop(1,'rgba(205,88,40,0.20)');
+  c.fillStyle=g; c.fillRect(0,0,W,H);
+  const n=Math.round(W*0.9);
+  for(let i=0;i<n;i++){
+   const t=rnd(); const x=ini+(fim-ini)*t;
+   const dens=Math.max(1-t*1.6,0)+Math.max(t*1.6-0.6,0)+0.25; if(rnd()>dens) continue;
+   const y=H*0.5+(rnd()-0.5)*H*(0.35+0.6*Math.abs(t-0.5));
+   const alvo=(rnd()<0.3)?creme:laranja; const col=mix(pedra,alvo,Math.min(1,Math.max(0,(t-0.15)/0.75)));
+   const a=0.25+0.55*(Math.abs(t-0.5)*1.6); const s=0.6+rnd()*2.2*(1-Math.abs(t-0.5));
+   c.fillStyle=`rgba(${col[0]},${col[1]},${col[2]},${Math.min(a,0.85)})`;
+   c.beginPath(); c.arc(x,y,s,0,Math.PI*2); c.fill();
+  }
+ }
+ desenhar(); let tm; window.addEventListener('resize',()=>{clearTimeout(tm);tm=setTimeout(desenhar,150);});
+})();
+</script>
+<!--/ktMenu-->
+<div class="pag">
+  <div class="filtro">
+    <div class="topo"><h2 class="cond">🏀 Atleta FBERJ</h2>
+      <label class="fl">Time<select id="selTime" onchange="kt_mudouTime()"></select></label>
+      <label class="fl curto">Categoria<select id="selCat" onchange="kt_mudouCat()"></select></label>
+      <label class="fl grande">Atleta<select id="selAtl" onchange="kt_mudouAtl()"></select></label></div>
+    <p class="intro">Números da temporada <b id="anoTxt"></b> com estatística do Klaus TV: só entram os jogos narrados (o atleta precisa estar na súmula). Escolha o time, depois a categoria e então o atleta.</p>
+  </div>
+  <div id="conteudo"><div class="vazio">Carregando atletas...</div></div>
+  <div class="atual" id="atual"></div>
+</div>
+<div id="ktModal" onclick="if(event.target===this)kt_fechaModal()"></div>
+<script>
+const KT_API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
+const D={"curto":{"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN":"Funcionários","FFC":"Fluminense","TTC":"Tijuca","NBC":"Niterói","CCL":"Leopoldinense","IG":"Iguaba Grande","ABIG":"Jequiá","ACEAR":"Irajá","CESC":"Suzano Costa","EEPZ":"Passo Zero","IDEC":"IDEC","ITDA":"Atitude","KE":"K. Esportes","MB":"Mesquita","JTC":"Jacarepaguá","TKA":"Team Klun","ASPCM":"Municipal","CK":"Carioca King's","IB":"Itaipu","NBR":"NBR Campos"},"cores":{"ABIG":["#1F4E79","#FFFFFF"],"ACEAR":["#E2231A","#FFFFFF"],"ASPCM":["#2E3192","#E2231A"],"BFR":["#000000","#FFFFFF"],"BSA":["#F28C28","#FFFFFF"],"CCL":["#1F5FBF","#FFFFFF"],"CESC":["#000000","#FFFFFF"],"CFCSN":["#7B1E22","#FFFFFF"],"CK":["#1A1A1A","#B8860B"],"CRF":["#C8102E","#000000"],"EEPZ":["#1B2A4A","#F28C28"],"FFC":["#7A0026","#00613C"],"IB":["#E06A2C","#000000"],"IDEC":["#1F4E5F","#A4C639"],"IG":["#1F2E8A","#F07A1A"],"ITDA":["#0B1F4B","#FFFFFF"],"JTC":["#2E3448","#F2D33B"],"KE":["#000000","#FFD200"],"MB":["#1A1A1A","#F28C28"],"NBC":["#E2231A","#000000"],"TKA":["#1E8C3A","#F2C200"],"TTC":["#E2231A","#FFFFFF"]},"ordem":["Sub-12","Sub-13","Sub-14","Sub-15","Sub-16","Sub-17","Sub-19","Sub-22","Adulto"],"escudos":{"ABIG":"escudos/ABIG.png","ACEAR":"escudos/ACEAR.png","ASPCM":"escudos/ASPCM.png","BFR":"escudos/BFR.png","BSA":"escudos/BSA.png","CCL":"escudos/CCL.png","CESC":"escudos/CESC.png","CFCSN":"escudos/CFCSN.png","CK":"escudos/CK.png","CRF":"escudos/CRF.png","EEPZ":"escudos/EEPZ.png","FFC":"escudos/FFC.png","IB":"escudos/IB.png","IDEC":"escudos/IDEC.png","IG":"escudos/IG.png","ITDA":"escudos/ITDA.png","JTC":"escudos/JTC.png","KE":"escudos/KE.png","MB":"escudos/MB.png","NBC":"escudos/NBC.png","TKA":"escudos/TKA.png","TTC":"escudos/TTC.png"}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+async function api(d){ try{ const r=await fetch(KT_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(d)}); return await r.json(); }catch(e){ return {ok:false,erro:'Sem conexão com o servidor.'}; } }
+function cor(s){ return (D.cores[s]||['#1e5bd8','#ffffff'])[0]; }
+function nomeT(s,eq){ return D.curto[s]||(eq&&eq[s])||s; }
+/* Página Atleta FBERJ (Magno, 20/11/2026): Time → Categoria → Atleta; três abas: Perfil na temporada, Jogos narrados e Comparar atletas.
+   Fontes: dadosFed (elencos da FBERJ), dadosCestinhas (fotos e apelidos) e atletasKT (números dos jogos narrados). Médias com vírgula e 1 casa. */
+const ANO=String(new Date().getFullYear());
+const KS=['pts','twoMade','twoMiss','threeMade','threeMiss','ftMade','ftMiss','reb','ast','stl','blk','to','foul','eff'];
+let FED=null, EXT={fotos:{},apelidos:{}}, ATL={}, ABA='perfil', ORDJ={k:'d',dir:-1}, CMP=null;
+const f1=x=>(Math.round((+x||0)*10)/10).toFixed(1).replace('.',',');
+const ap=reg=>(EXT.apelidos||{})[reg]||'';
+const foto=reg=>(EXT.fotos||{})[reg]||'bola_fiba.png';
+const escUrl=s=>D.escudos[s]||'';
+const txtCor=c=>{ const n=parseInt(String(c).slice(1),16); const r=n>>16,g=(n>>8)&255,b=n&255; return (r*299+g*587+b*114)/1000>150?'#111':'#fff'; };
+const nome2=n=>{ const w=String(n||'').trim().split(/\s+/).filter(Boolean); return w.length<=1?(w[0]||''):w[0]+' '+w[w.length-1]; };
+const dataBR=d=>{ const m=String(d||'').match(/^(\d{4})-(\d{2})-(\d{2})/); return m?m[3]+'/'+m[2]+'/'+m[1]:''; };
+const elenco=(cat,s)=>((FED.elencos||{})[cat]||{})[s]||[];
+const nomeAt=(cat,reg)=>{ for(const s of Object.keys((FED.elencos||{})[cat]||{})){ const x=elenco(cat,s).find(r=>String(r[0])===String(reg)); if(x) return x[1]; } return ''; };
+
+async function kt_init(){
+  $('anoTxt').textContent=ANO;
+  const [a,b]=await Promise.all([api({acao:'dadosFed'}),api({acao:'dadosCestinhas'})]);
+  if(!a||!a.ok){ $('conteudo').innerHTML='<div class="vazio">'+esc((a&&a.erro)||'Não foi possível carregar os elencos da FBERJ.')+'</div>'; return; }
+  FED=a; if(b&&b.ok) EXT={fotos:b.fotos||{},apelidos:b.apelidos||{}};
+  const sigs=new Set(); Object.values(FED.elencos).forEach(o=>Object.keys(o).forEach(s=>sigs.add(s)));
+  const ts=[...sigs].sort((x,y)=>nomeT(x,FED.equipes).localeCompare(nomeT(y,FED.equipes),'pt-BR'));
+  $('selTime').innerHTML='<option value="">Escolha o time</option>'+ts.map(s=>`<option value="${s}">${esc(nomeT(s,FED.equipes))}</option>`).join('');
+  const u=new URL(location); const t=u.searchParams.get('time'); if(t&&ts.includes(t)) $('selTime').value=t;
+  await kt_mudouTime(u.searchParams.get('cat'),u.searchParams.get('atleta'));
+}
+function kt_url(){ const u=new URL(location); ['time','cat','atleta'].forEach((k,i)=>{ const v=[$('selTime').value,$('selCat').value,$('selAtl').value][i]; if(v) u.searchParams.set(k,v); else u.searchParams.delete(k); }); history.replaceState(null,'',u); }
+async function kt_mudouTime(catIni,atlIni){
+  const s=$('selTime').value;
+  const cats=s?Object.keys(FED.elencos).filter(c=>(FED.elencos[c][s]||[]).length):[];
+  const ordC=c=>{ const m=String(c).match(/(\d+)/); return c==='Adulto'?99:(m?+m[1]:50); }; cats.sort((a,b)=>ordC(a)-ordC(b));
+  $('selCat').innerHTML=cats.length?cats.map(c=>`<option>${esc(c)}</option>`).join(''):'<option value="">—</option>';
+  if(catIni&&cats.includes(catIni)) $('selCat').value=catIni;
+  await kt_mudouCat(atlIni);
+}
+async function kt_atl(cat){ if(!ATL[cat]){ const r=await api({acao:'atletasKT',categoria:cat,ano:ANO}); ATL[cat]=(r&&r.ok)?r:{ok:false,erro:(r&&r.erro)||'Não foi possível carregar os números agora.',jogos:[]}; } return ATL[cat]; }
+async function kt_mudouCat(atlIni){
+  const s=$('selTime').value, cat=$('selCat').value; CMP=null;
+  if(!s||!cat){ $('selAtl').innerHTML='<option value="">—</option>'; $('conteudo').innerHTML='<div class="vazio">Escolha o time e a categoria.</div>'; kt_url(); return; }
+  $('selAtl').innerHTML='<option value="">Carregando…</option>'; $('conteudo').innerHTML='<div class="vazio">Carregando os jogos narrados…</div>';
+  const R=await kt_atl(cat);
+  const ls=elenco(cat,s).map(([reg,nome])=>({reg:String(reg),nome,q:kt_jogosDe(R,reg).length})).sort((a,b)=>(b.q>0)-(a.q>0)||a.nome.localeCompare(b.nome,'pt-BR'));
+  $('selAtl').innerHTML='<option value="">Escolha o atleta</option>'+ls.map(a=>`<option value="${a.reg}">${esc(a.nome)}${ap(a.reg)?' ('+esc(ap(a.reg))+')':''} · ${a.q?a.q+(a.q===1?' jogo narrado':' jogos narrados'):'sem jogo narrado'}</option>`).join('');
+  const ini=atlIni&&ls.some(a=>a.reg===String(atlIni))?String(atlIni):((ls.find(a=>a.q)||{}).reg||'');
+  $('selAtl').value=ini; kt_mudouAtl();
+}
+function kt_mudouAtl(){ CMP=null; kt_url(); kt_desenha(); }
+
+/* jogos narrados de um atleta: [{id,d,s,sig,opp,pf,pa}] */
+function kt_jogosDe(R,reg){ const out=[]; (R.jogos||[]).forEach(g=>{ const r=g.p.find(x=>String(x[0])===String(reg)); if(!r) return;
+  const s={}; KS.forEach((k,i)=>s[k]=+r[3+i]||0); const lado=r[1], sig=r[2]; const o=g.p.find(x=>x[1]!==lado);
+  const pf=g.p.filter(x=>x[1]===lado).reduce((t,x)=>t+(+x[3]||0),0), pa=g.p.filter(x=>x[1]!==lado).reduce((t,x)=>t+(+x[3]||0),0);
+  out.push({id:g.id,d:g.d,s,sig,opp:o?o[2]:'',pf,pa}); }); return out; }
+function kt_med(js){ const q=js.length, m={q}; KS.forEach(k=>m[k]=q?js.reduce((t,j)=>t+j.s[k],0)/q:0); return m; }
+
+function kt_desenha(){
+  const s=$('selTime').value, cat=$('selCat').value, reg=$('selAtl').value; const R=ATL[cat];
+  if(!reg){ $('conteudo').innerHTML='<div class="vazio">Escolha o atleta.</div>'; return; }
+  if(R&&!R.ok){ $('conteudo').innerHTML='<div class="vazio">'+esc(R.erro)+'</div>'; return; }
+  const nome=nomeAt(cat,reg)||reg, js=kt_jogosDe(R,reg), m=kt_med(js), c=cor(s);
+  const cab=`<div class="atCab" style="--c:${c}"><div class="tm"><img src="${escUrl(s)}" alt=""><b>${esc(nomeT(s,FED.equipes))}</b></div><h1>Atleta FBERJ<small>${esc(cat)} · Temporada ${ANO}</small></h1></div>
+    <div class="abasA">${[['perfil','Perfil na temporada'],['jogos','Jogos narrados'],['cmp','Comparar atletas']].map(([k,n])=>`<span class="${ABA===k?'on':''}" onclick="ABA='${k}';kt_desenha()">${n}</span>`).join('')}</div>`;
+  let h='';
+  if(!js.length) h=`<div class="atCorpo"><div class="vazio" style="color:#555">${esc(nome)} ainda não tem jogo narrado pelo Klaus TV no ${esc(cat)} de ${ANO}.</div></div>`;
+  else if(ABA==='perfil') h=kt_perfil(s,cat,reg,nome,js,m,R);
+  else if(ABA==='jogos') h=kt_tabJogos(nome,js,m);
+  else h=kt_comparar(s,cat,reg,nome,m);
+  $('conteudo').innerHTML=cab+h;
+  $('atual').textContent='Dados: elenco e matrícula da FBERJ (cópia diária) e estatística dos jogos narrados pelo Klaus TV.';
+}
+
+function kt_perfil(s,cat,reg,nome,js,m,R){
+  const q=js.length;
+  const cards=[['pts','Pontos'],['reb','Rebotes'],['ast','Assistências'],['eff','Eficiência']].map(([k,n])=>`<div class="atCard"><span>${n}</span><b>${f1(m[k])}</b><small>média por jogo</small></div>`).join('');
+  const ficha=[['Nome',esc(nome),'Equipe',`${esc(nomeT(s,FED.equipes))}`],['Apelido',esc(ap(reg)||'—'),'Categoria',esc(cat)],['Matrícula FBERJ',esc(reg),'Jogos narrados',q+' em '+ANO]]
+    .map(r=>`<tr><td class="k">${r[0]}</td><td class="v">${r[1]}</td><td class="k">${r[2]}</td><td class="v">${r[3]}</td></tr>`).join('');
+  // média da equipe: média das médias dos atletas do mesmo time na categoria, com jogo narrado
+  const comp=elenco(cat,s).map(([r])=>kt_jogosDe(R,r)).filter(x=>x.length).map(kt_med);
+  const eq={}; ['pts','reb','ast','threeMade','twoMade','ftMade','eff'].forEach(k=>eq[k]=comp.length?comp.reduce((t,x)=>t+x[k],0)/comp.length:0);
+  const recs=[['pts','PTS','Pontos'],['reb','REB','Rebotes'],['ast','AST','Assistências'],['stl','ROU','Roubos de bola'],['blk','TOC','Tocos'],['threeMade','3PC','Cestas de 3 certas'],['twoMade','2PC','Cestas de 2 certas'],['ftMade','LLC','Lances livres certos']].map(([k,s2,t])=>{
+    const mx=Math.max(...js.map(j=>j.s[k])); if(!(mx>0)) return `<div class="rec zero" title="${t}"><div class="n"><b>0</b><span>${s2}</span></div><div class="t"><b>Ainda sem ${t.toLowerCase()}</b><span></span></div></div>`;
+    const qs=js.filter(j=>j.s[k]===mx);
+    return `<div class="rec" title="${t}"><div class="n"><b>${mx}</b><span>${s2}</span></div><div class="t">${qs.length>1?`<b>em ${qs.length} partidas</b><span>${qs.map(j=>dataBR(j.d).slice(0,5)).join(' · ')}</span>`:`<b>VS. <img src="${escUrl(qs[0].opp)}" alt="">${esc(nomeT(qs[0].opp,FED.equipes))}</b><span>${dataBR(qs[0].d)}</span>`}</div></div>`; }).join('');
+  return `<div class="atCorpo"><div class="atTopo"><div><div class="atNm">${ap(reg)?`<b>${esc(ap(reg))}</b>`:`<b>${esc(nome2(nome))}</b>`}<small>${esc(nome)}</small></div><div class="atCards">${cards}</div>
+      <div class="atH">Ficha técnica</div><table class="ficha">${ficha}</table></div>
+      <img class="atFt" src="${foto(reg)}" alt="" onclick="window.open(this.src,'_blank')"></div>
+    <div class="atDuas"><div><div class="atH">Perfil na temporada<small>Média por jogo nos ${q} ${q===1?'jogo narrado':'jogos narrados'}</small></div>${kt_radar(m,eq,cor(s))}</div>
+      <div><div class="atH">Recordes pessoais<small>Baseados em ${q} ${q===1?'jogo narrado':'jogos narrados'} pelo Klaus TV — não é a temporada inteira da FBERJ.</small></div><div class="recs">${recs}</div></div></div></div>`;
+}
+function kt_radar(m,eq,c){
+  const AX=[['pts','Pontos'],['reb','Rebotes'],['ast','Assistências'],['threeMade','3 Pontos'],['twoMade','2 Pontos'],['ftMade','Lances Livres'],['eff','Eficiência']];
+  const mx=Math.max(5,...AX.map(([k])=>Math.max(m[k],eq[k]))); const top=Math.ceil(mx/5)*5;
+  const W=560,H=420,cx=280,cy=215,R=150, n=AX.length;
+  const pt=(i,v)=>{ const a=-Math.PI/2+i*2*Math.PI/n, r=R*Math.max(0,v)/top; return [cx+r*Math.cos(a),cy+r*Math.sin(a)]; };
+  const anel=f=>AX.map((_,i)=>pt(i,top*f).join(',')).join(' ');
+  const pol=o=>AX.map(([k],i)=>pt(i,o[k]).join(',')).join(' ');
+  const lab=AX.map(([k,t],i)=>{ const [x,y]=pt(i,top*1.17); const anc=Math.abs(x-cx)<10?'middle':(x>cx?'start':'end'); return `<text x="${x}" y="${y+4}" text-anchor="${anc}" font-size="13" fill="#444">${t}</text>`; }).join('');
+  const esc5=[1,2,3].map(f=>{ const [x,y]=pt(0,top*f/3); return `<text x="${x}" y="${y-3}" text-anchor="middle" font-size="12" fill="#777" paint-order="stroke" stroke="#e8edf3" stroke-width="3">${Math.round(top*f/3)}</text>`; }).join('');
+  const dots=(o,cl)=>AX.map(([k],i)=>{ const [x,y]=pt(i,o[k]); return `<circle cx="${x}" cy="${y}" r="4.5" fill="${cl}" stroke="#fff" stroke-width="1.5"><title>${f1(o[k])}</title></circle>`; }).join('');
+  return `<div class="leg"><span><i style="background:rgba(46,125,50,.25);border:2px solid #2e7d32"></i>Média do atleta</span><span><i style="background:rgba(120,130,150,.25);border:2px solid #b5bcc8"></i>Média da equipe</span></div>
+  <svg class="radar" viewBox="0 0 ${W} ${H}">${[1/3,2/3,1].map(f=>`<polygon points="${anel(f)}" fill="none" stroke="#c3c8d0"/>`).join('')}${AX.map((_,i)=>{ const [x,y]=pt(i,top); return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#c3c8d0"/>`; }).join('')}
+   <polygon points="${pol(eq)}" fill="rgba(120,130,150,.22)" stroke="#b5bcc8" stroke-width="3"/>${dots(eq,'#333')}
+   <polygon points="${pol(m)}" fill="rgba(46,125,50,.22)" stroke="#2e7d32" stroke-width="3.5"/>${dots(m,'#1e4fa8')}${esc5}${lab}</svg>`;
+}
+function kt_tabJogos(nome,js,m){
+  const C=[['d','Data'],['opp','Adversário'],['res','Resultado'],['pts','Pts'],['two','2P'],['three','3P'],['ft','LL'],['reb','REB'],['ast','AST'],['stl','ROU'],['blk','TOC'],['to','ERR'],['foul','FP'],['eff','EF']];
+  const pc=(mk,a)=>a?Math.round(mk*100/a):0;
+  const arr=(o,f,dec)=>{ const mk=o[f+'Made'], a=mk+o[f+'Miss']; return dec?`${f1(mk)}/${f1(a)} <small>(${pc(mk,a)}%)</small>`:`${mk}/${a} <small>(${pc(mk,a)}%)</small>`; };
+  const val=(j,k)=>k==='d'?j.d:(k==='opp'?nomeT(j.opp,FED.equipes):(k==='res'?j.pf-j.pa:(['two','three','ft'].includes(k)?j.s[k+'Made']:j.s[k])));
+  const ls=js.slice().sort((a,b)=>{ const x=val(a,ORDJ.k), y=val(b,ORDJ.k); return (typeof x==='string'?String(x).localeCompare(String(y),'pt-BR'):x-y)*ORDJ.dir; });
+  const tr=ls.map(j=>{ const r=j.pf>j.pa?'v':(j.pf<j.pa?'d':'e');
+    return `<tr><td>${dataBR(j.d)}</td><td class="l"><img src="${escUrl(j.opp)}" alt="">${esc(nomeT(j.opp,FED.equipes))}</td><td class="res"><i class="${r}">${{v:'V',d:'D',e:'E'}[r]}</i>${j.pf} x ${j.pa}</td>
+      <td><b>${j.s.pts}</b></td><td>${arr(j.s,'two')}</td><td>${arr(j.s,'three')}</td><td>${arr(j.s,'ft')}</td><td>${j.s.reb}</td><td>${j.s.ast}</td><td>${j.s.stl}</td><td>${j.s.blk}</td><td>${j.s.to}</td><td>${j.s.foul}</td><td><b>${j.s.eff}</b></td></tr>`; }).join('');
+  const T={}; KS.forEach(k=>T[k]=js.reduce((t,j)=>t+j.s[k],0));
+  const lin=(o,dec,rot)=>`<tr class="${dec?'media':'total'}"><td colspan="3" class="l">${rot}</td><td>${dec?f1(o.pts):o.pts}</td><td>${arr(o,'two',dec)}</td><td>${arr(o,'three',dec)}</td><td>${arr(o,'ft',dec)}</td>${['reb','ast','stl','blk','to','foul','eff'].map(k=>`<td>${dec?f1(o[k]):o[k]}</td>`).join('')}</tr>`;
+  return `<div class="tabJ"><div class="cx"><h3>Jogos narrados · ${esc(nome)}</h3><table class="jg"><tr>${C.map(([k,n])=>`<th class="${ORDJ.k===k?'on':''}" onclick="kt_ordJ('${k}')">${n}</th>`).join('')}</tr>${tr}
+    ${lin(m,true,'Média por jogo ('+js.length+' '+(js.length===1?'jogo':'jogos')+')')}${lin(T,false,'Total na temporada')}</table></div></div>`;
+}
+function kt_ordJ(k){ ORDJ=ORDJ.k===k?{k,dir:-ORDJ.dir}:{k,dir:(k==='opp'?1:-1)}; kt_desenha(); }
+function kt_comparar(s,cat,reg,nome,m0){ let m=m0;
+  // comparação justa (Magno, 20/11): só os confrontos narrados entre os dois times (mesmo time: só os jogos em que os dois estavam)
+  const R=ATL[cat]; let B=null, nConf=0;
+  if(CMP){ const jA=kt_jogosDe(R,reg), jB=kt_jogosDe(R,CMP.reg);
+    let fA, fB; if(CMP.sig===s){ const ids=new Set(jB.map(j=>j.id)); fA=jA.filter(j=>ids.has(j.id)); const idA=new Set(fA.map(j=>j.id)); fB=jB.filter(j=>idA.has(j.id)); }
+    else { fA=jA.filter(j=>j.opp===CMP.sig); fB=jB.filter(j=>j.opp===s); }
+    nConf=new Set(fA.map(j=>j.id).concat(fB.map(j=>j.id))).size; m=kt_med(fA); B={...CMP,m:kt_med(fB)}; }
+  const IT=[['pts','PTS','Pontos'],['reb','REB','Rebotes'],['ast','AST','Assistências'],['stl','ROU','Roubos de bola'],['blk','TOC','Tocos'],['threeMade','3PT','Cestas de 3 certas'],['twoMade','2PT','Cestas de 2 certas'],['ftMade','LL','Lances livres certos'],['eff','EF','Eficiência']];
+  const jogA=`<div class="cmpJ" style="--c:${cor(s)}"><img class="f" src="${foto(reg)}" alt=""><b>${esc(ap(reg)||nome2(nome))}</b><small><img src="${escUrl(s)}" alt="">${esc(nomeT(s,FED.equipes))}${B?` · ${m.q} ${m.q===1?'jogo':'jogos'}`:''}</small><button style="visibility:hidden">.</button></div>`;
+  const jogB=B?`<div class="cmpJ" style="--c:${cor(B.sig)}"><img class="f" src="${foto(B.reg)}" alt=""><b>${esc(ap(B.reg)||nome2(B.nome))}</b><small><img src="${escUrl(B.sig)}" alt="">${esc(nomeT(B.sig,FED.equipes))} · ${B.m.q} ${B.m.q===1?'jogo':'jogos'}</small><button onclick="kt_escolher()">Trocar atleta</button></div>`
+    :`<div class="cmpJ"><img class="f" src="bola_fiba.png" alt=""><b>?</b><small>Atleta do ${esc(cat)}</small><button onclick="kt_escolher()">Escolher atleta</button></div>`;
+  const mxAll=k=>Math.max(m[k],B?B.m[k]:0)||1;
+  const lin=IT.map(([k,sg,t])=>{ const a=m[k], b=B?B.m[k]:null; const ga=B&&a>b, gb=B&&b>a;
+    const w=v=>Math.max(22,Math.round(100*v/mxAll(k)));
+    return `<div class="cmpL"><div class="bA"><div class="pill" style="width:${w(a)}%">${f1(a)}${ga?'<span class="ck">✔</span>':''}</div></div><div class="k">${sg}<small>${t}</small></div><div class="bB">${B?`<div class="pill" style="width:${w(b)}%">${f1(b)}${gb?'<span class="ck">✔</span>':''}</div>`:'<span style="color:#888">—</span>'}</div></div>`; }).join('');
+  return `<div class="cmp"><h3>COMPARE OS ATLETAS NA TEMPORADA</h3><div class="sub">Só atletas do ${esc(cat)}, de qualquer time. Para ser justo, a comparação usa só os confrontos narrados entre os dois times em ${ANO}${B?` (${B.sig===s?'jogos em que os dois estavam na súmula':esc(nomeT(s,FED.equipes))+' x '+esc(nomeT(B.sig,FED.equipes))}: <b>${nConf} ${nConf===1?'confronto narrado':'confrontos narrados'}</b>)`:''} · média por jogo.</div>
+    ${B&&!nConf?`<div class="vazio" style="color:#ffd54f">Ainda não há confronto narrado entre ${esc(nomeT(s,FED.equipes))} e ${esc(nomeT(B.sig,FED.equipes))} no ${esc(cat)} de ${ANO}. Escolha um atleta de outro time.</div>`:''}
+    <div class="cmpTopo">${jogA}<div class="vs">VS</div>${jogB}</div>${lin}
+    <div class="cmpLeg"><b>PTS</b> Pontos · <b>REB</b> Rebotes · <b>AST</b> Assistências · <b>ROU</b> Roubos de bola · <b>TOC</b> Tocos · <b>3PT</b> cestas de 3 · <b>2PT</b> cestas de 2 · <b>LL</b> lances livres certos · <b>EF</b> Eficiência</div></div>`;
+}
+/* escolher o 2º atleta: janela com os escudos dos times da categoria; depois fotos e nomes do time */
+function kt_escolher(){ const cat=$('selCat').value, R=ATL[cat], eu=$('selTime').value; const ss=Object.keys(FED.elencos[cat]||{}).sort((a,b)=>nomeT(a,FED.equipes).localeCompare(nomeT(b,FED.equipes),'pt-BR'));
+  $('ktModal').innerHTML=`<div class="mx"><button class="fx" onclick="kt_fechaModal()">✕</button><h4>Escolha o time · ${esc(cat)}</h4><div class="escGrid">${ss.map(s=>{ const n=s===eu?null:(R.jogos||[]).filter(g=>g.p.some(x=>x[2]===s)&&g.p.some(x=>x[2]===eu)).length; return `<div onclick="kt_escTime('${s}')"><img src="${escUrl(s)}" alt="">${esc(nomeT(s,FED.equipes))}<small style="display:block;color:${n===0?'#c62828':'#777'};font-weight:600;font-size:11px;margin-top:3px">${n===null?'mesmo time':n+(n===1?' confronto narrado':' confrontos narrados')}</small></div>`; }).join('')}</div></div>`;
+  $('ktModal').classList.add('on'); }
+function kt_escTime(s){ const cat=$('selCat').value, R=ATL[cat], eu=$('selAtl').value;
+  const ls=elenco(cat,s).map(([reg,nome])=>({reg:String(reg),nome,q:kt_jogosDe(R,reg).length})).filter(a=>a.reg!==eu).sort((a,b)=>(b.q>0)-(a.q>0)||a.nome.localeCompare(b.nome,'pt-BR'));
+  $('ktModal').innerHTML=`<div class="mx"><button class="fx" onclick="kt_fechaModal()">✕</button><button class="voltar" onclick="kt_escolher()">← Times</button><h4><img src="${escUrl(s)}" alt="" style="width:30px;height:30px;object-fit:contain;vertical-align:-8px;margin-right:6px">${esc(nomeT(s,FED.equipes))} · ${esc(cat)}</h4>
+    <div class="jogGrid">${ls.map(a=>`<div class="${a.q?'':'sem'}" ${a.q?`onclick="kt_escAtl('${s}','${a.reg}')"`:''}><img src="${foto(a.reg)}" alt="">${esc(nome2(a.nome))}${ap(a.reg)?`<small>${esc(ap(a.reg))}</small>`:''}<small>${a.q?a.q+(a.q===1?' jogo narrado':' jogos narrados'):'sem jogo narrado'}</small></div>`).join('')||'<div class="sem">Sem atletas.</div>'}</div></div>`; }
+function kt_escAtl(s,reg){ CMP={sig:s,reg,nome:nomeAt($('selCat').value,reg)}; kt_fechaModal(); kt_desenha(); }
+function kt_fechaModal(){ $('ktModal').classList.remove('on'); $('ktModal').innerHTML=''; }
+kt_init();
+</script>
+
+<footer class="ktFooter">
+  <div class="lema">🏀 No basquete, <span>tudo pode acontecer!</span></div>
+  <div class="wrap">
+    <div>
+      <div class="marca"><img src="favicon-180.png" alt="Klaus Chagas"><div><b>Klaus <span>TV</span></b><small>Basket RJ Stats PRO 4.0</small></div></div>
+      <p class="sobre">Basquete do Rio de Janeiro com narração de Klaus Chagas. Desde 2007 registrando a base carioca.</p>
+      <div class="redes">
+        <a href="https://www.youtube.com/@klauschagas" target="_blank" rel="noopener" title="YouTube">▶️</a>
+        <a href="https://www.instagram.com/basquete.rj/" target="_blank" rel="noopener" title="Instagram">📸</a>
+        <a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener" title="Blog">📰</a>
+        <a href="https://wa.me/5521998092305" target="_blank" rel="noopener" title="WhatsApp">💬</a>
+      </div>
+      <div class="parc"><h4>Parceiros</h4><div class="parcLista"><a class="patro" href="https://www.instagram.com/coachmarciasantos12/" target="_blank" rel="noopener" title="Instagram de Coach Márcia Santos"><div><b>Coach Márcia Santos</b><small>📸 @coachmarciasantos12</small></div></a><a class="patro" href="https://www.instagram.com/jdjacademy.oficial/" target="_blank" rel="noopener" title="Instagram de JDJ Academy"><div><b>JDJ Academy</b><small>📸 @jdjacademy.oficial</small></div></a><a class="patro" href="https://www.instagram.com/resultnutritionoficial/" target="_blank" rel="noopener" title="Instagram de Result Nutrition"><div><b>Result Nutrition</b><small>📸 @resultnutritionoficial</small></div></a></div></div>
+    </div>
+    <div>
+      <h4>Páginas</h4>
+      <ul>
+        <li><a href="index.html">Início</a></li>
+        <li class="soLog"><a href="montar-jogo.html">Montar Jogo</a></li>
+        <li class="soLog"><a href="scout.html">Scout</a></li>
+        <li><a href="atletas.html">Atletas</a></li>
+        <li><a href="cestinhas.html">Cestinhas</a></li>
+        <li><a href="sumulas.html">Súmulas</a></li>
+        <li><a href="classificacao.html">Classificação</a></li>
+        <li class="soLog"><a href="bancodados.html">Banco de dados</a></li>
+        <li><a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener">Blog</a></li>
+        <li><a href="calendario.html">Calendário de jogos</a></li>
+        <li><a href="aovivo.html">Estatísticas ao vivo</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contato</h4>
+      <div class="ct"><i>💬</i><a href="https://wa.me/5521998092305" target="_blank" rel="noopener">(21) 99809-2305</a></div>
+      <div class="ct"><i>📸</i><a href="https://www.instagram.com/basquete.rj/" target="_blank" rel="noopener">@basquete.rj</a></div>
+      <div class="ct"><i>✉️</i><a href="mailto:klaustv.rj@gmail.com">klaustv.rj@gmail.com</a></div>
+    </div>
+    <div>
+      <h4>Local do jogo</h4>
+      <div class="local" id="ktLocalNome">Cristo Redentor, Rio de Janeiro</div>
+      <iframe class="mapa" id="ktMapa" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q=Cristo%20Redentor%2C%20Rio%20de%20Janeiro&output=embed"></iframe>
+    </div>
+  </div>
+  <div class="copy">© 2026 <b>Klaus TV</b> · klaustv.com · Basket RJ Stats PRO 4.0</div>
+</footer>
+<script>
+function kt_mapaFooter(nome){
+  const n = (nome||'').trim();
+  const q = n ? n + ', Rio de Janeiro, RJ' : 'Cristo Redentor, Rio de Janeiro';
+  const el = document.getElementById('ktMapa'); if(!el) return;
+  const src = 'https://www.google.com/maps?q=' + encodeURIComponent(q) + '&output=embed';
+  if(el.dataset.q !== q){ el.src = src; el.dataset.q = q; }
+  document.getElementById('ktLocalNome').innerText = n ? n : 'Cristo Redentor, Rio de Janeiro';
+}
+</script>
+</body>
+</html>
