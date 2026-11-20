@@ -955,7 +955,7 @@ kt_init();
 
 <script>/*ktFogoLouro*/(function(){
   // fogo leve e contínuo só nas folhas de louro do selo do Cestinha (Magno, 20/11/2026)
-  const L=[[.16,.33],[.11,.42],[.09,.52],[.11,.62],[.15,.69],[.21,.74]]; // folhas da esquerda (fração da imagem); a direita é o espelho
+  const L=[[.16,.42],[.13,.48],[.12,.54],[.13,.60],[.16,.66]]; // termina antes da faixa TOP SCORER (Magno, 20/11) // folhas da esquerda (fração da imagem); a direita é o espelho
   const pto=t=>{ const n=L.length-1, i=Math.min(n-1,Math.floor(t*n)), f=t*n-i; return [L[i][0]+(L[i+1][0]-L[i][0])*f, L[i][1]+(L[i+1][1]-L[i][1])*f]; };
   const est=new WeakMap();
   function passo(){
@@ -965,7 +965,7 @@ kt_init();
       const iw=w/1.2, ox=w*(.1/1.2), oy=h*(.22/1.22), e=iw/58;
       let P=est.get(cv); if(!P){ P=[]; est.set(cv,P); }
       for(let i=0;i<3;i++){ const [fx,fy]=pto(Math.random()), lado=Math.random()<.5;
-        P.push({x:ox+(lado?fx:1-fx)*iw+(Math.random()-.5)*2*e, y:oy+fy*iw, vx:(Math.random()-.5)*.12*e, vy:-(0.18+Math.random()*0.32)*e, r:(2.4+Math.random()*2.2)*e, v:0, max:18+Math.random()*16}); }
+        P.push({x:ox+(lado?fx:1-fx)*iw+(Math.random()-.5)*1.5*e, y:oy+fy*iw, vx:(lado?-1:1)*Math.random()*.06*e, vy:-(0.08+Math.random()*0.14)*e, r:(2.0+Math.random()*1.8)*e, v:0, max:12+Math.random()*12}); }
       const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h); c.globalCompositeOperation='lighter';
       for(let i=P.length-1;i>=0;i--){ const p=P[i]; p.v++; p.x+=p.vx+Math.sin((p.v+p.y)*.2)*.08*e; p.y+=p.vy; const t=p.v/p.max;
         if(t>=1){ P.splice(i,1); continue; }
