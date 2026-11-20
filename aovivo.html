@@ -139,7 +139,7 @@ table.jog tr:nth-child(even) td{background:#f5f6f8;}
 #zoom img{max-width:min(90vw,520px);max-height:75vh;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.6);background:#fff;}
 #zoom .nm{font-family:'Oswald','Arial Narrow',Arial;font-size:22px;letter-spacing:1px;text-transform:uppercase;}
 #zoom .fechar{position:absolute;top:16px;right:20px;font-size:34px;color:#fff;background:none;border:none;cursor:pointer;}
-.ap{display:block;font-size:11px;color:#777;font-weight:600;}
+.ap{display:block;font-size:11px;color:#777;font-weight:600;}table.jog .pc{font-size:.82em;color:#666;font-weight:600;white-space:nowrap;}table.jog td.nm{white-space:nowrap!important;max-width:none!important;}table.jog td.nm .ap{white-space:normal;}@media(min-width:1001px){table.jog{font-size:12.5px;}table.jog th.c-num{font-size:10px;}table.jog .pc{font-size:.7em;}table.jog .foto{width:36px;height:36px;}table.jog th,table.jog td{padding-left:2px;padding-right:2px;}table.jog td.nm .ap{font-size:10.5px;}}@media(max-width:560px){table.jog .pc{display:block;font-size:.68em;letter-spacing:-.2px;}table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{padding-left:1px;padding-right:1px;}table.jog th.c-num{font-size:9px;}table.jog td.nm{white-space:normal!important;max-width:96px!important;}}
 table.jog td.nm{max-width:150px;line-height:1.15;white-space:normal;font-size:12.5px;}
 table.jog th,table.jog td{padding-left:3px;padding-right:3px;}
 table.jog td{white-space:nowrap;}table.jog td.nm{white-space:normal;}.med{font-size:10px;margin-left:1px;}
@@ -402,6 +402,8 @@ function jogadores(j,l){
     .sort(kt_cmp(KT_ORD));
 }
 const KT_CON=['da','de','do','das','dos','e',"d'"];
+/* REGRA TRAVADA (Magno, 19/11/2026): na página Ao vivo o nome do jogador é SÓ o primeiro e o último nome, sem abreviação; o apelido vai embaixo. Nenhum outro pedido muda esta regra. */
+function kt_nome2(n){ const w=String(n||'').trim().split(/\s+/).filter(Boolean); return w.length<=1?(w[0]||''):w[0]+' '+w[w.length-1]; }
 function abrev(n){ const w=String(n||'').trim().split(/\s+/); const core=w.map((x,i)=>KT_CON.includes(x.toLowerCase())?-1:i).filter(i=>i>=0); const c=core.length; let ab=[];
   if(c>=5) ab=core.slice(1,c-2); else if(c===4) ab=[core[2]]; else if(c===3) ab=[core[1]];
   ab.forEach(i=>{ w[i]=w[i].charAt(0).toUpperCase()+'.'; }); return w.join(' '); }
@@ -426,16 +428,18 @@ function kt_render(j){ KT_ULT_ST=status(j);
   const cols=['pts','reb','ast','blk','stl','eff'];
   const COLS=['pts','2p','3p','ll','reb','ast','stl','blk','to','foul','eff'];
   const fr=(p,f)=>{ const m=+p[f+'Made']||0, e=+p[f+'Miss']||0; return m+'/'+(m+e); };
+  const frP=(p,f)=>{ const m=+p[f+'Made']||0, a=m+(+p[f+'Miss']||0); return m+'/'+a+'<small class="pc"> ('+(a?Math.round(m*100/a):0)+'%)</small>'; };
+  const valH=(p,k)=>k==='2p'?frP(p,'two'):k==='3p'?frP(p,'three'):k==='ll'?frP(p,'ft'):(+p[k]||0);
   const val=(p,k)=>k==='2p'?fr(p,'two'):k==='3p'?fr(p,'three'):k==='ll'?fr(p,'ft'):(+p[k]||0);
   const melhor={}; cols.forEach(k=>{ const mx=Math.max(...todos.map(p=>+p[k]||0)); melhor[k]=mx>0?mx:null; });
   const med=(p,k)=>(melhor[k]!==null && (+p[k]||0)===melhor[k])?'<span class="med">🥇</span>':'';
   const linha=p=>{ const c=cor(p.sig); const rk=(D.rank[cat]||{})[p.reg];
     return `<tr data-reg="${p.reg}"><td class="c-num"><span class="num" style="background:${c};color:${txt(c)}">${esc(p.numero||'-')}</span></td>
-    <td class="rk">${rk?rk+'º':'—'}</td><td class="hm"><img class="foto" src="${foto(p.reg)}" alt="" onclick="kt_zoom(this.src,'${esc(p.nome).replace(/'/g,'')}')"></td>
-    <td class="l nm" title="${esc(p.nome)}">${esc(abrev(p.nome))}${p.apelido?'<span class="ap">'+esc(p.apelido)+'</span>':''}</td>
-    ${COLS.map(k=>`<td class="c-${k}" data-k="${p.reg}-${k}" data-v="${val(p,k)}">${val(p,k)}${cols.includes(k)?med(p,k):''}</td>`).join('')}</tr>`; };
+    <td class="hm"><img class="foto" src="${foto(p.reg)}" alt="" onclick="kt_zoom(this.src,'${esc(p.nome).replace(/'/g,'')}')"></td>
+    <td class="l nm" title="${esc(p.nome)}">${esc(kt_nome2(p.nome))}${p.apelido?'<span class="ap">'+esc(p.apelido)+'</span>':''}</td>
+    ${COLS.map(k=>`<td class="c-${k}" data-k="${p.reg}-${k}" data-v="${val(p,k)}">${valH(p,k)}${cols.includes(k)?med(p,k):''}</td>`).join('')}</tr>`; };
   const tabela=(t,js,sel)=>`<div class="box"><div class="cab"><img src="${escudo(t.sigla)}" alt=""><div>${esc(D.curto[t.sigla]||t.sigla)} <small>· ${esc(cat)}</small>${(t.tecnico&&t.tecnico.nome)?`<div class="tec">${fotoTec(t.sigla)}Técnico: <b>${esc(t.tecnico.nome)}</b>${t.tecnico.apelido?' ('+esc(t.tecnico.apelido)+')':''}</div>`:''}</div>${sel?`<label class="ord" title="Muda a ordem dos jogadores dos dois times">Ordenar por <select onchange="kt_ordMudou(this.value)">${KT_ORDS.map(([v,n])=>`<option value="${v}"${v===KT_ORD?' selected':''}>${n}</option>`).join('')}</select></label>`:''}</div>
-    <table class="jog"><tr><th class="c-num">CAMISA</th><th class="rkh" title="Posição no ranking de cestinhas do campeonato">RANKING<br>CESTINHAS</th><th class="hm"></th><th class="l">JOGADOR</th><th class="c-pts" title="Pontos">PTS</th><th class="c-2p" title="Arremessos de 2: certos/tentados">2P</th><th class="c-3p" title="Arremessos de 3: certos/tentados">3P</th><th class="c-ll" title="Lances livres: certos/tentados">LL</th><th class="c-reb" title="Rebotes">REB</th><th class="c-ast" title="Assistências">AST</th><th class="c-stl" title="Roubos de bola">ROU</th><th class="c-blk" title="Tocos">TOC</th><th class="c-to" title="Erros (perdas de bola)">ERR</th><th class="c-foul" title="Faltas pessoais">FP</th><th class="c-eff" title="Eficiência">EF</th></tr>
+    <table class="jog"><tr><th class="c-num">CAMISA</th><th class="hm"></th><th class="l">JOGADOR</th><th class="c-pts" title="Pontos">PTS</th><th class="c-2p" title="Arremessos de 2: certos/tentados">2P</th><th class="c-3p" title="Arremessos de 3: certos/tentados">3P</th><th class="c-ll" title="Lances livres: certos/tentados">LL</th><th class="c-reb" title="Rebotes">REB</th><th class="c-ast" title="Assistências">AST</th><th class="c-stl" title="Roubos de bola">ROU</th><th class="c-blk" title="Tocos">TOC</th><th class="c-to" title="Erros (perdas de bola)">ERR</th><th class="c-foul" title="Faltas pessoais">FP</th><th class="c-eff" title="Eficiência">EF</th></tr>
     ${js.map(linha).join('')||'<tr><td colspan="15">Sem atletas.</td></tr>'}</table></div>`;
   // comparação
   const tot=js=>{ const o={}; ['pts','twoMade','twoMiss','threeMade','threeMiss','ftMade','ftMiss','reb','ast','stl','blk','to','foul','eff'].forEach(k=>o[k]=soma(js,k)); return o; };
@@ -463,7 +467,7 @@ function kt_render(j){ KT_ULT_ST=status(j);
   const mxPts=Math.max(0,...todos.map(p=>+p.pts||0)); const cestJ=p=>mxPts>0&&(+p.pts||0)===mxPts;
   const cats=[['eff','Eficiência'],['pts','Pontos'],['reb','Rebotes'],['ast','Assistências'],['blk','Tocos'],['stl','Roubos de bola']];
   const top3=(js,k)=>js.filter(p=>(+p[k]||0)!==0).sort(ordem(k)).slice(0,3);
-  const nomeJ=p=>esc(p.apelido||abrev(p.nome));
+  const nomeJ=p=>esc(p.apelido||kt_nome2(p.nome));
   const lider=cats.map(([k,t],idx)=>{ const a=top3(ja,k), b=top3(jb,k);
     const lado=(p,dir)=>p?`<div class="lado ${dir?'dir':''}"><img src="${foto(p.reg)}" alt="" onclick="kt_zoom(this.src,'${esc(p.nome).replace(/'/g,'')}')"><div class="n">${nomeJ(p)}${(k==='eff'&&p.reg===mvp)?'<br><span class="cest mvpS" onclick="kt_mvpZoom()" title="MVP do jogo (clique para ampliar)"><span class="seloF"><img src="selo_mvp.png" alt="MVP"><canvas class="fogoSelo"></canvas></span></span>':''}${(k==='pts'&&cestJ(p))?'<br><span class="cest"><span class="bolaF"><canvas class="fogoBola"></canvas><img src="bola_fiba.png" alt=""></span><b>CESTINHA</b></span>':''}</div><div class="v">${+p[k]||0}</div></div>`:`<div class="lado ${dir?'dir':''}" style="color:#999;">—</div>`;
     const seg=i=>`<div>${a[i]?`<span>${nomeJ(a[i])}</span><span>${+a[i][k]||0}</span>`:''}</div><div class="dir">${b[i]?`<span>${nomeJ(b[i])}</span><span>${+b[i][k]||0}</span>`:''}</div>`;
@@ -565,7 +569,7 @@ function kt_abaHTML(j,ja,jb){
     const val=o=>o.r?(KT_ORDCES==='m'?(o.r[6]?o.r[4]/o.r[6]:0):o.r[+KT_ORDCES]):-1;
     linhas.sort((x,y)=>(val(y)-val(x))||((y.r?y.r[4]:-1)-(x.r?x.r[4]:-1)));
     const col={'4':'c4','5':'c5','m':'cm'}[KT_ORDCES];
-    const tr=linhas.map(({a,r})=>`<tr><td class="pos">${r&&r[0]===cat&&pos[r[2]]?pos[r[2]]+'º':'—'}</td><td>${kt_ft(a.reg)}</td><td class="l nm">${esc(abrev(a.nome))}${a.apelido?'<small>'+esc(a.apelido)+'</small>':''}${r&&r[0]!==cat?'<small>cestinhas do '+esc(r[0])+'</small>':''}</td><td class="l">${kt_tm(a.sig)}</td>
+    const tr=linhas.map(({a,r})=>`<tr><td class="pos">${r&&r[0]===cat&&pos[r[2]]?pos[r[2]]+'º':'—'}</td><td>${kt_ft(a.reg)}</td><td class="l nm">${esc(kt_nome2(a.nome))}${a.apelido?'<small>'+esc(a.apelido)+'</small>':''}${r&&r[0]!==cat?'<small>cestinhas do '+esc(r[0])+'</small>':''}</td><td class="l">${kt_tm(a.sig)}</td>
       <td>${r?r[6]:'—'}</td><td class="c4">${r?r[4]:'—'}</td><td class="cm">${r?(r[6]?(r[4]/r[6]).toFixed(1):'0.0'):'—'}</td><td class="c5">${r?r[5]:'—'}</td></tr>`).join('');
     return `<div class="abaTopo">🏀 Cestinhas do campeonato · jogadores deste jogo · ${esc(cat)}<label class="ord">Ordenar por <select onchange="KT_ORDCES=this.value;kt_render(KT_ULT)"><option value="4"${KT_ORDCES==='4'?' selected':''}>Pontos</option><option value="5"${KT_ORDCES==='5'?' selected':''}>Cestas de 3</option><option value="m"${KT_ORDCES==='m'?' selected':''}>Média por jogo</option></select></label></div>
       <table class="ab"><tr><th title="Posição no ranking de cestinhas da categoria">Pos.</th><th></th><th class="l">Atleta</th><th class="l">Equipe</th><th>Jogos</th><th class="c4">Pontos</th><th class="cm">Média</th><th class="c5">Cestas de 3</th></tr>${tr}</table>
@@ -585,7 +589,7 @@ function kt_abaHTML(j,ja,jb){
     let p=0; const pos=ls.map((x,i)=>{ const ant=ls[i-1], k=chave(x); if(!ant||String(chave(ant))!==String(k)) p=i+1; return (k[0]+k[1]+k[2])?p+'º':'—'; });
     const cel=x=>{ if(!x||!(x[0]+x[1]+x[2])) return '<span class="z">—</span>'; return ['🥇','🥈','🥉'].map((e,i)=>x[i]?e+x[i]:'').filter(Boolean).join(' '); };
     const cols=[['G','Geral']].concat(C.map(c=>[c,c]));
-    const tr=ls.map((x,i)=>`<tr><td class="pos">${pos[i]}</td><td>${kt_ft(x.a.reg)}</td><td class="l nm">${esc(abrev(x.a.nome))}${x.a.apelido?'<small>'+esc(x.a.apelido)+'</small>':''}</td><td class="l">${kt_tm(x.a.sig)}</td>
+    const tr=ls.map((x,i)=>`<tr><td class="pos">${pos[i]}</td><td>${kt_ft(x.a.reg)}</td><td class="l nm">${esc(kt_nome2(x.a.nome))}${x.a.apelido?'<small>'+esc(x.a.apelido)+'</small>':''}</td><td class="l">${kt_tm(x.a.sig)}</td>
       ${cols.map(([k])=>`<td class="mm${k===ord?' ordOn':''}">${cel(k==='G'?x.g:x.o.m[k])}</td>`).join('')}</tr>`).join('');
     const NM={G:'Geral (todas)',PTS:'Pontos',"2P":'Cestas de 2',"3P":'Cestas de 3',LL:'Lances livres',REB:'Rebotes',AST:'Assistências',ROU:'Roubos de bola',TOC:'Tocos',EF:'Eficiência'};
     return kt_confrTopo(j,sa,sb,'🏅 Medalhas nos confrontos')+`<div class="abaTopo" style="border-top:none;padding-top:0"><label class="ord">Classificar por <select onchange="KT_ORDMED=this.value;kt_render(KT_ULT)">${cols.map(([k])=>`<option value="${k}"${k===ord?' selected':''}>${NM[k]||k}</option>`).join('')}</select></label></div>
