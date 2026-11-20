@@ -302,7 +302,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktJogoTravado .ktQck,html.ktJog
 .ktPremTit{color:#ffd54f;font-weight:700;font-size:16px;text-align:center;margin-bottom:8px;}
 .ktPremCab,.ktPremL{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) 40px;gap:8px;align-items:center;}
 .ktPremCab{font-size:11px;color:#9fb3c8;text-transform:uppercase;margin-bottom:4px;}
-.ktPremL{margin-bottom:6px;}
+.ktPremL{margin-bottom:6px;}.ktPremD{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) 40px;gap:8px;align-items:center;margin-bottom:6px;}.ktPremD span{padding:8px;border-radius:8px;background:#fff8e1;color:#5d4300;font-size:13px;font-weight:700;}.ktPremD small{font-size:11px;color:#8a6d00;text-align:center;}
 .ktPremL .ktLixo{background:#fff;border:1px solid #ccc;padding:5px 0;width:38px;display:flex;align-items:center;justify-content:center;}
 .ktPremL .ktLixo:hover{background:#ffe0e0;}
 .ktPremL select{width:100%;padding:8px;border-radius:8px;border:none;font-size:13px;}
@@ -1705,7 +1705,7 @@ kt_listarMontados().then(()=>kt_restaurar());
 /* ---------- Prêmios do jogo ---------- */
 function kt_premDaPlanilha(pr){ if(!Array.isArray(pr)||!pr.length) return null;
   return pr.map(x=>{ let pv=String(x[0]); if(+pv>=6 && x[3]){ const ex=kt_premExtras(); if(!ex.includes(x[3])){ ex.push(x[3]); try{ localStorage.setItem('klaustv_premios_v1',JSON.stringify(ex)); }catch(e){} } pv=String(6+kt_premExtras().indexOf(x[3])); } return [pv,x[1]||'',x[2]||'']; }); }
-const KT_PREM_BASE=['MVP do jogo','Cestinha do jogo','Reboteiro do jogo','Defensor do jogo','Destaque do Time A','Destaque do Time B'];
+const KT_PREM_BASE=['MVP do jogo','Cestinha do jogo','Líder de rebote do jogo','Defensor do jogo','Destaque do Time A','Destaque do Time B'];
 function kt_premExtras(){ try{ return JSON.parse(localStorage.getItem('klaustv_premios_v1')||'[]'); }catch(e){ return []; } }
 function kt_premNomes(){ const ta=document.getElementById('titleA').innerText.trim()||'Time A', tb=document.getElementById('titleB').innerText.trim()||'Time B';
   return KT_PREM_BASE.map(p=>p.replace('Time A',ta).replace('Time B',tb)).concat(kt_premExtras()); }
@@ -1719,11 +1719,11 @@ const KT_CRIT={
   0:[p=>KT_V(p,'eff'),p=>KT_V(p,'pts'),p=>KT_V(p,'reb'),KT_DEF],
   1:[p=>KT_V(p,'pts')],
   2:[p=>KT_V(p,'reb'),KT_DEF,p=>KT_V(p,'eff'),p=>KT_V(p,'pts')],
-  3:[KT_DEF,p=>KT_V(p,'stl')+KT_V(p,'blk'),p=>KT_V(p,'eff'),p=>KT_V(p,'pts')]};
+  3:[KT_DEF]}; // Defensor: regra própria em KTPremios.defensores (sumula.js)
 function kt_ordenaCrit(js,cr){ return js.filter(p=>cr[0](p)>0).sort((a,b)=>{ for(const f of cr){ const d=f(b)-f(a); if(d) return d; } return 0; }); }
 function kt_cestinhas(){ const js=kt_ordenaCrit(kt_jogadores(),KT_CRIT[1]); if(!js.length) return []; const m=KT_V(js[0],'pts');
   return js.filter(p=>KT_V(p,'pts')===m).sort((a,b)=>KT_V(b,'eff')-KT_V(a,'eff')).map(p=>p.k); }
-function kt_sugestao(i,extra){ if(i===1) return kt_cestinhas()[+extra||0]||''; const cr=KT_CRIT[i]; if(!cr) return ''; const js=kt_ordenaCrit(kt_jogadores(),cr); return js.length?js[0].k:''; }
+function kt_sugestao(i,extra){ if(i===1) return kt_cestinhas()[+extra||0]||''; if(i===3){ const d=window.KTPremios?KTPremios.defensores(kt_jogadores(),KT_V):[]; return d.length?d[0].k:''; } const cr=KT_CRIT[i]; if(!cr) return ''; const js=kt_ordenaCrit(kt_jogadores(),cr); return js.length?js[0].k:''; }
 function kt_premOpcoes(l){ const sp=l.querySelector('.pP'), sj=l.querySelector('.pJ'); const vp=sp.value, vj=sj.value;
   const nomes=kt_premNomes(); sp.innerHTML=nomes.map((n,i)=>'<option value="'+i+'">'+n.replace(/</g,'&lt;')+'</option>').join('')+'<option value="novo">Novo prêmio…</option>';
   sp.value=(vp!==''&&+vp<nomes.length)?vp:(l.dataset.ini||'0');
@@ -1748,7 +1748,16 @@ function kt_premAuto(){ clearTimeout(kt_premT); kt_premT=setTimeout(()=>{
   extras.slice(n).forEach(l=>l.remove());
   for(let k=extras.length;k<n;k++){ kt_premLinha(1); const l=ls.lastElementChild; l.dataset.extra=String(k+1); const ant=ls.querySelector('.ktPremL[data-extra="'+k+'"]')||main; ant.after(l); }
   ls.querySelectorAll('.ktPremL').forEach(l=>{ const v=l.querySelector('.pP').value; if(['0','1','2','3'].includes(v) && l.querySelector('.pJ').dataset.manual!=='1') kt_premOpcoes(l); });
+  kt_premDuplos();
  },150); }
+// Duplo, triplo, quádruplo e quíntuplo-duplo: automáticos, logo depois do Cestinha (não são salvos; o PDF recalcula)
+function kt_premDuplos(){ const ls=document.getElementById('ktPremLista'); if(!ls||!window.KTPremios) return;
+  ls.querySelectorAll('.ktPremD').forEach(l=>l.remove());
+  const es=x=>String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const rows=[...ls.querySelectorAll('.ktPremL')]; let ant=null; rows.forEach(l=>{ if(l.querySelector('.pP').value==='1') ant=l; });
+  KTPremios.duplos(kt_jogadores(),KT_V).forEach(d=>{ const l=document.createElement('div'); l.className='ktPremD';
+    l.innerHTML='<span>'+es(d.nome)+'</span><span>'+(d.p.num?'#'+es(d.p.num)+' ':'')+es(d.p.nome)+' · '+es(d.p.tn)+'<br><small style="font-weight:400">'+es(d.txt)+'</small></span><small title="Calculado automaticamente">auto</small>';
+    if(ant){ ant.after(l); ant=l; } else ls.appendChild(l); }); }
 if(typeof atualizarTotaisEquipe==='function'){ const _atz=atualizarTotaisEquipe; atualizarTotaisEquipe=function(){ const r=_atz.apply(this,arguments); try{ const t=arguments[0]; let p=0; for(let i=1;i<=12;i++) p+=(+((stats[t+'-'+i]||{}).pts)||0); document.getElementById('score'+t).innerText=p; }catch(e){} kt_premAuto(); kt_rascSalvar(); return r; }; }
 /* ---------- PDF e imagem ---------- */
 function kt_carregarLib(src){ return new Promise((ok,erro)=>{ if(document.querySelector('script[src="'+src+'"]')) return ok(); const e=document.createElement('script'); e.src=src; e.onload=ok; e.onerror=erro; document.head.appendChild(e); }); }

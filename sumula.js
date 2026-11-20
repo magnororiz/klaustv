@@ -5,12 +5,24 @@
  * jogo antigo sem destaques salvos ganha os 6 destaques calculados pelos números. */
 (function(){
 const ZERO={pts:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,reb:0,ast:0,stl:0,blk:0,to:0,foul:0,eff:0};
-const PREM_BASE=['MVP do jogo','Cestinha do jogo','Reboteiro do jogo','Defensor do jogo','Destaque do Time A','Destaque do Time B'];
+const PREM_BASE=['MVP do jogo','Cestinha do jogo','Líder de rebote do jogo','Defensor do jogo','Destaque do Time A','Destaque do Time B'];
 const esc=x=>String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const V=(p,c)=>+p.s[c]||0;
 const DEF=p=>V(p,'reb')+V(p,'stl')+V(p,'blk');
+/* Prêmios automáticos (iguais no Scout, Ao vivo e PDF). g(p,k) lê a estatística k do jogador p.
+ * Defensor: só concorre quem tem 1+ rebote, 1+ toco e 1+ roubo; pontos = soma; empate: rebotes, tocos, roubos.
+ * Duplos: 10+ em 2/3/4/5 de pontos, rebotes, assistências, tocos e roubos; cada atleta só no nível mais alto;
+ * vários no mesmo nível: ordem por pontos e depois rebotes. */
+const KT_DUP_CATS=['pts','reb','ast','blk','stl'];
+const KT_NIVEIS={2:'Duplo-duplo',3:'Triplo-duplo',4:'Quádruplo-duplo',5:'Quíntuplo-duplo'};
+const KT_DUP_ROT={pts:'pts',reb:'reb',ast:'ast',blk:'toc',stl:'rou'};
+function premDefensores(js,g){ const sm=p=>g(p,'reb')+g(p,'blk')+g(p,'stl');
+  return js.filter(p=>g(p,'reb')>=1&&g(p,'blk')>=1&&g(p,'stl')>=1).sort((a,b)=>sm(b)-sm(a)||g(b,'reb')-g(a,'reb')||g(b,'blk')-g(a,'blk')||g(b,'stl')-g(a,'stl')); }
+function premDuplos(js,g){ const out=[]; js.forEach(p=>{ const ks=KT_DUP_CATS.filter(k=>g(p,k)>=10); if(ks.length>=2) out.push({p,n:ks.length,nome:KT_NIVEIS[ks.length],txt:ks.map(k=>g(p,k)+' '+KT_DUP_ROT[k]).join(' · ')}); });
+  return out.sort((a,b)=>a.n-b.n||g(b.p,'pts')-g(a.p,'pts')||g(b.p,'reb')-g(a.p,'reb')); }
+window.KTPremios={defensores:premDefensores,duplos:premDuplos,NIVEIS:KT_NIVEIS};
 // mesmos critérios do Scout
-const CRIT={0:[p=>V(p,'eff'),p=>V(p,'pts'),p=>V(p,'reb'),DEF],1:[p=>V(p,'pts'),p=>V(p,'eff')],2:[p=>V(p,'reb'),DEF,p=>V(p,'eff'),p=>V(p,'pts')],3:[DEF,p=>V(p,'stl')+V(p,'blk'),p=>V(p,'eff'),p=>V(p,'pts')],
+const CRIT={0:[p=>V(p,'eff'),p=>V(p,'pts'),p=>V(p,'reb'),DEF],1:[p=>V(p,'pts'),p=>V(p,'eff')],2:[p=>V(p,'reb'),DEF,p=>V(p,'eff'),p=>V(p,'pts')],
   4:[p=>V(p,'eff'),p=>V(p,'pts')],5:[p=>V(p,'eff'),p=>V(p,'pts')]};
 function ordena(js,cr){ return js.filter(p=>cr[0](p)>0).sort((a,b)=>{ for(const f of cr){ const d=f(b)-f(a); if(d) return d; } return 0; }); }
 function pctTxt(m,e){ const t=m+e; return t?m+'/'+t+' ('+Math.round(m*100/t)+'%)':'0/0'; }
@@ -25,7 +37,7 @@ function jogadores(jogo,o){ const m=jogo.meta||{}, st=jogo.stats||{}, out=[];
 
 function destaques(jogo,js,o){ const pr=(jogo.stats||{}).prem; const out=[];
   const nomeP=i=>i<6?PREM_BASE[i].replace('Time A',o.nomeTime('A')).replace('Time B',o.nomeTime('B')):'';
-  const auto=i=>{ if(i===4||i===5){ const t=i===4?'A':'B'; return ordena(js.filter(p=>p.t===t),CRIT[i]).slice(0,1); }
+  const auto=i=>{ if(i===3) return premDefensores(js,V).slice(0,1); if(i===4||i===5){ const t=i===4?'A':'B'; return ordena(js.filter(p=>p.t===t),CRIT[i]).slice(0,1); }
     const r=ordena(js,CRIT[i]); if(!r.length) return []; if(i!==1) return [r[0]];
     const mx=V(r[0],'pts'); return r.filter(p=>V(p,'pts')===mx); }; // empate na cestinha: todos
   if(Array.isArray(pr)&&pr.length){
@@ -33,9 +45,13 @@ function destaques(jogo,js,o){ const pr=(jogo.stats||{}).prem; const out=[];
       if(i<4 && x[2]!=='1'){ auto(i).forEach(pl=>out.push({p:nome,pl})); return; }
       const pl=js.find(p=>p.reg===String(x[4]||'')); if(pl) out.push({p:nome,pl}); });
   } else [0,1,2,3,4,5].forEach(i=>auto(i).forEach(pl=>out.push({p:nomeP(i),pl})));
+  // duplos (sempre automáticos) entram logo depois do Cestinha
+  const dup=premDuplos(js,V).map(d=>({p:d.nome,pl:d.p,det:d.txt}));
+  let pos=-1; out.forEach((x,k)=>{ if(x.p===PREM_BASE[1]) pos=k; });
+  out.splice(pos+1,0,...dup);
   return out; }
 
-const CSS='#ktSumBox .stJ{display:inline-block;margin-top:6px;padding:3px 12px;border-radius:12px;background:#fff3cd;color:#8a6100;font-size:12px;font-weight:900;letter-spacing:1px}#ktSumBox .stJ.fin{background:#e7e9ee;color:#333}#ktSumBox table.qz{width:auto;margin:14px auto 4px;border-collapse:collapse;font-size:14px;table-layout:auto}#ktSumBox table.qz th,#ktSumBox table.qz td{border:1px solid #c9d3e3;padding:5px 14px;text-align:center;width:auto!important;min-width:44px}#ktSumBox table.qz th{background:#1e5bd8;color:#fff}#ktSumBox table.qz .l{text-align:left;font-weight:700}#ktSumBox{width:1000px;background:#fff;color:#111;font-family:Arial,sans-serif;padding:26px 30px;box-sizing:border-box}#ktSumBox .cab{display:flex;align-items:center;gap:18px;border-bottom:4px solid #1e5bd8;padding-bottom:14px}#ktSumBox .cab img{height:96px}#ktSumBox .pl{flex:1;text-align:center}#ktSumBox .pl .t{display:flex;align-items:center;justify-content:center;gap:18px;font-weight:900;font-size:24px}#ktSumBox .pl .n{font-size:54px;color:#1e5bd8;font-family:Oswald,Arial}#ktSumBox .pl .x{font-size:26px;color:#999}#ktSumBox .inf{color:#555;font-size:14px;margin-top:6px}#ktSumBox .sT{background:#1e5bd8;color:#fff;font-weight:800;font-size:17px;padding:7px 12px;margin-top:18px;border-radius:6px 6px 0 0}#ktSumBox table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}#ktSumBox th.cN{width:32px}#ktSumBox th.cJ{width:220px}#ktSumBox th.cA{width:84px}#ktSumBox th{background:#e8eefb;color:#1a2c55;padding:6px 3px;font-size:12px}#ktSumBox td{padding:5px 3px;text-align:center;border-bottom:1px solid #e4e7ec;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#ktSumBox .l{text-align:left}#ktSumBox tr.tot td{background:#0d1a33;color:#ffd54f;font-weight:800}#ktSumBox .prem{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;background:#fff8e1;border:1px solid #ffd54f;border-top:none}#ktSumBox .prem div{display:flex;flex-direction:column;background:#fff;border-radius:8px;padding:8px 10px;border:1px solid #f0e2a8}#ktSumBox .prem span{font-size:12px;color:#8a6d00;font-weight:700;text-transform:uppercase}#ktSumBox .prem b{font-size:15px}#ktSumBox .prem small{color:#666}#ktSumBox .rod{margin-top:18px;border-top:2px solid #e4e7ec;padding-top:10px;display:flex;justify-content:space-between;color:#555;font-size:13px}';
+const CSS='#ktSumBox .stJ{display:inline-block;margin-top:6px;padding:3px 12px;border-radius:12px;background:#fff3cd;color:#8a6100;font-size:12px;font-weight:900;letter-spacing:1px}#ktSumBox .stJ.fin{background:#e7e9ee;color:#333}#ktSumBox table.qz{width:auto;margin:14px auto 4px;border-collapse:collapse;font-size:14px;table-layout:auto}#ktSumBox table.qz th,#ktSumBox table.qz td{border:1px solid #c9d3e3;padding:5px 14px;text-align:center;width:auto!important;min-width:44px}#ktSumBox table.qz th{background:#1e5bd8;color:#fff}#ktSumBox table.qz .l{text-align:left;font-weight:700}#ktSumBox{width:1000px;background:#fff;color:#111;font-family:Arial,sans-serif;padding:26px 30px;box-sizing:border-box}#ktSumBox .cab{display:flex;align-items:center;gap:18px;border-bottom:4px solid #1e5bd8;padding-bottom:14px}#ktSumBox .cab img{height:96px}#ktSumBox .pl{flex:1;text-align:center}#ktSumBox .pl .t{display:flex;align-items:center;justify-content:center;gap:18px;font-weight:900;font-size:24px}#ktSumBox .pl .n{font-size:54px;color:#1e5bd8;font-family:Oswald,Arial}#ktSumBox .pl .x{font-size:26px;color:#999}#ktSumBox .inf{color:#555;font-size:14px;margin-top:6px}#ktSumBox .sT{background:#1e5bd8;color:#fff;font-weight:800;font-size:17px;padding:7px 12px;margin-top:18px;border-radius:6px 6px 0 0}#ktSumBox table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}#ktSumBox th.cN{width:32px}#ktSumBox th.cJ{width:220px}#ktSumBox th.cA{width:84px}#ktSumBox th{background:#e8eefb;color:#1a2c55;padding:6px 3px;font-size:12px}#ktSumBox td{padding:5px 3px;text-align:center;border-bottom:1px solid #e4e7ec;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#ktSumBox .l{text-align:left}#ktSumBox tr.tot td{background:#0d1a33;color:#ffd54f;font-weight:800}#ktSumBox .prem{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;background:#fff8e1;border:1px solid #ffd54f;border-top:none}#ktSumBox .prem div{display:flex;flex-direction:column;background:#fff;border-radius:8px;padding:8px 10px;border:1px solid #f0e2a8}#ktSumBox .prem span{font-size:12px;color:#8a6d00;font-weight:700;word-spacing:3px;letter-spacing:.3px}#ktSumBox .prem b{font-size:15px}#ktSumBox .prem small{color:#666}#ktSumBox .rod{margin-top:18px;border-top:2px solid #e4e7ec;padding-top:10px;display:flex;justify-content:space-between;color:#555;font-size:13px}';
 
 // jogo = {meta, stats, categoria, dataHora, ginasio, jogoFed, status}; o = {nomeTime(lado), apelidos, logo}
 function montar(jogo,o){
@@ -48,9 +64,10 @@ function montar(jogo,o){
     ps.map(p=>'<tr><td>'+esc(p.num)+'</td><td class="l">'+esc(p.nome)+'</td><td><b>'+V(p,'pts')+'</b></td><td>'+pctTxt(V(p,'twoMade'),V(p,'twoMiss'))+'</td><td>'+pctTxt(V(p,'threeMade'),V(p,'threeMiss'))+'</td><td>'+pctTxt(V(p,'ftMade'),V(p,'ftMiss'))+'</td><td>'+V(p,'reb')+'</td><td>'+V(p,'ast')+'</td><td>'+V(p,'stl')+'</td><td>'+V(p,'blk')+'</td><td>'+V(p,'to')+'</td><td>'+V(p,'foul')+'</td><td><b>'+V(p,'eff')+'</b></td></tr>').join('')+
     '<tr class="tot"><td colspan="2" class="l">Total</td><td>'+sum('pts')+'</td><td>'+pctTxt(sum('twoMade'),sum('twoMiss'))+'</td><td>'+pctTxt(sum('threeMade'),sum('threeMiss'))+'</td><td>'+pctTxt(sum('ftMade'),sum('ftMiss'))+'</td><td>'+sum('reb')+'</td><td>'+sum('ast')+'</td><td>'+sum('stl')+'</td><td>'+sum('blk')+'</td><td>'+sum('to')+'</td><td>'+sum('foul')+'</td><td>'+sum('eff')+'</td></tr></table>'; };
   const prem=destaques(jogo,js,o);
-  const premHtml=prem.length?'<div class="sT">🏆 Destaques do jogo</div><div class="prem">'+prem.map(x=>'<div><span>'+esc(x.p)+'</span><b>'+esc(x.pl.nome)+'</b><small>'+esc(x.pl.tn)+'</small></div>').join('')+'</div>':'';
+  const premHtml=prem.length?'<div class="sT">🏆 Destaques do jogo</div><div class="prem">'+prem.map(x=>'<div><span>'+esc(String(x.p).toUpperCase())+'</span><b>'+esc(x.pl.nome)+'</b><small>'+esc(x.pl.tn)+(x.det?' · '+esc(x.det):'')+'</small></div>').join('')+'</div>':'';
   const info=[jogo.categoria, data, jogo.ginasio||m.ginasio, (jogo.jogoFed||m.jogoFed)?'Jogo FBERJ nº '+(jogo.jogoFed||m.jogoFed):''].filter(Boolean).map(esc).join(' · ');
-  const fin=jogo.status==='FINAL';
+  const dI=new Date(String(jogo.dataHora||'').replace(' ','T')); // encerrado: finalizado no Scout ou 3 h depois do início (mesma regra do Ao vivo e dos Jogos anteriores)
+  const fin=jogo.status==='FINAL' || (!isNaN(dI) && Date.now()>dI.getTime()+3*3600e3);
   const per=(jogo.stats||{}).periodos||{};
   const qv=(t,q)=>{ const v=(per[t]||[])[q-1]; return (v===undefined||v===null||v==='')?'':String(v); };
   const QQ=(qv('A',5)!==''||qv('B',5)!=='')?[1,2,3,4,5]:[1,2,3,4];
