@@ -526,7 +526,7 @@ function kt_render(j){ KT_ULT_ST=status(j);
   const linha=p=>{ const c=cor(p.sig); const rk=(D.rank[cat]||{})[p.reg];
     return `<tr data-reg="${p.reg}"><td class="c-num"><span class="num" style="background:${c};color:${txt(c)}">${esc(p.numero||'-')}</span></td>
     <td class="hm"><img class="foto" src="${foto(p.reg)}" alt="" onclick="kt_card('${p.reg}','${p.lado}')" style="cursor:pointer"></td>
-    <td class="l nm" title="${esc(p.nome)}">${esc(kt_nome2(p.nome))}${p.apelido?'<span class="ap">'+esc(p.apelido)+'</span>':''}</td>
+    <td class="l nm" title="${esc(p.nome)}" onclick="kt_card('${p.reg}','${p.lado}')" style="cursor:pointer">${esc(kt_nome2(p.nome))}${p.apelido?'<span class="ap">'+esc(p.apelido)+'</span>':''}</td>
     ${COLS.map(k=>`<td class="c-${k}" data-k="${p.reg}-${k}" data-v="${val(p,k)}">${valH(p,k)}${cols.includes(k)?med(p,k):''}</td>`).join('')}</tr>`; };
   // pontos do time no canto direito do cabeçalho de cada tabela, sincronizado com o placar (Magno, 20/11)
   const ptsCab=js=>`<div class="cabPts"><b>${soma(js,'pts')}</b><small>PONTOS</small></div>`;
@@ -778,7 +778,7 @@ function kt_timeHTML(j,l){
   const cel=(o,k)=>{ if(F[k]){ const r=fr(o,F[k]); return r.mk+'/'+r.a+'<small class="pc"> ('+r.pc+'%)</small>'; } if(k==='effM') return o.qtd?o.effM.toFixed(1).replace('.',','):'0,0'; const x=+o[k]||0; return ['mvp','ces','def','d2','d3','d4','d5'].includes(k)&&!x?'<span class="z">—</span>':x; };
   const tr=js.map(({p,o})=>`<tr><td class="c-num"><span class="num" style="background:${c};color:${txt(c)}">${esc(p.numero||'-')}</span></td>
     <td class="hm"><img class="foto" src="${foto(p.reg)}" alt="" onclick="kt_card('${p.reg}','${l}')" style="cursor:pointer"></td>
-    <td class="l nm">${esc(p.nome)}${p.apelido?'<span class="ap">'+esc(p.apelido)+'</span>':''}</td>
+    <td class="l nm" onclick="kt_card('${p.reg}','${l}')" style="cursor:pointer">${esc(p.nome)}${p.apelido?'<span class="ap">'+esc(p.apelido)+'</span>':''}</td>
     ${KT_TCOLS.map(([k])=>`<td class="c-${k}${k===KT_ORDT?' ordOn':''}">${cel(o,k)}</td>`).join('')}</tr>`).join('');
   const opts=[['num','Camisa']].concat(KT_TCOLS.map(([k,s,d])=>[k,s+' · '+d.split(':')[0].replace(' (quantas vezes)','')]));
   return `<div class="abaTopo"><div class="tmEsc"><img src="${escudo(t.sigla)}" alt="">${tecFt}</div><div class="tmTxt"><div>${esc(D.curto[t.sigla]||t.nome||t.sigla||'')} · ${esc(cat)} · Temporada ${esc(ano)} · ${n} ${n===1?'jogo narrado':'jogos narrados'}</div>${tec}</div>
@@ -882,7 +882,7 @@ function kt_abaHTML(j,ja,jb){
       const itens=C.filter(k=>{ const v=x.o.m[k]; return v&&(v[0]+v[1]+v[2]); }).map(k=>{ const v=x.o.m[k]; return `<div class="pdIt"><span>${NMc[k]||k}</span><b>${['🥇','🥈','🥉'].map((e,q)=>v[q]?e+v[q]:'').filter(Boolean).join(' ')}</b></div>`; }).join('');
       return `<div class="pdC${dst(c,'#000000')<150?' pdEsc':''}" style="background:${c};color:${tc}${f3?';--f3a:'+rgba(f3,.55)+';--f3b:'+rgba(f3,.75):''}"><div class="pdTopo"><img src="${(KT_FOTOS[x.a.reg])||(KT_HIS&&KT_HIS.fotos&&KT_HIS.fotos[x.a.reg])||'bola_fiba.png'}" alt="" onclick="kt_card('${x.a.reg}','${x.a.lado}')"><div><div class="pdPos">${pos[i]}</div><div class="pdN">${esc(x.a.nome)}</div>${x.a.apelido?`<div class="pdAp">${esc(x.a.apelido)}</div>`:''}<div class="pdTm"><img src="${escudo(x.a.sig)}" alt="">${esc(D.curto[x.a.sig]||x.a.sig||'')}</div></div></div>
         <div class="pdTot">${cel(x.g)}<small>total</small></div><div class="pdLista">${itens}</div></div>`; }).join('');
-    const tr=ls.slice(nPod).map((x,i0)=>{ const i=i0+nPod; return `<tr><td class="pos">${pos[i]}</td><td>${kt_ft(x.a.reg)}</td><td class="l nm">${esc(kt_nome2(x.a.nome))}${x.a.apelido?'<small>'+esc(x.a.apelido)+'</small>':''}</td><td class="l">${kt_tm(x.a.sig)}</td>
+    const tr=ls.slice(nPod).map((x,i0)=>{ const i=i0+nPod; return `<tr><td class="pos">${pos[i]}</td><td>${kt_ft(x.a.reg)}</td><td class="l nm" onclick="kt_card('${x.a.reg}','${x.a.lado}')" style="cursor:pointer">${esc(kt_nome2(x.a.nome))}${x.a.apelido?'<small>'+esc(x.a.apelido)+'</small>':''}</td><td class="l">${kt_tm(x.a.sig)}</td>
       ${cols.map(([k])=>`<td class="mm${k===ord?' ordOn':''}">${cel(k==='G'?x.g:x.o.m[k])}</td>`).join('')}</tr>`; }).join('');
     const NM={G:'Geral (todas)',PTS:'Pontos',"2P":'Cestas de 2',"3P":'Cestas de 3',LL:'Lances livres',REB:'Rebotes',AST:'Assistências',ROU:'Roubos de bola',TOC:'Tocos',EF:'Eficiência'};
     return kt_confrTopo(j,sa,sb,'🏅 Medalhas nos confrontos')+`<div class="abaTopo" style="border-top:none;padding-top:0"><label class="ord">Classificar por <select onchange="KT_ORDMED=this.value;kt_render(KT_ULT)">${cols.map(([k])=>`<option value="${k}"${k===ord?' selected':''}>${NM[k]||k}</option>`).join('')}</select></label></div>
