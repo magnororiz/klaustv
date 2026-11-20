@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<!-- Página oculta e sem senha, autorizado pelo Magno (20/11/2026): não aparece no menu nem em lugar nenhum; o Klaus abre direto klaustv.com/escalacao no OBS -->
+<!-- Página sem senha (autorizado pelo Magno, 20/11/2026); o link no menu só aparece para quem está logado. No OBS: botão "Copiar URL de saída". -->
 <meta name="robots" content="noindex,nofollow">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -43,6 +43,17 @@ body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::befo
 #ficha .g{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:4px 12px 16px;text-align:center;}
 #ficha .g b{display:block;font:700 24px 'Oswald',Arial;}
 #ficha .g span{font-size:11px;font-weight:800;color:#888;}
+#painel{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(5,10,20,.88);}
+#painel.fora{display:none;}
+#painel .pc{width:min(92vw,560px);background:#0f1a2e;border:1px solid #2b3d5c;border-radius:14px;padding:18px 18px 14px;box-shadow:0 12px 40px rgba(0,0,0,.6);}
+#painel h1{margin:0 0 10px;font:700 22px 'Oswald',Arial;letter-spacing:2px;text-transform:uppercase;}
+#painel .tp{display:flex;gap:6px;margin-bottom:10px;}#painel .tp button{flex:1;padding:9px;border-radius:8px;border:1px solid #2b3d5c;background:#16233b;color:#cfd8e6;font-weight:800;cursor:pointer;}#painel .tp button.on{background:#1e5bd8;color:#fff;border-color:#1e5bd8;}
+#painel select{width:100%;padding:10px;border-radius:8px;font-size:15px;margin-bottom:10px;}
+#painel .ok{width:100%;padding:11px;border:none;border-radius:8px;background:#e8590c;color:#fff;font-weight:900;font-size:15px;cursor:pointer;}
+#painel .dica{font-size:12.5px;color:#9fb0c8;line-height:1.45;margin-top:12px;}#painel .dica code{background:#16233b;padding:2px 6px;border-radius:5px;color:#ffd54f;word-break:break-all;}
+#painel .cp{margin-top:6px;padding:6px 10px;border-radius:6px;border:1px solid #2b3d5c;background:#16233b;color:#fff;cursor:pointer;font-weight:700;}
+#engr{position:fixed;left:8px;bottom:8px;z-index:15;width:34px;height:34px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;font-size:17px;cursor:pointer;opacity:.35;}#engr:hover{opacity:1;}#copiaUrl{position:fixed;left:50px;bottom:8px;z-index:15;padding:8px 14px;border-radius:999px;border:none;background:#e8590c;color:#fff;font-weight:800;cursor:pointer;display:none;}body.temJogo:not(.obs) #copiaUrl{display:block;}body.obs #engr{opacity:0;}body.obs #engr:hover{opacity:1;} /* no OBS a engrenagem só aparece com o mouse em cima (janela Interagir) */
+.msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:12px 18px;border-radius:10px;background:rgba(0,0,0,.7);font-weight:700;}
 </style>
 </head>
 <body>
@@ -51,6 +62,7 @@ body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::befo
   <div id="ficha" onclick="if(event.target===this)this.classList.remove('on')"><div class="c" id="fichaC"></div></div>
 </div>
 <button id="engr" title="Escolher outro jogo" onclick="painel(true)">⚙</button>
+<button id="copiaUrl" onclick="copiaSaida(this)">📋 Copiar URL de saída (OBS)</button>
 <div id="painel" class="fora"><div class="pc"><h1>Escalação</h1>
   <div class="tp"><button id="tpP" class="on" onclick="tipo('P')">Próximos jogos</button><button id="tpA" onclick="tipo('A')">Jogos anteriores</button></div>
   <select id="selJ"><option>Carregando jogos…</option></select>
@@ -88,7 +100,8 @@ function tipo(t){ TIPO=t; $('tpP').classList.toggle('on',t==='P'); $('tpA').clas
   $('selJ').innerHTML=ls.length?ls.map(j=>`<option value="${esc(j.id)}">${esc(rotulo(j))}</option>`).join(''):`<option value="">Nenhum jogo ${t==='A'?'anterior':'montado para os próximos dias'}</option>`;
   if(J&&ls.some(x=>x.id===J.id)) $('selJ').value=J.id; dica(); }
 function dica(){ const id=$('selJ').value; const base=location.origin+location.pathname;
-  $('dica').innerHTML=id?`<b>No OBS</b> (fonte <b>Navegador</b>, 1920 × 1080), use sempre o endereço <code>klaustv.com/escalacao.html</code>: ele abre o último jogo escolhido aqui. Endereço fixo só deste jogo:<br><code id="urlObs">${esc(base+'?jogo='+encodeURIComponent(id)+'&obs=1')}</code><br><button class="cp" onclick="navigator.clipboard&&navigator.clipboard.writeText($('urlObs').textContent);this.textContent='Copiado ✓'">Copiar endereço</button><br>A troca entre Casa e Visitante é feita nas abas (no OBS, pelo botão <b>Interagir</b>). O fundo fica transparente: aparece a câmera.`:''; }
+  $('dica').innerHTML=id?`<b>No OBS</b> (fonte <b>Navegador</b>, 1920 × 1080), cole a <b>URL de saída</b> deste jogo (não pede login):<br><code id="urlObs">${esc(base+'?jogo='+encodeURIComponent(id)+'&obs=1')}</code><br><button class="cp" onclick="navigator.clipboard&&navigator.clipboard.writeText($('urlObs').textContent);this.textContent='Copiado ✓'">Copiar URL de saída</button><br>A troca entre Casa e Visitante é feita nas abas (no OBS, pelo botão <b>Interagir</b>). O fundo fica transparente: aparece a câmera.`:''; }
+function copiaSaida(b){ if(!J) return; const u=location.origin+location.pathname.replace(/\.html$/,'')+'?jogo='+encodeURIComponent(J.id)+'&obs=1'; (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{ b.textContent='✓ Copiado! Cole no OBS (fonte Navegador)'; setTimeout(()=>b.textContent='📋 Copiar URL de saída (OBS)',2500); }).catch(()=>prompt('Copie a URL de saída:',u)); }
 function painel(on){ $('painel').classList.toggle('fora',!on); if(on&&!LISTA.length) carregarLista(); }
 function escolher(){ const id=$('selJ').value; if(!id) return; try{ localStorage.setItem('kt_esc_jogo',id); }catch(e){} const u=new URL(location); u.searchParams.set('jogo',id); history.replaceState(null,'',u); painel(false); abrir(id); }
 document.addEventListener('change',e=>{ if(e.target.id==='selJ') dica(); });
@@ -96,7 +109,7 @@ document.addEventListener('change',e=>{ if(e.target.id==='selJ') dica(); });
 async function abrir(id){ $('times').innerHTML='<div class="msg">Carregando a escalação…</div>'; $('abas').innerHTML='';
   const r=await api({acao:'aoVivoJogo',id});
   if(!r||!r.ok||!r.jogo){ $('times').innerHTML='<div class="msg">Não foi possível abrir este jogo agora.</div>'; return; }
-  J=r.jogo; FOTOS=r.fotos||{}; APS=r.apelidos||{}; TEMP=null; monta();
+  document.body.classList.add('temJogo'); J=r.jogo; FOTOS=r.fotos||{}; APS=r.apelidos||{}; TEMP=null; monta();
   const ano=String(J.dataHora||'').slice(0,4)||String(new Date().getFullYear());
   if(J.categoria) api({acao:'atletasKT',categoria:J.categoria,ano}).then(x=>{ TEMP=(x&&x.ok)?x:{ok:false}; const l=$('tB')&&$('tB').classList.contains('on')?'B':'A'; monta(); aba(l); }); }
 
