@@ -139,7 +139,7 @@ table.jog tr:nth-child(even) td{background:#f5f6f8;}
 #zoom img{max-width:min(90vw,520px);max-height:75vh;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.6);background:#fff;}
 #zoom .nm{font-family:'Oswald','Arial Narrow',Arial;font-size:22px;letter-spacing:1px;text-transform:uppercase;}
 #zoom .fechar{position:absolute;top:16px;right:20px;font-size:34px;color:#fff;background:none;border:none;cursor:pointer;}
-.ap{display:block;font-size:11px;color:#777;font-weight:600;}table.jog .pc{font-size:.82em;color:#666;font-weight:600;white-space:nowrap;}table.jog td.nm{white-space:nowrap!important;max-width:none!important;}table.jog td.nm .ap{white-space:normal;}@media(min-width:1001px){table.jog{font-size:12.5px;}table.jog th.c-num{font-size:10px;}table.jog .pc{font-size:.7em;}table.jog .foto{width:36px;height:36px;}table.jog th,table.jog td{padding-left:2px;padding-right:2px;}table.jog td.nm .ap{font-size:10.5px;}}@media(max-width:560px){table.jog .pc{display:block;font-size:.68em;letter-spacing:-.2px;}table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{padding-left:1px;padding-right:1px;}table.jog th.c-num{font-size:9px;}table.jog td.nm{white-space:normal!important;max-width:96px!important;}}
+.ap{display:block;font-size:11px;color:#777;font-weight:600;}table.jog .pc{font-size:.82em;color:#666;font-weight:600;white-space:nowrap;}table.jog.apertada .pc{display:block;font-size:.72em;}table.jog td.nm{white-space:nowrap!important;max-width:none!important;}table.jog td.nm .ap{white-space:normal;}@media(min-width:1001px){table.jog{font-size:12.5px;}table.jog th.c-num{font-size:10px;}table.jog .pc{font-size:.7em;}table.jog .foto{width:36px;height:36px;}table.jog th,table.jog td{padding-left:2px;padding-right:2px;}table.jog td.nm .ap{font-size:10.5px;}}@media(max-width:560px){table.jog .pc{display:block;font-size:.68em;letter-spacing:-.2px;}table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{padding-left:1px;padding-right:1px;}table.jog th.c-num{font-size:9px;}table.jog td.nm{white-space:normal!important;max-width:96px!important;}}
 table.jog td.nm{max-width:150px;line-height:1.15;white-space:normal;font-size:12.5px;}
 table.jog th,table.jog td{padding-left:3px;padding-right:3px;}
 table.jog td{white-space:nowrap;}table.jog td.nm{white-space:normal;}.med{font-size:10px;margin-left:1px;}
@@ -311,6 +311,9 @@ function kt_zoom(src,nm){ const z=$('zoom'); z.querySelector('img').src=src; z.q
 function kt_mvpZoom(){ let z=$('mvpZ'); if(z){ z.remove(); return; } z=document.createElement('div'); z.id='mvpZ'; z.title='Clique para fechar';
   z.innerHTML='<span class="seloF"><img src="selo_mvp.png" alt="MVP"><canvas class="fogoSelo"></canvas></span>'; z.onclick=()=>z.remove(); document.body.appendChild(z); }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('mvpZ')) $('mvpZ').remove(); });
+// se a tabela dos jogadores não couber (tela estreita ou nomes longos), a % de acerto desce para baixo do número, para não cortar a coluna EF
+function kt_ajustaTab(){ document.querySelectorAll('table.jog').forEach(t=>{ t.classList.remove('apertada'); if(t.scrollWidth>t.parentElement.clientWidth+1) t.classList.add('apertada'); }); }
+window.addEventListener('resize',()=>{ clearTimeout(window.KT_RZ); window.KT_RZ=setTimeout(kt_ajustaTab,150); });
 function kt_fechaZoom(){ $('zoom').classList.remove('on'); }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') kt_fechaZoom(); });
 const $=id=>document.getElementById(id);
@@ -529,6 +532,7 @@ function kt_render(j){ KT_ULT_ST=status(j);
    <div class="atual">${status(j)==='vivo'?'🔴 Atualizando ao vivo · ':(status(j)==='final'?'Jogo encerrado · ':'')}Atualizado às ${new Date().toLocaleTimeString('pt-BR')}</div>
    ${status(j)!=='breve'?`<div class="ktBaixar"><button type="button" onclick="kt_baixar('pdf',this)">📄 Baixar PDF do jogo</button><button type="button" onclick="kt_baixar('img',this)">🖼️ Baixar imagem para WhatsApp</button></div>`:''}`;
   $('jogo').classList.toggle('lidAberto',kt_todosLid);
+  kt_ajustaTab();
   if(typeof kt_mapaFooter==='function') kt_mapaFooter(j.ginasio||m.ginasio||'');
   document.querySelectorAll('#jogo table.jog .c-'+KT_ORD).forEach(e=>e.classList.add('ordOn'));
   if(Object.keys(antes).length){
