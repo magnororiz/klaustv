@@ -224,10 +224,10 @@ table.jg tr.media td,table.jg tr.total td{font-weight:800;background:#e9ecf1!imp
 <div class="pag">
   <div class="filtro">
     <div class="topo"><h2 class="cond">🏀 Atleta FBERJ</h2>
-      <label class="fl">Time<select id="selTime" onchange="kt_mudouTime()"></select></label>
-      <label class="fl curto">Categoria<select id="selCat" onchange="kt_mudouCat()"></select></label>
+      <label class="fl curto">Categoria<select id="selCat" onchange="kt_mudouCatF()"></select></label>
+      <label class="fl">Time<select id="selTime" onchange="kt_mudouCat()"></select></label>
       <label class="fl grande">Atleta<select id="selAtl" onchange="kt_mudouAtl()"></select></label></div>
-    <p class="intro">Números da temporada <b id="anoTxt"></b> com estatística do Klaus TV: só entram os jogos narrados (o atleta precisa estar na súmula). Escolha o time, depois a categoria e então o atleta.</p>
+    <p class="intro">Números da temporada <b id="anoTxt"></b> com estatística do Klaus TV: só entram os jogos narrados (o atleta precisa estar na súmula). Escolha a categoria, depois o time e então o atleta.</p>
   </div>
   <div id="conteudo"><div class="vazio">Carregando atletas...</div></div>
   <div class="atual" id="atual"></div>
@@ -261,25 +261,21 @@ async function kt_init(){
   const [a,b]=await Promise.all([api({acao:'dadosFed'}),api({acao:'dadosCestinhas'})]);
   if(!a||!a.ok){ $('conteudo').innerHTML='<div class="vazio">'+esc((a&&a.erro)||'Não foi possível carregar os elencos da FBERJ.')+'</div>'; return; }
   FED=a; if(b&&b.ok) EXT={fotos:b.fotos||{},apelidos:b.apelidos||{}};
-  const sigs=new Set(); Object.values(FED.elencos).forEach(o=>Object.keys(o).forEach(s=>sigs.add(s)));
-  const ts=[...sigs].sort((x,y)=>nomeT(x,FED.equipes).localeCompare(nomeT(y,FED.equipes),'pt-BR'));
-  $('selTime').innerHTML='<option value="">Escolha o time</option>'+ts.map(s=>`<option value="${s}">${esc(nomeT(s,FED.equipes))}</option>`).join('');
-  const u=new URL(location); const t=u.searchParams.get('time'); if(t&&ts.includes(t)) $('selTime').value=t;
-  await kt_mudouTime(u.searchParams.get('cat'),u.searchParams.get('atleta'));
+  // ordem dos filtros (Magno, 20/11): Categoria → Time → Atleta
+  const ordC=c=>{ const m=String(c).match(/(\d+)/); return c==='Adulto'?99:(m?+m[1]:50); };
+  const cats=Object.keys(FED.elencos).sort((a,b)=>ordC(a)-ordC(b));
+  $('selCat').innerHTML='<option value="">Escolha</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join('');
+  const u=new URL(location); const c0=u.searchParams.get('cat'); if(c0&&cats.includes(c0)) $('selCat').value=c0;
+  kt_times(u.searchParams.get('time')); await kt_mudouCat(u.searchParams.get('atleta'));
 }
+function kt_times(tIni){ const cat=$('selCat').value; const ts=cat?Object.keys(FED.elencos[cat]||{}).filter(s=>(FED.elencos[cat][s]||[]).length).sort((x,y)=>nomeT(x,FED.equipes).localeCompare(nomeT(y,FED.equipes),'pt-BR')):[];
+  const v=tIni||$('selTime').value; $('selTime').innerHTML='<option value="">Escolha o time</option>'+ts.map(s=>`<option value="${s}">${esc(nomeT(s,FED.equipes))}</option>`).join(''); if(ts.includes(v)) $('selTime').value=v; }
+async function kt_mudouCatF(){ kt_times(); await kt_mudouCat(); }
 function kt_url(){ const u=new URL(location); ['time','cat','atleta'].forEach((k,i)=>{ const v=[$('selTime').value,$('selCat').value,$('selAtl').value][i]; if(v) u.searchParams.set(k,v); else u.searchParams.delete(k); }); history.replaceState(null,'',u); }
-async function kt_mudouTime(catIni,atlIni){
-  const s=$('selTime').value;
-  const cats=s?Object.keys(FED.elencos).filter(c=>(FED.elencos[c][s]||[]).length):[];
-  const ordC=c=>{ const m=String(c).match(/(\d+)/); return c==='Adulto'?99:(m?+m[1]:50); }; cats.sort((a,b)=>ordC(a)-ordC(b));
-  $('selCat').innerHTML=cats.length?cats.map(c=>`<option>${esc(c)}</option>`).join(''):'<option value="">—</option>';
-  if(catIni&&cats.includes(catIni)) $('selCat').value=catIni;
-  await kt_mudouCat(atlIni);
-}
 async function kt_atl(cat){ if(!ATL[cat]){ const r=await api({acao:'atletasKT',categoria:cat,ano:ANO}); ATL[cat]=(r&&r.ok)?r:{ok:false,erro:(r&&r.erro)||'Não foi possível carregar os números agora.',jogos:[]}; } return ATL[cat]; }
 async function kt_mudouCat(atlIni){
   const s=$('selTime').value, cat=$('selCat').value; CMP=null;
-  if(!s||!cat){ $('selAtl').innerHTML='<option value="">—</option>'; $('conteudo').innerHTML='<div class="vazio">Escolha o time e a categoria.</div>'; kt_url(); return; }
+  if(!s||!cat){ $('selAtl').innerHTML='<option value="">—</option>'; $('conteudo').innerHTML='<div class="vazio">Escolha a categoria e o time.</div>'; kt_url(); return; }
   $('selAtl').innerHTML='<option value="">Carregando…</option>'; $('conteudo').innerHTML='<div class="vazio">Carregando os jogos narrados…</div>';
   const R=await kt_atl(cat);
   const ls=elenco(cat,s).map(([reg,nome])=>({reg:String(reg),nome,q:kt_jogosDe(R,reg).length})).sort((a,b)=>(b.q>0)-(a.q>0)||a.nome.localeCompare(b.nome,'pt-BR'));
