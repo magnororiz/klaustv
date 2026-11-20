@@ -429,6 +429,8 @@ function kt_render(j){ KT_ULT_ST=status(j);
   const pa=soma(ja,'pts'), pb=soma(jb,'pts');
   const d=dataJogo(j), cat=j.categoria;
   const nome=s=>esc((D.equipes[s]||s));
+  // técnico: o que foi salvo no jogo (Montar Jogo); se o jogo não tiver, usa o técnico cadastrado no Banco de dados (time + categoria)
+  const tecN=t=>((t.tecnico&&t.tecnico.nome)||KT_AP['TEC-'+t.sigla+'-'+String(cat).replace(/[^A-Za-z0-9]/g,'')]||'').trim();
   const fotoTec=s=>{ const k='TEC-'+s+'-'+String(cat).replace(/[^A-Za-z0-9]/g,''); return KT_FOTOS[k]?`<img class="tecFoto" src="${KT_FOTOS[k]}" alt="" onclick="kt_zoom(this.src,'Técnico')">`:''; };
   // líderes por coluna (medalhas)
   const cols=['pts','reb','ast','blk','stl','eff'];
@@ -444,7 +446,7 @@ function kt_render(j){ KT_ULT_ST=status(j);
     <td class="hm"><img class="foto" src="${foto(p.reg)}" alt="" onclick="kt_zoom(this.src,'${esc(p.nome).replace(/'/g,'')}')"></td>
     <td class="l nm" title="${esc(p.nome)}">${esc(kt_nome2(p.nome))}${p.apelido?'<span class="ap">'+esc(p.apelido)+'</span>':''}</td>
     ${COLS.map(k=>`<td class="c-${k}" data-k="${p.reg}-${k}" data-v="${val(p,k)}">${valH(p,k)}${cols.includes(k)?med(p,k):''}</td>`).join('')}</tr>`; };
-  const tabela=(t,js,sel)=>`<div class="box"><div class="cab"><img src="${escudo(t.sigla)}" alt=""><div>${esc(D.curto[t.sigla]||t.sigla)} <small>· ${esc(cat)}</small>${(t.tecnico&&t.tecnico.nome)?`<div class="tec">${fotoTec(t.sigla)}Técnico: <b>${esc(t.tecnico.nome)}</b>${t.tecnico.apelido?' ('+esc(t.tecnico.apelido)+')':''}</div>`:''}</div>${sel?`<label class="ord" title="Muda a ordem dos jogadores dos dois times">Ordenar por <select onchange="kt_ordMudou(this.value)">${KT_ORDS.map(([v,n])=>`<option value="${v}"${v===KT_ORD?' selected':''}>${n}</option>`).join('')}</select></label>`:''}</div>
+  const tabela=(t,js,sel)=>`<div class="box"><div class="cab"><img src="${escudo(t.sigla)}" alt=""><div>${esc(D.curto[t.sigla]||t.sigla)} <small>· ${esc(cat)}</small>${tecN(t)?`<div class="tec">${fotoTec(t.sigla)}Técnico: <b>${esc(tecN(t))}</b>${(t.tecnico&&t.tecnico.apelido)?' ('+esc(t.tecnico.apelido)+')':''}</div>`:''}</div>${sel?`<label class="ord" title="Muda a ordem dos jogadores dos dois times">Ordenar por <select onchange="kt_ordMudou(this.value)">${KT_ORDS.map(([v,n])=>`<option value="${v}"${v===KT_ORD?' selected':''}>${n}</option>`).join('')}</select></label>`:''}</div>
     <table class="jog"><tr><th class="c-num">CAMISA</th><th class="hm"></th><th class="l">JOGADOR</th><th class="c-pts" title="Pontos">PTS</th><th class="c-2p" title="Arremessos de 2: certos/tentados">2P</th><th class="c-3p" title="Arremessos de 3: certos/tentados">3P</th><th class="c-ll" title="Lances livres: certos/tentados">LL</th><th class="c-reb" title="Rebotes">REB</th><th class="c-ast" title="Assistências">AST</th><th class="c-stl" title="Roubos de bola">ROU</th><th class="c-blk" title="Tocos">TOC</th><th class="c-to" title="Erros (perdas de bola)">ERR</th><th class="c-foul" title="Faltas pessoais">FP</th><th class="c-eff" title="Eficiência">EF</th></tr>
     ${js.map(linha).join('')||'<tr><td colspan="15">Sem atletas.</td></tr>'}</table></div>`;
   // comparação
