@@ -3,7 +3,7 @@
  * v2 (20/11/2026): pede sempre a versão nova ao site e a página se recarrega sozinha quando sai atualização.
  * Sem internet, abre a última cópia guardada das páginas e imagens do próprio site.
  * Nunca guarda os dados do jogo (servidor Google): os números sempre vêm ao vivo. */
-const CACHE = 'klaustv-app-v6';
+const CACHE = 'klaustv-app-v7';
 const BASICO = ['aovivo.html', 'manifest.webmanifest', 'logo_klaustv_tv.png', 'bola_fiba.png', 'app/icone-192.png', 'app/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
