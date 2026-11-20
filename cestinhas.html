@@ -51,6 +51,7 @@ table.rk .tm .esc{width:24px;height:24px;flex-basis:24px;}
 table.rk .ordOn{background:rgba(255,213,79,.25)!important;}
 table.rk th.ordOn{box-shadow:inset 0 -3px 0 #ffb300;}
 table.rk tr.hl td{background:#fff6d6!important;}
+table.rk td.mat{color:#1e5bd8;font-weight:600;font-size:.92em;white-space:nowrap;}
 @media(max-width:600px){table.rk .hf{display:none;}table.rk{font-size:12.5px;}table.rk .tm span{display:none;}}
 .mais{display:block;width:100%;padding:11px;border:none;background:#e9ecf1;color:#222;font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Oswald','Arial Narrow',Arial;}
 /*ktMenuCSS*/
@@ -216,9 +217,9 @@ function kt_desenha(){
   const lim=(kt_todos||q||eq)?lsB.length:Math.min(50,lsB.length);
   const col={'4':'c4','m':'cm','5':'c5','6':'c6'}[ord];
   const linhas=lsB.slice(0,lim).map(r=>`<tr><td class="pos">${pos[r[1]+'|'+r[2]]?pos[r[1]+'|'+r[2]]+'º':'—'}</td><td class="hf"><img class="ft" src="${foto(r[2])}" alt=""></td>
-    <td class="l nm">${esc(abrev(r[3]))}${ap(r[2])?`<small>${esc(ap(r[2]))}</small>`:''}</td><td class="l"><div class="tm">${escudo(r[1])}<span>${esc(nomeT(r[1],C.equipes))}</span></div></td>
+    <td class="l nm">${esc(abrev(r[3]))}${ap(r[2])?`<small>${esc(ap(r[2]))}</small>`:''}</td><td class="mat">${esc(r[2]||'—')}</td><td class="l"><div class="tm">${escudo(r[1])}<span>${esc(nomeT(r[1],C.equipes))}</span></div></td>
     <td class="c6">${r[6]}</td><td class="c4">${r[4]}</td><td class="cm">${med(r).toFixed(1)}</td><td class="c5">${r[5]}</td></tr>`).join('');
-  $('conteudo').innerHTML=pod+`<div class="box"><table class="rk"><tr><th title="Posição no ranking de pontos da categoria">Pos.</th><th class="hf"></th><th class="l">Atleta</th><th class="l">Equipe</th><th class="c6">Jogos</th><th class="c4">Pontos</th><th class="cm">Média</th><th class="c5">Cestas de 3</th></tr>${linhas||'<tr><td colspan="8">Nenhum atleta encontrado.</td></tr>'}</table>
+  $('conteudo').innerHTML=pod+`<div class="box"><table class="rk"><tr><th title="Posição no ranking de pontos da categoria">Pos.</th><th class="hf"></th><th class="l">Atleta</th><th class="mat" title="Número do atleta na FBERJ (o mesmo da planilha da federação)">Matrícula<small style="display:block;font-size:9px;font-weight:600;color:#777;text-transform:none">FBERJ</small></th><th class="l">Equipe</th><th class="c6">Jogos</th><th class="c4">Pontos</th><th class="cm">Média</th><th class="c5">Cestas de 3</th></tr>${linhas||'<tr><td colspan="9">Nenhum atleta encontrado.</td></tr>'}</table>
     ${(!kt_todos&&!q&&!eq&&lsB.length>50)?`<button class="mais" onclick="kt_todos=true;kt_desenha()">▼ Ver todos os ${lsB.length} atletas</button>`:''}</div>`;
   document.querySelectorAll('table.rk .'+col).forEach(e=>e.classList.add('ordOn'));
 }
