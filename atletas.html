@@ -334,14 +334,14 @@ function kt_perfil(s,cat,reg,nome,js,m,R){
   const comp=elenco(cat,s).map(([r])=>kt_jogosDe(R,r)).filter(x=>x.length).map(kt_med);
   const eq={}; ['pts','reb','ast','threeMade','twoMade','ftMade','eff'].forEach(k=>eq[k]=comp.length?comp.reduce((t,x)=>t+x[k],0)/comp.length:0);
   const recs=[['pts','PTS','Pontos'],['reb','REB','Rebotes'],['ast','AST','Assistências'],['stl','ROU','Roubos de bola'],['blk','TOC','Tocos'],['threeMade','3PC','Cestas de 3 certas'],['twoMade','2PC','Cestas de 2 certas'],['ftMade','LLC','Lances livres certos']].map(([k,s2,t])=>{
-    const mx=Math.max(...js.map(j=>j.s[k])); if(!(mx>0)) return `<div class="rec zero" title="${t}"><div class="n"><b>0</b><span>${s2}</span></div><div class="t"><b>Ainda sem ${t.toLowerCase()}</b><span></span></div></div>`;
+    const mx=Math.max(...js.map(j=>j.s[k])); if(!(mx>0)) return ''; // sem recorde: não aparece
     const qs=js.filter(j=>j.s[k]===mx);
     return `<div class="rec" title="${t}"><div class="n"><b>${mx}</b><span>${s2}</span></div><div class="t">${qs.length>1?`<b>em ${qs.length} partidas</b><span>${qs.map(j=>dataBR(j.d).slice(0,5)).join(' · ')}</span>`:`<b>VS. <img src="${escUrl(qs[0].opp)}" alt="">${esc(nomeT(qs[0].opp,FED.equipes))}</b><span>${dataBR(qs[0].d)}</span>`}</div></div>`; }).join('');
   // prêmios dentro dos Recordes pessoais, no mesmo formato; total de todos os jogos narrados da temporada (Magno, 20/11)
   const P=kt_premios(R,reg);
   const prems=[['mvp','MVP','MVP do jogo'],['ces','CES','Cestinha do jogo'],['def','DEF','Defensor do jogo'],['dest','DEST','Destaque do jogo'],['d2','DD','Duplo-duplo'],['d3','TD','Triplo-duplo'],['d4','QD','Quádruplo-duplo'],['d5','5D','Quíntuplo-duplo']]
-    .filter(([k])=>!['d4','d5'].includes(k)||P[k].length).map(([k,sg,t])=>{ const L=P[k], n=L.length;
-      return `<div class="rec${n?'':' zero'}" title="${t}"><div class="n"><b>${n}</b><span>${sg}</span></div><div class="t"><b>${n===1?t:(n?n+' vezes '+t:'Ainda sem '+t)}</b><span>${n===1?`VS. <img src="${escUrl(L[0].opp)}" alt="">${esc(nomeT(L[0].opp,FED.equipes))} · ${dataBR(L[0].d)}`:(n?L.map(j=>dataBR(j.d).slice(0,5)).join(' · '):'')}</span></div></div>`; }).join('');
+    // só a quantidade e o nome do prêmio; prêmio que ele não tem não aparece (Magno, 20/11)
+    .filter(([k])=>P[k].length).map(([k,sg,t])=>`<div class="rec" title="${t}"><div class="n"><b>${P[k].length}</b><span>${sg}</span></div><div class="t"><b>${t}</b><span></span></div></div>`).join('');
   return `<div class="atCorpo"><div class="atTopo"><div><div class="atNm">${ap(reg)?`<b>${esc(ap(reg))}</b>`:`<b>${esc(nome2(nome))}</b>`}<small>${esc(nome)}</small></div><div class="atCards">${cards}</div>
       <div class="atH">Ficha técnica</div><table class="ficha">${ficha}</table></div>
       <img class="atFt" src="${foto(reg)}" alt="" onclick="window.open(this.src,'_blank')"></div>
