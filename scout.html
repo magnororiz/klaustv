@@ -1616,7 +1616,7 @@ async function kt_finalizar(bt){
   const j=KT_MONTADOS.find(x=>x.id===KT_JOGO_ID); if(j){ j.status='FINAL'; kt_listarAnteriores(j); }
   KT_TRAVADO=true; KT_SNAP=null; kt_pintarTrava(); kt_qPintar();
   const o=document.querySelector('#ktSelJogo option[value="'+KT_JOGO_ID+'"]'); if(o&&j) o.textContent=kt_rotuloJM(j);
-  kt_msg('🏁 Jogo finalizado'+(r.placar?' · placar final '+r.placar[0]+' x '+r.placar[1]:'')+'. O Ao vivo já mostra JOGO FINALIZADO.');
+  kt_msg('✅ Jogo finalizado'+(r.placar?' · placar final '+r.placar[0]+' x '+r.placar[1]:'')+'. O Ao vivo já mostra JOGO FINALIZADO.');
 }
 async function kt_reabrirJogo(id){
   const j=KT_MONTADOS.find(x=>x.id===id); if(!j) return;
