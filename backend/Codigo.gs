@@ -16,7 +16,7 @@ function doPost(e) {
   let p = {};
   try { p = JSON.parse(e.postData.contents || '{}'); } catch (err) { return responder({ ok: false, erro: 'Pedido inválido.' }); }
   if (p.acao === 'aoVivoLista') return responder(aoVivoLista(p.categoria));
-  if (p.acao === 'aoVivoJogo') return responder(aoVivoJogo(p.id));
+  if (p.acao === 'aoVivoJogo') return responder(aoVivoJogo(p.id, p.leve));
   if (p.acao === 'dadosFed') return responder(comExtras(dadosFed()));
   if (p.acao === 'dadosCestinhas') return responder(dadosCestinhas());
   if (p.acao === 'dadosCestinhas2025') return responder(dadosCestinhas2025());
@@ -43,7 +43,7 @@ function doPost(e) {
       case 'salvarApelido': return responder(salvarApelido(p.token, p.reg, p.apelido));
       case 'salvarCamisa': return responder(salvarCamisa(p.token, p.reg, p.camisa));
       case 'aoVivoLista': return responder(aoVivoLista(p.categoria));
-      case 'aoVivoJogo': return responder(aoVivoJogo(p.id));
+      case 'aoVivoJogo': return responder(aoVivoJogo(p.id, p.leve));
       case 'listarArbitragem': return responder(listarArbitragem(p.token));
       case 'incluirArbitragem': return responder(incluirArbitragem(p.token, p.nomes));
       case 'funcaoArbitragem': return responder(funcaoArbitragem(p.token, p.nome, p.funcao));
@@ -257,7 +257,13 @@ function aoVivoLista(categoria) {
   else if (categoria) lista = lista.filter(x => x.categoria === categoria && !x.avulso);
   return { ok: true, jogos: lista, agora: new Date().toISOString() };
 }
-function aoVivoJogo(id) {
+// leve = só os números do jogo, sem a lista de fotos e apelidos (o Ao vivo pede assim nas atualizações de 5 em 5 s, para gastar menos internet)
+function aoVivoJogo(id, leve) {
+  const r = aoVivoJogoCompleto(id);
+  if (leve && r && r.ok) return { ok: true, leve: true, jogo: r.jogo, agora: r.agora };
+  return r;
+}
+function aoVivoJogoCompleto(id) {
   const c = CacheService.getScriptCache(); const k = 'j_' + id; const hit = c.get(k);
   if (hit) return JSON.parse(hit);
   const x = lerJogos().find(j => j.id === id); if (!x) return { ok: false, erro: 'Jogo não encontrado.' };
