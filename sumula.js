@@ -58,7 +58,9 @@ function montar(jogo,o){
   const m=jogo.meta||{}, tn=o.nomeTime;
   const js=jogadores(jogo,o); const tot=t=>js.filter(p=>p.t===t).reduce((a,p)=>a+V(p,'pts'),0);
   const data=dataTxt(jogo.dataHora)||new Date().toLocaleDateString('pt-BR');
-  const tab=t=>{ const ps=js.filter(p=>p.t===t).sort((a,b)=>V(b,'pts')-V(a,'pts')||V(b,'eff')-V(a,'eff'));
+  const tab=t=>{ // REGRA GRAVADA (Magno, 20/11/2026): no PDF e na imagem os jogadores saem SEMPRE em ordem de camisa (menor para maior), qualquer que seja a ordem escolhida na tela.
+  const nCam=p=>{ const n=parseInt(p.num,10); return isNaN(n)?999:n; };
+  const ps=js.filter(p=>p.t===t).sort((a,b)=>nCam(a)-nCam(b)||String(a.num).localeCompare(String(b.num)));
     const sum=k=>ps.reduce((a,p)=>a+V(p,k),0);
     return '<div class="sT">'+esc(tn(t))+'</div><table><tr><th class="cN">#</th><th class="cJ l">Jogador</th><th>PTS</th><th class="cA">2P</th><th class="cA">3P</th><th class="cA">LL</th><th>REB</th><th>AST</th><th>ROU</th><th>TOC</th><th>ERR</th><th>FP</th><th>EF</th></tr>'+
     ps.map(p=>'<tr><td>'+esc(p.num)+'</td><td class="l">'+esc(p.nome)+'</td><td><b>'+V(p,'pts')+'</b></td><td>'+pctTxt(V(p,'twoMade'),V(p,'twoMiss'))+'</td><td>'+pctTxt(V(p,'threeMade'),V(p,'threeMiss'))+'</td><td>'+pctTxt(V(p,'ftMade'),V(p,'ftMiss'))+'</td><td>'+V(p,'reb')+'</td><td>'+V(p,'ast')+'</td><td>'+V(p,'stl')+'</td><td>'+V(p,'blk')+'</td><td>'+V(p,'to')+'</td><td>'+V(p,'foul')+'</td><td><b>'+V(p,'eff')+'</b></td></tr>').join('')+
