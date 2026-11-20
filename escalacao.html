@@ -134,7 +134,7 @@ function timeDe(l){ const m=J.meta||{}, t=m['time'+l]||{}, sig=t.sigla||(l==='A'
 function monta(){ const T={A:timeDe('A'),B:timeDe('B')}; window.KT_T=T;
   $('times').innerHTML=['A','B'].map(l=>{ const t=T[l];
     return `<div class="time${l==='A'?' on':''}" id="t${l}" style="--cor:${t.cor};--txt:${t.txt}">
-      ${t.tec?`<div class="tec${l==='B'?' dir':''}"><div class="tf" style="background-image:url('${esc(t.tecF)}')"></div><div><small>Técnico</small>${esc(t.tec)}</div></div>`:''}
+      ${t.tec?`<div class="tec${l==='B'?' dir':''}" onclick="tecFicha('${l}')" style="cursor:pointer" title="Ver foto do técnico"><div class="tf" style="background-image:url('${esc(t.tecF)}')"></div><div><small>Técnico</small>${esc(t.tec)}</div></div>`:''}
       <div class="cab">${esc(t.nome)}</div>
       <div class="qd">${t.js.map((a,i)=>{ const [x,y,e]=POS[i]; const ap=APS[a.reg]||a.apelido||'';
         return `<div class="jog" style="left:${x}%;top:${y}%;--e:${e}" onclick="ficha('${l}',${i})"><div class="foto" style="background-image:url('${esc(FOTOS[a.reg]||'bola_fiba.png')}')"><span class="num">${esc(a.numero||'-')}</span></div><div class="nm">${esc(nome2(a.nome))}${ap?'<small>'+esc(ap)+'</small>':''}</div></div>`; }).join('')}</div></div>`; }).join('');
@@ -142,6 +142,11 @@ function monta(){ const T={A:timeDe('A'),B:timeDe('B')}; window.KT_T=T;
   $('abas').innerHTML=`<img class="abEsc" src="${escudo(T.A.sig)}" alt="">${bt('A')}${bt('B')}<img class="abEsc" src="${escudo(T.B.sig)}" alt="">`;
   // pré-carrega as fotos dos dois times: a troca de aba é instantânea
   [...T.A.js,...T.B.js].forEach(a=>{ if(FOTOS[a.reg]){ const im=new Image(); im.src=FOTOS[a.reg]; } }); }
+// técnico: só a foto grande e o nome (Magno, 20/11/2026)
+function tecFicha(l){ const t=KT_T[l]; const c=$('fichaC'); c.style.setProperty('--cor',t.cor);
+  c.innerHTML=`<div style="padding:18px;text-align:center"><div style="width:min(60vh,300px);aspect-ratio:1;margin:0 auto;border-radius:50%;border:5px solid ${t.cor};background:#e9edf2 url('${esc(t.tecF)}') center/cover"></div>
+    <div style="margin-top:12px;font:700 13px 'Oswald',Arial;letter-spacing:2px;color:#888;text-transform:uppercase">Técnico · ${esc(t.nome)}</div><div style="font:700 26px 'Oswald',Arial">${esc(t.tec)}</div></div>`;
+  $('ficha').classList.add('on'); }
 function aba(l){ ['A','B'].forEach(x=>{ $('t'+x).classList.toggle('on',x===l); $('b'+x).classList.toggle('on',x===l); }); $('ficha').classList.remove('on'); }
 
 // ficha: estatística geral do atleta na temporada (jogos narrados pelo Klaus TV)
