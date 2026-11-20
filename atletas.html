@@ -150,6 +150,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .rec .n b{font:700 46px 'Oswald','Arial Narrow',Arial;line-height:1;}.rec .n span{font:700 16px 'Oswald','Arial Narrow',Arial;letter-spacing:1px;}
 .rec .t{padding:10px 14px;display:flex;flex-direction:column;justify-content:space-between;}.rec .t b{font:700 19px 'Oswald','Arial Narrow',Arial;}.rec .t span{font-size:15px;color:#333;}.rec .t img{width:22px;height:22px;object-fit:contain;vertical-align:-5px;margin-right:4px;}
 .rec.zero{opacity:.55;}
+.prems{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}.prem{background:linear-gradient(#333,#222);color:#fff;border-radius:14px;text-align:center;padding:10px 6px;}.prem b{display:block;font:700 38px 'Oswald','Arial Narrow',Arial;line-height:1;color:#ffd54f;}.prem span{font:700 13px 'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;}.prem.zero{opacity:.5;}.prem.zero b{color:#fff;}
 .tabJ{background:#2e2e2e;border-radius:0 0 14px 14px;padding:16px;}
 .tabJ .cx{background:#d9dce1;border-radius:6px;padding:12px;overflow-x:auto;}
 .tabJ h3{margin:0 0 8px;color:#111;font:400 22px Arial,sans-serif;}
@@ -308,6 +309,21 @@ function kt_desenha(){
   $('atual').textContent='Dados: elenco e matrícula da FBERJ (cópia diária) e estatística dos jogos narrados pelo Klaus TV.';
 }
 
+/* prêmios nos jogos narrados (mesmas regras do Ao vivo e do Scout): MVP, cestinha, defensor, destaque e duplos (Magno, 20/11) */
+function kt_premios(R,reg){ const o={mvp:0,ces:0,def:0,dest:0,d2:0,d3:0,d4:0,d5:0}; reg=String(reg);
+  (R.jogos||[]).forEach(g=>{ if(!g.p.some(x=>String(x[0])===reg)) return;
+    const js=g.p.map(r=>{ const s={}; KS.forEach((k,i)=>s[k]=+r[3+i]||0); return {reg:String(r[0]),lado:r[1],s}; }); const V=(p,k)=>p.s[k];
+    const pr=Array.isArray(g.prem)?g.prem:[]; const man=i=>{ const x=pr.find(y=>+y[0]===i && y[2]==='1' && y[4]); return x?js.filter(p=>p.reg===String(x[4])):null; };
+    const ord=cr=>js.filter(p=>cr[0](p)>0).sort((a,b)=>{ for(const f of cr){ const d=f(b)-f(a); if(d) return d; } return 0; });
+    const DS=p=>V(p,'reb')+V(p,'stl')+V(p,'blk');
+    const mvp=man(0)||ord([p=>V(p,'eff'),p=>V(p,'pts'),p=>V(p,'reb'),DS]).slice(0,1);
+    let ces=man(1); if(!ces){ const mx=Math.max(0,...js.map(p=>V(p,'pts'))); ces=mx>0?js.filter(p=>V(p,'pts')===mx):[]; }
+    const def=man(3)||js.filter(p=>V(p,'reb')>=1&&V(p,'blk')>=1&&V(p,'stl')>=1).sort((a,b)=>DS(b)-DS(a)||V(b,'reb')-V(a,'reb')||V(b,'blk')-V(a,'blk')||V(b,'stl')-V(a,'stl')).slice(0,1);
+    const dest=['A','B'].map((l,i)=>{ const x=pr.find(y=>+y[0]===4+i && y[4]); const t=js.filter(p=>p.lado===l); const p=x?t.find(q=>q.reg===String(x[4])):null;
+      return p||t.filter(q=>V(q,'eff')>0||V(q,'pts')>0).sort((a,b)=>V(b,'eff')-V(a,'eff')||V(b,'pts')-V(a,'pts'))[0]; }).filter(Boolean);
+    const eu=js.find(p=>p.reg===reg); const n=['pts','reb','ast','blk','stl'].filter(k=>V(eu,k)>=10).length;
+    if(mvp.some(p=>p.reg===reg)) o.mvp++; if(ces.some(p=>p.reg===reg)) o.ces++; if(def.some(p=>p.reg===reg)) o.def++; if(dest.some(p=>p.reg===reg)) o.dest++; if(n>=2&&n<=5) o['d'+n]++; });
+  return o; }
 function kt_perfil(s,cat,reg,nome,js,m,R){
   const q=js.length;
   const cards=[['pts','Pontos'],['reb','Rebotes'],['ast','Assistências'],['eff','Eficiência']].map(([k,n])=>`<div class="atCard"><span>${n}</span><b>${f1(m[k])}</b><small>média por jogo</small></div>`).join('');
@@ -320,11 +336,15 @@ function kt_perfil(s,cat,reg,nome,js,m,R){
     const mx=Math.max(...js.map(j=>j.s[k])); if(!(mx>0)) return `<div class="rec zero" title="${t}"><div class="n"><b>0</b><span>${s2}</span></div><div class="t"><b>Ainda sem ${t.toLowerCase()}</b><span></span></div></div>`;
     const qs=js.filter(j=>j.s[k]===mx);
     return `<div class="rec" title="${t}"><div class="n"><b>${mx}</b><span>${s2}</span></div><div class="t">${qs.length>1?`<b>em ${qs.length} partidas</b><span>${qs.map(j=>dataBR(j.d).slice(0,5)).join(' · ')}</span>`:`<b>VS. <img src="${escUrl(qs[0].opp)}" alt="">${esc(nomeT(qs[0].opp,FED.equipes))}</b><span>${dataBR(qs[0].d)}</span>`}</div></div>`; }).join('');
+  const P=kt_premios(R,reg);
+  const prems=[['mvp','MVP','MVP do jogo'],['ces','Cestinha','Cestinha do jogo'],['def','Defensor','Defensor do jogo'],['dest','Destaque','Destaque do jogo'],['d2','Duplo-duplo','2 itens com 10 ou mais'],['d3','Triplo-duplo','3 itens com 10 ou mais'],['d4','Quádruplo-duplo','4 itens com 10 ou mais'],['d5','Quíntuplo-duplo','5 itens com 10 ou mais']]
+    .filter(([k])=>!['d4','d5'].includes(k)||P[k]>0).map(([k,n,t])=>`<div class="prem${P[k]?'':' zero'}" title="${t}"><b>${P[k]}</b><span>${n}</span></div>`).join('');
   return `<div class="atCorpo"><div class="atTopo"><div><div class="atNm">${ap(reg)?`<b>${esc(ap(reg))}</b>`:`<b>${esc(nome2(nome))}</b>`}<small>${esc(nome)}</small></div><div class="atCards">${cards}</div>
       <div class="atH">Ficha técnica</div><table class="ficha">${ficha}</table></div>
       <img class="atFt" src="${foto(reg)}" alt="" onclick="window.open(this.src,'_blank')"></div>
     <div class="atDuas"><div><div class="atH">Perfil na temporada<small>Média por jogo nos ${q} ${q===1?'jogo narrado':'jogos narrados'}</small></div>${kt_radar(m,eq,cor(s))}</div>
-      <div><div class="atH">Recordes pessoais<small>Baseados em ${q} ${q===1?'jogo narrado':'jogos narrados'} pelo Klaus TV — não é a temporada inteira da FBERJ.</small></div><div class="recs">${recs}</div></div></div></div>`;
+      <div><div class="atH">Recordes pessoais<small>Baseados em ${q} ${q===1?'jogo narrado':'jogos narrados'} pelo Klaus TV — não é a temporada inteira da FBERJ.</small></div><div class="recs">${recs}</div>
+        <div class="atH">Prêmios nos jogos narrados<small>Quantas vezes ganhou em ${q} ${q===1?'jogo narrado':'jogos narrados'} (mesmas regras do Ao vivo e do Scout)</small></div><div class="prems">${prems}</div></div></div></div>`;
 }
 function kt_radar(m,eq,c){
   const AX=[['pts','Pontos'],['reb','Rebotes'],['ast','Assistências'],['threeMade','3 Pontos'],['twoMade','2 Pontos'],['ftMade','Lances Livres'],['eff','Eficiência']];
