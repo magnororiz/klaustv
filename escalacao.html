@@ -12,7 +12,7 @@
 html,body{margin:0;height:100%;background:transparent;color:#fff;font-family:Arial,Helvetica,sans-serif;overflow:hidden;}
 body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::before{content:'(aqui aparece a imagem da câmera do Klaus)';position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font:700 22px Arial;color:rgba(255,255,255,.18);}
 .palco{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,177.78vh);aspect-ratio:16/9;overflow:hidden;}
-.qd{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);height:76%;aspect-ratio:765/855;background:url(quadra_escalacao.webp) center/100% 100% no-repeat;}
+.qd{position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:84%;aspect-ratio:765/855;background:url(quadra_escalacao.webp) center/100% 100% no-repeat;}
 .time{position:absolute;inset:0;display:none;}
 .time.on{display:block;}
 .escGrande{position:absolute;left:50%;top:4%;transform:translateX(-50%);height:34%;opacity:.45;filter:drop-shadow(0 0 30px rgba(0,0,0,.8));pointer-events:none;}
@@ -20,8 +20,8 @@ body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::befo
 .abas button{font:700 clamp(12px,2vh,18px) 'Oswald',Arial;letter-spacing:1.5px;text-transform:uppercase;padding:.5em 1.1em;border-radius:999px;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.55);color:#ddd;cursor:pointer;display:flex;align-items:center;gap:.5em;}
 .abas{align-items:center;}.abas .abEsc{height:clamp(34px,7vh,64px);filter:drop-shadow(0 2px 6px rgba(0,0,0,.7));}
 .abas button.on{background:var(--cor);color:var(--txt);border-color:#fff;}
-.cab{position:absolute;left:0;right:0;top:12%;z-index:2;text-align:center;font:700 clamp(18px,3.4vh,34px) 'Oswald',Arial;letter-spacing:2px;text-transform:uppercase;text-shadow:0 2px 8px #000,0 0 2px #000;}
-.tec{position:absolute;left:2%;top:3%;display:flex;align-items:center;gap:10px;z-index:4;}.tec .tf{width:clamp(30px,5.5vh,56px);aspect-ratio:1;border-radius:50%;border:3px solid var(--cor);background:#1a2233 center/cover;box-shadow:0 4px 12px rgba(0,0,0,.7);}.tec div{font:700 clamp(12px,2vh,20px) Arial;text-shadow:0 2px 6px #000;}.tec small{display:block;font:700 clamp(10px,1.4vh,13px) 'Oswald',Arial;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;}
+.cab{position:absolute;left:0;right:0;top:11%;z-index:2;text-align:center;font:700 clamp(18px,3.4vh,34px) 'Oswald',Arial;letter-spacing:2px;text-transform:uppercase;text-shadow:0 2px 8px #000,0 0 2px #000;}
+.tec{position:absolute;left:2%;top:3%;display:flex;align-items:center;gap:10px;z-index:4;}.tec.dir{left:auto;right:2%;flex-direction:row-reverse;text-align:right;}.tec .tf{width:clamp(30px,5.5vh,56px);aspect-ratio:1;border-radius:50%;border:3px solid var(--cor);background:#1a2233 center/cover;box-shadow:0 4px 12px rgba(0,0,0,.7);}.tec div{font:700 clamp(12px,2vh,20px) Arial;text-shadow:0 2px 6px #000;}.tec small{display:block;font:700 clamp(10px,1.4vh,13px) 'Oswald',Arial;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;}
 .cab small{display:block;font:600 clamp(11px,1.6vh,16px) Arial;letter-spacing:.5px;text-transform:none;opacity:.9;}
 .jog{position:absolute;transform:translate(-50%,-50%) scale(var(--e,1));display:flex;flex-direction:column;align-items:center;cursor:pointer;width:14%;}
 .jog .foto{position:relative;width:100%;aspect-ratio:1;border-radius:50%;border:3px solid var(--cor);background:#1a2233 center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.7);}
@@ -57,7 +57,7 @@ const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 function monta(){
   document.getElementById('times').innerHTML=['A','B'].map(l=>{ const t=EX[l];
     return `<div class="time${l==='A'?' on':''}" id="t${l}" style="--cor:${t.cor};--txt:${t.txt}">
-      <div class="tec"><div class="tf" style="background-image:url(bola_fiba.png)"></div><div><small>Técnico</small>${esc(t.tec)}</div></div>
+      <div class="tec${l==='B'?' dir':''}"><div class="tf" style="background-image:url(bola_fiba.png)"></div><div><small>Técnico</small>${esc(t.tec)}</div></div>
       <div class="cab">${esc(t.nome)}</div>
       <div class="qd">${t.js.map((j,i)=>{ const [x,y,e]=POS[i]; return `<div class="jog" style="left:${x}%;top:${y}%;--e:${e}" onclick="ficha('${l}',${i})"><div class="foto" style="background-image:url(bola_fiba.png)"><span class="num">${esc(j[0])}</span></div><div class="nm">${esc(j[1])}${j[2]?'<small>'+esc(j[2])+'</small>':''}</div></div>`; }).join('')}</div></div>`; }).join('');
   const bt=l=>`<button id="b${l}" class="${l==='A'?'on':''}" style="--cor:${EX[l].cor};--txt:${EX[l].txt}" onclick="aba('${l}')">${l==='A'?'Casa':'Visitante'} · ${esc(EX[l].nome)}</button>`;
