@@ -82,9 +82,9 @@ body.obs #filtros,#engr,#copiaUrl{display:none!important;}
 .abas{position:absolute!important;inset:0!important;display:block!important;pointer-events:none;}
 .lado{position:absolute;top:17%;width:22%;display:flex;flex-direction:column;align-items:center;gap:1.2vh;pointer-events:auto;}
 .lado.lA{left:8.5%;}.lado.lB{right:8.5%;}
-.lado button{opacity:.55;font-size:clamp(10px,1.6vh,15px)!important;padding:.35em 1em!important;}
+.lado button{display:none!important;opacity:.55;font-size:clamp(10px,1.6vh,15px)!important;padding:.35em 1em!important;}
 .lado button.on{opacity:.8;}
-.lado .abEsc{height:13vh!important;filter:drop-shadow(0 4px 10px rgba(0,0,0,.75));}
+.lado .abEsc{cursor:pointer;transition:transform .15s;height:13vh!important;filter:drop-shadow(0 4px 10px rgba(0,0,0,.75));}
 .tm .tf{width:10vh!important;border-width:4px!important;}
 .tm small{font-size:1.5vh!important;}
 .tm b{font-size:2.3vh!important;max-width:none!important;white-space:nowrap;}
@@ -215,7 +215,7 @@ function monta(){ const T={A:timeDe('A'),B:timeDe('B')}; window.KT_T=T;
   const bt=l=>`<button id="b${l}" class="${l==='A'?'on':''}" style="--cor:${T[l].cor};--txt:${T[l].txt}" onclick="aba('${l}')">${esc(T[l].nome)}</button>`;
   const tm=l=>`<div class="tm on" id="tm${l}" style="--cor:${T[l].cor}">${T[l].tec?`<div class="tf" style="background-image:url('${esc(T[l].tecF)}')" onclick="tecFicha('${l}')" title="Ver foto do técnico"></div><small>Técnico</small><b>${esc(tecCurto(T[l].tec).n)}</b>${tecCurto(T[l].tec).a?`<i class="tAp">${esc(tecCurto(T[l].tec).a)}</i>`:''}`:''}</div>`;
   // layout (Magno, 20/11/2026): casa sempre à esquerda e visitante à direita, alinhados com o topo da tabela de basquete; botão discreto, escudo e técnico em destaque
-  $('abas').innerHTML=`<div class="lado lA">${bt('A')}<img class="abEsc" src="${escudo(T.A.sig)}" alt="">${tm('A')}</div><div class="lado lB">${bt('B')}<img class="abEsc" src="${escudo(T.B.sig)}" alt="">${tm('B')}</div>`;
+  $('abas').innerHTML=`<div class="lado lA">${bt('A')}<img class="abEsc" src="${escudo(T.A.sig)}" alt="" onclick="aba('A')" title="Mostrar ${esc(T.A.nome)}">${tm('A')}</div><div class="lado lB">${bt('B')}<img class="abEsc" src="${escudo(T.B.sig)}" alt="" onclick="aba('B')" title="Mostrar ${esc(T.B.nome)}">${tm('B')}</div>`; // troca de time clicando no escudo (Magno, 20/11/2026)
   // pré-carrega as fotos dos dois times: a troca de aba é instantânea
   [...T.A.js,...T.B.js].forEach(a=>{ if(FOTOS[a.reg]){ const im=new Image(); im.src=FOTOS[a.reg]; } }); }
 // técnico: só a foto grande e o nome (Magno, 20/11/2026)
