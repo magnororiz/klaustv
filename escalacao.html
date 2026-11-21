@@ -78,7 +78,7 @@ body.obs #filtros,#engr,#copiaUrl{display:none!important;}
 
 /* topo novo (Magno, 20/11/2026) */
 .qd{height:80%!important;bottom:3%!important;}
-.cab{top:9.5%!important;font-size:clamp(20px,4.6vh,48px)!important;} /* bem perto do topo da tabela */
+.cab{top:4.5%!important;font-size:clamp(16px,3.5vh,38px)!important;line-height:1.15;} /* 'Escalação Klaus TV' em cima do nome do time, mesma letra e tamanho; um pouco afastado da tabela (Magno, 20/11/2026) */
 .abas{position:absolute!important;inset:0!important;display:block!important;pointer-events:none;}
 .lado{position:absolute;top:17%;width:22%;display:flex;flex-direction:column;align-items:center;gap:1.2vh;pointer-events:auto;}
 .lado.lA{left:8.5%;}.lado.lB{right:8.5%;}
@@ -107,7 +107,6 @@ body.obs #filtros,#engr,#copiaUrl{display:none!important;}
   <div id="ficha" onclick="if(event.target===this)this.classList.remove('on')"><div class="c" id="fichaC"></div></div>
 </div>
 <div id="filtros"><label>Categoria<select id="fCat"></select></label><label>Time<select id="fTime"></select></label><label>Jogo (data)<select id="fJogo"></select></label><button class="cpF" onclick="copiaSaida(this)">📋 Copiar URL de saída (OBS)</button></div>
-<div id="marca"><img src="logo_klaustv_tv.png" alt="Klaus TV"><div>ESCALAÇÃO<br>KLAUS TV</div></div>
 <button id="engr" title="Escolher outro jogo" onclick="painel(true)">⚙</button>
 <button id="copiaUrl" onclick="copiaSaida(this)">📋 Copiar URL de saída (OBS)</button>
 <div id="painel" class="fora"><div class="pc"><h1>Escalação</h1>
@@ -210,7 +209,7 @@ function monta(){ const T={A:timeDe('A'),B:timeDe('B')}; window.KT_T=T;
   $('times').innerHTML=['A','B'].map(l=>{ const t=T[l];
     return `<div class="time${l==='A'?' on':''}" id="t${l}" style="--cor:${t.cor};--txt:${t.txt}">
       
-      <div class="cab">${esc(t.nome)}</div>
+      <div class="cab">Escalação Klaus TV<br>${esc(t.nome)}</div>
       <div class="qd">${t.js.map((a,i)=>{ const [x,y,e]=POS[i]; const ap=APS[a.reg]||a.apelido||'';
         return `<div class="jog" style="left:${x}%;top:${y}%;--e:${e}" onclick="ficha('${l}',${i})"><div class="foto" style="background-image:url('${esc(FOTOS[a.reg]||'bola_fiba.png')}')"><span class="num">${esc(a.numero||'-')}</span></div><div class="nm">${esc(nome2(a.nome))}${ap?'<small>'+esc(ap)+'</small>':''}</div></div>`; }).join('')}</div></div>`; }).join('');
   const bt=l=>`<button id="b${l}" class="${l==='A'?'on':''}" style="--cor:${T[l].cor};--txt:${T[l].txt}" onclick="aba('${l}')">${esc(T[l].nome)}</button>`;
