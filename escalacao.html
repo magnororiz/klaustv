@@ -68,6 +68,13 @@ body.obs #filtros,#engr,#copiaUrl{display:none!important;}
 .tm .tf{width:clamp(34px,6vh,60px);aspect-ratio:1;border-radius:50%;border:3px solid var(--cor);background:#1a2233 center/cover;box-shadow:0 3px 10px rgba(0,0,0,.7);cursor:pointer;}
 .tm small{font:700 clamp(9px,1.3vh,12px) 'Oswald',Arial;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;text-shadow:0 1px 4px #000;}
 .tm b{font:700 clamp(11px,1.8vh,17px) Arial;text-shadow:0 2px 6px #000;max-width:18vh;}
+
+/* tamanhos proporcionais à quadra: no OBS fica igual à tela do computador, em qualquer tamanho (Magno, 20/11/2026) */
+.qd{container-type:size;}
+.jog{transform:translate(-50%,0)!important;} /* a posição marca o topo da bola: o nome comprido não empurra a bola */
+.jog .nm{font-size:2.15cqh!important;white-space:normal!important;width:max-content;max-width:23cqw;padding:.2em .55em!important;}
+.jog .nm small{font-size:.82em;}
+.jog .num{font-size:2.2cqh!important;}
 </style>
 </head>
 <body>
@@ -87,10 +94,10 @@ body.obs #filtros,#engr,#copiaUrl{display:none!important;}
 <script>
 // posições dos 12 na quadra (em % da imagem da quadra) e escala pela profundidade (Magno, 20/11/2026):
 // frente (maiores) = quem mais jogou no time na temporada; fundo (menores) = quem menos jogou
-const POS=[[11,78,1.12],[37,78,1.12],[63,78,1.12],[89,78,1.12],
-  [18,59,1.12],[50,59,1.12],[82,59,1.12],
-  [26,40.5,1.12],[50,40.5,1.12],[74,40.5,1.12],
-  [39,22,1.12],[61,22,1.12]]; // todas do mesmo tamanho (Magno, 20/11/2026); a ordem continua: na frente quem mais jogou
+const POS=[[11,76.3,1.05],[37,76.3,1.05],[63,76.3,1.05],[89,76.3,1.05],
+  [17,52.8,1.05],[50,52.8,1.05],[83,52.8,1.05],
+  [24,29.3,1.05],[50,29.3,1.05],[76,29.3,1.05],
+  [38,5.8,1.05],[62,5.8,1.05]]; // fileiras mais afastadas para o nome não cair na foto de trás (Magno, 20/11/2026) // todas do mesmo tamanho (Magno, 20/11/2026); a ordem continua: na frente quem mais jogou
 const D={"cores":{"ABIG":["#1F4E79","#FFFFFF"],"ACEAR":["#E2231A","#FFFFFF"],"ASPCM":["#2E3192","#E2231A"],"BFR":["#000000","#FFFFFF"],"BSA":["#F28C28","#FFFFFF"],"CCL":["#1F5FBF","#FFFFFF"],"CESC":["#000000","#FFFFFF"],"CFCSN":["#7B1E22","#FFFFFF"],"CK":["#1A1A1A","#B8860B"],"CRF":["#C8102E","#000000"],"EEPZ":["#1B2A4A","#F28C28"],"FFC":["#7A0026","#00613C"],"IB":["#E06A2C","#000000"],"IDEC":["#1F4E5F","#A4C639"],"IG":["#1F2E8A","#F07A1A"],"ITDA":["#0B1F4B","#FFFFFF"],"JTC":["#2E3448","#F2D33B"],"KE":["#000000","#FFD200"],"MB":["#1A1A1A","#F28C28"],"NBC":["#E2231A","#000000"],"TKA":["#1E8C3A","#F2C200"],"TTC":["#E2231A","#FFFFFF"]},"escudos":{"ABIG":"escudos/ABIG.png","ACEAR":"escudos/ACEAR.png","ASPCM":"escudos/ASPCM.png","BFR":"escudos/BFR.png","BSA":"escudos/BSA.png","CCL":"escudos/CCL.png","CESC":"escudos/CESC.png","CFCSN":"escudos/CFCSN.png","CK":"escudos/CK.png","CRF":"escudos/CRF.png","EEPZ":"escudos/EEPZ.png","FFC":"escudos/FFC.png","IB":"escudos/IB.png","IDEC":"escudos/IDEC.png","IG":"escudos/IG.png","ITDA":"escudos/ITDA.png","JTC":"escudos/JTC.png","KE":"escudos/KE.png","MB":"escudos/MB.png","NBC":"escudos/NBC.png","TKA":"escudos/TKA.png","TTC":"escudos/TTC.png"},"curto":{"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN":"Funcionários","FFC":"Fluminense","TTC":"Tijuca","NBC":"Niterói","CCL":"Leopoldinense","IG":"Iguaba Grande","ABIG":"Jequiá","ACEAR":"Irajá","CESC":"Suzano Costa","EEPZ":"Passo Zero","IDEC":"IDEC","ITDA":"Atitude","KE":"K. Esportes","MB":"Mesquita","JTC":"Jacarepaguá","TKA":"Team Klun","ASPCM":"Municipal","CK":"Carioca King's","IB":"Itaipu","NBR":"NBR Campos"}}; // cores, escudos e nomes curtos (cópia do Ao vivo)
 const KT_API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
 async function api(d){ let ult='';
