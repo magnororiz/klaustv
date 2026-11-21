@@ -94,6 +94,11 @@ body.obs #filtros,#engr,#copiaUrl{display:none!important;}
 #marca{position:fixed;left:calc(50% - min(50vw,88.89vh) + min(100vw,177.78vh)*.29);top:1.5vh;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4vh;z-index:3;pointer-events:none;} /* no alto, entre o nome do time e o escudo da casa (Magno, 20/11/2026) */
 #marca img{height:11vh;filter:drop-shadow(0 4px 10px rgba(0,0,0,.7));}
 #marca div{font:700 1.9vh 'Oswald',Arial;letter-spacing:.35vh;text-align:center;line-height:1.15;text-shadow:0 2px 8px #000;}
+
+/* quadra 65% sólida (35% transparente) para aparecer o movimento da câmera; jogadores e nomes 100% sólidos (Magno, 20/11/2026) */
+.qd{background:none!important;}
+.qd::before{content:'';position:absolute;inset:0;background:url(quadra_escalacao.webp) center/100% 100% no-repeat;opacity:.65;z-index:0;pointer-events:none;}
+.qd .jog{z-index:1;}
 </style>
 </head>
 <body>
