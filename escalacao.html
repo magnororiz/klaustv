@@ -95,9 +95,9 @@ body.obs #filtros,#engr,#copiaUrl{display:none!important;}
 #marca img{height:11vh;filter:drop-shadow(0 4px 10px rgba(0,0,0,.7));}
 #marca div{font:700 1.9vh 'Oswald',Arial;letter-spacing:.35vh;text-align:center;line-height:1.15;text-shadow:0 2px 8px #000;}
 
-/* quadra 65% sólida (35% transparente) para aparecer o movimento da câmera; jogadores e nomes 100% sólidos (Magno, 20/11/2026) */
+/* quadra 50% sólida (era 35% transparente; no OBS pouco se notava) para aparecer o movimento da câmera; jogadores e nomes 100% sólidos (Magno, 20/11/2026) */
 .qd{background:none!important;}
-.qd::before{content:'';position:absolute;inset:0;background:url(quadra_escalacao.webp) center/100% 100% no-repeat;opacity:.65;z-index:0;pointer-events:none;}
+.qd::before{content:'';position:absolute;inset:0;background:url(quadra_escalacao.webp) center/100% 100% no-repeat;opacity:var(--qdOp,.5);z-index:0;pointer-events:none;}
 .qd .jog{z-index:1;}
 </style>
 </head>
