@@ -159,10 +159,15 @@ document.addEventListener('change',e=>{ if(e.target.id==='selJ') dica(); });
 async function abrir(id){ $('times').innerHTML='<div class="msg">Carregando a escalação…</div>'; $('abas').innerHTML='';
   const r=await api({acao:'aoVivoJogo',id});
   if(!r||!r.ok||!r.jogo){ $('times').innerHTML='<div class="msg">Não foi possível abrir este jogo agora.<br><small style="font-weight:400">Jogo: '+esc(id)+' · Motivo: '+esc((r&&r.erro)||'desconhecido')+'</small><br><button class="cp" style="margin-top:8px" onclick="abrir(\''+esc(id)+'\')">Tentar de novo</button></div>'; return; }
-  document.body.classList.add('temJogo'); J=r.jogo; FOTOS=r.fotos||{}; APS=r.apelidos||{}; TEMP=null; monta(); if(LISTA.length) fMonta();
+  document.body.classList.add('temJogo'); J=r.jogo; FOTOS=r.fotos||{}; APS=r.apelidos||{}; TEMP=null; fotoTec(); monta(); if(LISTA.length) fMonta();
   const ano=String(J.dataHora||'').slice(0,4)||String(new Date().getFullYear());
   if(J.categoria) api({acao:'atletasKT',categoria:J.categoria,ano}).then(x=>{ TEMP=(x&&x.ok)?x:{ok:false}; const l=$('tB')&&$('tB').classList.contains('on')?'B':'A'; monta(); aba(l); }); }
 
+// foto do técnico (Magno, 20/11/2026): se não tiver na categoria do jogo, usa a do mesmo técnico (mesmo time e mesmo nome) em outra categoria
+function fotoTec(){ const nz=x=>String(x||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim().toLowerCase();
+  const m=J.meta||{}; ['A','B'].forEach(l=>{ const t=m['time'+l]||{}, sig=t.sigla||(l==='A'?J.timeA:J.timeB), k='TEC-'+sig+'-'+String(J.categoria||'').replace(/[^A-Za-z0-9]/g,'');
+    if(FOTOS[k]) return; const nome=nz((t.tecnico&&t.tecnico.nome)||APS[k]); if(!nome) return;
+    const outra=Object.keys(FOTOS).find(x=>x.indexOf('TEC-'+sig+'-')===0&&nz(APS[x])===nome); if(outra) FOTOS[k]=FOTOS[outra]; }); }
 function timeDe(l){ const m=J.meta||{}, t=m['time'+l]||{}, sig=t.sigla||(l==='A'?J.timeA:J.timeB); const c=cor(sig);
   const kTec='TEC-'+sig+'-'+String(J.categoria||'').replace(/[^A-Za-z0-9]/g,'');
   return {sig,nome:D.curto[sig]||t.nome||sig||'',cor:c,txt:txt(c),tec:((t.tecnico&&t.tecnico.nome)||APS[kTec]||'').trim(),tecF:FOTOS[kTec]||'bola_fiba.png',
