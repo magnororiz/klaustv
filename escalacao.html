@@ -125,6 +125,8 @@ const POS=[[11,76.3,1.05],[37,76.3,1.05],[63,76.3,1.05],[89,76.3,1.05],
   [17,52.8,1.05],[50,52.8,1.05],[83,52.8,1.05],
   [24,29.3,1.05],[50,29.3,1.05],[76,29.3,1.05],
   [38,5.8,1.05],[62,5.8,1.05]]; // fileiras mais afastadas para o nome não cair na foto de trás (Magno, 20/11/2026) // todas do mesmo tamanho (Magno, 20/11/2026); a ordem continua: na frente quem mais jogou
+// camisa menor no fundo (perto da cesta) e maior na frente; em cada fileira da esquerda para a direita
+const ORDEM=[10,11,7,8,9,4,5,6,0,1,2,3];
 const D={"cores":{"ABIG":["#1F4E79","#FFFFFF"],"ACEAR":["#E2231A","#FFFFFF"],"ASPCM":["#2E3192","#E2231A"],"BFR":["#000000","#FFFFFF"],"BSA":["#F28C28","#FFFFFF"],"CCL":["#1F5FBF","#FFFFFF"],"CESC":["#000000","#FFFFFF"],"CFCSN":["#7B1E22","#FFFFFF"],"CK":["#1A1A1A","#B8860B"],"CRF":["#C8102E","#000000"],"EEPZ":["#1B2A4A","#F28C28"],"FFC":["#7A0026","#00613C"],"IB":["#E06A2C","#000000"],"IDEC":["#1F4E5F","#A4C639"],"IG":["#1F2E8A","#F07A1A"],"ITDA":["#0B1F4B","#FFFFFF"],"JTC":["#2E3448","#F2D33B"],"KE":["#000000","#FFD200"],"MB":["#1A1A1A","#F28C28"],"NBC":["#E2231A","#000000"],"TKA":["#1E8C3A","#F2C200"],"TTC":["#E2231A","#FFFFFF"]},"escudos":{"ABIG":"escudos/ABIG.png","ACEAR":"escudos/ACEAR.png","ASPCM":"escudos/ASPCM.png","BFR":"escudos/BFR.png","BSA":"escudos/BSA.png","CCL":"escudos/CCL.png","CESC":"escudos/CESC.png","CFCSN":"escudos/CFCSN.png","CK":"escudos/CK.png","CRF":"escudos/CRF.png","EEPZ":"escudos/EEPZ.png","FFC":"escudos/FFC.png","IB":"escudos/IB.png","IDEC":"escudos/IDEC.png","IG":"escudos/IG.png","ITDA":"escudos/ITDA.png","JTC":"escudos/JTC.png","KE":"escudos/KE.png","MB":"escudos/MB.png","NBC":"escudos/NBC.png","TKA":"escudos/TKA.png","TTC":"escudos/TTC.png"},"curto":{"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN":"Funcionários","FFC":"Fluminense","TTC":"Tijuca","NBC":"Niterói","CCL":"Leopoldinense","IG":"Iguaba Grande","ABIG":"Jequiá","ACEAR":"Irajá","CESC":"Suzano Costa","EEPZ":"Passo Zero","IDEC":"IDEC","ITDA":"Atitude","KE":"K. Esportes","MB":"Mesquita","JTC":"Jacarepaguá","TKA":"Team Klun","ASPCM":"Municipal","CK":"Carioca King's","IB":"Itaipu","NBR":"NBR Campos"}}; // cores, escudos e nomes curtos (cópia do Ao vivo)
 const KT_API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
 async function api(d){ let ult='';
@@ -210,13 +212,13 @@ function corCaixa(sig){ const lum=h=>{ const n=parseInt(String(h).slice(1),16); 
 function timeDe(l){ const m=J.meta||{}, t=m['time'+l]||{}, sig=t.sigla||(l==='A'?J.timeA:J.timeB); const c=cor(sig);
   const kTec='TEC-'+sig+'-'+String(J.categoria||'').replace(/[^A-Za-z0-9]/g,'');
   return {sig,nome:D.curto[sig]||t.nome||sig||'',cor:c,txt:txt(c),tec:((t.tecnico&&t.tecnico.nome)||APS[kTec]||'').trim(),tecF:FOTOS[kTec]||'bola_fiba.png',
-    js:(t.atletas||[]).slice().sort((a,b)=>{ const x=somaTemp(a.reg)||{qtd:0,pts:0}, y=somaTemp(b.reg)||{qtd:0,pts:0}; return (y.qtd-x.qtd)||((y.pts||0)-(x.pts||0))||((parseInt(a.numero)||999)-(parseInt(b.numero)||999)); }).slice(0,12)}; }
+    js:(t.atletas||[]).slice().sort((a,b)=>((parseInt(a.numero)||999)-(parseInt(b.numero)||999))||String(a.numero).localeCompare(String(b.numero))).slice(0,12)}; } // ordem da camisa, menor para maior (Magno, 20/11/2026)
 function monta(){ const T={A:timeDe('A'),B:timeDe('B')}; window.KT_T=T;
   $('times').innerHTML=['A','B'].map(l=>{ const t=T[l];
     return `<div class="time${l==='A'?' on':''}" id="t${l}" style="--cor:${t.cor};--txt:${t.txt}">
       
       <div class="cab"><span class="cabBox" style="background:${corCaixa(t.sig)}"><span class="cabK">Escalação Klaus TV</span>${esc(t.nome)}</span></div>
-      <div class="qd">${t.js.map((a,i)=>{ const [x,y,e]=POS[i]; const ap=APS[a.reg]||a.apelido||'';
+      <div class="qd">${t.js.map((a,i)=>{ const [x,y,e]=POS[ORDEM[i]]; const ap=APS[a.reg]||a.apelido||'';
         return `<div class="jog" style="left:${x}%;top:${y}%;--e:${e}" onclick="ficha('${l}',${i})"><div class="foto" style="background-image:url('${esc(FOTOS[a.reg]||'bola_fiba.png')}')"><span class="num">${esc(a.numero||'-')}</span></div><div class="nm">${esc(nome2(a.nome))}${ap?'<small>'+esc(ap)+'</small>':''}</div></div>`; }).join('')}</div></div>`; }).join('');
   const bt=l=>`<button id="b${l}" class="${l==='A'?'on':''}" style="--cor:${T[l].cor};--txt:${T[l].txt}" onclick="aba('${l}')">${esc(T[l].nome)}</button>`;
   const tm=l=>`<div class="tm on" id="tm${l}" style="--cor:${T[l].cor}">${T[l].tec?`<div class="tf" style="background-image:url('${esc(T[l].tecF)}')" onclick="tecFicha('${l}')" title="Ver foto do técnico"></div><small>Técnico</small><b>${esc(tecCurto(T[l].tec).n)}</b>${tecCurto(T[l].tec).a?`<i class="tAp">${esc(tecCurto(T[l].tec).a)}</i>`:''}`:''}</div>`;
