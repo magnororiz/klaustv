@@ -54,6 +54,20 @@ body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::befo
 #painel .cp{margin-top:6px;padding:6px 10px;border-radius:6px;border:1px solid #2b3d5c;background:#16233b;color:#fff;cursor:pointer;font-weight:700;}
 #engr{position:fixed;left:8px;bottom:8px;z-index:15;width:34px;height:34px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;font-size:17px;cursor:pointer;opacity:.35;}#engr:hover{opacity:1;}#copiaUrl{position:fixed;left:50px;bottom:8px;z-index:15;padding:8px 14px;border-radius:999px;border:none;background:#e8590c;color:#fff;font-weight:800;cursor:pointer;display:none;}body.temJogo:not(.obs) #copiaUrl{display:block;}body.obs #engr{opacity:0;}body.obs #engr:hover{opacity:1;} /* no OBS a engrenagem só aparece com o mouse em cima (janela Interagir) */
 .msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:12px 18px;border-radius:10px;background:rgba(0,0,0,.7);font-weight:700;}
+
+/* filtros fixos no canto (Magno, 20/11/2026): Categoria > Time > Jogo (data); ficam na tela depois de escolher; no OBS ficam escondidos */
+#filtros{position:fixed;left:10px;top:10px;z-index:16;display:flex;flex-direction:column;gap:5px;width:250px;padding:8px;border-radius:10px;background:rgba(10,18,32,.88);border:1px solid #2b3d5c;font:12px Arial;}
+#filtros label{display:flex;flex-direction:column;gap:2px;color:#9fb0c8;font-weight:800;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;}
+#filtros select{padding:5px;border-radius:6px;font-size:13px;}
+#filtros .cpF{margin-top:3px;padding:7px;border:none;border-radius:7px;background:#e8590c;color:#fff;font-weight:800;cursor:pointer;}
+body.obs #filtros,#engr,#copiaUrl{display:none!important;}
+.abas{align-items:flex-start!important;}
+.abL{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:clamp(80px,14vh,150px);}
+.tm{display:none;flex-direction:column;align-items:center;gap:3px;text-align:center;}
+.tm.on{display:flex;}
+.tm .tf{width:clamp(34px,6vh,60px);aspect-ratio:1;border-radius:50%;border:3px solid var(--cor);background:#1a2233 center/cover;box-shadow:0 3px 10px rgba(0,0,0,.7);cursor:pointer;}
+.tm small{font:700 clamp(9px,1.3vh,12px) 'Oswald',Arial;letter-spacing:2px;color:#ffd54f;text-transform:uppercase;text-shadow:0 1px 4px #000;}
+.tm b{font:700 clamp(11px,1.8vh,17px) Arial;text-shadow:0 2px 6px #000;max-width:18vh;}
 </style>
 </head>
 <body>
@@ -61,6 +75,7 @@ body.teste{background:linear-gradient(160deg,#4b5563,#1f2937);} body.teste::befo
   <div class="abas" id="abas"></div>
   <div id="ficha" onclick="if(event.target===this)this.classList.remove('on')"><div class="c" id="fichaC"></div></div>
 </div>
+<div id="filtros"><label>Categoria<select id="fCat"></select></label><label>Time<select id="fTime"></select></label><label>Jogo (data)<select id="fJogo"></select></label><button class="cpF" onclick="copiaSaida(this)">📋 Copiar URL de saída (OBS)</button></div>
 <button id="engr" title="Escolher outro jogo" onclick="painel(true)">⚙</button>
 <button id="copiaUrl" onclick="copiaSaida(this)">📋 Copiar URL de saída (OBS)</button>
 <div id="painel" class="fora"><div class="pc"><h1>Escalação</h1>
@@ -96,7 +111,7 @@ if(Q.has('teste')) document.body.classList.add('teste');
 if(Q.has('obs')||window.obsstudio) document.body.classList.add('obs'); // dentro do OBS o fundo fica transparente sozinho
 
 function rotulo(j){ const d=dataJ(j); return (j.categoria||'Avulso')+' · '+(D.curto[j.timeA]||j.timeA)+' x '+(D.curto[j.timeB]||j.timeB)+(d?' · '+d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''); }
-async function carregarLista(){ const r=await api({acao:'aoVivoLista',categoria:''}); LISTA=(r&&r.ok&&r.jogos)||[]; tipo(TIPO); }
+async function carregarLista(){ const r=await api({acao:'aoVivoLista',categoria:''}); LISTA=(r&&r.ok&&r.jogos)||[]; fMonta(); }
 function tipo(t){ TIPO=t; $('tpP').classList.toggle('on',t==='P'); $('tpA').classList.toggle('on',t==='A');
   const tm=j=>{ const d=dataJ(j); return d?d.getTime():0; };
   const ls=LISTA.filter(j=>t==='A'?status(j)==='final':status(j)!=='final').sort((a,b)=>t==='A'?tm(b)-tm(a):tm(a)-tm(b));
@@ -123,14 +138,28 @@ function dePacote(t){ const o=b64d(t); FOTOS={}; APS={}; PRE={}; const meta={};
 function copiaSaida(b){ if(!J) return; if(!TEMP){ b.textContent='Aguarde: carregando as estatísticas…'; setTimeout(()=>copiaSaida(b),800); return; }
   const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1#d='+pacote();
   (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{ b.textContent='✓ Copiado! Cole no OBS (fonte Navegador)'; setTimeout(()=>b.textContent='📋 Copiar URL de saída (OBS)',2500); }).catch(()=>prompt('Copie a URL de saída:',u)); }
-function painel(on){ $('painel').classList.toggle('fora',!on); if(on&&!LISTA.length) carregarLista(); }
+
+// ---------- filtros fixos: Categoria > Time > Jogo ----------
+function fMonta(){ const cats=[...new Set(LISTA.map(j=>j.categoria||'Avulso'))].sort((a,b)=>(parseInt(a.replace(/\D/g,''))||99)-(parseInt(b.replace(/\D/g,''))||99));
+  const cAtual=(J&&J.categoria)||$('fCat').value||cats[0]||'';
+  $('fCat').innerHTML=cats.map(c=>`<option${c===cAtual?' selected':''}>${esc(c)}</option>`).join('')||'<option>—</option>'; fTimes(J&&J.id); }
+function fTimes(idSel){ const c=$('fCat').value; const js=LISTA.filter(j=>(j.categoria||'Avulso')===c);
+  const ts=[...new Set(js.flatMap(j=>[j.timeA,j.timeB]))].filter(Boolean).sort((a,b)=>String(D.curto[a]||a).localeCompare(String(D.curto[b]||b)));
+  const jSel=idSel&&LISTA.find(j=>j.id===idSel); const tAt=(jSel&&(ts.includes($('fTime').value)&&[jSel.timeA,jSel.timeB].includes($('fTime').value)?$('fTime').value:jSel.timeA))||'';
+  $('fTime').innerHTML='<option value="">Todos os times</option>'+ts.map(t=>`<option value="${esc(t)}"${t===tAt?' selected':''}>${esc(D.curto[t]||t)}</option>`).join(''); fJogos(idSel); }
+function fJogos(idSel){ const c=$('fCat').value, t=$('fTime').value; const tm=j=>{ const d=dataJ(j); return d?d.getTime():0; };
+  const js=LISTA.filter(j=>(j.categoria||'Avulso')===c&&(!t||j.timeA===t||j.timeB===t)).sort((a,b)=>tm(b)-tm(a));
+  const rot=j=>{ const d=dataJ(j), st=status(j); return (st==='final'?'⚪ ':st==='vivo'?'🔴 ':'🟡 ')+(d?d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' · ':'')+(D.curto[j.timeA]||j.timeA)+' x '+(D.curto[j.timeB]||j.timeB); };
+  $('fJogo').innerHTML='<option value="">— escolha o jogo ('+js.length+') —</option>'+js.map(j=>`<option value="${esc(j.id)}"${j.id===idSel?' selected':''}>${esc(rot(j))}</option>`).join(''); }
+document.addEventListener('change',e=>{ if(e.target.id==='fCat') fTimes(); else if(e.target.id==='fTime') fJogos(); else if(e.target.id==='fJogo'&&e.target.value){ const id=e.target.value; try{ localStorage.setItem('kt_esc_jogo',id); }catch(x){} const u=new URL(location); u.searchParams.set('jogo',id); u.hash=''; history.replaceState(null,'',u); abrir(id); } });
+function painel(on){ if(!LISTA.length) carregarLista(); } // o painel grande saiu: agora são os filtros fixos no canto
 function escolher(){ const id=$('selJ').value; if(!id) return; try{ localStorage.setItem('kt_esc_jogo',id); }catch(e){} const u=new URL(location); u.searchParams.set('jogo',id); history.replaceState(null,'',u); painel(false); abrir(id); }
 document.addEventListener('change',e=>{ if(e.target.id==='selJ') dica(); });
 
 async function abrir(id){ $('times').innerHTML='<div class="msg">Carregando a escalação…</div>'; $('abas').innerHTML='';
   const r=await api({acao:'aoVivoJogo',id});
   if(!r||!r.ok||!r.jogo){ $('times').innerHTML='<div class="msg">Não foi possível abrir este jogo agora.<br><small style="font-weight:400">Jogo: '+esc(id)+' · Motivo: '+esc((r&&r.erro)||'desconhecido')+'</small><br><button class="cp" style="margin-top:8px" onclick="abrir(\''+esc(id)+'\')">Tentar de novo</button></div>'; return; }
-  document.body.classList.add('temJogo'); J=r.jogo; FOTOS=r.fotos||{}; APS=r.apelidos||{}; TEMP=null; monta();
+  document.body.classList.add('temJogo'); J=r.jogo; FOTOS=r.fotos||{}; APS=r.apelidos||{}; TEMP=null; monta(); if(LISTA.length) fMonta();
   const ano=String(J.dataHora||'').slice(0,4)||String(new Date().getFullYear());
   if(J.categoria) api({acao:'atletasKT',categoria:J.categoria,ano}).then(x=>{ TEMP=(x&&x.ok)?x:{ok:false}; const l=$('tB')&&$('tB').classList.contains('on')?'B':'A'; monta(); aba(l); }); }
 
@@ -141,12 +170,13 @@ function timeDe(l){ const m=J.meta||{}, t=m['time'+l]||{}, sig=t.sigla||(l==='A'
 function monta(){ const T={A:timeDe('A'),B:timeDe('B')}; window.KT_T=T;
   $('times').innerHTML=['A','B'].map(l=>{ const t=T[l];
     return `<div class="time${l==='A'?' on':''}" id="t${l}" style="--cor:${t.cor};--txt:${t.txt}">
-      ${t.tec?`<div class="tec${l==='B'?' dir':''}" onclick="tecFicha('${l}')" style="cursor:pointer" title="Ver foto do técnico"><div class="tf" style="background-image:url('${esc(t.tecF)}')"></div><div><small>Técnico</small>${esc(t.tec)}</div></div>`:''}
+      
       <div class="cab">${esc(t.nome)}</div>
       <div class="qd">${t.js.map((a,i)=>{ const [x,y,e]=POS[i]; const ap=APS[a.reg]||a.apelido||'';
         return `<div class="jog" style="left:${x}%;top:${y}%;--e:${e}" onclick="ficha('${l}',${i})"><div class="foto" style="background-image:url('${esc(FOTOS[a.reg]||'bola_fiba.png')}')"><span class="num">${esc(a.numero||'-')}</span></div><div class="nm">${esc(nome2(a.nome))}${ap?'<small>'+esc(ap)+'</small>':''}</div></div>`; }).join('')}</div></div>`; }).join('');
   const bt=l=>`<button id="b${l}" class="${l==='A'?'on':''}" style="--cor:${T[l].cor};--txt:${T[l].txt}" onclick="aba('${l}')">${l==='A'?'Casa':'Visitante'} · ${esc(T[l].nome)}</button>`;
-  $('abas').innerHTML=`<img class="abEsc" src="${escudo(T.A.sig)}" alt="">${bt('A')}${bt('B')}<img class="abEsc" src="${escudo(T.B.sig)}" alt="">`;
+  const tm=l=>`<div class="tm${l==='A'?' on':''}" id="tm${l}" style="--cor:${T[l].cor}">${T[l].tec?`<div class="tf" style="background-image:url('${esc(T[l].tecF)}')" onclick="tecFicha('${l}')" title="Ver foto do técnico"></div><small>Técnico</small><b>${esc(T[l].tec)}</b>`:''}</div>`;
+  $('abas').innerHTML=`<div class="abL"><img class="abEsc" src="${escudo(T.A.sig)}" alt="">${tm('A')}</div>${bt('A')}${bt('B')}<div class="abL"><img class="abEsc" src="${escudo(T.B.sig)}" alt="">${tm('B')}</div>`;
   // pré-carrega as fotos dos dois times: a troca de aba é instantânea
   [...T.A.js,...T.B.js].forEach(a=>{ if(FOTOS[a.reg]){ const im=new Image(); im.src=FOTOS[a.reg]; } }); }
 // técnico: só a foto grande e o nome (Magno, 20/11/2026)
@@ -154,7 +184,7 @@ function tecFicha(l){ const t=KT_T[l]; const c=$('fichaC'); c.style.setProperty(
   c.innerHTML=`<div style="padding:18px;text-align:center"><div style="width:min(60vh,300px);aspect-ratio:1;margin:0 auto;border-radius:50%;border:5px solid ${t.cor};background:#e9edf2 url('${esc(t.tecF)}') center/cover"></div>
     <div style="margin-top:12px;font:700 13px 'Oswald',Arial;letter-spacing:2px;color:#888;text-transform:uppercase">Técnico · ${esc(t.nome)}</div><div style="font:700 26px 'Oswald',Arial">${esc(t.tec)}</div></div>`;
   $('ficha').classList.add('on'); }
-function aba(l){ ['A','B'].forEach(x=>{ $('t'+x).classList.toggle('on',x===l); $('b'+x).classList.toggle('on',x===l); }); $('ficha').classList.remove('on'); }
+function aba(l){ ['A','B'].forEach(x=>{ $('t'+x).classList.toggle('on',x===l); $('b'+x).classList.toggle('on',x===l); const m=$('tm'+x); if(m) m.classList.toggle('on',x===l); }); $('ficha').classList.remove('on'); }
 
 // ficha: estatística geral do atleta na temporada (jogos narrados pelo Klaus TV)
 let PRE=null; // estatísticas que vieram prontas dentro da URL de saída (OBS)
@@ -176,7 +206,8 @@ function ficha(l,i){ const t=KT_T[l], a=t.js[i]; const ap=APS[a.reg]||a.apelido|
 let ULT=''; try{ ULT=localStorage.getItem('kt_esc_jogo')||''; }catch(e){}
 const HD=/[#&]d=([^&]+)/.exec(location.hash);
 if(HD){ try{ dePacote(HD[1]); document.body.classList.add('temJogo'); monta(); }catch(e){ $('times').innerHTML='<div class="msg">Endereço incompleto. Copie de novo a URL de saída no site.</div>'; } }
-else if(Q.get('jogo')) abrir(Q.get('jogo')); else if(ULT) abrir(ULT); else painel(true); // abre o último jogo escolhido
+else if(Q.get('jogo')) abrir(Q.get('jogo')); else if(ULT) abrir(ULT); else $('times').innerHTML='<div class="msg">Escolha a categoria, o time e o jogo nos filtros do canto.</div>';
+if(!HD) carregarLista(); // abre o último jogo escolhido
 </script>
 </body>
 </html>
