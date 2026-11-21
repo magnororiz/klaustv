@@ -88,6 +88,12 @@ body.obs #filtros,#engr,#copiaUrl{display:none!important;}
 .tm .tf{width:10vh!important;border-width:4px!important;}
 .tm small{font-size:1.5vh!important;}
 .tm b{font-size:2.3vh!important;max-width:none!important;white-space:nowrap;}
+
+.tm .tAp{font-style:normal;font-weight:700;font-size:1.9vh;color:#ffd54f;text-shadow:0 2px 6px #000;margin-top:-.4vh;}
+/* logo Klaus TV (Magno, 20/11/2026) */
+#marca{position:fixed;left:calc(50% - min(50vw,88.89vh) + min(100vw,177.78vh)*.06);bottom:6vh;display:flex;flex-direction:column;align-items:center;gap:.6vh;z-index:3;pointer-events:none;}
+#marca img{height:15vh;filter:drop-shadow(0 4px 10px rgba(0,0,0,.7));}
+#marca div{font:700 2.4vh 'Oswald',Arial;letter-spacing:.35vh;text-align:center;line-height:1.15;text-shadow:0 2px 8px #000;}
 </style>
 </head>
 <body>
@@ -96,6 +102,7 @@ body.obs #filtros,#engr,#copiaUrl{display:none!important;}
   <div id="ficha" onclick="if(event.target===this)this.classList.remove('on')"><div class="c" id="fichaC"></div></div>
 </div>
 <div id="filtros"><label>Categoria<select id="fCat"></select></label><label>Time<select id="fTime"></select></label><label>Jogo (data)<select id="fJogo"></select></label><button class="cpF" onclick="copiaSaida(this)">📋 Copiar URL de saída (OBS)</button></div>
+<div id="marca"><img src="logo_klaustv_tv.png" alt="Klaus TV"><div>ESCALAÇÃO<br>KLAUS TV</div></div>
 <button id="engr" title="Escolher outro jogo" onclick="painel(true)">⚙</button>
 <button id="copiaUrl" onclick="copiaSaida(this)">📋 Copiar URL de saída (OBS)</button>
 <div id="painel" class="fora"><div class="pc"><h1>Escalação</h1>
@@ -188,6 +195,8 @@ function fotoTec(){ const nz=x=>String(x||'').normalize('NFD').replace(/[̀-ͯ]/
   const m=J.meta||{}; ['A','B'].forEach(l=>{ const t=m['time'+l]||{}, sig=t.sigla||(l==='A'?J.timeA:J.timeB), k='TEC-'+sig+'-'+String(J.categoria||'').replace(/[^A-Za-z0-9]/g,'');
     if(FOTOS[k]) return; const nome=nz((t.tecnico&&t.tecnico.nome)||APS[k]); if(!nome) return;
     const outra=Object.keys(FOTOS).find(x=>x.indexOf('TEC-'+sig+'-')===0&&nz(APS[x])===nome); if(outra) FOTOS[k]=FOTOS[outra]; }); }
+// técnico (Magno, 20/11/2026): primeiro e último nome; o apelido (entre parênteses ou aspas) vai embaixo
+function tecCurto(t){ t=String(t||''); let a=''; const m=/[\(“\"]([^\)”\"]+)[\)”\"]/.exec(t); if(m){ a=m[1].trim(); t=t.replace(m[0],' '); } return {n:nome2(t),a}; }
 function timeDe(l){ const m=J.meta||{}, t=m['time'+l]||{}, sig=t.sigla||(l==='A'?J.timeA:J.timeB); const c=cor(sig);
   const kTec='TEC-'+sig+'-'+String(J.categoria||'').replace(/[^A-Za-z0-9]/g,'');
   return {sig,nome:D.curto[sig]||t.nome||sig||'',cor:c,txt:txt(c),tec:((t.tecnico&&t.tecnico.nome)||APS[kTec]||'').trim(),tecF:FOTOS[kTec]||'bola_fiba.png',
@@ -200,7 +209,7 @@ function monta(){ const T={A:timeDe('A'),B:timeDe('B')}; window.KT_T=T;
       <div class="qd">${t.js.map((a,i)=>{ const [x,y,e]=POS[i]; const ap=APS[a.reg]||a.apelido||'';
         return `<div class="jog" style="left:${x}%;top:${y}%;--e:${e}" onclick="ficha('${l}',${i})"><div class="foto" style="background-image:url('${esc(FOTOS[a.reg]||'bola_fiba.png')}')"><span class="num">${esc(a.numero||'-')}</span></div><div class="nm">${esc(nome2(a.nome))}${ap?'<small>'+esc(ap)+'</small>':''}</div></div>`; }).join('')}</div></div>`; }).join('');
   const bt=l=>`<button id="b${l}" class="${l==='A'?'on':''}" style="--cor:${T[l].cor};--txt:${T[l].txt}" onclick="aba('${l}')">${esc(T[l].nome)}</button>`;
-  const tm=l=>`<div class="tm on" id="tm${l}" style="--cor:${T[l].cor}">${T[l].tec?`<div class="tf" style="background-image:url('${esc(T[l].tecF)}')" onclick="tecFicha('${l}')" title="Ver foto do técnico"></div><small>Técnico</small><b>${esc(T[l].tec)}</b>`:''}</div>`;
+  const tm=l=>`<div class="tm on" id="tm${l}" style="--cor:${T[l].cor}">${T[l].tec?`<div class="tf" style="background-image:url('${esc(T[l].tecF)}')" onclick="tecFicha('${l}')" title="Ver foto do técnico"></div><small>Técnico</small><b>${esc(tecCurto(T[l].tec).n)}</b>${tecCurto(T[l].tec).a?`<i class="tAp">${esc(tecCurto(T[l].tec).a)}</i>`:''}`:''}</div>`;
   // layout (Magno, 20/11/2026): casa sempre à esquerda e visitante à direita, alinhados com o topo da tabela de basquete; botão discreto, escudo e técnico em destaque
   $('abas').innerHTML=`<div class="lado lA">${bt('A')}<img class="abEsc" src="${escudo(T.A.sig)}" alt="">${tm('A')}</div><div class="lado lB">${bt('B')}<img class="abEsc" src="${escudo(T.B.sig)}" alt="">${tm('B')}</div>`;
   // pré-carrega as fotos dos dois times: a troca de aba é instantânea
