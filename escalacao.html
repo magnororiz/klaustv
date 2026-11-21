@@ -214,7 +214,7 @@ function fotoTec(){ const nz=x=>String(x||'').normalize('NFD').replace(/[̀-ͯ]/
     if(FOTOS[k]) return; const nome=nz((t.tecnico&&t.tecnico.nome)||APS[k]); if(!nome) return;
     const outra=Object.keys(FOTOS).find(x=>x.indexOf('TEC-'+sig+'-')===0&&nz(APS[x])===nome); if(outra) FOTOS[k]=FOTOS[outra]; }); }
 // técnico (Magno, 20/11/2026): primeiro e último nome; o apelido (entre parênteses ou aspas) vai embaixo
-function tecCurto(t){ t=String(t||''); let a=''; const m=/[\(“\"]([^\)”\"]+)[\)”\"]/.exec(t); if(m){ a=m[1].trim(); t=t.replace(m[0],' '); } return {n:nome2(t),a}; }
+function tecCurto(t){ t=String(t||''); let a=''; const m=/[\(“\"]([^\)”\"]+)[\)”\"]/.exec(t); if(m){ a=m[1].trim(); t=t.replace(m[0],' '); } const w=nome2(t).split(' '); return {n:w.length>1?w[0].charAt(0)+'. '+w[w.length-1]:w[0],a}; } // técnico: inicial do primeiro nome + último nome, ex.: L. Monteiro (Magno, 21/11/2026)
 // caixa do nome do time (Magno, 20/11/2026): cor predominante do brasão; se for clara demais para letra branca, usa a 2ª ou a 3ª cor
 function corCaixa(sig){ const lum=h=>{ const n=parseInt(String(h).slice(1),16); return (n>>16)*.299+((n>>8)&255)*.587+(n&255)*.114; };
   const c=(D.cores[sig]||[]).find(x=>/^#[0-9a-f]{6}$/i.test(x)&&lum(x)<175); return c||'#1b2a4a'; }
@@ -230,7 +230,7 @@ function monta(){ const T={A:timeDe('A'),B:timeDe('B')}; window.KT_T=T;
       <div class="qd">${t.js.map((a,i)=>{ const [x,y,e]=POS[ORDEM[i]]; const ap=APS[a.reg]||a.apelido||'';
         return `<div class="jog" style="left:${x}%;top:${y}%;--e:${e}" onclick="ficha('${l}',${i})"><div class="foto" style="background-image:url('${esc(FOTOS[a.reg]||'bola_fiba.png')}')"><span class="num">${esc(a.numero||'-')}</span></div><div class="nm">${esc(nome2(a.nome))}${ap?'<small>'+esc(ap)+'</small>':''}</div></div>`; }).join('')}</div></div>`; }).join('');
   const bt=l=>`<button id="b${l}" class="${l==='A'?'on':''}" style="--cor:${T[l].cor};--txt:${T[l].txt}" onclick="aba('${l}')">${esc(T[l].nome)}</button>`;
-  const tm=l=>`<div class="tm on" id="tm${l}" style="--cor:${T[l].cor}">${T[l].tec?`<div class="tf" style="background-image:url('${esc(T[l].tecF)}')" onclick="tecFicha('${l}')" title="Ver foto do técnico"></div><small>Técnico</small><b>${esc(tecCurto(T[l].tec).n)}</b>${tecCurto(T[l].tec).a?`<i class="tAp">${esc(tecCurto(T[l].tec).a)}</i>`:''}`:''}</div>`;
+  const tm=l=>`<div class="tm${l==='A'?' on':''}" id="tm${l}" style="--cor:${T[l].cor}">${T[l].tec?`<div class="tf" style="background-image:url('${esc(T[l].tecF)}')" onclick="tecFicha('${l}')" title="Ver foto do técnico"></div><small>Técnico</small><b>${esc(tecCurto(T[l].tec).n)}</b>${tecCurto(T[l].tec).a?`<i class="tAp">${esc(tecCurto(T[l].tec).a)}</i>`:''}`:''}</div>`;
   // layout (Magno, 20/11/2026): casa sempre à esquerda e visitante à direita, alinhados com o topo da tabela de basquete; botão discreto, escudo e técnico em destaque
   $('abas').innerHTML=`<div class="lado lA">${bt('A')}<img class="abEsc" src="${escudo(T.A.sig)}" alt="" onclick="aba('A')" title="Mostrar ${esc(T.A.nome)}">${tm('A')}</div><div class="lado lB">${bt('B')}<img class="abEsc" src="${escudo(T.B.sig)}" alt="" onclick="aba('B')" title="Mostrar ${esc(T.B.nome)}">${tm('B')}</div>`; // troca de time clicando no escudo (Magno, 20/11/2026)
   // pré-carrega as fotos dos dois times: a troca de aba é instantânea
@@ -240,7 +240,7 @@ function tecFicha(l){ const t=KT_T[l]; const c=$('fichaC'); c.style.setProperty(
   c.innerHTML=`<div style="padding:18px;text-align:center"><div style="width:min(60vh,300px);aspect-ratio:1;margin:0 auto;border-radius:50%;border:5px solid ${t.cor};background:#e9edf2 url('${esc(t.tecF)}') center/cover"></div>
     <div style="margin-top:12px;font:700 13px 'Oswald',Arial;letter-spacing:2px;color:#888;text-transform:uppercase">Técnico · ${esc(t.nome)}</div><div style="font:700 26px 'Oswald',Arial">${esc(t.tec)}</div></div>`;
   $('ficha').classList.add('on'); }
-function aba(l){ ['A','B'].forEach(x=>{ $('t'+x).classList.toggle('on',x===l); $('b'+x).classList.toggle('on',x===l); }); $('ficha').classList.remove('on'); }
+function aba(l){ ['A','B'].forEach(x=>{ $('t'+x).classList.toggle('on',x===l); $('b'+x).classList.toggle('on',x===l); const tm=$('tm'+x); if(tm) tm.classList.toggle('on',x===l); }); /* só o técnico do time que está na tela (Magno, 21/11/2026) */ $('ficha').classList.remove('on'); }
 
 // ficha: estatística geral do atleta na temporada (jogos narrados pelo Klaus TV)
 let PRE=null; // estatísticas que vieram prontas dentro da URL de saída (OBS)
