@@ -253,6 +253,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
   .ktFaixa{padding-left:100px;height:34px;}.ktMenu .miolo{bottom:34px;}.ktFaixa a{font-size:12px;padding:0 9px;letter-spacing:1px;}}
 @media(max-width:480px){.ktMenu .bola{height:82px !important;top:6px !important;right:6px !important;}.ktMenu .miolo{padding-right:80px;}.ktFaixa{padding-left:76px;}.ktFaixa a{padding:0 6px;font-size:11px;}.ktMenu .cristo{height:120px;}}
 /*fim*//*ktFooterCSS*/
+.ktVis{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,213,79,.35);color:#ffd54f;font:700 13px 'Barlow',Arial,sans-serif;letter-spacing:.3px;} /* contador de visitas (Magno, 22/11/2026) */
 .ktFooter{position:relative;width:100vw;left:50%;margin-left:-50vw;margin-top:40px;margin-bottom:-16px;color:#c9d4e2;font-family:'Barlow',Arial,sans-serif;font-size:14px;text-align:left;
   background:linear-gradient(180deg,#0a1428 0%,#070d1b 100%);border-top:3px solid #1e5bd8;}
 .ktFooter .lema{font-family:'Oswald','Arial Narrow',Arial;text-align:center;font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:22px 16px 18px 16px;
@@ -1059,6 +1060,7 @@ kt_init();
         <a href="https://klauschagas.blogspot.com/" target="_blank" rel="noopener" title="Blog">📰</a>
         <a href="https://wa.me/5521998092305" target="_blank" rel="noopener" title="WhatsApp">💬</a>
       </div>
+      <div id="ktVisitas" class="ktVis" style="display:none" title="Visitas ao site (cada pessoa conta 1 vez por dia)"></div>
       <div class="parc"><h4>Parceiros</h4><div class="parcLista"><a class="patro" href="https://www.instagram.com/coachmarciasantos12/" target="_blank" rel="noopener" title="Instagram de Coach Márcia Santos"><div><b>Coach Márcia Santos</b><small>📸 @coachmarciasantos12</small></div></a><a class="patro" href="https://www.instagram.com/jdjacademy.oficial/" target="_blank" rel="noopener" title="Instagram de JDJ Academy"><div><b>JDJ Academy</b><small>📸 @jdjacademy.oficial</small></div></a><a class="patro" href="https://www.instagram.com/resultnutritionoficial/" target="_blank" rel="noopener" title="Instagram de Result Nutrition"><div><b>Result Nutrition</b><small>📸 @resultnutritionoficial</small></div></a></div></div>
     </div>
     <div>
@@ -1148,5 +1150,11 @@ async function kt_appInstalar(){ if(!kt_appPrompt) return; kt_appPrompt.prompt()
 })();
 </script>
 <script src="sumula.js"></script>
+<script>/* contador de visitas (Magno, 22/11/2026): cada navegador conta 1 visita por dia (Início ou Ao vivo); o total fica no servidor */
+(function(){ var k='kt_visita_dia', hoje=new Date().toLocaleDateString('sv-SE'), novo=0; try{ if(localStorage.getItem(k)!==hoje) novo=1; }catch(e){}
+  fetch('https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({acao:'visita',novo:novo})})
+  .then(function(r){ return r.json(); }).then(function(r){ if(!r||!r.ok||!(r.total>0)) return; if(novo){ try{ localStorage.setItem(k,hoje); }catch(e){} }
+    var el=document.getElementById('ktVisitas'); if(el){ el.textContent='👁 '+Number(r.total).toLocaleString('pt-BR')+(r.total===1?' visita':' visitas'); el.style.display=''; } }).catch(function(){}); })();
+</script>
 </body>
 </html>

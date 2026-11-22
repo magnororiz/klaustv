@@ -25,6 +25,7 @@ function doPost(e) {
   if (p.acao === 'atletasKT') return responder(atletasKT(p.categoria, p.ano));
   if (p.acao === 'dadosClassificacao') return responder(dadosClassificacao());
   if (p.acao === 'dadosCalendario') return responder(dadosCalendario());
+  if (p.acao === 'visita') return responder(contarVisita(p.novo));
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     switch (p.acao) {
@@ -991,4 +992,15 @@ function atletasKT(categoria, ano) {
   });
   const res = { ok: true, categoria: cat, ano: a, ks: KT_ATL_KS, jogos: G, agora: new Date().toISOString() };
   cachePut(ck, res, 120); return res;
+}
+
+
+/* ================= CONTADOR DE VISITAS (Magno, 22/11/2026) =================
+ * Início e Ao vivo chamam 'visita'. novo=1 só na 1ª visita do dia daquele navegador (soma 1); novo=0 só lê o total.
+ * O total fica nas Propriedades do script (chave 'visitas'). */
+function contarVisita(novo) {
+  const pr = PropertiesService.getScriptProperties(); const ler = () => Number(pr.getProperty('visitas') || 0);
+  if (!novo) return { ok: true, total: ler() };
+  const l = LockService.getScriptLock(); if (!l.tryLock(5000)) return { ok: true, total: ler() };
+  try { const t = ler() + 1; pr.setProperty('visitas', String(t)); return { ok: true, total: t }; } finally { l.releaseLock(); }
 }
