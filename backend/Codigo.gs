@@ -10,7 +10,14 @@ const ABA = 'Usuarios';
 const SITE = 'https://klaustv.com';
 const HORAS_SESSAO = 12;
 
-function doGet(e) { return responder({ ok: true, msg: 'Klaus TV backend ativo' }); }
+function doGet(e) {
+  const p = (e && e.parameter) || {};
+  // Placar do OBS (Magno, 23/11/2026): GET com callback (JSONP) porque o navegador do OBS não consegue usar fetch no Google
+  if (p.acao === 'placar') { const cb = String(p.callback || ''); const o = placarAtual();
+    if (/^[A-Za-z_$][\w$]{0,40}$/.test(cb)) return ContentService.createTextOutput(cb + '(' + JSON.stringify(o) + ');').setMimeType(ContentService.MimeType.JAVASCRIPT);
+    return responder(o); }
+  return responder({ ok: true, msg: 'Klaus TV backend ativo' });
+}
 
 function doPost(e) {
   let p = {};
@@ -38,6 +45,7 @@ function doPost(e) {
       case 'salvarJogo': return responder(salvarJogo(p.token, p.jogo));
       case 'listarJogos': return responder(listarJogos(p.token, p.data));
       case 'excluirJogo': return responder(excluirJogo(p.token, p.id));
+      case 'placarDefinir': return responder(placarDefinir(p.token, p.id));
       case 'salvarStats': return responder(salvarStats(p.token, p.id, p.stats, p.status, p.dataHora));
       case 'salvarData': return responder(salvarData(p.token, p.id, p.dataHora));
       case 'salvarFoto': return responder(salvarFoto(p.token, p.chave, p.imagem));
@@ -270,7 +278,7 @@ function aoVivoJogoCompleto(id) {
   if (hit) return JSON.parse(hit);
   const x = lerJogos().find(j => j.id === id); if (!x) return { ok: false, erro: 'Jogo não encontrado.' };
   const fotos = mapaFotos();
-  const r = { ok: true, fotos: fotos, apelidos: mapaApelidos(), jogo: { id: x.id, categoria: x.categoria, dataHora: x.dataHora instanceof Date ? x.dataHora.toISOString() : String(x.dataHora),
+  const r = { ok: true, fotos: fotos, apelidos: mapaApelidos(), jogo: { id: x.id, timeA: x.timeA, timeB: x.timeB, categoria: x.categoria, dataHora: x.dataHora instanceof Date ? x.dataHora.toISOString() : String(x.dataHora),
     ginasio: x.ginasio, jogoFed: x.jogoFed, meta: jsonOu(x.meta, {}), stats: jsonOu(x.stats, {}), status: x.status }, agora: new Date().toISOString() };
   c.put(k, JSON.stringify(r), 4);
   return r;
@@ -1004,4 +1012,30 @@ function contarVisita(novo) {
   if (!novo) return { ok: true, total: ler() };
   const l = LockService.getScriptLock(); if (!l.tryLock(5000)) return { ok: true, total: ler() };
   try { const t = ler() + 1; pr.setProperty('visitas', String(t)); return { ok: true, total: t }; } finally { l.releaseLock(); }
+}
+
+
+/* ================= PLACAR DO OBS (Magno, 23/11/2026) =================
+ * O Scout avisa qual jogo abriu ('placarDefinir'); o placar (só o OBS do Klaus) pergunta a cada 2 s ('placar', via doGet).
+ * Leitura rápida pela memória (CacheService); as Propriedades só são lidas se a memória esvaziar (protege a cota diária). */
+function placarDefinir(token, id) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  id = String(id || ''); if (!id) return { ok: false, erro: 'Jogo inválido.' };
+  CacheService.getScriptCache().put('placar_id', id, 21600); PropertiesService.getScriptProperties().setProperty('placarJogo', id);
+  return { ok: true };
+}
+function placarNomes() {
+  const c = CacheService.getScriptCache(); const hit = c.get('placar_nomes'); if (hit) return JSON.parse(hit);
+  const se = SpreadsheetApp.openById(PLANILHA_ID).getSheetByName('FBERJ_Equipes'); const eq = {};
+  if (se) se.getDataRange().getDisplayValues().slice(1).forEach(r => { if (r[0]) eq[r[0]] = r[1]; });
+  c.put('placar_nomes', JSON.stringify(eq), 21600); return eq;
+}
+function placarAtual() {
+  const c = CacheService.getScriptCache(); let id = c.get('placar_id');
+  if (!id) { id = PropertiesService.getScriptProperties().getProperty('placarJogo') || ''; if (id) c.put('placar_id', id, 21600); }
+  if (!id) return { ok: false, erro: 'Nenhum jogo aberto no Scout.' };
+  const r = aoVivoJogoCompleto(id); if (!r || !r.ok) return { ok: false, erro: (r && r.erro) || 'Jogo não encontrado.' };
+  const j = r.jogo, m = j.meta || {}, st = j.stats || {}, pl = placarDe(st), eq = placarNomes();
+  const a = (m.timeA || {}).sigla || j.timeA || '', b = (m.timeB || {}).sigla || j.timeB || '';
+  return { ok: true, id: j.id, cat: j.categoria, a: a, b: b, nA: eq[a] || '', nB: eq[b] || '', pa: pl[0], pb: pl[1], qf: Number(st.qFech || 0), ot: ['A', 'B'].some(l => { const v = ((st.periodos || {})[l] || [])[4]; return v !== null && v !== undefined && v !== '' && Number(v) > 0; }), status: j.status || '', agora: r.agora };
 }

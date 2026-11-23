@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Placar · Klaus TV (OBS)</title>
+<meta name="viewport" content="width=1920">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Placar para o OBS (Magno, 23/11/2026): fonte Navegador 1920 × 1080, fundo transparente.
+   Os retângulos vazados são para as câmeras: relógio do jogo (sempre) e 24 segundos (versão ?c24=1).
+   Nomes dos 9 modelos (Magno, 23/11/2026): Overlay FBERJ | Overlay FBERJ relógio | Overlay FBERJ relógio e cronômetro,
+   e o mesmo para Klaus e Klaus TV. Modelos do meio (?modelo=): 1 = logo FBERJ, 2 = avatar do Klaus, 3 = logo Klaus TV. Nada ao lado do escudo do time A (neutralidade). */
+html,body{margin:0;background:transparent;overflow:hidden;}
+body{width:1920px;height:1080px;position:relative;font-family:'Oswald','Arial Narrow',Arial,sans-serif;color:#fff;}
+#placar{position:absolute;left:50%;bottom:var(--baixo,22px);transform:translateX(-50%);display:flex;align-items:stretch;height:92px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55));}
+/* janelas das câmeras: só a moldura, o meio fica transparente */
+.cam{width:168px;box-sizing:border-box;border:5px solid #f28c28;background:transparent;position:relative;}
+.cam.c24{width:150px;border-radius:22px 0 0 22px;border-right:none;}
+.cam.rel{border-radius:0 22px 22px 0;border-left:none;}
+.cam i{position:absolute;left:50%;top:-1px;transform:translate(-50%,-100%);font:700 13px 'Oswald',Arial;letter-spacing:2px;background:#f28c28;color:#10204a;padding:1px 10px 0;border-radius:7px 7px 0 0;white-space:nowrap;}
+/* faixa principal */
+.faixa{position:relative;display:flex;align-items:center;overflow:hidden;
+  background:
+    radial-gradient(120% 160% at 0% 50%, var(--corA,#c8102e) 0%, transparent 46%),
+    radial-gradient(120% 160% at 100% 50%, var(--corB,#7b1e22) 0%, transparent 46%),
+    linear-gradient(180deg,#1c4fb8 0%,#123a8f 48%,#0b2766 100%);}
+body:not(.c24) .faixa{border-radius:22px 0 0 22px;}
+body.c0 .faixa{border-radius:22px;}
+body.c0 .nm{width:340px;}body.c1 .nm{width:300px;} /* mais espaço para o nome quando tem menos câmera */
+.faixa::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1100' height='92' viewBox='0 0 1100 92'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.13' stroke-width='3'%3E%3Cline x1='550' y1='0' x2='550' y2='92'/%3E%3Ccircle cx='550' cy='46' r='58'/%3E%3Cpath d='M0 -40 A 190 190 0 0 1 0 132'/%3E%3Cpath d='M1100 -40 A 190 190 0 0 0 1100 132'/%3E%3Crect x='-2' y='14' width='120' height='64'/%3E%3Crect x='982' y='14' width='120' height='64'/%3E%3C/g%3E%3C/svg%3E") center/100% 100% no-repeat;pointer-events:none;}
+.faixa::after{content:'';position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(90deg,var(--corA,#c8102e),#f28c28 30%,#f28c28 70%,var(--corB,#7b1e22));}
+.faixa>*{position:relative;z-index:1;}
+.av{width:86px;height:92px;display:flex;align-items:flex-end;justify-content:center;}
+.av img{height:84px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));}
+.esc{width:84px;display:flex;align-items:center;justify-content:center;}
+.esc img{max-height:66px;max-width:70px;filter:drop-shadow(0 2px 5px rgba(0,0,0,.65));}
+.nm{width:262px;padding:0 10px;box-sizing:border-box;font-weight:700;font-size:31px;letter-spacing:1.5px;text-transform:uppercase;text-shadow:0 2px 6px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden;text-overflow:clip;}
+.nm.a{text-align:right;}.nm.b{text-align:left;}
+.pt{width:104px;height:70px;border-radius:14px;background:linear-gradient(180deg,rgba(4,14,40,.85),rgba(4,14,40,.6));box-shadow:inset 0 0 0 2px rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:56px;line-height:1;transition:transform .25s;}
+.pt.pulo{animation:pulo .7s ease;}
+@keyframes pulo{0%{transform:scale(1);color:#fff;}30%{transform:scale(1.18);color:#ffd54f;}100%{transform:scale(1);color:#fff;}}
+.fed{width:86px;display:flex;align-items:center;justify-content:center;}
+.fed img{height:70px;filter:drop-shadow(0 2px 5px rgba(0,0,0,.6));}
+.fed.m2 img{height:68px;}.fed.m3 img{height:66px;}
+.faixa>.esc:first-child{padding-left:14px;}
+.qt{width:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.qt b{font-weight:700;font-size:40px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.6);}
+.qt small{font-weight:500;font-size:13px;letter-spacing:3px;color:#ffd54f;margin-top:2px;}
+.qt.fim b{font-size:30px;color:#ffd54f;}
+body:not(.obs){background:linear-gradient(160deg,#4b5563,#1f2937);}
+#painel{position:absolute;left:24px;top:24px;width:430px;background:rgba(10,20,40,.92);border:1px solid #2c4a80;border-radius:16px;padding:18px;font:14px Arial,sans-serif;color:#dfe7f2;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+body.obs #painel{display:none;}
+#painel h1{margin:0 0 10px;font:700 26px 'Oswald',Arial;letter-spacing:1px;color:#ffd54f;}
+#painel label{display:block;font-weight:700;font-size:12px;letter-spacing:1px;color:#9fb3cf;margin:10px 0 4px;text-transform:uppercase;}
+#painel select{width:100%;padding:9px;border-radius:8px;border:none;font-size:15px;}
+#painel button{width:100%;margin-top:10px;padding:11px;border:none;border-radius:999px;font-weight:800;font-size:15px;cursor:pointer;}
+#bCopiar{background:#e8590c;color:#fff;}#bVoltar{background:#1f3b73;color:#fff;}
+#estado{margin-top:12px;padding:10px;border-radius:10px;background:rgba(255,255,255,.06);line-height:1.45;}
+#painel .dica{margin-top:10px;font-size:12px;color:#9fb3cf;line-height:1.45;}
+#aviso{position:absolute;left:12px;top:10px;font:600 14px Arial;color:#fff;background:rgba(0,0,0,.55);padding:6px 10px;border-radius:8px;display:none;}
+</style>
+</head>
+<body>
+<div id="placar">
+  <div class="cam c24" id="cam24" style="display:none"><i>24 SEG.</i></div>
+  <div class="faixa" id="faixa">
+    <div class="esc"><img id="escA" alt=""></div>
+    <div class="nm a" id="nmA">TIME A</div>
+    <div class="pt" id="ptA">0</div>
+    <div class="fed" id="centro"><img id="centroImg" src="fberj.png" alt=""></div>
+    <div class="pt" id="ptB">0</div>
+    <div class="nm b" id="nmB">TIME B</div>
+    <div class="esc"><img id="escB" alt=""></div>
+    <div class="qt" id="qt"><b id="qtN">1º</b><small>QUARTO</small></div>
+  </div>
+  <div class="cam rel" id="camRel"><i>CRONÔMETRO</i></div>
+</div>
+<div id="painel">
+  <h1>📺 Placar · OBS</h1>
+  <label for="selMod">Modelo</label>
+  <select id="selMod"></select>
+  <button id="bCopiar" type="button">📋 Copiar URL de saída (OBS)</button>
+  <button id="bVoltar" type="button" onclick="location.href='index.html'">🏠 Voltar ao Início</button>
+  <div id="estado">Procurando o jogo aberto no Scout…</div>
+  <div class="dica">O placar mostra sozinho o jogo que estiver aberto no Scout (pontos e quarto). No OBS: fonte <b>Navegador</b>, 1920 × 1080, com a URL de saída. Os retângulos laranja ficam vazados para as câmeras do <b>cronômetro</b> e dos <b>24 segundos</b>.</div>
+</div>
+<div id="aviso"></div>
+<script>
+const D={"cores":{"ABIG":["#1F4E79","#FFFFFF"],"ACEAR":["#E2231A","#FFFFFF"],"ASPCM":["#2E3192","#E2231A"],"BFR":["#000000","#FFFFFF"],"BSA":["#F28C28","#FFFFFF"],"CCL":["#1F5FBF","#FFFFFF"],"CESC":["#000000","#FFFFFF"],"CFCSN":["#7B1E22","#FFFFFF"],"CK":["#1A1A1A","#B8860B"],"CRF":["#C8102E","#000000"],"EEPZ":["#1B2A4A","#F28C28"],"FFC":["#7A0026","#00613C"],"IB":["#E06A2C","#000000"],"IDEC":["#1F4E5F","#A4C639"],"IG":["#1F2E8A","#F07A1A"],"ITDA":["#0B1F4B","#FFFFFF"],"JTC":["#2E3448","#F2D33B"],"KE":["#000000","#FFD200"],"MB":["#1A1A1A","#F28C28"],"NBC":["#E2231A","#000000"],"TKA":["#1E8C3A","#F2C200"],"TTC":["#E2231A","#FFFFFF"]},"escudos":{"ABIG":"escudos/ABIG.png","ACEAR":"escudos/ACEAR.png","ASPCM":"escudos/ASPCM.png","BFR":"escudos/BFR.png","BSA":"escudos/BSA.png","CCL":"escudos/CCL.png","CESC":"escudos/CESC.png","CFCSN":"escudos/CFCSN.png","CK":"escudos/CK.png","CRF":"escudos/CRF.png","EEPZ":"escudos/EEPZ.png","FFC":"escudos/FFC.png","IB":"escudos/IB.png","IDEC":"escudos/IDEC.png","IG":"escudos/IG.png","ITDA":"escudos/ITDA.png","JTC":"escudos/JTC.png","KE":"escudos/KE.png","MB":"escudos/MB.png","NBC":"escudos/NBC.png","TKA":"escudos/TKA.png","TTC":"escudos/TTC.png"},"curto":{"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN":"Funcionários","FFC":"Fluminense","TTC":"Tijuca","NBC":"Niterói","CCL":"Leopoldinense","IG":"Iguaba Grande","ABIG":"Jequiá","ACEAR":"Irajá","CESC":"Suzano Costa","EEPZ":"Passo Zero","IDEC":"IDEC","ITDA":"Atitude","KE":"K. Esportes","MB":"Mesquita","JTC":"Jacarepaguá","TKA":"Team Klun","ASPCM":"Municipal","CK":"Carioca King's","IB":"Itaipu","NBR":"NBR Campos"}};
+const Q=new URLSearchParams(location.search), $=id=>document.getElementById(id);
+// câmeras (?cam=): 0 = sem câmera, 1 = relógio, 2 = relógio e cronômetro de 24 s (?c24=1 = cam 2, para endereços antigos)
+const CAM=Q.get('c24')==='1'?'2':(['0','1','2'].includes(Q.get('cam'))?Q.get('cam'):'1');
+if(CAM==='2'){ document.body.classList.add('c24'); $('cam24').style.display=''; }
+if(CAM==='1') document.body.classList.add('c1');
+if(CAM==='0'){ document.body.classList.add('c0'); $('camRel').style.display='none'; }
+const MOD={'1':['fberj.png','FBERJ'],'2':['avatar_klaus.png','Klaus'],'3':['logo_klaustv_tv.png','Klaus TV']}, mo=MOD[Q.get('modelo')]?Q.get('modelo'):'1';
+$('centroImg').src=MOD[mo][0]; $('centroImg').alt=MOD[mo][1]; $('centro').classList.add('m'+mo);
+if(Q.get('baixo')) document.documentElement.style.setProperty('--baixo',(+Q.get('baixo')||0)+'px');
+const curto=s=>(D.curto[s]||s||'').toUpperCase();
+function times(a,b){ $('nmA').textContent=curto(a); $('nmB').textContent=curto(b);
+  $('escA').src=D.escudos[a]||'favicon.svg'; $('escB').src=D.escudos[b]||'favicon.svg';
+  const r=document.documentElement.style; r.setProperty('--corA',(D.cores[a]||['#c8102e'])[0]); r.setProperty('--corB',(D.cores[b]||['#7b1e22'])[0]); }
+let ULT={A:null,B:null};
+function pontos(a,b){ [['A',a],['B',b]].forEach(([l,v])=>{ const el=$('pt'+l); if(ULT[l]!==null&&v!==ULT[l]){ el.classList.remove('pulo'); void el.offsetWidth; el.classList.add('pulo'); } ULT[l]=v; el.textContent=v; }); }
+function quarto(q,fim){ const el=$('qt'); el.classList.toggle('fim',!!fim);
+  if(fim){ $('qtN').textContent='FIM'; el.querySelector('small').textContent='DE JOGO'; return; }
+  $('qtN').textContent=q>=5?'OT':q+'º'; el.querySelector('small').textContent=q>=5?'PRORROG.':'QUARTO'; }
+if(Q.has('obs')||window.obsstudio) document.body.classList.add('obs');
+// 9 modelos (nomes do Magno, 23/11/2026)
+const MODELOS=[];[['1','FBERJ'],['2','Klaus'],['3','Klaus TV']].forEach(([m,n])=>[['0',''],['1',' relógio'],['2',' relógio e cronômetro']].forEach(([c,t])=>MODELOS.push({m,c,nome:'Overlay '+n+t})));
+$('selMod').innerHTML=MODELOS.map((o,i)=>`<option value="${i}"${o.m===mo&&o.c===CAM?' selected':''}>${o.nome}</option>`).join('');
+$('selMod').onchange=()=>{ const o=MODELOS[+$('selMod').value]; const u=new URL(location); u.searchParams.set('modelo',o.m); u.searchParams.set('cam',o.c); u.searchParams.delete('c24'); location.replace(u); };
+$('bCopiar').onclick=()=>{ const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1&modelo='+mo+'&cam='+CAM;
+  (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{ $('bCopiar').textContent='✓ Copiado! Cole no OBS (fonte Navegador)'; setTimeout(()=>$('bCopiar').textContent='📋 Copiar URL de saída (OBS)',2500); }).catch(()=>prompt('Copie a URL de saída:',u)); };
+// nome: o maior que couber (nome completo da FBERJ → nome curto do site), diminuindo um pouco a letra antes de trocar
+function cabe(el,txt){ for(let f=31;f>=25;f--){ el.style.fontSize=f+'px'; el.textContent=txt; if(el.scrollWidth<=el.clientWidth+1) return true; } return false; }
+function poeNome(el,completo,sig){ const op=[CAM==='2'?'':completo,D.curto[sig]||sig] /* com as duas câmeras: sempre o nome curto */.filter(Boolean).map(x=>String(x).toUpperCase());
+  for(const t of op){ if(cabe(el,t)) return; } el.style.fontSize='25px'; el.textContent=op[op.length-1]||''; }
+let SIG='';
+function aplicar(r){ const sg=r.a+'|'+r.b+'|'+r.nA+'|'+r.nB;
+  if(sg!==SIG){ SIG=sg; times(r.a,r.b); poeNome($('nmA'),r.nA,r.a); poeNome($('nmB'),r.nB,r.b); ULT={A:null,B:null}; }
+  $('placar').style.visibility=''; pontos(r.pa,r.pb); const fim=r.status==='FINAL'; quarto(fim?4:(r.ot?5:Math.min(4,(+r.qf||0)+1)),fim);
+  $('estado').innerHTML='Jogo do Scout: <b>'+(D.curto[r.a]||r.a)+' '+r.pa+' x '+r.pb+' '+(D.curto[r.b]||r.b)+'</b> · '+(r.cat||'')+'<br><small>Atualizado às '+new Date().toLocaleTimeString('pt-BR')+'</small>'; $('aviso').style.display='none'; }
+// busca a cada 2 s, por <script> (JSONP): funciona dentro do OBS, que não consegue usar fetch no Google
+const API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
+let N=0, FALHAS=0, OCUP=false;
+function buscar(){ if(OCUP) return; OCUP=true; const cb='kt_pl'+(++N); const sc=document.createElement('script'); let feito=false;
+  const fim=ok=>{ if(feito) return; feito=true; OCUP=false; delete window[cb]; sc.remove(); if(!ok){ FALHAS++; if(FALHAS>=3 && !document.body.classList.contains('obs')){ $('aviso').textContent='Sem conexão com o servidor — tentando de novo…'; $('aviso').style.display='block'; } } else FALHAS=0; };
+  window[cb]=r=>{ fim(true); if(r&&r.ok) aplicar(r); else $('estado').textContent=(r&&r.erro)||'Nenhum jogo aberto no Scout.'; };
+  sc.onerror=()=>fim(false); setTimeout(()=>fim(false),8000);
+  sc.src=API+'?acao=placar&callback='+cb+'&_='+Date.now(); document.head.appendChild(sc); }
+if(Q.get('demo')){ const P=Q.get('demo').split(','); times(P[0],P[1]); pontos(+P[2]||0,+P[3]||0); quarto(+P[4]||1,P[4]==='F'); $('estado').textContent='Prévia (demo): não está ligado ao Scout.'; }
+else { $('placar').style.visibility='hidden'; buscar(); setInterval(buscar,2000); }
+</script>
+</body>
+</html>

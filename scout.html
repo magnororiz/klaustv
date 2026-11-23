@@ -1440,7 +1440,7 @@ const KT_RASC_H=8*3600*1000;
 function kt_rascLer(id){ try{ const r=JSON.parse(localStorage.getItem('kt_rasc_'+id)||'null'); return (r&&Date.now()-r.ts<KT_RASC_H)?r:null; }catch(e){ return null; } }
 let kt_rascT=null;
 let KT_SUJO=false, KT_ENVIANDO=false;
-function kt_rascSalvar(){ if(!KT_JOGO_ID || (typeof KT_LEITURA!=='undefined' && KT_LEITURA)) return; KT_SUJO=true; clearTimeout(kt_rascT); kt_rascT=setTimeout(()=>{ try{
+function kt_rascSalvar(){ if(!KT_JOGO_ID || (typeof KT_LEITURA!=='undefined' && KT_LEITURA)) return; KT_SUJO=true; kt_envioRapido(); clearTimeout(kt_rascT); kt_rascT=setTimeout(()=>{ try{
   const prem=[...document.querySelectorAll('.ktPremL')].filter(l=>!l.dataset.extra).map(l=>[l.querySelector('.pP').value,l.querySelector('.pJ').value,l.querySelector('.pJ').dataset.manual||'']);
   localStorage.setItem('kt_rasc_'+KT_JOGO_ID,JSON.stringify({ts:Date.now(),stats:kt_statsDaTela(),prem,dataHora:document.getElementById('ktDataJogo').value}));
   localStorage.setItem('kt_scout_atual',JSON.stringify({id:KT_JOGO_ID,ts:Date.now()})); }catch(e){} },120); }
@@ -1479,6 +1479,7 @@ async function kt_abrirMontado(id,restaurando){
   if(rasc && rasc.stats){ ['A','B'].forEach(t=>{ for(let i=1;i<=12;i++){ const reg=KT_REGS[t][i]; const v=reg&&rasc.stats[t]&&rasc.stats[t][reg]; if(v) stats[t+'-'+i]=Object.assign({},KT_ZERO,v); } const pq=((rasc.stats.periodos||{})[t])||[]; for(let q=1;q<=5;q++){ const v=pq[q-1]; document.getElementById('ktQ'+t+q).value=(v===undefined||v===null)?'':v; } }); }
   if(typeof atualizarTodasAsLinhas==='function') atualizarTodasAsLinhas();
   KT_JOGO_ID=id;
+  if(!(typeof KT_LEITURA!=='undefined'&&KT_LEITURA)) kt_apiSc({acao:'placarDefinir',id}); // placar do OBS passa a mostrar este jogo (Magno, 23/11/2026)
   try{ localStorage.setItem('kt_scout_atual',JSON.stringify({id,ts:Date.now()})); }catch(e){}
   kt_msg(rasc?(restaurando?'🔄 Jogo recuperado depois de atualizar a página — os números da tela foram mantidos.':'🔄 Números da tela recuperados deste aparelho.'):((st.A||st.B)?'Jogo aberto com os números salvos na planilha.':''));
   KT_RASC_PREM=(rasc&&rasc.prem)||kt_premDaPlanilha(st.prem)||null;
@@ -1501,6 +1502,8 @@ function kt_statsDaTela(){
   try{ const nomes=kt_premNomes(); out.prem=[...document.querySelectorAll('.ktPremL')].filter(l=>!l.dataset.extra).map(l=>{ const pv=l.querySelector('.pP').value; const k=l.querySelector('.pJ').value; const mt=/^([AB])-(\d+)$/.exec(k); return [pv,k,l.querySelector('.pJ').dataset.manual||'',nomes[+pv]||'',mt?(KT_REGS[mt[1]][+mt[2]]||''):'']; }); }catch(e){}
   return out;
 }
+/* envio logo depois do clique (Magno, 23/11/2026): o placar do OBS mostra o ponto em 2 a 5 s; os 8 s continuam como reserva */
+let KT_RAPIDO_T=null; function kt_envioRapido(){ clearTimeout(KT_RAPIDO_T); KT_RAPIDO_T=setTimeout(kt_enviarAuto,700); }
 async function kt_enviarAuto(){
   if(typeof KT_LEITURA!=='undefined' && KT_LEITURA) return;
   if(!KT_JOGO_ID || !KT_SUJO || KT_ENVIANDO) return;
@@ -1508,6 +1511,7 @@ async function kt_enviarAuto(){
   const st=kt_statsDaTela(); const dh='';
   const r=await kt_apiSc({acao:'salvarStats',id,stats:st});
   KT_ENVIANDO=false;
+  if(r.ok && KT_SUJO) kt_envioRapido(); // mudou de novo enquanto enviava
   if(r.ok && id===KT_JOGO_ID){ KT_STATS_SALVOS=st; kt_msg('📡 Enviado ao Ao vivo às '+new Date().toLocaleTimeString('pt-BR')+(r.placar?' · placar '+r.placar[0]+' x '+r.placar[1]:'')); }
   else if(!r.ok){ KT_SUJO=true; kt_msg('⚠️ Sem conexão com a planilha — os números estão guardados neste computador e serão enviados quando a conexão voltar.'); }
 }
