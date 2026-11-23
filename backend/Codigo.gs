@@ -607,7 +607,7 @@ function lerExtras() {
 function comExtras(res) {
   if (!res || !res.ok) return res;
   try { lerExtras().forEach(x => { const c = res.elencos[x.categoria] = res.elencos[x.categoria] || {}; const l = c[x.sigla] = c[x.sigla] || [];
-    const a = l.find(y => String(y[0]) === x.matricula); if (a) { if (!a[2]) a[2] = x.deCategoria; } else l.push([x.matricula, x.nome, x.deCategoria]); l.sort((p, q) => String(p[1]).localeCompare(String(q[1]), 'pt-BR')); }); } catch (e) {}
+    const a = l.find(y => String(y[0]) === x.matricula); if (a) { if (!a[2] && x.deCategoria !== 'NOVO') a[2] = x.deCategoria; } /* jogador novo que já entrou na lista da FBERJ: vira oficial, sem etiqueta 'novo' nem Excluir (Magno, 23/11/2026) */ else l.push([x.matricula, x.nome, x.deCategoria]); l.sort((p, q) => String(p[1]).localeCompare(String(q[1]), 'pt-BR')); }); } catch (e) {}
   return res;
 }
 function incluirExtra(token, p) {
