@@ -121,12 +121,17 @@ function aplicar(r){ const sg=r.a+'|'+r.b+'|'+r.nA+'|'+r.nB;
   if(sg!==SIG){ SIG=sg; times(r.a,r.b); poeNome($('nmA'),r.nA,r.a); poeNome($('nmB'),r.nB,r.b); ULT={A:null,B:null}; }
   $('placar').style.visibility=''; pontos(r.pa,r.pb); const fim=r.status==='FINAL'; quarto(fim?4:(r.ot?5:Math.min(4,(+r.qf||0)+1)),fim);
   $('estado').innerHTML='Jogo do Scout: <b>'+(D.curto[r.a]||r.a)+' '+r.pa+' x '+r.pb+' '+(D.curto[r.b]||r.b)+'</b> · '+(r.cat||'')+'<br><small>Atualizado às '+new Date().toLocaleTimeString('pt-BR')+'</small>'; $('aviso').style.display='none'; }
-// busca a cada 2 s, por <script> (JSONP): funciona dentro do OBS, que não consegue usar fetch no Google
+// busca a cada 2 s (fetch; se o navegador recusar, como já aconteceu no OBS, troca sozinho para <script>/JSONP)
 const API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
-let N=0, FALHAS=0, OCUP=false;
-function buscar(){ if(OCUP) return; OCUP=true; const cb='kt_pl'+(++N); const sc=document.createElement('script'); let feito=false;
-  const fim=ok=>{ if(feito) return; feito=true; OCUP=false; delete window[cb]; sc.remove(); if(!ok){ FALHAS++; if(FALHAS>=3 && !document.body.classList.contains('obs')){ $('aviso').textContent='Sem conexão com o servidor — tentando de novo…'; $('aviso').style.display='block'; } } else FALHAS=0; };
-  window[cb]=r=>{ fim(true); if(r&&r.ok) aplicar(r); else $('estado').textContent=(r&&r.erro)||'Nenhum jogo aberto no Scout.'; };
+let N=0, FALHAS=0, OCUP=false, MODO='fetch'; // tenta fetch (GET simples); se falhar, usa <script> (JSONP), que funciona no OBS
+function resposta(r){ if(r&&r.ok) aplicar(r); else $('estado').textContent=(r&&r.erro)||'Nenhum jogo aberto no Scout.'; }
+function falhou(){ FALHAS++; MODO=MODO==='fetch'?'jsonp':'fetch'; if(FALHAS>=3 && !document.body.classList.contains('obs')){ $('aviso').textContent='Sem conexão com o servidor — tentando de novo…'; $('aviso').style.display='block'; } }
+function buscar(){ if(OCUP) return; OCUP=true;
+  if(MODO==='fetch'){ const ct=new AbortController(); const tm=setTimeout(()=>ct.abort(),8000);
+    fetch(API+'?acao=placar&_='+Date.now(),{signal:ct.signal}).then(r=>r.json()).then(r=>{ FALHAS=0; $('aviso').style.display='none'; resposta(r); }).catch(falhou).finally(()=>{ clearTimeout(tm); OCUP=false; }); return; }
+  const cb='kt_pl'+(++N); const sc=document.createElement('script'); let feito=false;
+  const fim=ok=>{ if(feito) return; feito=true; OCUP=false; delete window[cb]; sc.remove(); if(ok) FALHAS=0; else falhou(); };
+  window[cb]=r=>{ fim(true); resposta(r); };
   sc.onerror=()=>fim(false); setTimeout(()=>fim(false),8000);
   sc.src=API+'?acao=placar&callback='+cb+'&_='+Date.now(); document.head.appendChild(sc); }
 if(Q.get('demo')){ const P=Q.get('demo').split(','); times(P[0],P[1]); pontos(+P[2]||0,+P[3]||0); quarto(+P[4]||1,P[4]==='F'); $('estado').textContent='Prévia (demo): não está ligado ao Scout.'; }
