@@ -177,6 +177,8 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
  <div class="painel"><div class="filtros"><label>Categoria<select id="jCat" onchange="kt_jTimes()"></select></label><label>Time<select id="jTime" onchange="kt_jLista()"></select></label></div>
  <div class="dica">Elenco inteiro da FBERJ. Apelido e foto valem para todos os jogos. A camisa vale para a categoria aberta na tela: quem joga em duas categorias pode ter um número em cada (a categoria sem número próprio usa a camisa que já estava salva). Salva sozinho ao sair do campo.</div><div class="dica fedNota" style="color:#7fd1ff"></div></div>
  <div id="jConteudo"></div>
+ <div class="painel" style="margin-top:10px"><b style="color:#ffd54f">🆕 Incluir jogador novo (que não está na lista da FBERJ)</b><div class="dica">Para atleta que ainda não aparece no elenco da FBERJ. Escolha a categoria e o time, digite a matrícula (só números) e o nome completo. Ele passa a aparecer no elenco do time e no Montar Jogo. <!-- Magno, 23/11/2026 --></div>
+  <div class="filtros" style="margin-top:6px"><label>Categoria<select id="nCat" onchange="kt_nTimes()"></select></label><label>Time<select id="nTime"><option value="">— escolha a categoria —</option></select></label><label>Matrícula<input id="nMat" inputmode="numeric" maxlength="12" placeholder="só números" oninput="this.value=this.value.replace(/\D/g,'')"></label><label style="flex:1;min-width:220px">Nome completo<input id="nNome" maxlength="80" placeholder="nome e sobrenome"></label><button class="btSalvar" style="padding:9px 16px;font-size:14px" onclick="kt_nIncluir()">➕ Incluir</button></div></div>
 </div>
 <div id="secG" style="display:none">
  <div class="painel"><div class="filtros">
@@ -246,10 +248,10 @@ function kt_jLista(){ const cat=$('jCat').value, sig=$('jTime').value; if(!sig){
   $('jConteudo').innerHTML='<div class="cabT" style="background:'+c+';color:'+txtSobre(c)+'">'+(D.escudos[sig]?'<img src="'+D.escudos[sig]+'">':'')+'<div><b>'+esc(nomeEq(sig))+'</b><div style="font-size:12px">'+esc(cat)+' · '+ls.length+' atletas inscritos na FBERJ</div></div></div>'+
    '<table class="bd"><tr><th>Foto</th><th>Camisa</th><th>Nome completo</th><th>Matrícula FBERJ</th><th>Apelido</th><th></th></tr>'+
    '<tr style="background:#101c31"><td>'+btFoto(tk)+'</td><td style="color:#ffd54f;font-weight:800;font-size:11px">TÉCNICO</td><td colspan="2"><input class="inAp" style="width:340px;max-width:100%;box-sizing:border-box" placeholder="Nome do técnico" value="'+esc(APS[tk]||'')+'" onchange="kt_salvarAp(\''+tk+'\',this)"></td><td></td><td class="ok" id="ok_'+tk+'"></td></tr>'+
-   ls.map(a=>'<tr><td>'+btFoto(a[0])+'</td><td><input class="inCam" inputmode="numeric" maxlength="3" value="'+esc(camDe(a[0],cat))+'" title="Camisa no '+esc(cat)+'" onchange="kt_salvarCam(\''+a[0]+'\',this,\''+cat+'\')"></td><td>'+esc(a[1])+(a[2]?' <span class="tagSub">do '+esc(a[2])+'</span> <button class="bExc" title="Tirar do '+esc(cat)+'" onclick="kt_jTirarExtra(\''+a[0]+'\')">🗑️ Excluir</button>':'')+'</td><td class="reg">'+a[0]+'</td><td><input class="inAp" value="'+esc(APS[a[0]]||'')+'" onchange="kt_salvarAp(\''+a[0]+'\',this)"></td><td class="ok" id="ok_'+a[0]+'"></td></tr>').join('')+'</table>'+kt_jBlocoExtra(cat,sig,ls); }
+   ls.map(a=>'<tr><td>'+btFoto(a[0])+'</td><td><input class="inCam" inputmode="numeric" maxlength="3" value="'+esc(camDe(a[0],cat))+'" title="Camisa no '+esc(cat)+'" onchange="kt_salvarCam(\''+a[0]+'\',this,\''+cat+'\')"></td><td>'+esc(a[1])+(a[2]?' <span class="tagSub">'+(a[2]==='NOVO'?'novo':'do '+esc(a[2]))+'</span> <button class="bExc" title="Tirar do '+esc(cat)+'" onclick="kt_jTirarExtra(\''+a[0]+'\')">🗑️ Excluir</button>':'')+'</td><td class="reg">'+a[0]+'</td><td><input class="inAp" value="'+esc(APS[a[0]]||'')+'" onchange="kt_salvarAp(\''+a[0]+'\',this)"></td><td class="ok" id="ok_'+a[0]+'"></td></tr>').join('')+'</table>'+kt_jBlocoExtra(cat,sig,ls); }
 function kt_jBlocoExtra(cat,sig,ls){ const i=D.ordem.indexOf(cat); if(i<=0) return '';
   const tem=new Set(ls.map(a=>String(a[0]))); const ops=[];
-  D.ordem.slice(0,i).reverse().forEach(c=>{ const l=((D.elencos[c]||{})[sig]||[]).filter(a=>!a[2]&&!tem.has(String(a[0]))); if(l.length) ops.push('<optgroup label="'+esc(c)+'">'+l.map(a=>'<option value="'+esc(c)+'|'+a[0]+'">'+esc(a[1])+' ('+a[0]+')</option>').join('')+'</optgroup>'); });
+  D.ordem.slice(0,i).reverse().forEach(c=>{ const l=((D.elencos[c]||{})[sig]||[]).filter(a=>(!a[2]||a[2]==='NOVO')&&!tem.has(String(a[0]))); if(l.length) ops.push('<optgroup label="'+esc(c)+'">'+l.map(a=>'<option value="'+esc(c)+'|'+a[0]+'">'+esc(a[1])+' ('+a[0]+')</option>').join('')+'</optgroup>'); });
   return '<div class="painel" style="margin-top:10px"><b style="color:#ffd54f">➕ Incluir atleta de categoria inferior no '+esc(cat)+'</b><div class="dica">Atleta do '+esc(nomeEq(sig))+' de categoria abaixo que vai jogar no '+esc(cat)+'. Entra com a mesma matrícula (as estatísticas continuam juntas). Camisa: se for a mesma, não precisa mexer; se for outra, digite na linha dele aqui no '+esc(cat)+'.</div>'+
     (ops.length?'<div class="filtros" style="margin-top:6px"><select id="jExtraSel" style="flex:1;min-width:260px"><option value="">— escolha o atleta —</option>'+ops.join('')+'</select><button class="btSalvar" style="padding:9px 16px;font-size:14px" onclick="kt_jIncluirExtra()">➕ Incluir</button></div>':'<div class="dica">Nenhum atleta de categoria inferior disponível para este time.</div>')+'</div>'; }
 function kt_jCacheFed(f){ try{ const c=JSON.parse(localStorage.getItem('kt_fed_v1')||'null'); if(c&&c.elencos){ f(c); localStorage.setItem('kt_fed_v1',JSON.stringify(c)); } }catch(e){} }
@@ -258,8 +260,18 @@ async function kt_jIncluirExtra(){ const v=$('jExtraSel').value; if(!v) return a
   const r=await api({acao:'incluirExtra',categoria:cat,sigla:sig,matricula:mat,nome:a[1],deCategoria:de}); if(!r.ok) return aviso('Não incluiu: '+(r.erro||'tente de novo'));
   const pr=(x,y)=>String(x[1]).localeCompare(String(y[1]),'pt-BR'); const add=E=>{ const c=E[cat]=E[cat]||{}; const l=c[sig]=c[sig]||[]; if(!l.some(x=>String(x[0])===mat)) l.push([mat,a[1],de]); l.sort(pr); };
   add(D.elencos); kt_jCacheFed(c=>add(c.elencos)); aviso('✅ '+a[1]+' incluído no '+cat+'.'); kt_jLista(); }
+/* ---------- Jogador novo, fora da lista da FBERJ (Magno, 23/11/2026) ---------- */
+function kt_nTimes(){ const c=$('nCat').value; $('nTime').innerHTML=c?'<option value="">— escolha o time —</option>'+timesDe(c).map(s=>'<option value="'+s+'">'+esc(nomeEq(s))+' ('+s+')</option>').join(''):'<option value="">— escolha a categoria —</option>'; }
+async function kt_nIncluir(){ const cat=$('nCat').value, sig=$('nTime').value, mat=$('nMat').value.trim(), nome=$('nNome').value.replace(/\s+/g,' ').trim();
+  if(!cat) return aviso('Escolha a categoria.'); if(!sig) return aviso('Escolha o time.');
+  if(!/^\d{2,12}$/.test(mat)) return aviso('Digite a matrícula (só números).'); if(nome.length<3||nome.indexOf(' ')<0) return aviso('Digite o nome completo (nome e sobrenome).');
+  const ja=((D.elencos[cat]||{})[sig]||[]).find(x=>String(x[0])===mat); if(ja) return aviso('A matrícula '+mat+' já está no '+cat+' do '+nomeEq(sig)+': '+ja[1]+'.');
+  const r=await api({acao:'incluirExtra',categoria:cat,sigla:sig,matricula:mat,nome:nome,deCategoria:'NOVO'}); if(!r.ok) return aviso('Não incluiu: '+(r.erro||'tente de novo'));
+  const pr=(x,y)=>String(x[1]).localeCompare(String(y[1]),'pt-BR'); const add=E=>{ const c=E[cat]=E[cat]||{}; const l=c[sig]=c[sig]||[]; if(!l.some(x=>String(x[0])===mat)) l.push([mat,nome,'NOVO']); l.sort(pr); };
+  add(D.elencos); kt_jCacheFed(c=>add(c.elencos)); aviso('✅ '+nome+' incluído no '+cat+' do '+nomeEq(sig)+'.'); $('nMat').value=''; $('nNome').value='';
+  $('jCat').value=cat; kt_jTimes(); $('jTime').value=sig; kt_jLista(); }
 async function kt_jTirarExtra(mat){ const cat=$('jCat').value, sig=$('jTime').value; const a=((D.elencos[cat]||{})[sig]||[]).find(x=>String(x[0])===String(mat)); if(!a) return;
-  if(!confirm('Tirar '+a[1]+' do '+cat+'? Ele continua no '+a[2]+' e os jogos já montados não mudam.')) return;
+  if(!confirm(a[2]==='NOVO'?'Tirar '+a[1]+' (jogador novo) do '+cat+'? Os jogos já montados não mudam.':'Tirar '+a[1]+' do '+cat+'? Ele continua no '+a[2]+' e os jogos já montados não mudam.')) return;
   const r=await api({acao:'excluirExtra',categoria:cat,sigla:sig,matricula:String(mat)}); if(!r.ok) return aviso('Não tirou: '+(r.erro||'tente de novo'));
   const tira=E=>{ const l=(E[cat]||{})[sig]; if(l){ const k=l.findIndex(x=>String(x[0])===String(mat)&&x[2]); if(k>=0) l.splice(k,1); } };
   tira(D.elencos); kt_jCacheFed(c=>tira(c.elencos)); aviso('Atleta tirado do '+cat+'.'); kt_jLista(); }
@@ -313,11 +325,11 @@ async function kt_gListar(){ const cat=$('gListaCat').value; const r=await api({
   const js=(r.jogos||[]).filter(j=>j.status==='FINAL' && (!cat||j.categoria===cat)).sort((a,b)=>String(b.dataHora).localeCompare(String(a.dataHora)));
   box.innerHTML=js.length?js.map(j=>{ const m=j.meta||{}; const d=String(j.dataHora||''); return '<div class="item"><span>'+d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4)+' · '+esc(j.categoria)+' · '+esc((m.timeA||{}).sigla)+' '+(j.placarA||0)+' x '+(j.placarB||0)+' '+esc((m.timeB||{}).sigla)+(j.jogoFed?' · jogo '+esc(j.jogoFed):'')+'</span><button onclick="kt_gExcluir(\''+j.id+'\',this)">🗑️ Excluir</button></div>'; }).join(''):'<div style="color:#9fb3c8">Nenhum jogo encerrado'+(cat?' no '+esc(cat):'')+'.</div>'; }
 async function kt_gExcluir(id,b){ if(!confirm('Excluir este jogo do banco? Não dá para desfazer.')) return; if(!confirm('Tem certeza?')) return; b.disabled=true; const r=await api({acao:'excluirJogo',id}); if(r.ok){ aviso('Jogo excluído.'); kt_gListar(); } else { b.disabled=false; aviso('Não excluiu: '+(r.erro||'')); } }
-['jCat','gCat'].forEach(i=>$(i).innerHTML=catOpts()); $('gListaCat').innerHTML='<option value="">Todas as categorias</option>'+D.ordem.map(c=>'<option>'+c+'</option>').join('');
+['jCat','gCat','nCat'].forEach(i=>$(i).innerHTML=catOpts()); $('gListaCat').innerHTML='<option value="">Todas as categorias</option>'+D.ordem.map(c=>'<option>'+c+'</option>').join('');
 kt_carregar();
 function kt_fedNota(){ const t=D.fedAtualizado?('Dados da FBERJ: último backup em '+D.fedAtualizado+'.'):'Dados da FBERJ: cópia de 11/11/2026 (backup automático ainda não respondeu).'; document.querySelectorAll('.fedNota').forEach(e=>e.textContent=t); }
 kt_fedNota();
-kt_fedCarregar(()=>{ ['jCat','gCat'].forEach(i=>{ const v=$(i).value; $(i).innerHTML=catOpts(); $(i).value=v; }); kt_fedNota(); });
+kt_fedCarregar(()=>{ ['jCat','gCat','nCat'].forEach(i=>{ const v=$(i).value; $(i).innerHTML=catOpts(); $(i).value=v; }); kt_fedNota(); });
 </script>
 <footer class="ktFooter">
   <div class="lema">🏀 No basquete, <span>tudo pode acontecer!</span></div>

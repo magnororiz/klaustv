@@ -613,8 +613,9 @@ function comExtras(res) {
 function incluirExtra(token, p) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
   const cat = String(p.categoria || ''), de = String(p.deCategoria || ''), sig = String(p.sigla || '').trim(), mat = String(p.matricula || '').trim(), nome = String(p.nome || '').replace(/\s+/g, ' ').trim();
-  if (ORD_CAT.indexOf(cat) < 0 || ORD_CAT.indexOf(de) < 0) return { ok: false, erro: 'Categoria inválida.' };
-  if (ORD_CAT.indexOf(de) >= ORD_CAT.indexOf(cat)) return { ok: false, erro: 'Só pode subir atleta de categoria inferior.' };
+  // de = 'NOVO': jogador novo, que ainda não está na lista da FBERJ (Magno, 23/11/2026)
+  if (ORD_CAT.indexOf(cat) < 0 || (de !== 'NOVO' && ORD_CAT.indexOf(de) < 0)) return { ok: false, erro: 'Categoria inválida.' };
+  if (de !== 'NOVO' && ORD_CAT.indexOf(de) >= ORD_CAT.indexOf(cat)) return { ok: false, erro: 'Só pode subir atleta de categoria inferior.' };
   if (!/^[A-Za-z0-9]{2,12}$/.test(sig) || !/^[0-9A-Za-z]{2,20}$/.test(mat) || nome.length < 3) return { ok: false, erro: 'Dados do atleta inválidos.' };
   if (lerExtras().some(x => x.categoria === cat && x.sigla === sig && x.matricula === mat)) return { ok: true, jaTinha: true };
   const sh = abaExtras(); sh.appendRow([cat, sig, mat, nome, de, new Date(), u.usuario]); sh.getRange(sh.getLastRow(), 3).setNumberFormat('@').setValue(mat);
