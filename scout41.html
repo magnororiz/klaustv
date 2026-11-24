@@ -238,8 +238,8 @@ const FE={
  tc:{ll:1,nm:'Técnica do técnico',d:'conduta do próprio técnico',tx:'Falta técnica do técnico',quem:'tec',k:'C'},
  tb:{ll:1,nm:'Técnica do banco',d:'reservas, assistente ou comissão',tx:'Falta técnica do banco',quem:'tec',k:'B'},
  dt:{ll:2,nm:'Desqualificante do técnico ou banco',d:'expulso na hora',tx:'Falta desqualificante do técnico ou banco',quem:'tec',dq:1},
- // Sub-12 do Rio (Magno, 24/11/2026, provisório até confirmar na FBERJ): falta do TIME, não do jogador · não conta falta do jogador nem do time · 1 lance livre e bola na lateral
- s12:{ll:1,nm:'Técnica Sub-12',d:'pressão · roubo de bola no campo do adversário',tx:'Falta técnica Sub-12',quem:'tec',s12:1}};
+ // Sub-12 do Rio (Magno, 24/11/2026, confirmado com o técnico Bruno Gonzalez): falta do TIME, não do jogador · não conta falta do jogador nem do time · o outro time escolhe quem bate, 1 ou 2 lances livres, e bola na lateral
+ s12:{ll:0,nm:'Técnica Sub-12',d:'pressão · roubo de bola no campo do adversário',tx:'Falta técnica Sub-12',quem:'tec',s12:1}};
 const TC={a:{C:0,B:0,dq:0},b:{C:0,B:0,dq:0}};
 // camiseta regata (mesmo desenho da Escalação); listrada para o Flamengo, lisa para o Tijuca
 const CORPO='M9 1.5h5Q19 10.5 24 1.5h5v5.4q1.4 7.6 7.5 8.6V42.5H1.5V15.5Q7.6 14.5 9 6.9z';
@@ -455,8 +455,7 @@ function desenhaFE(){ const b=document.getElementById('btFE'); if(!b) return; co
   b.innerHTML=!on?'FALTA<br>ESPECIAL':!FA.fez?`${f.nm.toUpperCase()}<small>marque quem fez · toque aqui p/ fechar</small>`
    :`CONFIRMAR<br>${f.nm.toUpperCase()}`+(f.sof&&!FA.sof?'<small>quem sofreu: opcional</small>':''); }
 function confirmaFE(){ const f=FE[FA.tipo], {t,n}=FA.fez;
-  if(f.s12){ reg(t,'',`Falta técnica Sub-12 ${T[t].nome}`,'Pressão: roubo de bola no campo do adversário · 1 lance livre e bola na lateral','fa');
-    aviso(`Falta técnica Sub-12 · ${T[t].nome} · 1 lance livre e bola na lateral`,1); }
+  if(f.s12){ reg(t,'',`Falta técnica Sub-12 ${T[t].nome}`,'Pressão: roubo de bola no campo do adversário · lance livre e bola na lateral','fa'); }
   else if(f.quem==='tec'){ const x=TC[t], quem=f.k==='C'?'Técnico':f.k==='B'?'Banco':'Técnico ou banco';
     if(f.dq){ x.dq++; reg(t,'',`${quem} ${T[t].nome}`,`${f.tx} · fora do jogo`,'er'); }
     else { x[f.k]++; reg(t,'',`${quem} ${T[t].nome}`,`${f.tx} (${x[f.k]}ª)`,'fa');
@@ -473,7 +472,8 @@ function confirmaFE(){ const f=FE[FA.tipo], {t,n}=FA.fez;
   const sof=FA.sof, qtd=f.ll||(FT[t]>=5&&f.quem==='jog'?2:0);
   pausaPor(8);
   FA.on=false; FA.tipo=null; FA.fez=null; FA.sof=null; desenhaFT(); desenha();
-  if(qtd) iniciaLL(t==='a'?'b':'a',qtd,sof); }
+  if(f.s12) iniciaLL(t==='a'?'b':'a',0,null,1);   // Sub-12: escolhe quem bate e depois 1 ou 2
+  else if(qtd) iniciaLL(t==='a'?'b':'a',qtd,sof); }
 
 // ===== LANCE LIVRE (Magno + Claude, 24/11/2026) =====
 // Botão LANCE LIVRE: camisa de quem bate → 1 · 2 · 3 → ✓/✗ em cada lance (✓ soma 1 no placar).
@@ -486,21 +486,21 @@ function clicaLL(){ if(document.body.classList.contains('sub')) return aviso('Te
   if(FA.on) return aviso('Termine ou feche a falta antes do LANCE LIVRE');
   if(LL.on){ if(!LL.n&&!LL.q){ fimLL(); return; }              // nada marcado ainda: o 2º toque fecha
     return LL.n?telaLL():aviso('Marque a camisa do jogador que vai bater o lance livre'); }
-  LL.on=true; LL.t=null; LL.n=null; LL.q=0; LL.r=[]; telaLL(); }   // 1º marca o jogador, depois 1 · 2 · 3
+  LL.on=true; LL.t=null; LL.n=null; LL.q=0; LL.r=[]; LL.s12=0; telaLL(); }   // 1º marca o jogador, depois 1 · 2 · 3
 function paraLL(){ C.trava=true; C.tarja=true; clearTimeout(tSub); tSub=null; pausa(); }
-function iniciaLL(t,q,sof){ LL.on=true; LL.t=t; LL.q=q; LL.r=[]; LL.n=sof&&sof.t===t?sof.n:null; paraLL(); telaLL(); }
+function iniciaLL(t,q,sof,s12){ LL.on=true; LL.s12=s12?1:0; LL.t=t; LL.q=q; LL.r=[]; LL.n=sof&&sof.t===t?sof.n:null; paraLL(); telaLL(); }
 function marcaLL(t,n){ if(LL.t&&LL.t!==t) return aviso(`O lance livre é do ${T[LL.t].nome}`);
   LL.t=t; LL.n=n; telaLL(); }
 function telaLL(){ const m=document.getElementById('llMenu'), op=document.getElementById('llOp'), ti=document.getElementById('llTit'); desenhaLL();
   m.classList.remove('linha');
-  if(!LL.n){ m.classList.remove('on'); aviso(LL.q?`${LL.q} lance${LL.q>1?'s':''} livre${LL.q>1?'s':''}${LL.t?' do '+T[LL.t].nome:''} · marque o jogador que vai bater`:'Marque o jogador que vai bater o lance livre',1); return; }
+  if(!LL.n){ m.classList.remove('on'); aviso(LL.q?`${LL.q} lance${LL.q>1?'s':''} livre${LL.q>1?'s':''}${LL.t?' do '+T[LL.t].nome:''} · marque o jogador que vai bater`:`Marque o jogador${LL.t?' do '+T[LL.t].nome:''} que vai bater o lance livre`,1); return; }
   if(!LL.q){ const jq=jog(LL.t,LL.n); ti.textContent=`LANCE LIVRE · ${jq[1]} - ${jq[0]} · quantos?`; m.classList.add('on');
-    op.innerHTML=`<div class="qt">${[[1,'cesta + falta'],[2,'arremesso de 2 · bônus'],[3,'arremesso de 3']].map(([q,d])=>`<button onclick="qtdLL(${q})">${q}<small>${d}</small></button>`).join('')}</div>`; return; }
+    op.innerHTML=`<div class="qt">${(LL.s12?[[1,'falta técnica Sub-12'],[2,'falta técnica Sub-12']]:[[1,'cesta + falta'],[2,'arremesso de 2 · bônus'],[3,'arremesso de 3']]).map(([q,d])=>`<button onclick="qtdLL(${q})">${q}<small>${d}</small></button>`).join('')}</div>`; return; }
   const j=jog(LL.t,LL.n), vez=LL.r.length;
   ti.textContent=`${j[1]} - ${j[0]} · ${vez+1}º de ${LL.q}`; m.classList.add('on','linha');
   op.innerHTML=`<div class="rs">${Array.from({length:LL.q},(_,i)=>`<i class="${LL.r[i]===1?'ok':LL.r[i]===0?'er':i===vez?'vez':''}">${LL.r[i]===1?'✓':LL.r[i]===0?'✗':i+1}</i>`).join('')}</div>
    <div class="bb"><button class="ok" onclick="resLL(1)" title="Convertido">✓</button><button class="er" onclick="resLL(0)" title="Errado">✗</button></div>
-   <div class="rod"><span>trocar: ${[1,2,3].map(q=>`<a onclick="qtdLL(${q})">${q}</a>`).join(' · ')}</span><span><a onclick="trocaLL()">outro jogador</a>${vez?' · <a onclick="voltaLL()">↶ corrigir o último</a>':''}</span></div>`; }
+   <div class="rod"><span>trocar: ${(LL.s12?[1,2]:[1,2,3]).map(q=>`<a onclick="qtdLL(${q})">${q}</a>`).join(' · ')}</span><span><a onclick="trocaLL()">outro jogador</a>${vez?' · <a onclick="voltaLL()">↶ corrigir o último</a>':''}</span></div>`; }
 function qtdLL(q){ paraLL(); LL.q=q; LL.r=LL.r.slice(0,q); telaLL(); }
 function trocaLL(){ LL.n=null; telaLL(); }
 function voltaLL(){ const x=LL.r.pop(); if(x===1){ PL[LL.t]--; desenhaPL(); } telaLL(); }
@@ -510,7 +510,7 @@ function resLL(v){ LL.r.push(v); if(v){ PL[LL.t]++; desenhaPL(); }
   reg(LL.t,'',`Lance livre ${j[1]} - ${j[0]}`,`${ok} de ${LL.q} convertido${ok>1?'s':''}`,ok?'ok':'ou');
   fimLL(); aviso('Lances livres registrados · toque ▶ quando o jogo reiniciar',1); }
 function cancelaLL(){ if(!LL.q){ fimLL(); return; } for(const x of LL.r) if(x===1) PL[LL.t]--; desenhaPL(); fimLL(); aviso('Lance livre cancelado · relógio parado, toque ▶ no reinício'); }
-function fimLL(){ LL.on=false; LL.t=null; LL.n=null; LL.q=0; LL.r=[]; document.getElementById('llMenu').classList.remove('on'); desenhaLL(); }
+function fimLL(){ LL.on=false; LL.s12=0; LL.t=null; LL.n=null; LL.q=0; LL.r=[]; document.getElementById('llMenu').classList.remove('on'); desenhaLL(); }
 function desenhaLL(){ const b=document.getElementById('btLL'); if(!b) return; b.classList.toggle('subOn',LL.on&&!LL.n);
   b.innerHTML=LL.on&&!LL.n?'LANCE LIVRE<small>marque o jogador que vai bater · toque aqui p/ fechar</small>':'LANCE<br>LIVRE'; }
 
