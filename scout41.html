@@ -231,16 +231,16 @@ const FA={on:false,tipo:null,fez:null,sof:null}, FT={a:0,b:0};   // falta em and
 // tipos da FALTA ESPECIAL (regras FIBA 2026) · ver a seção FALTA ESPECIAL mais abaixo
 const FE={
  t1:{ll:1,nm:'Técnica',d:'categoria 1 · reclamação, provocação, simulação',tx:'Falta técnica (categoria 1)',quem:'jog',gd:1},
- t2:{ll:1,nm:'Técnica',d:'categoria 2 · atrasar o jogo, pendurar no aro, pressão proibida na base',tx:'Falta técnica (categoria 2)',quem:'jog'},
+ t2:{ll:1,nm:'Técnica',d:'categoria 2 · atrasar o jogo, pendurar no aro',tx:'Falta técnica (categoria 2)',quem:'jog'},
  di:{ll:2,nm:'Disruptiva',d:'parar contra-ataque ou o relógio · antiga antidesportiva leve',tx:'Falta disruptiva',quem:'jog',sof:1},
  fl:{ll:2,nm:'Flagrante',d:'imprudente, violenta ou perigosa · antiga antidesportiva grave',tx:'Falta flagrante',quem:'jog',sof:1,gd:1},
  dj:{ll:2,nm:'Desqualificante',d:'jogador expulso na hora · agressão, briga',tx:'Falta desqualificante',quem:'jog',sof:1,dq:1},
  tc:{ll:1,nm:'Técnica do técnico',d:'conduta do próprio técnico',tx:'Falta técnica do técnico',quem:'tec',k:'C'},
  tb:{ll:1,nm:'Técnica do banco',d:'reservas, assistente ou comissão',tx:'Falta técnica do banco',quem:'tec',k:'B'},
  dt:{ll:2,nm:'Desqualificante do técnico ou banco',d:'expulso na hora',tx:'Falta desqualificante do técnico ou banco',quem:'tec',dq:1},
- // REGRA (Magno, 24/11/2026): a Técnica Sub-12 NÃO entra em nenhuma estatística (nem FP, FR, falta do time, EF, Ao vivo ou planilha) · só vai para o lance a lance. Ao ligar os dados de verdade, não gravar como falta.
+ // REGRA (Magno, 24/11/2026): a Técnica categoria 0 (antes chamada Sub-12; regra do Rio) NÃO entra em nenhuma estatística (nem FP, FR, falta do time, EF, Ao vivo ou planilha) · só vai para o lance a lance. Ao ligar os dados de verdade, não gravar como falta.
 // Sub-12 do Rio (Magno, 24/11/2026, confirmado com o técnico Bruno Gonzalez): falta do TIME, não do jogador · não conta falta do jogador nem do time · o outro time escolhe quem bate, sempre 1 lance livre, e bola na lateral · fluxo: FALTA ESPECIAL › Técnica Sub-12 › camisa de quem bate › ✓/✗ (sem escolher time)
- s12:{ll:0,nm:'Técnica Sub-12',d:'pressão · roubo de bola no campo do adversário',tx:'Falta técnica Sub-12',quem:'tec',s12:1}};
+ s12:{ll:0,nm:'Técnica',d:'categoria 0 · pressão: roubo de bola no campo do adversário · não conta falta',tx:'Falta técnica (categoria 0)',quem:'tec',s12:1}};
 const TC={a:{C:0,B:0,dq:0},b:{C:0,B:0,dq:0}};
 // camiseta regata (mesmo desenho da Escalação); listrada para o Flamengo, lisa para o Tijuca
 const CORPO='M9 1.5h5Q19 10.5 24 1.5h5v5.4q1.4 7.6 7.5 8.6V42.5H1.5V15.5Q7.6 14.5 9 6.9z';
@@ -457,7 +457,7 @@ function desenhaFE(){ const b=document.getElementById('btFE'); if(!b) return; co
   b.innerHTML=!on?'FALTA<br>ESPECIAL':!FA.fez?`${f.nm.toUpperCase()}<small>marque quem fez · toque aqui p/ fechar</small>`
    :`CONFIRMAR<br>${f.nm.toUpperCase()}`+(f.sof&&!FA.sof?'<small>quem sofreu: opcional</small>':''); }
 function confirmaFE(){ const f=FE[FA.tipo], {t,n}=FA.fez;
-  if(f.s12){ reg(t,'',`Falta técnica Sub-12 ${T[t].nome}`,'Pressão: roubo de bola no campo do adversário · 1 lance livre e bola na lateral','fa'); }
+  if(f.s12){ reg(t,'',`Falta técnica (categoria 0) ${T[t].nome}`,'Pressão: roubo de bola no campo do adversário · 1 lance livre e bola na lateral','fa'); }
   else if(f.quem==='tec'){ const x=TC[t], quem=f.k==='C'?'Técnico':f.k==='B'?'Banco':'Técnico ou banco';
     if(f.dq){ x.dq++; reg(t,'',`${quem} ${T[t].nome}`,`${f.tx} · fora do jogo`,'er'); }
     else { x[f.k]++; reg(t,'',`${quem} ${T[t].nome}`,`${f.tx} (${x[f.k]}ª)`,'fa');
@@ -492,7 +492,7 @@ function clicaLL(){ if(document.body.classList.contains('sub')) return aviso('Te
 function paraLL(){ C.trava=true; C.tarja=true; clearTimeout(tSub); tSub=null; pausa(); }
 function iniciaLL(t,q,sof,s12){ LL.on=true; LL.s12=s12?1:0; LL.t=t; LL.q=q; LL.r=[]; LL.n=sof&&sof.t===t?sof.n:null; paraLL(); telaLL(); }
 function marcaLL(t,n){ if(LL.t&&LL.t!==t) return aviso(`O lance livre é do ${T[LL.t].nome}`);
-  if(LL.s12===1){ LL.s12=2; const o=t==='a'?'b':'a'; reg(o,'',`Falta técnica Sub-12 ${T[o].nome}`,'Pressão: roubo de bola no campo do adversário · 1 lance livre e bola na lateral','fa'); }   // registra a falta do outro time ao marcar quem bate
+  if(LL.s12===1){ LL.s12=2; const o=t==='a'?'b':'a'; reg(o,'',`Falta técnica (categoria 0) ${T[o].nome}`,'Pressão: roubo de bola no campo do adversário · 1 lance livre e bola na lateral','fa'); }   // registra a falta do outro time ao marcar quem bate
   LL.t=t; LL.n=n; telaLL(); }
 function telaLL(){ const m=document.getElementById('llMenu'), op=document.getElementById('llOp'), ti=document.getElementById('llTit'); desenhaLL();
   m.classList.remove('linha');
@@ -503,7 +503,7 @@ function telaLL(){ const m=document.getElementById('llMenu'), op=document.getEle
   ti.textContent=`${j[1]} - ${j[0]} · ${vez+1}º de ${LL.q}`; m.classList.add('on','linha');
   op.innerHTML=`<div class="rs">${Array.from({length:LL.q},(_,i)=>`<i class="${LL.r[i]===1?'ok':LL.r[i]===0?'er':i===vez?'vez':''}">${LL.r[i]===1?'✓':LL.r[i]===0?'✗':i+1}</i>`).join('')}</div>
    <div class="bb"><button class="ok" onclick="resLL(1)" title="Convertido">✓</button><button class="er" onclick="resLL(0)" title="Errado">✗</button></div>
-   <div class="rod"><span>${LL.s12?'falta técnica Sub-12 · 1 lance livre':'trocar: '+[1,2,3].map(q=>`<a onclick="qtdLL(${q})">${q}</a>`).join(' · ')}</span><span><a onclick="trocaLL()">outro jogador</a>${vez?' · <a onclick="voltaLL()">↶ corrigir o último</a>':''}</span></div>`; }
+   <div class="rod"><span>${LL.s12?'falta técnica (categoria 0) · 1 lance livre':'trocar: '+[1,2,3].map(q=>`<a onclick="qtdLL(${q})">${q}</a>`).join(' · ')}</span><span><a onclick="trocaLL()">outro jogador</a>${vez?' · <a onclick="voltaLL()">↶ corrigir o último</a>':''}</span></div>`; }
 function qtdLL(q){ paraLL(); LL.q=q; LL.r=LL.r.slice(0,q); telaLL(); }
 function trocaLL(){ LL.n=null; telaLL(); }
 function voltaLL(){ const x=LL.r.pop(); if(x===1){ PL[LL.t]--; desenhaPL(); } telaLL(); }
