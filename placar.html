@@ -69,7 +69,7 @@ body.alto #alto{display:flex;} body.alto #placar{display:none!important;}
 .aL1 .ld.a::after{background:var(--linA);} .aL1 .ld.b::after{background:var(--linB);}
 .aL1 .esc{position:relative;z-index:2;width:150px;height:96px;}
 .aL1 .esc img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:var(--eh,118px);max-width:none;max-height:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.8));}
-.aL1 .nm{position:relative;z-index:2;width:330px;font-size:40px;}
+.aL1 .nm{position:relative;z-index:2;width:330px!important;font-size:40px;}
 .aL1 .nm.a{text-align:left;padding-left:6px;} .aL1 .nm.b{text-align:right;padding-right:6px;}
 .aL1 .pt{position:relative;z-index:2;width:120px;height:96px;background:none;box-shadow:none;border-radius:0;font-size:72px;text-shadow:0 3px 8px rgba(0,0,0,.7);}
 .aL1 .div{position:relative;z-index:2;width:4px;height:62px;background:rgba(255,255,255,.85);margin:0 10px;border-radius:2px;}
@@ -170,7 +170,7 @@ function escala(){ const e=Math.min(innerWidth/1920, innerHeight/1080)||1; docum
 escala(); addEventListener('resize',escala);
 // 9 modelos (nomes do Magno, 23/11/2026)
 const MODELOS=[];[['1','FBERJ'],['2','Klaus'],['3','Klaus TV']].forEach(([m,n])=>[['0',''],['1',' relógio'],['2',' relógio e cronômetro']].forEach(([c,t])=>MODELOS.push({m,c,nome:'Overlay '+n+t})));
-MODELOS.push({m:'4',c:'2',nome:'Overlay alto'}); // 10º modelo (Magno, 23/11/2026)
+[['0',''],['1',' relógio'],['2',' relógio e cronômetro']].forEach(([c,t])=>MODELOS.push({m:'4',c,nome:'Overlay alto'+t})); // modelo alto nas 3 versões de câmera (Magno, 24/11/2026)
 $('selMod').innerHTML=MODELOS.map((o,i)=>`<option value="${i}"${o.m===mo&&o.c===CAM?' selected':''}>${o.nome}</option>`).join('');
 $('selMod').onchange=()=>{ const o=MODELOS[+$('selMod').value]; const u=new URL(location); u.searchParams.set('modelo',o.m); u.searchParams.set('cam',o.c); u.searchParams.delete('c24'); location.replace(u); };
 $('bCopiar').onclick=()=>{ const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1&modelo='+mo+'&cam='+CAM;
