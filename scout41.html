@@ -79,7 +79,8 @@ body.sub .corpo{grid-template-rows:1fr 196px}
 /* meio */
 .meio{display:flex;min-height:0;min-width:0}
 .quadra{flex:1;display:flex;align-items:center;justify-content:center;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;min-height:0;overflow:hidden}
-.quadra svg{height:100%;width:100%}
+.quadra svg{height:100%;width:100%;flex:0 0 auto}
+.quadra{display:flex;align-items:center;justify-content:center}   /* proporção travada (Magno, 24/11/2026): zoom do navegador ou tela larga não deformam mais a quadra */
 .lal{min-width:0;background:#0e1626;border:1px solid #2c4a80;border-radius:8px;display:flex;flex-direction:column;min-height:0}
 .lal h3{height:28px;box-sizing:border-box;align-items:center;font-size:13px;letter-spacing:2px;color:#ffd54f;font-weight:600;padding:6px 12px;border-bottom:1px solid #22385f;display:flex;justify-content:space-between}
 .lal h3 .tag41{font-style:normal;font-size:10px;letter-spacing:1px;color:#000;background:#ffd54f;padding:1px 6px;border-radius:3px;margin:0 auto 0 12px;align-self:center}
@@ -338,7 +339,11 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
   </g>
  </svg>`;
  // círculo do meio sempre redondo na tela (a quadra é esticada); o que passa da borda de baixo fica cortado · Magno, 24/11/2026
- function redondo(){ const q=document.querySelector('#quadra svg'), w=q.clientWidth, h=q.clientHeight; if(!w||!h) return;
+ // proporção fixa da quadra na tela (largura ÷ altura = 1,31, a do Magno): sobra vira margem preta, nada se deforma (Klaus, zoom 80%, 24/11/2026)
+ const RQ=1.31;
+ function redondo(){ const q=document.querySelector('#quadra svg'), box=document.getElementById('quadra'), bw=box.clientWidth, bh=box.clientHeight; if(!bw||!bh) return;
+   const qw=Math.min(bw,bh*RQ), qh=qw/RQ; q.style.width=qw+'px'; q.style.height=qh+'px';
+   const w=qw, h=qh;
    const sx=w/(W+12), sy=h/(H+12), f=sx/sy; document.getElementById('cc').setAttribute('ry',1.8*S*f);
    // círculo do lance livre e área restrita também redondos na tela (Magno, 24/11/2026)
    document.getElementById('ll1').setAttribute('d',`M${cx-rl} ${gh}A${rl} ${rl*f} 0 0 0 ${cx+rl} ${gh}`);
