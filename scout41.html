@@ -26,6 +26,10 @@ body{background:#05070d;color:#fff;font-family:'Oswald',Arial,sans-serif;overflo
 .top .pl{font-size:44px;font-weight:700;min-width:70px;text-align:center}
 .top .seta{width:44px;height:44px;display:grid;place-items:center;background:rgba(255,255,255,.06);border-radius:6px;color:#55688f;font-size:22px}
 .top .seta.on{color:#ffd54f;background:rgba(255,213,79,.12)}
+/* ▶ / ⏸ do relógio na mão do Raoni (Magno, 24/11/2026) */
+.top .seta{cursor:pointer;user-select:none}
+.top .seta.sPl.on{color:#3ddc84;background:rgba(61,220,132,.16)}
+.top .seta.sPa.on{color:#ff5a5a;background:rgba(255,90,90,.16);box-shadow:inset 0 0 0 2px #ff5a5a}
 .top .rel{display:flex;flex-direction:column;align-items:center;line-height:1;padding-top:4px}
 .top .rel i{font-style:normal;font-size:13px;color:#ffd54f;letter-spacing:1px}
 .top .rel b{font-size:36px;font-weight:600;letter-spacing:1px}
@@ -143,9 +147,9 @@ body.sub .banco{display:grid}
   <div class="cx" id="fA" title="Faltas do time no quarto">F<b>0</b></div><div class="sep"></div>
   <div class="cx tmp" id="tmA" onclick="pedeTempo('a')" title="Pedido de tempo do Flamengo: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div>
   <div class="pl">24</div>
-  <div class="seta on" title="Posse alternada">◀</div>
+  <div class="seta sPl" id="btPlay" onclick="clicaPlay()" title="Liberar o relógio">▶</div>
   <div class="rel"><i id="relQ">1º Q</i><div class="rl"><b id="relB" onclick="clicaRel()" title="Relógio parado: toque para voltar a correr">10:00</b><span class="ed" onclick="acerto()" title="Acertar pelo placar do ginásio">✎</span></div><span class="net" id="relSt">● correndo</span></div>
-  <div class="seta" title="Posse alternada">▶</div>
+  <div class="seta sPa" id="btPaus" onclick="clicaPausa()" title="Pausar o relógio (não volta sozinho)">⏸</div>
   <div class="pl">18</div>
   <div class="cx tmp" id="tmB" onclick="pedeTempo('b')" title="Pedido de tempo do Tijuca: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div><div class="sep"></div>
   <div class="cx" id="fB" title="Faltas do time no quarto">F<b>0</b></div>
@@ -278,7 +282,7 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
 // e volta a correr no próximo lance de bola viva (por enquanto: toque no relógio). ✎ acerta pelo placar do ginásio.
 // Cada lance guarda o "tempo bruto" do nosso relógio; o horário mostrado é corrigido pelos acertos e pelo fim do quarto.
 const DUR=q=>q<=4?600:300, NQ=q=>q<=4?`${q}º Q`:`${q-4}ª PR`;
-const C={q:1,em:true,anda:true,raw:0,t0:performance.now(),anc:{1:[[0,0]]},tm:{a:0,b:0},tmAb:null,tmIni:0,conf:0};
+const C={q:1,em:true,anda:true,trava:false,raw:0,t0:performance.now(),anc:{1:[[0,0]]},tm:{a:0,b:0},tmAb:null,tmIni:0,conf:0};
 const rawAgora=()=>C.raw+(C.anda?(performance.now()-C.t0)/1000:0);
 // tempo de jogo decorrido (s) para um tempo bruto, interpolando entre os acertos
 function jogoDe(q,raw){ const A=C.anc[q]||[[0,0]]; let i=A.length-1; while(i>0&&A[i][0]>raw) i--;
@@ -286,7 +290,8 @@ function jogoDe(q,raw){ const A=C.anc[q]||[[0,0]]; let i=A.length-1; while(i>0&&
 const mmss=x=>{ x=Math.max(0,Math.round(x)); return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0'); };
 const restante=(q,raw)=>Math.max(0,DUR(q)-jogoDe(q,raw));
 function pausa(){ if(C.anda){ C.raw=rawAgora(); C.anda=false; } relDesenha(); }
-function solta(){ clearTimeout(tSub); tSub=null; if(C.em&&!C.anda&&!C.tmAb){ C.t0=performance.now(); C.anda=true; } relDesenha(); }
+function solta(mao){ if(C.trava&&!mao) return relDesenha();   // pausa do Raoni (⏸) vence o automático
+  if(mao) C.trava=false; clearTimeout(tSub); tSub=null; if(C.em&&!C.anda&&!C.tmAb){ C.t0=performance.now(); C.anda=true; } relDesenha(); }
 function bolaViva(){ solta(); }
 // substituição: o relógio para 4 s (tempo da troca) e volta sozinho · Magno, 24/11/2026
 // pausaPor: para o relógio e solta sozinho depois de "seg" (se ele estava correndo ou já ia voltar)
@@ -302,18 +307,27 @@ function relDesenha(){ const b=document.getElementById('relB'); if(!b||b.querySe
   st.className='net'+(!C.em?' fq':C.anda?'':' par');
   for(const t of ['a','b']){ const e=document.getElementById('tm'+t.toUpperCase()); e.classList.toggle('on',C.tmAb===t); e.querySelector('b').textContent=`${C.tm[t]}/${limTm(C.q)}`; }
   const bq=document.getElementById('btQ'); bq.className='play'+(C.conf?' conf':!C.em?' ini':''); bq.textContent=C.em?'■':'▶';
-  bq.title=C.em?'Encerrar o quarto (toque 2 vezes)':'Iniciar o próximo período'; }
+  bq.title=C.em?'Encerrar o quarto (toque 2 vezes)':'Iniciar o próximo período';
+  document.getElementById('btPlay').classList.toggle('on',C.em&&C.anda);
+  document.getElementById('btPaus').classList.toggle('on',C.em&&C.trava); }
+// ▶ / ⏸ (Magno, 24/11/2026): o relógio segue automático, mas o Raoni pode segurar (discussão, atendimento, pedido de tempo
+// atrasado). ⏸ para e cancela a volta automática (substituição 4 s, falta 8 s); só volta no ▶.
+function clicaPausa(){ if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
+  C.trava=true; clearTimeout(tSub); tSub=null; pausa(); aviso('Relógio pausado · toque ▶ para liberar'); }
+function clicaPlay(){ if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
+  if(C.tmAb) return aviso('Pedido de tempo aberto · toque de novo no TEMPO do time para encerrar');
+  solta(1); aviso('Relógio correndo',1); }
 setInterval(relDesenha,250);
 function clicaRel(){ if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
   if(C.tmAb) return aviso('Pedido de tempo aberto · toque de novo no TEMPO do time para encerrar');
-  if(C.anda){ pausa(); aviso('Relógio parado'); } else { solta(); aviso('Relógio correndo',1); } }
+  if(C.anda) clicaPausa(); else clicaPlay(); }
 function clicaQuarto(){
   if(C.em){ if(!C.conf){ C.conf=1; relDesenha(); aviso('Toque de novo no ■ para encerrar o '+NQ(C.q)); setTimeout(()=>{C.conf=0;relDesenha();},3000); return; }
-    C.conf=0; if(C.tmAb) fechaTempo(); pausa(); const raw=C.raw, A=C.anc[C.q];
+    C.conf=0; if(C.tmAb) fechaTempo(); C.trava=false; pausa(); const raw=C.raw, A=C.anc[C.q];
     if(raw>A[A.length-1][0]) A.push([raw,DUR(C.q)]);           // correção do fim do quarto
     C.em=false; relDesenha(); reg(null,'','',`Fim do ${NQ(C.q)}`,'qt'); aviso(`Fim do ${NQ(C.q)} · horários corrigidos`,1); return; }
   C.q++; C.raw=0; C.anc[C.q]=[[0,0]]; C.em=true; FT.a=0; FT.b=0; desenhaFT(); if(C.q===3||C.q>4) C.tm={a:0,b:0};
-  C.t0=performance.now(); C.anda=true; relDesenha(); reg(null,'','',`Início do ${NQ(C.q)} · cronômetro liberado (${mmss(DUR(C.q))})`,'qt'); aviso(`Início do ${NQ(C.q)}`,1); }
+  C.t0=performance.now(); C.anda=true; C.trava=false; relDesenha(); reg(null,'','',`Início do ${NQ(C.q)} · cronômetro liberado (${mmss(DUR(C.q))})`,'qt'); aviso(`Início do ${NQ(C.q)}`,1); }
 function pedeTempo(t){ if(!C.em) return aviso('Quarto encerrado · toque ▶ para iniciar o próximo');
   if(C.tmAb===t) return fechaTempo();
   if(C.tmAb) return aviso(`Feche antes o pedido de tempo do ${T[C.tmAb].nome}`);
