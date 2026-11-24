@@ -41,7 +41,7 @@ body{background:#05070d;color:#fff;font-family:'Oswald',Arial,sans-serif;overflo
 .top .ed{font-size:14px;color:#9fb0d6;cursor:pointer;padding:2px 3px;border-radius:4px}.top .ed:hover{background:rgba(255,255,255,.12);color:#fff}
 .top .rel input{width:92px;height:30px;padding:0;font:600 24px Oswald,Arial;text-align:center;background:#fff;color:#000;border:none;border-radius:4px}
 .top .net.par{color:#ff8a8a}.top .net.fq{color:#ffd54f}
-.top .play{cursor:pointer;width:40px;height:40px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;font-size:15px;margin-left:6px}
+.top .play{cursor:pointer;width:28px;height:28px;box-sizing:border-box;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;font-size:11px;margin-left:2px}   /* ao lado do ✎ (Magno, 24/11/2026) */
 .top .play.conf{background:#d32f2f;border-color:#d32f2f}.top .play.ini{background:#2fae4a;border-color:#2fae4a}
 
 /* ===== corpo: camisas | quadra + lance a lance | botões ===== */
@@ -148,13 +148,12 @@ body.sub .banco{display:grid}
   <div class="cx tmp" id="tmA" onclick="pedeTempo('a')" title="Pedido de tempo do Flamengo: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div>
   <div class="pl">24</div>
   <div class="seta sPl" id="btPlay" onclick="clicaPlay()" title="Liberar o relógio">▶</div>
-  <div class="rel"><i id="relQ">1º Q</i><div class="rl"><b id="relB" onclick="clicaRel()" title="Relógio parado: toque para voltar a correr">10:00</b><span class="ed" onclick="acerto()" title="Acertar pelo placar do ginásio">✎</span></div><span class="net" id="relSt">● correndo</span></div>
+  <div class="rel"><i id="relQ">1º Q</i><div class="rl"><b id="relB" onclick="clicaRel()" title="Relógio parado: toque para voltar a correr">10:00</b><span class="ed" onclick="acerto()" title="Acertar pelo placar do ginásio">✎</span><div class="play" id="btQ" onclick="clicaQuarto()" title="Encerrar o quarto">■</div></div><span class="net" id="relSt">● correndo</span></div>
   <div class="seta sPa" id="btPaus" onclick="clicaPausa()" title="Pausar o relógio (não volta sozinho)">⏸</div>
   <div class="pl">18</div>
   <div class="cx tmp" id="tmB" onclick="pedeTempo('b')" title="Pedido de tempo do Tijuca: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div><div class="sep"></div>
   <div class="cx" id="fB" title="Faltas do time no quarto">F<b>0</b></div>
   <div class="tm b"><span class="nm">TIJUCA</span><img src="escudos/TTC.png" alt=""></div>
-  <div class="play" id="btQ" onclick="clicaQuarto()" title="Encerrar o quarto">■</div>
 </header>
 
 <main class="corpo">
