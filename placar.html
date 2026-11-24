@@ -111,10 +111,12 @@ body.alto.c0 .aL2 .cw{display:none;} body.alto.c1 .aL2 .cw.v{display:none;}
   <h1>📺 Placar · OBS</h1>
   <label for="selMod">Modelo</label>
   <select id="selMod"></select>
+  <label for="selJogo">Jogo</label>
+  <select id="selJogo"><option value="">Carregando a agenda de jogos…</option></select>
   <button id="bCopiar" type="button">📋 Copiar URL de saída (OBS)</button>
   <button id="bVoltar" type="button" onclick="location.href='index.html'">🏠 Voltar ao Início</button>
-  <div id="estado">Procurando o jogo aberto no Scout…</div>
-  <div class="dica">O placar mostra sozinho o jogo que estiver aberto no Scout (pontos e quarto). No OBS: fonte <b>Navegador</b>, 1920 × 1080, com a URL de saída. Os retângulos laranja ficam vazados para as câmeras do <b>cronômetro</b> e dos <b>24 segundos</b>.</div>
+  <div id="estado">Procurando o jogo…</div>
+  <div class="dica">Escolha o jogo na agenda: o placar mostra os pontos e o quarto desse jogo, sem depender do computador do Scout (em "Seguir o Scout", mostra o jogo aberto no Scout). No OBS: fonte <b>Navegador</b>, 1920 × 1080, com a URL de saída. Os retângulos laranja ficam vazados para as câmeras do <b>cronômetro</b> e dos <b>24 segundos</b>.</div>
 </div>
 <div id="aviso"></div>
 <script>
@@ -176,7 +178,7 @@ const MODELOS=[];[['1','FBERJ'],['2','Klaus'],['3','Klaus TV']].forEach(([m,n])=
 [['0',''],['1',' relógio'],['2',' relógio e cronômetro']].forEach(([c,t])=>MODELOS.push({m:'4',c,nome:'Overlay alto'+t})); // modelo alto nas 3 versões de câmera (Magno, 24/11/2026)
 $('selMod').innerHTML=MODELOS.map((o,i)=>`<option value="${i}"${o.m===mo&&o.c===CAM?' selected':''}>${o.nome}</option>`).join('');
 $('selMod').onchange=()=>{ const o=MODELOS[+$('selMod').value]; const u=new URL(location); u.searchParams.set('modelo',o.m); u.searchParams.set('cam',o.c); u.searchParams.delete('c24'); location.replace(u); };
-$('bCopiar').onclick=()=>{ const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1&modelo='+mo+'&cam='+CAM;
+$('bCopiar').onclick=()=>{ const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1&modelo='+mo+'&cam='+CAM+(JOGO?'&jogo='+encodeURIComponent(JOGO):'');
   (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{ $('bCopiar').textContent='✓ Copiado! Cole no OBS (fonte Navegador)'; setTimeout(()=>$('bCopiar').textContent='📋 Copiar URL de saída (OBS)',2500); }).catch(()=>prompt('Copie a URL de saída:',u)); };
 // nome: o maior que couber (nome completo da FBERJ → nome médio → nome curto do site), diminuindo um pouco a letra antes de trocar
 function cabe(el,txt){ const F=ALTO?40:31; for(let f=F;f>=F-8;f--){ el.style.fontSize=f+'px'; el.textContent=txt; if(el.scrollWidth<=el.clientWidth+1) return true; } return false; }
@@ -186,22 +188,40 @@ let SIG='';
 function aplicar(r){ const sg=r.a+'|'+r.b+'|'+r.nA+'|'+r.nB;
   if(sg!==SIG){ SIG=sg; times(r.a,r.b); poeNome($('nmA'),r.nA,r.a); poeNome($('nmB'),r.nB,r.b); ULT={A:null,B:null}; }
   $('placar').style.visibility=''; pontos(r.pa,r.pb); const fim=r.status==='FINAL'; quarto(fim?4:(r.ot?5:Math.min(4,(+r.qf||0)+1)),fim);
-  $('estado').innerHTML='Jogo do Scout: <b>'+(D.curto[r.a]||r.a)+' '+r.pa+' x '+r.pb+' '+(D.curto[r.b]||r.b)+'</b> · '+(r.cat||'')+'<br><small>Atualizado às '+new Date().toLocaleTimeString('pt-BR')+'</small>'; $('aviso').style.display='none'; }
+  $('estado').innerHTML=(JOGO?'Jogo escolhido: <b>':'Jogo do Scout: <b>')+(D.curto[r.a]||r.a)+' '+r.pa+' x '+r.pb+' '+(D.curto[r.b]||r.b)+'</b> · '+(r.cat||'')+'<br><small>Atualizado às '+new Date().toLocaleTimeString('pt-BR')+'</small>'; $('aviso').style.display='none'; }
 // busca a cada 2 s (fetch; se o navegador recusar, como já aconteceu no OBS, troca sozinho para <script>/JSONP)
 const API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
+// jogo escolhido na agenda (?jogo=ID): independente do Scout (Magno, 24/11/2026)
+const JOGO=Q.get('jogo')||'';
+const PERG=()=>JOGO?'acao=escalacaoJogo&id='+encodeURIComponent(JOGO):'acao=placar';
+function doJogo(x){ if(!(x&&x.ok&&x.jogo)) return {ok:false,erro:(x&&x.erro)||'Jogo não encontrado.'}; const j=x.jogo, m=j.meta||{}, st=j.stats||{};
+  const pts=l=>{ let p=0; const o=st[l]||{}; Object.keys(o).forEach(k=>{ if(o[k]&&typeof o[k]==='object') p+=Number(o[k].pts||0); }); return p; };
+  const a=(m.timeA||{}).sigla||j.timeA||'', b=(m.timeB||{}).sigla||j.timeB||'';
+  return {ok:true,id:j.id,cat:j.categoria,a,b,nA:(m.timeA||{}).nome||'',nB:(m.timeB||{}).nome||'',pa:pts('A'),pb:pts('B'),qf:Number(st.qFech||0),
+    ot:['A','B'].some(l=>{ const v=((st.periodos||{})[l]||[])[4]; return v!==null&&v!==undefined&&v!==''&&Number(v)>0; }),status:j.status||''}; }
 let N=0, FALHAS=0, OCUP=false, MODO='fetch'; // tenta fetch (GET simples); se falhar, usa <script> (JSONP), que funciona no OBS
-function resposta(r){ if(r&&r.ok) aplicar(r); else $('estado').textContent=(r&&r.erro)||'Nenhum jogo aberto no Scout.'; }
+function resposta(r){ if(JOGO) r=doJogo(r); if(r&&r.ok) aplicar(r); else $('estado').textContent=(r&&r.erro)||'Nenhum jogo aberto no Scout.'; }
 function falhou(){ FALHAS++; MODO=MODO==='fetch'?'jsonp':'fetch'; if(FALHAS>=3 && !document.body.classList.contains('obs')){ $('aviso').textContent='Sem conexão com o servidor — tentando de novo…'; $('aviso').style.display='block'; } }
 function buscar(){ if(OCUP) return; OCUP=true;
   if(MODO==='fetch'){ const ct=new AbortController(); const tm=setTimeout(()=>ct.abort(),8000);
-    fetch(API+'?acao=placar&_='+Date.now(),{signal:ct.signal}).then(r=>r.json()).then(r=>{ FALHAS=0; $('aviso').style.display='none'; resposta(r); }).catch(falhou).finally(()=>{ clearTimeout(tm); OCUP=false; }); return; }
+    fetch(API+'?'+PERG()+'&_='+Date.now(),{signal:ct.signal}).then(r=>r.json()).then(r=>{ FALHAS=0; $('aviso').style.display='none'; resposta(r); }).catch(falhou).finally(()=>{ clearTimeout(tm); OCUP=false; }); return; }
   const cb='kt_pl'+(++N); const sc=document.createElement('script'); let feito=false;
   const fim=ok=>{ if(feito) return; feito=true; OCUP=false; delete window[cb]; sc.remove(); if(ok) FALHAS=0; else falhou(); };
   window[cb]=r=>{ fim(true); resposta(r); };
   sc.onerror=()=>fim(false); setTimeout(()=>fim(false),8000);
-  sc.src=API+'?acao=placar&callback='+cb+'&_='+Date.now(); document.head.appendChild(sc); }
+  sc.src=API+'?'+PERG()+'&callback='+cb+'&_='+Date.now(); document.head.appendChild(sc); }
 if(Q.get('demo')){ const P=Q.get('demo').split(','); times(P[0],P[1]); pontos(+P[2]||0,+P[3]||0); quarto(+P[4]||1,P[4]==='F'); $('estado').textContent='Prévia (demo): não está ligado ao Scout.'; }
-else { $('placar').style.visibility='hidden'; buscar(); setInterval(buscar,2000); }
+else { $('placar').style.visibility='hidden'; buscar(); setInterval(buscar,JOGO?3000:2000); }
+// agenda de jogos (só no site; no OBS o jogo já vem na URL)
+(async function agenda(){ const sel=$('selJogo'); if(!sel||Q.has('obs')) return;
+  let r=null; for(let t=0;t<3&&!(r&&r.ok);t++){ try{ r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({acao:'aoVivoLista',categoria:''})}).then(x=>x.json()); }catch(e){ await new Promise(ok=>setTimeout(ok,1200)); } }
+  const L=((r&&r.ok&&r.jogos)||[]).slice().sort((x,y)=>String(y.dataHora).localeCompare(String(x.dataHora)));
+  const dt=v=>{ const d=new Date(v); return isNaN(d)?'':d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
+  const nm=x=>D.curto[x]||x||'';
+  sel.innerHTML='<option value="">Seguir o Scout</option>'+L.map(x=>'<option value="'+x.id+'"'+(x.id===JOGO?' selected':'')+'>'+dt(x.dataHora)+' · '+(x.categoria||'')+' · '+nm(x.timeA)+' x '+nm(x.timeB)+(x.status==='FINAL'?' (encerrado)':'')+'</option>').join('');
+  if(JOGO&&!L.some(x=>x.id===JOGO)) sel.insertAdjacentHTML('beforeend','<option value="'+JOGO+'" selected>Jogo '+JOGO+'</option>');
+  if(!L.length) sel.insertAdjacentHTML('beforeend','<option disabled>Não consegui carregar a agenda — recarregue a página</option>');
+  sel.onchange=()=>{ const u=new URL(location); if(sel.value) u.searchParams.set('jogo',sel.value); else u.searchParams.delete('jogo'); location.replace(u); }; })();
 </script>
 </body>
 </html>

@@ -252,7 +252,8 @@ function dePacote(t){ const o=b64d(t); FOTOS={}; APS={}; PRE={}; const meta={};
       PRE[r[0]]={qtd:r[5],pts:r[6],reb:r[7],ast:r[8],stl:r[9],blk:r[10],eff:r[11],mvp:r[12]}; return {reg:r[0],nome:r[1],numero:r[2]}; })}; });
   J={id:o.id,categoria:o.c,dataHora:o.d,timeA:meta.timeA.sigla,timeB:meta.timeB.sigla,meta}; TEMP={ok:true,ks:[],jogos:[]}; }
 function copiaSaida(b){
-  const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1&scout=1&mod='+MODELO; // ligada ao Scout (Magno, 24/11/2026): o OBS mostra sempre o jogo aberto no Scout // v= muda a cada cópia: o OBS não usa a cópia velha guardada
+  if(!(J&&J.id)){ alert('Escolha o jogo primeiro (Categoria › Time › Jogo).'); return; }
+  const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1&jogo='+encodeURIComponent(J.id)+'&mod='+MODELO; // jogo escolhido na agenda, independente do Scout (Magno, 24/11/2026) // ligada ao Scout (Magno, 24/11/2026): o OBS mostra sempre o jogo aberto no Scout // v= muda a cada cópia: o OBS não usa a cópia velha guardada
   (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{ b.textContent='✓ Copiado! Cole no OBS (fonte Navegador)'; setTimeout(()=>b.textContent='📋 Copiar URL de saída (OBS)',2500); }).catch(()=>prompt('Copie a URL de saída:',u)); }
 
 // ---------- filtros fixos: Categoria > Time > Jogo ----------
@@ -417,8 +418,9 @@ function jpS(par){ return new Promise(ok=>{ const cb='kt_es'+Math.random().toStr
   window[cb]=fim; sc.onerror=()=>fim(null); setTimeout(()=>fim(null),20000);
   sc.src=KT_API+'?'+new URLSearchParams(Object.assign({},par,{callback:cb,_:Date.now()})).toString(); document.head.appendChild(sc); }); }
 let SC_ID='', SC_OCUP=false;
+const FIXO=Q.has('obs')?(Q.get('jogo')||''):''; // OBS com jogo escolhido: busca só esse jogo (JSONP), sem perguntar ao Scout
 async function scoutLoop(){ if(SC_OCUP) return; SC_OCUP=true;
-  try{ const r=await jp({acao:'placar'});
+  try{ const r=FIXO?{ok:true,id:FIXO}:await jp({acao:'placar'});
     if(!(r&&r.ok&&r.id)){ if(!J&&!document.body.classList.contains('obs')) $('times').innerHTML='<div class="msg">Aguardando o jogo aberto no Scout…</div>'; return; }
     if(r.id===SC_ID) return;
     const x=await jp({acao:'escalacaoJogo',id:r.id}); if(!(x&&x.ok&&x.jogo)) return;
@@ -427,10 +429,10 @@ async function scoutLoop(){ if(SC_OCUP) return; SC_OCUP=true;
     const ano=String(J.dataHora||'').slice(0,4)||String(new Date().getFullYear());
     if(J.categoria) jp({acao:'atletasKT',categoria:J.categoria,ano}).then(t=>{ if(SC_ID!==r.id) return; TEMP=(t&&t.ok)?t:{ok:false}; const l=$('tB')&&$('tB').classList.contains('on')?'B':'A'; monta(); aba(l); });
   } finally{ SC_OCUP=false; } }
-if(SCOUT){ scoutLoop(); setInterval(scoutLoop,5000); }
+if(SCOUT||FIXO){ scoutLoop(); setInterval(scoutLoop,5000); }
 else if(HD){ try{ dePacote(HD[1]); document.body.classList.add('temJogo'); monta(); }catch(e){ $('times').innerHTML='<div class="msg">Endereço incompleto. Copie de novo a URL de saída no site.</div>'; } }
 else if(Q.get('jogo')) abrir(Q.get('jogo')); else if(ULT) abrir(ULT); else $('times').innerHTML='<div class="msg">Escolha a categoria, o time e o jogo nos filtros do canto.</div>';
-if(!HD&&!SCOUT) carregarLista(); // abre o último jogo escolhido
+if(!HD&&!SCOUT&&!FIXO) carregarLista(); // abre o último jogo escolhido
 </script>
 </body>
 </html>
