@@ -71,6 +71,7 @@ body{background:#05070d;color:#fff;font-family:'Oswald',Arial,sans-serif;overflo
 .lal ul{list-style:none;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:#2c4a80 transparent}
 .lal li{display:grid;grid-template-columns:54px 44px 14px 32px 1fr auto;align-items:center;gap:8px;padding:4px 12px;font-size:14px;border-bottom:1px solid #16243f;font-family:Arial,sans-serif}
 .lal li:first-child{background:rgba(255,213,79,.08)}
+.lal li.vz{display:block;color:#7f93bd;font-style:italic;text-align:center;padding:14px;background:none}
 .lal li .h{color:#9fb0d6;font-family:'Oswald',Arial;letter-spacing:1px}
 .lal li .q{color:#7f93bd;font-size:12px}
 .lal li .d{width:12px;height:12px;border-radius:50%}
@@ -214,7 +215,7 @@ function clicaSub(){ const b=document.body;
     if(e!==s){ aviso(`${T[t].nome}: ${e} entra${e>1?'m':''}, ${s} sai${s>1?'em':''} — tem que ser o mesmo número`); return; } }
   for(const t of ['a','b']){ if(!ENTRA[t].size) continue;
     const nomes=x=>[...x].map(n=>{const j=T[t].js.find(j=>j[0]===n); return `${j[1]} (${n})`;}).join(', ');
-    LOG.unshift(['07:48','2º Q',t==='a'?'#C8102E':'#E2231A','',T[t].nome,`Entra ${nomes(ENTRA[t])} · Sai ${nomes(SAI[t])}`,'sb']);
+    const [q,h]=agora(); LOG.unshift([h,q,t==='a'?'#C8102E':'#E2231A','',T[t].nome,`Entra ${nomes(ENTRA[t])} · Sai ${nomes(SAI[t])}`,'sb']);
     T[t].js.forEach(j=>{ if(ENTRA[t].has(j[0])) j[3]=1; if(SAI[t].has(j[0])) j[3]=0; }); ENTRA[t].clear(); SAI[t].clear(); }
   b.classList.remove('sub'); desenha(); logDesenha(); aviso('Substituição feita',1); }
 desenha();
@@ -243,12 +244,13 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
   <image href="logo_klaustv_tv.png" x="${cx-1.5*S}" y="${H-1.75*S}" width="${3*S}" height="${1.4*S}" opacity=".35" preserveAspectRatio="xMidYMid meet"/>
  </svg>`; })();
 
-// lance a lance de teste (mais novo em cima)
-const LOG=[['07:48','2º Q','#C8102E',4,'Tozo','+3 ala direita','ok'],['08:05','2º Q','#E2231A',6,'Bruno','Falta (3ª)','fa'],
- ['08:21','2º Q','#E2231A',3,'Matheus','−2 garrafão','er'],['08:21','2º Q','#C8102E',8,'Gabriel','Rebote','ou'],
- ['08:40','2º Q','#C8102E',10,'Lucas','Assistência','ou'],['08:40','2º Q','#C8102E',5,'Pedro','+2 garrafão','ok'],
- ['09:15','2º Q','#E2231A',12,'Léo','LL certo','ok']];
-function logDesenha(){ document.getElementById('lal').innerHTML=LOG.map(([h,q,c,n,nm,a,k])=>`<li><span class="h">${h}</span><span class="q">${q}</span><span class="d" style="background:${c};${c==='#E2231A'?'box-shadow:0 0 0 2px #fff':'background:repeating-linear-gradient(180deg,#C8102E 0 3px,#000 3px 6px)'}"></span><span class="c">${n}</span><span>${nm}</span><span class="ac ${k}">${a}</span></li>`).join(''); }
+// lance a lance: começa vazio e só recebe o que os botões registram (mais novo em cima) · Magno, 24/11/2026
+const LOG=[];
+// quarto e relógio vêm do placar (quando o cronômetro existir, o horário passa a ser o do jogo)
+function agora(){ const r=document.querySelector('.rel'); return [r.querySelector('i').textContent, r.querySelector('b').textContent]; }
+function logDesenha(){ const ul=document.getElementById('lal');
+  if(!LOG.length){ ul.innerHTML='<li class="vz">Nenhum lance registrado ainda · cada botão que você usar aparece aqui</li>'; return; }
+  ul.innerHTML=LOG.map(([h,q,c,n,nm,a,k])=>`<li><span class="h">${h}</span><span class="q">${q}</span><span class="d" style="background:${c};${c==='#E2231A'?'box-shadow:0 0 0 2px #fff':'background:repeating-linear-gradient(180deg,#C8102E 0 3px,#000 3px 6px)'}"></span><span class="c">${n}</span><span>${nm}</span><span class="ac ${k}">${a}</span></li>`).join(''); }
 logDesenha();
 </script>
 </body>
