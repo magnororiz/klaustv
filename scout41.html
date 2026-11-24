@@ -238,7 +238,7 @@ const FE={
  tc:{ll:1,nm:'Técnica do técnico',d:'conduta do próprio técnico',tx:'Falta técnica do técnico',quem:'tec',k:'C'},
  tb:{ll:1,nm:'Técnica do banco',d:'reservas, assistente ou comissão',tx:'Falta técnica do banco',quem:'tec',k:'B'},
  dt:{ll:2,nm:'Desqualificante do técnico ou banco',d:'expulso na hora',tx:'Falta desqualificante do técnico ou banco',quem:'tec',dq:1},
- // Sub-12 do Rio (Magno, 24/11/2026, confirmado com o técnico Bruno Gonzalez): falta do TIME, não do jogador · não conta falta do jogador nem do time · o outro time escolhe quem bate, sempre 1 lance livre, e bola na lateral
+ // Sub-12 do Rio (Magno, 24/11/2026, confirmado com o técnico Bruno Gonzalez): falta do TIME, não do jogador · não conta falta do jogador nem do time · o outro time escolhe quem bate, sempre 1 lance livre, e bola na lateral · fluxo: FALTA ESPECIAL › Técnica Sub-12 › camisa de quem bate › ✓/✗ (sem escolher time)
  s12:{ll:0,nm:'Técnica Sub-12',d:'pressão · roubo de bola no campo do adversário',tx:'Falta técnica Sub-12',quem:'tec',s12:1}};
 const TC={a:{C:0,B:0,dq:0},b:{C:0,B:0,dq:0}};
 // camiseta regata (mesmo desenho da Escalação); listrada para o Flamengo, lisa para o Tijuca
@@ -444,7 +444,8 @@ function abreFE(){ document.getElementById('feTit').textContent='FALTA ESPECIAL 
   document.getElementById('feOp').innerHTML=Object.entries(FE).map(([k,f])=>`<button${f.s12?' class="s12"':''} onclick="escolheFE('${k}')">${f.nm}<small>${f.d}</small></button>`).join('');
   document.getElementById('feMenu').classList.add('on'); }
 function fechaFE(){ document.getElementById('feMenu').classList.remove('on'); }
-function escolheFE(k){ FA.tipo=k; FA.on=true; FA.fez=null; FA.sof=null;
+function escolheFE(k){ if(FE[k].s12){ fechaFE(); FA.on=false; FA.tipo=null; FA.fez=null; FA.sof=null; desenha(); iniciaLL(null,1,null,1); return; }   // Sub-12: sem escolher time · a camisa de quem bate já diz o time
+  FA.tipo=k; FA.on=true; FA.fez=null; FA.sof=null;
   if(FE[k].quem==='tec'){ document.getElementById('feTit').textContent=FE[k].nm.toUpperCase()+' · de qual time?';
     document.getElementById('feOp').innerHTML=['a','b'].map(t=>`<button class="tm" onclick="timeFE('${t}')">${T[t].nome.toUpperCase()}</button>`).join(''); }
   else fechaFE();
@@ -490,10 +491,11 @@ function clicaLL(){ if(document.body.classList.contains('sub')) return aviso('Te
 function paraLL(){ C.trava=true; C.tarja=true; clearTimeout(tSub); tSub=null; pausa(); }
 function iniciaLL(t,q,sof,s12){ LL.on=true; LL.s12=s12?1:0; LL.t=t; LL.q=q; LL.r=[]; LL.n=sof&&sof.t===t?sof.n:null; paraLL(); telaLL(); }
 function marcaLL(t,n){ if(LL.t&&LL.t!==t) return aviso(`O lance livre é do ${T[LL.t].nome}`);
+  if(LL.s12===1){ LL.s12=2; const o=t==='a'?'b':'a'; reg(o,'',`Falta técnica Sub-12 ${T[o].nome}`,'Pressão: roubo de bola no campo do adversário · 1 lance livre e bola na lateral','fa'); }   // registra a falta do outro time ao marcar quem bate
   LL.t=t; LL.n=n; telaLL(); }
 function telaLL(){ const m=document.getElementById('llMenu'), op=document.getElementById('llOp'), ti=document.getElementById('llTit'); desenhaLL();
   m.classList.remove('linha');
-  if(!LL.n){ m.classList.remove('on'); aviso(LL.q?`${LL.q} lance${LL.q>1?'s':''} livre${LL.q>1?'s':''}${LL.t?' do '+T[LL.t].nome:''} · marque o jogador que vai bater`:`Marque o jogador${LL.t?' do '+T[LL.t].nome:''} que vai bater o lance livre`,1); return; }
+  if(!LL.n){ m.classList.remove('on'); aviso(LL.s12?'Escolha o jogador que irá bater o lance livre':LL.q?`${LL.q} lance${LL.q>1?'s':''} livre${LL.q>1?'s':''}${LL.t?' do '+T[LL.t].nome:''} · marque o jogador que vai bater`:`Marque o jogador${LL.t?' do '+T[LL.t].nome:''} que vai bater o lance livre`,1); return; }
   if(!LL.q){ const jq=jog(LL.t,LL.n); ti.textContent=`LANCE LIVRE · ${jq[1]} - ${jq[0]} · quantos?`; m.classList.add('on');
     op.innerHTML=`<div class="qt">${[[1,'cesta + falta'],[2,'arremesso de 2 · bônus'],[3,'arremesso de 3']].map(([q,d])=>`<button onclick="qtdLL(${q})">${q}<small>${d}</small></button>`).join('')}</div>`; return; }
   const j=jog(LL.t,LL.n), vez=LL.r.length;
