@@ -238,8 +238,8 @@ function clicaSub(){ const b=document.body; if(FA.on) return aviso('Termine ou f
     if(s&&!e){ aviso(`${T[t].nome}: marque no banco quem vai entrar`); return; }
     if(e!==s){ aviso(`${T[t].nome}: ${e} entra${e>1?'m':''}, ${s} sai${s>1?'em':''} — tem que ser o mesmo número`); return; } }
   for(const t of ['a','b']){ if(!ENTRA[t].size) continue;
-    const nomes=x=>[...x].map(n=>{const j=T[t].js.find(j=>j[0]===n); return `${j[1]} (${n})`;}).join(', ');
-    reg(t,'',T[t].nome,`Entra ${nomes(ENTRA[t])} · Sai ${nomes(SAI[t])}`,'sb');
+    const nomes=x=>[...x].map(n=>{const j=T[t].js.find(j=>j[0]===n); return `${j[1]} - ${n}`;}).join(', ');      // nome - nº (Magno, 24/11/2026)
+    reg(t,'',`Substituição ${T[t].nome}`,`Entra ${nomes(ENTRA[t])} · Sai ${nomes(SAI[t])}`,'sb');
     T[t].js.forEach(j=>{ if(ENTRA[t].has(j[0])) j[3]=1; if(SAI[t].has(j[0])) j[3]=0; }); ENTRA[t].clear(); SAI[t].clear(); }
   b.classList.remove('sub'); desenha(); logDesenha(); pausaSub(); aviso('Substituição feita · relógio volta em 4 s',1); }
 desenha();
@@ -363,14 +363,15 @@ function clicaFalta(){ if(document.body.classList.contains('sub')) return aviso(
   if(!FA.on){ FA.on=true; desenha(); return; }
   if(!FA.fez){ FA.on=false; FA.sof=null; desenha(); return; }
   const {t,n}=FA.fez, j=jog(t,n); j[2]=Math.min(5,j[2]+1); FT[t]++;
-  let txt=`Falta (${j[2]}ª)`;
-  if(FA.sof){ const s=jog(FA.sof.t,FA.sof.n); s[4]=(s[4]||0)+1; txt+=` em ${s[1]} (${s[0]})`; }
+  // texto do lance a lance (Magno, 24/11/2026): esquerda "1ª falta Bruno - 6" · direita "em Davi - 7"
+  const esq=`${j[2]}ª falta ${j[1]} - ${n}`; let txt='Falta';
+  if(FA.sof){ const s=jog(FA.sof.t,FA.sof.n); s[4]=(s[4]||0)+1; txt=`em ${s[1]} - ${s[0]}`; }
   if(FT[t]>=5) txt+=` · ${FT[t]}ª do time no quarto (bônus)`;
   pausaPor(8);                                    // falta para o relógio; volta sozinho em 8 s (reposição) até o LANCE LIVRE existir
-  reg(t,n,j[1],txt,'fa');
+  reg(t,'',esq,txt,'fa');
   FA.on=false; FA.fez=null; FA.sof=null; desenhaFT(); desenha();
-  if(j[2]>=5){ reg(t,n,j[1],'EXCLUÍDO (5 faltas) · faça a substituição','er'); aviso(`${j[1]} (${n}) excluído com 5 faltas · faça a substituição`); }
-  else aviso(`Falta de ${j[1]} (${n}) · relógio volta em 8 s`,1); }
+  if(j[2]>=5){ reg(t,'',`${j[1]} - ${n}`,'EXCLUÍDO (5 faltas) · faça a substituição','er'); aviso(`${j[1]} - ${n} excluído com 5 faltas · faça a substituição`); }
+  else aviso(`Falta de ${j[1]} - ${n} · relógio volta em 8 s`,1); }
 
 // ===== LANCE A LANCE (começa vazio; só recebe o que os botões registram; mais novo em cima) =====
 const LOG=[];
