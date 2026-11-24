@@ -201,10 +201,10 @@ function regata(id,n,lis){
 const FLA=[['#C8102E','#000000'],'#FFFFFF','#FFFFFF'];   // listras vermelho e preto, número branco
 const TIJ=[['#E2231A'],'#FFFFFF','#FFFFFF'];             // vermelha lisa, número branco
 
-// elenco de teste (nome ou apelido) · faltas · em quadra (q=1)
-const T={a:{nome:'Flamengo',lis:FLA,js:[[4,'Tozo',1,1],[5,'Pedro',2,1],[7,'Davi',0,1],[8,'Gabriel',4,1],[10,'Lucas',1,1],
- [6,'Caio',0,0],[9,'Miguel',0,0],[11,'Arthur',0,0],[12,'Bento',5,0],[13,'Enzo',0,0],[14,'Rafa',0,0],[15,'João',0,0]]},
- b:{nome:'Tijuca',lis:TIJ,js:[[3,'Matheus',2,1],[5,'Kaique',1,1],[6,'Bruno',3,1],[9,'Igor',0,1],[12,'Léo',1,1],
+// elenco de teste (nome ou apelido) · faltas (começam zeradas e acompanham o jogador no banco) · em quadra (q=1)
+const T={a:{nome:'Flamengo',lis:FLA,js:[[4,'Tozo',0,1],[5,'Pedro',0,1],[7,'Davi',0,1],[8,'Gabriel',0,1],[10,'Lucas',0,1],
+ [6,'Caio',0,0],[9,'Miguel',0,0],[11,'Arthur',0,0],[12,'Bento',0,0],[13,'Enzo',0,0],[14,'Rafa',0,0],[15,'João',0,0]]},
+ b:{nome:'Tijuca',lis:TIJ,js:[[3,'Matheus',0,1],[5,'Kaique',0,1],[6,'Bruno',0,1],[9,'Igor',0,1],[12,'Léo',0,1],
  [4,'Vitor',0,0],[7,'Samuel',0,0],[8,'Thiago',0,0],[10,'Felipe',0,0],[11,'Nico',0,0],[13,'Heitor',0,0],[14,'Danilo',0,0]]}};
 const ENTRA={a:new Set(),b:new Set()}, SAI={a:new Set(),b:new Set()};
 function tile(t,[n,nm,f],onde){ const k=t+n, cls=[f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':'',onde==='q'&&FA.fez&&FA.fez.t===t&&FA.fez.n===n?'fez':'',onde==='q'&&FA.sof&&FA.sof.t===t&&FA.sof.n===n?'sof':''].join(' ');
