@@ -355,9 +355,11 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
 //  · Meia distância longa (4,4 m até a linha de 3): canto (θ>50°), 45° (20–50°) e frente (|θ|≤20°), dos dois lados
 const ZG={S:40,K:1.28,cx:300,cyM:1.575,r1:2.25,r2:4.4,q:1};   // q: deixa os círculos dos setores redondos na tela
 const ZN={ce:'Garrafão · perto da cesta',mL:'Meia distância curta · esquerda',mC:'Meia distância curta · frente',mR:'Meia distância curta · direita',
- oLC:'Meia distância longa · canto esquerdo',oLW:'Meia distância longa · 45° esquerdo',oC:'Meia distância longa · frente',oRW:'Meia distância longa · 45° direito',oRC:'Meia distância longa · canto direito'};   // nomes no padrão internacional (Magno, 24/11/2026)
+ oLC:'Meia distância longa · canto esquerdo',oLW:'Meia distância longa · 45° esquerdo',oC:'Meia distância longa · frente',oRW:'Meia distância longa · 45° direito',oRC:'Meia distância longa · canto direito',
+ tLC:'Canto esquerdo (corner 3)',tLW:'Ala esquerda (45°)',tC:'Frente (above the break)',tRW:'Ala direita (45°)',tRC:'Canto direito (corner 3)',tM:'Meio de quadra'};   // setores de 3 (Magno, 24/11/2026)
+const vZ=z=>z&&z[0]==='t'?3:2;   // quanto vale o arremesso do setor   // nomes no padrão internacional (Magno, 24/11/2026)
 const ST={}, AR={x:0,y:0,z:null,lado:'',res:null}, MARCAS=[];
-const stJ=(t,n)=>ST[t+n]||(ST[t+n]={pts:0,twoMade:0,twoMiss:0,eff:0});
+const stJ=(t,n)=>ST[t+n]||(ST[t+n]={pts:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,eff:0});
 function zM(x,y){ return {mx:(x-ZG.cx)/ZG.S, my:y/(ZG.S*ZG.K)-ZG.cyM}; }          // svg → metros (cesta = 0,0)
 function zS(mx,my){ return [ZG.cx+mx*ZG.S,(my+ZG.cyM)*ZG.S*ZG.K]; }              // metros → svg
 function den2(mx,my){ if(my<-ZG.cyM||Math.abs(mx)>=6.6) return false;          // dentro da quadra e da linha de 3
@@ -384,10 +386,26 @@ function montaZonas(){ const svg=document.querySelector('#quadra svg'); if(!svg)
   const raio=(deg,r0,r1)=>{ const th=deg*Math.PI/180, a=zR(Math.sin(th)*r0,Math.cos(th)*r0), rr=Math.min(r1,rMax(th)), b=zR(Math.sin(th)*rr,Math.cos(th)*rr); return `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`; };
   h+=lin(arco(ZG.r1),'znL')+lin(arco(ZG.r2),'znL');
   for(const d of [-30,30]) h+=lin(raio(d,ZG.r1,ZG.r2),'znL'); for(const d of [-20,20,-50,50]) h+=lin(raio(d,ZG.r2,9),'znL');
+  // ===== SETORES DE 3 (imagem "Shot selection", Magno 24/11/2026) =====
+  // cantos: da lateral até a linha de 3, acima da linha fina horizontal (onde a linha reta vira curva)
+  // alas e frente: separadas por duas linhas finas que continuam os raios de 20° da meia distância longa até o meio da quadra
+  // meio de quadra: tudo atrás da linha do meio (acende a faixa inteira)
+  { const W=15*ZG.S, M=14*ZG.S, H=16*ZG.S, x1=.9*ZG.S, x2=W-.9*ZG.S, yq=(ZG.cyM+Math.sqrt(6.75**2-6.6**2))*ZG.S*ZG.K, r3=6.75*ZG.S, ry3=r3*ZG.K;
+    const c=zS(0,0), far=deg=>{ const th=deg*Math.PI/180; return zR(Math.sin(th)*40,Math.cos(th)*40); }, P=a=>'M'+a.map(p=>(+p[0]).toFixed(1)+' '+(+p[1]).toFixed(1)).join('L')+'Z';
+    const fL=far(-20), fR=far(20);
+    h+=`<defs><clipPath id="fora3"><path clip-rule="evenodd" d="M0 0H${W}V${M}H0Z M${x1} 0V${yq}A${r3} ${ry3} 0 0 0 ${x2} ${yq}V0Z"/></clipPath></defs>`;
+    const T=[['tLC',P([[-50,-50],[c[0],-50],[c[0],yq],[-50,yq]])],
+      ['tRC',P([[c[0],-50],[W+50,-50],[W+50,yq],[c[0],yq]])],
+      ['tLW',P([c,fL,[-2000,fL[1]],[-2000,yq],[c[0],yq]])],
+      ['tRW',P([c,fR,[W+2000,fR[1]],[W+2000,yq],[c[0],yq]])],
+      ['tC',P([c,fL,fR])]];
+    h+=T.map(([z,d])=>`<path class="zn" clip-path="url(#fora3)" data-z="${z}" data-l="" d="${d}"/>`).join('');
+    h+=`<path class="zn" data-z="tM" data-l="" d="M0 ${M}H${W}V${H}H0Z"/>`;
+    h+=`<g clip-path="url(#fora3)">`+lin(`M0 ${yq}H${x1}M${x2} ${yq}H${W}`,'znL')+lin(`M${c[0]} ${c[1]}L${fL[0]} ${fL[1]}M${c[0]} ${c[1]}L${fR[0]} ${fR[1]}`,'znL')+`</g>`; }
   h+=`<g id="marcas" style="pointer-events:none"></g>`;   // sem linha tracejada: o ponto exato do clique já mostra o lado (Magno, 24/11/2026)
   g.innerHTML=h; g.querySelectorAll('.znL').forEach(e=>e.style.pointerEvents='none'); desenhaMarcas();
   const tip=document.getElementById('zTip');
-  g.querySelectorAll('.zn').forEach(p=>{ p.onmouseenter=()=>{ if(AR.z) return; tip.textContent=nomeZ(p.dataset.z,p.dataset.l)+' · 2 pontos'; tip.style.display='block'; };
+  g.querySelectorAll('.zn').forEach(p=>{ p.onmouseenter=()=>{ if(AR.z) return; tip.textContent=nomeZ(p.dataset.z,p.dataset.l)+` · ${vZ(p.dataset.z)} pontos`; tip.style.display='block'; };
     p.onmouseleave=()=>{ if(!AR.z) tip.style.display='none'; }; p.onclick=e=>clicaZona(e,p); }); }
 window.zOK=1; montaZonas();
 function ptSvg(e){ const svg=document.querySelector('#quadra svg'), pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
@@ -397,21 +415,22 @@ function clicaZona(e,p){ const b=document.body;
   if(AR.res!==null) return aviso('Toque na camisa de quem arremessou (ou ✕ para cancelar)');
   const q=ptSvg(e); AR.x=q.x; AR.y=q.y; AR.z=p.dataset.z; AR.lado=p.dataset.l; AR.res=null;
   document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); p.classList.add('on');
-  const tip=document.getElementById('zTip'); tip.textContent=nomeZ(AR.z,AR.lado)+' · 2 pontos · cesta ✓ ou errou ✗?'; tip.style.display='block';
+  const tip=document.getElementById('zTip'); tip.textContent=nomeZ(AR.z,AR.lado)+` · ${vZ(AR.z)} pontos · cesta ✓ ou errou ✗?`; tip.style.display='block';
   desenhaMarcas(); const m=document.getElementById('arMenu'), mr=document.querySelector('.meio').getBoundingClientRect();
   m.classList.add('on'); const mw=m.offsetWidth, mh=m.offsetHeight; let L=e.clientX-mr.left-mw/2, T=e.clientY-mr.top-mh-14; if(T<4) T=e.clientY-mr.top+14;
   m.style.left=Math.max(4,Math.min(mr.width-mw-4,L))+'px'; m.style.top=T+'px'; }
 function resAr(v){ if(!AR.z) return; AR.res=v; const m=document.getElementById('arMenu'); m.classList.add('jog'); desenhaMarcas();   // no mesmo lugar: "Escolha o jogador"
-  const tip=document.getElementById('zTip'); tip.textContent=`2 pontos ${v?'convertido':'perdido'} · toque na camisa de quem arremessou`; tip.style.display='block';
+  const tip=document.getElementById('zTip'); tip.textContent=`${vZ(AR.z)} pontos ${v?'convertido':'perdido'} · toque na camisa de quem arremessou`; tip.style.display='block';
 }
 function cancelaAr(){ AR.z=null; AR.res=null; document.getElementById('arMenu').classList.remove('on','jog'); document.getElementById('zTip').style.display='none';
   document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); desenhaMarcas(); }
 function marcaAr(t,n){ const j=jog(t,n), s=stJ(t,n), v=AR.res, onde=nomeZ(AR.z,AR.lado);
-  if(v){ s.pts+=2; s.twoMade++; PL[t]+=2; desenhaPL(); } else s.twoMiss++;
-  s.eff=s.pts-s.twoMiss;      // por enquanto só arremessos de 2; rebote, assistência etc. entram quando os botões existirem
+  const p=vZ(AR.z), k=p===3?'three':'two';
+  if(v){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); } else s[k+'Miss']++;
+  s.eff=s.pts-s.twoMiss-s.threeMiss;      // por enquanto só arremessos de 2 e 3; rebote, assistência etc. entram quando os botões existirem
   MARCAS.push({x:AR.x,y:AR.y,ok:v,t,n,z:AR.z,lado:AR.lado});
-  reg(t,'',`2 pontos ${v?'convertido':'perdido'} ${j[1]} - ${n}`,onde,v?'ok':'ou');   // estilo FIBA LiveStats
-  cancelaAr(); bolaViva(); aviso(v?`+2 para ${j[1]} - ${n}`:`2 pontos perdido · ${j[1]} - ${n}`,1); }
+  reg(t,'',`${p} pontos ${v?'convertido':'perdido'} ${j[1]} - ${n}`,onde,v?'ok':'ou');   // estilo FIBA LiveStats
+  cancelaAr(); bolaViva(); aviso(v?`+${p} para ${j[1]} - ${n}`:`${p} pontos perdido · ${j[1]} - ${n}`,1); }
 function desenhaMarcas(){ const g=document.getElementById('marcas'); if(!g) return; const dx=5, dy=5*ZG.K;
   const X=(x,y,c)=>`<path d="M${x-dx} ${y-dy}L${x+dx} ${y+dy}M${x+dx} ${y-dy}L${x-dx} ${y+dy}" stroke="${c}" stroke-width="2.2" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
   let h=MARCAS.map(m=>X(m.x,m.y,m.ok?'#2ee66b':'#ff3b3b')).join('');
