@@ -21,14 +21,13 @@ body{width:100vw;height:100vh;position:relative;font-family:'Oswald','Arial Narr
 /* faixa principal */
 .faixa{position:relative;display:flex;align-items:center;overflow:hidden;
   background:
-    radial-gradient(120% 160% at 0% 50%, var(--corA,#c8102e) 0%, transparent 46%),
-    radial-gradient(120% 160% at 100% 50%, var(--corB,#7b1e22) 0%, transparent 46%),
-    linear-gradient(180deg,#1c4fb8 0%,#123a8f 48%,#0b2766 100%);}
+    linear-gradient(180deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 42%,rgba(0,0,0,0) 60%,rgba(0,0,0,.35) 100%),
+    linear-gradient(90deg,var(--corA,#c8102e) 0%,var(--corA,#c8102e) 30%,#0c0c0e 47%,#0c0c0e 53%,var(--corB,#7b1e22) 70%,var(--corB,#7b1e22) 100%);} /* cores fiéis ao brasão (Magno, 23/11/2026): saiu o fundo azul, que deixava o vermelho rosa; o meio é preto */
 body:not(.c24) .faixa{border-radius:22px 0 0 22px;}
 body.c0 .faixa{border-radius:22px;}
 body.c0 .nm{width:340px;}body.c1 .nm{width:300px;} /* mais espaço para o nome quando tem menos câmera */
 .faixa::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1100' height='92' viewBox='0 0 1100 92'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.13' stroke-width='3'%3E%3Cline x1='550' y1='0' x2='550' y2='92'/%3E%3Ccircle cx='550' cy='46' r='58'/%3E%3Cpath d='M0 -40 A 190 190 0 0 1 0 132'/%3E%3Cpath d='M1100 -40 A 190 190 0 0 0 1100 132'/%3E%3Crect x='-2' y='14' width='120' height='64'/%3E%3Crect x='982' y='14' width='120' height='64'/%3E%3C/g%3E%3C/svg%3E") center/100% 100% no-repeat;pointer-events:none;}
-.faixa::after{content:'';position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(90deg,var(--corA,#c8102e),#f28c28 30%,#f28c28 70%,var(--corB,#7b1e22));}
+.faixa::after{content:'';position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(90deg,var(--linA,#c8102e),#f28c28 30%,#f28c28 70%,var(--linB,#7b1e22));}
 .faixa>*{position:relative;z-index:1;}
 .av{width:86px;height:92px;display:flex;align-items:flex-end;justify-content:center;}
 .av img{height:84px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));}
@@ -36,7 +35,7 @@ body.c0 .nm{width:340px;}body.c1 .nm{width:300px;} /* mais espaço para o nome q
 .esc img{max-height:66px;max-width:70px;filter:drop-shadow(0 2px 5px rgba(0,0,0,.65));}
 .nm{width:262px;padding:0 10px;box-sizing:border-box;font-weight:700;font-size:31px;letter-spacing:1.5px;text-transform:uppercase;text-shadow:0 2px 6px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden;text-overflow:clip;}
 .nm.a{text-align:right;}.nm.b{text-align:left;}
-.pt{width:104px;height:70px;border-radius:14px;background:linear-gradient(180deg,rgba(4,14,40,.85),rgba(4,14,40,.6));box-shadow:inset 0 0 0 2px rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:56px;line-height:1;transition:transform .25s;}
+.pt{width:104px;height:70px;border-radius:14px;background:linear-gradient(180deg,rgba(0,0,0,.78),rgba(0,0,0,.55));box-shadow:inset 0 0 0 2px rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:56px;line-height:1;transition:transform .25s;}
 .pt.pulo{animation:pulo .7s ease;}
 @keyframes pulo{0%{transform:scale(1);color:#fff;}30%{transform:scale(1.18);color:#ffd54f;}100%{transform:scale(1);color:#fff;}}
 .fed{width:86px;display:flex;align-items:center;justify-content:center;}
@@ -58,6 +57,34 @@ body.obs #painel{display:none;}
 #estado{margin-top:12px;padding:10px;border-radius:10px;background:rgba(255,255,255,.06);line-height:1.45;}
 #painel .dica{margin-top:10px;font-size:12px;color:#9fb3cf;line-height:1.45;}
 #aviso{position:absolute;left:12px;top:10px;font:600 14px Arial;color:#fff;background:rgba(0,0,0,.55);padding:6px 10px;border-radius:8px;display:none;}
+
+/* ===== Modelo 10: Overlay alto (Magno, 23/11/2026): 2 linhas – em cima escudo, nome e pontos; embaixo o quarto e as janelas das câmeras ===== */
+#alto{display:none;position:absolute;left:50%;bottom:calc(var(--baixo,22px) * var(--esc,1));transform:translateX(-50%) scale(var(--esc,1));transform-origin:50% 100%;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 14px rgba(0,0,0,.6));}
+body.alto #alto{display:flex;} body.alto #placar{display:none!important;}
+.aL1{position:relative;display:flex;align-items:center;height:96px;width:1240px;}
+.aL1 .ld{position:absolute;top:0;bottom:0;width:50%;}
+.aL1 .ld.a{left:0;clip-path:polygon(3.2% 0,100% 0,100% 100%,3.2% 100%,0 50%);background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 45%,rgba(0,0,0,.35)),linear-gradient(90deg,var(--corA) 0%,var(--corA) 52%,#0c0c0e 100%);}
+.aL1 .ld.b{right:0;clip-path:polygon(0 0,96.8% 0,100% 50%,96.8% 100%,0 100%);background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 45%,rgba(0,0,0,.35)),linear-gradient(270deg,var(--corB) 0%,var(--corB) 52%,#0c0c0e 100%);}
+.aL1 .ld::after{content:'';position:absolute;left:0;right:0;bottom:0;height:4px;}
+.aL1 .ld.a::after{background:var(--linA);} .aL1 .ld.b::after{background:var(--linB);}
+.aL1 .esc{position:relative;z-index:2;width:150px;height:96px;}
+.aL1 .esc img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:var(--eh,118px);max-width:none;max-height:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.8));}
+.aL1 .nm{position:relative;z-index:2;width:330px;font-size:40px;}
+.aL1 .nm.a{text-align:left;padding-left:6px;} .aL1 .nm.b{text-align:right;padding-right:6px;}
+.aL1 .pt{position:relative;z-index:2;width:120px;height:96px;background:none;box-shadow:none;border-radius:0;font-size:72px;text-shadow:0 3px 8px rgba(0,0,0,.7);}
+.aL1 .div{position:relative;z-index:2;width:4px;height:62px;background:rgba(255,255,255,.85);margin:0 10px;border-radius:2px;}
+.aL2{display:flex;align-items:stretch;height:62px;margin-top:-2px;}
+.aL2 .pq{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#26262a,#0b0b0d 60%,#000);color:#fff;font-weight:500;font-size:26px;letter-spacing:1.5px;text-transform:uppercase;}
+.aL2 .pq.q{width:200px;clip-path:polygon(0 0,100% 0,100% 100%,14% 100%);padding-left:22px;border-bottom:4px solid var(--linA);}
+.aL2 .pq.q b{font-weight:700;font-size:30px;margin-right:8px;}
+.aL2 .pq.f{width:46px;clip-path:polygon(0 0,100% 0,0 100%);border-bottom:4px solid var(--linB);}
+.aL2 .cw{position:relative;box-sizing:border-box;border:4px solid #f28c28;background:transparent;}
+.aL2 .cw.r{width:220px;} .aL2 .cw.v{width:130px;border-color:#e2231a;border-left:none;}
+.aL2 .cw i{position:absolute;left:50%;bottom:-2px;transform:translate(-50%,100%);font:700 12px 'Oswald',Arial;letter-spacing:2px;background:#f28c28;color:#10204a;padding:0 9px 1px;border-radius:0 0 7px 7px;white-space:nowrap;font-style:normal;}
+.aL2 .cw.v i{background:#e2231a;color:#fff;}
+body.alto.c0 .aL2 .cw{display:none;} body.alto.c1 .aL2 .cw.v{display:none;}
+.nm.b{color:var(--txB,#fff);text-shadow:var(--shB,0 2px 6px rgba(0,0,0,.6));}
+#placar .qt b{color:var(--txB,#fff);text-shadow:var(--shB,0 2px 6px rgba(0,0,0,.6));} #placar .qt small{color:var(--qtS,#ffd54f);}
 </style>
 </head>
 <body>
@@ -75,6 +102,8 @@ body.obs #painel{display:none;}
   </div>
   <div class="cam rel" id="camRel"><i>CRONÔMETRO</i></div>
 </div>
+<div id="alto"><div class="aL1"><div class="ld a"></div><div class="ld b"></div><span id="sA1"></span><span id="sA2"></span><span id="sA3"></span><div class="div"></div><span id="sB3"></span><span id="sB2"></span><span id="sB1"></span></div>
+  <div class="aL2"><div class="pq q" id="aQt"><b id="aQn">1º</b><span id="aQs">QUARTO</span></div><div class="cw r"><i>CRONÔMETRO</i></div><div class="cw v"><i>24 SEG.</i></div><div class="pq f"></div></div></div>
 <div id="painel">
   <h1>📺 Placar · OBS</h1>
   <label for="selMod">Modelo</label>
@@ -87,22 +116,52 @@ body.obs #painel{display:none;}
 <div id="aviso"></div>
 <script>
 const D={"cores":{"ABIG":["#1F4E79","#FFFFFF"],"ACEAR":["#E2231A","#FFFFFF"],"ASPCM":["#2E3192","#E2231A"],"BFR":["#000000","#FFFFFF"],"BSA":["#F28C28","#FFFFFF"],"CCL":["#1F5FBF","#FFFFFF"],"CESC":["#000000","#FFFFFF"],"CFCSN":["#7B1E22","#FFFFFF"],"CK":["#1A1A1A","#B8860B"],"CRF":["#C8102E","#000000"],"EEPZ":["#1B2A4A","#F28C28"],"FFC":["#7A0026","#00613C"],"IB":["#E06A2C","#000000"],"IDEC":["#1F4E5F","#A4C639"],"IG":["#1F2E8A","#F07A1A"],"ITDA":["#0B1F4B","#FFFFFF"],"JTC":["#2E3448","#F2D33B"],"KE":["#000000","#FFD200"],"MB":["#1A1A1A","#F28C28"],"NBC":["#E2231A","#000000"],"TKA":["#1E8C3A","#F2C200"],"TTC":["#E2231A","#FFFFFF"]},"escudos":{"ABIG":"escudos/ABIG.png","ACEAR":"escudos/ACEAR.png","ASPCM":"escudos/ASPCM.png","BFR":"escudos/BFR.png","BSA":"escudos/BSA.png","CCL":"escudos/CCL.png","CESC":"escudos/CESC.png","CFCSN":"escudos/CFCSN.png","CK":"escudos/CK.png","CRF":"escudos/CRF.png","EEPZ":"escudos/EEPZ.png","FFC":"escudos/FFC.png","IB":"escudos/IB.png","IDEC":"escudos/IDEC.png","IG":"escudos/IG.png","ITDA":"escudos/ITDA.png","JTC":"escudos/JTC.png","KE":"escudos/KE.png","MB":"escudos/MB.png","NBC":"escudos/NBC.png","TKA":"escudos/TKA.png","TTC":"escudos/TTC.png"},"curto":{"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN":"Funcionários","FFC":"Fluminense","TTC":"Tijuca","NBC":"Niterói","CCL":"Leopoldinense","IG":"Iguaba Grande","ABIG":"Jequiá","ACEAR":"Irajá","CESC":"Suzano Costa","EEPZ":"Passo Zero","IDEC":"IDEC","ITDA":"Atitude","KE":"K. Esportes","MB":"Mesquita","JTC":"Jacarepaguá","TKA":"Team Klun","ASPCM":"Municipal","CK":"Carioca King's","IB":"Itaipu","NBR":"NBR Campos"}};
+// paleta de cada time pelas cores do brasão (Magno, 23/11/2026): só cores que o time tem
+const PAL={"ABIG":["#1F4E79","#FFFFFF"],"ACEAR":["#E2231A","#FFFFFF"],"ASPCM":["#2E3192","#E2231A","#FFFFFF"],"BFR":["#000000","#FFFFFF"],"BSA":["#F28C28","#FFFFFF"],"CCL":["#1F5FBF","#FFFFFF"],"CESC":["#000000","#FFFFFF"],"CFCSN":["#7B1E22","#FFFFFF"],"CK":["#1A1A1A","#B8860B"],"CRF":["#C8102E","#000000","#FFFFFF"],"EEPZ":["#1B2A4A","#F28C28"],"FFC":["#7A0026","#00613C","#FFFFFF"],"IB":["#E06A2C","#000000","#FFFFFF"],"IDEC":["#A4C639","#123A3F"],"IG":["#1F2E8A","#F07A1A","#FFFFFF"],"ITDA":["#0B1F4B","#FFFFFF"],"JTC":["#2E3448","#F2D33B"],"KE":["#000000","#FFD200"],"MB":["#1A1A1A","#F28C28","#FFFFFF"],"NBC":["#E2231A","#000000","#FFFFFF"],"TKA":["#1E8C3A","#F2C200","#0E4A1E"],"TTC":["#E2231A","#FFFFFF"]};
+const _hx=h=>{ const n=parseInt(String(h).slice(1),16); return [n>>16,(n>>8)&255,n&255]; }, _lu=h=>{ const [r,g,b]=_hx(h); return r*.299+g*.587+b*.114; }, _di=(a,b)=>{ const x=_hx(a),y=_hx(b); return Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2]); };
+// tema do lado do time: escuro (fundo na cor escura do time, letra branca) ou claro (fundo branco, letra escura) – nunca usa preto em time que não tem preto
+function temaTime(sig,forca){ const p=PAL[sig]||((window.D&&D.cores[sig])||['#1e90ff','#ffffff']);
+  const esc=p.find(c=>_lu(c)<50), bra=p.some(c=>_lu(c)>=230);
+  let dark=forca?forca==='escuro':(!!esc||!bra);
+  const bg=dark?(esc||p.find(c=>_lu(c)<230)||'#000'):'#FFFFFF';
+  const acc=p.find(c=>c!==bg&&_lu(c)>=40&&_lu(c)<230)||(dark?'#D9D9D9':(esc||'#222'));
+  return {sig,dark,bg,acc,txt:dark?'#FFFFFF':(esc||'#111111'),pal:p,esc,bra}; }
+function temasDuelo(a,b){ const A=temaTime(a); let B=temaTime(b);
+  if(_di(A.acc,B.acc)<110 && A.dark===B.dark){ // cores parecidas no mesmo tipo de fundo: o visitante muda
+    if(B.esc&&B.bra){ B=temaTime(b,A.dark?'claro':'escuro'); }
+    if(_di(A.acc,B.acc)<110 && A.dark===B.dark){ const o=B.pal.find(c=>c!==B.bg&&_lu(c)>=40&&_lu(c)<230&&_di(A.acc,c)>=110); B.acc=o||'#F2C200'; } }
+  return {A,B}; }
 const Q=new URLSearchParams(location.search), $=id=>document.getElementById(id);
 // câmeras (?cam=): 0 = sem câmera, 1 = relógio, 2 = relógio e cronômetro de 24 s (?c24=1 = cam 2, para endereços antigos)
 const CAM=Q.get('c24')==='1'?'2':(['0','1','2'].includes(Q.get('cam'))?Q.get('cam'):'1');
 if(CAM==='2'){ document.body.classList.add('c24'); $('cam24').style.display=''; }
 if(CAM==='1') document.body.classList.add('c1');
 if(CAM==='0'){ document.body.classList.add('c0'); $('camRel').style.display='none'; }
-const MOD={'1':['fberj.png','FBERJ'],'2':['avatar_klaus.png','Klaus'],'3':['logo_klaustv_tv.png','Klaus TV']}, mo=MOD[Q.get('modelo')]?Q.get('modelo'):'1';
-$('centroImg').src=MOD[mo][0]; $('centroImg').alt=MOD[mo][1]; $('centro').classList.add('m'+mo);
+const MOD={'1':['fberj.png','FBERJ'],'2':['avatar_klaus.png','Klaus'],'3':['logo_klaustv_tv.png','Klaus TV'],'4':['','Alto']}, mo=MOD[Q.get('modelo')]?Q.get('modelo'):'1';
+const ALTO=mo==='4';
+if(ALTO){ document.body.classList.add('alto'); // modelo alto: os mesmos escudos, nomes e pontos vão para a faixa de 2 linhas
+  [['sA1',$('escA').parentNode],['sA2','nmA'],['sA3','ptA'],['sB3','ptB'],['sB2','nmB'],['sB1',$('escB').parentNode]].forEach(([s,e])=>{ const el=typeof e==='string'?$(e):e; $(s).replaceWith(el); });
+  ['escA','escB'].forEach(id=>{ const im=$(id); im.onload=()=>{ const ims=[$('escA'),$('escB')]; if(!ims.every(x=>x.naturalWidth)) return; const rs=ims.map(x=>x.naturalWidth/x.naturalHeight||1); const k=Math.min(1,...rs.map(r=>(140/r)/(118*Math.sqrt(.8/r)))); ims.forEach((x,i)=>x.style.setProperty('--eh',(118*Math.sqrt(.8/rs[i])*k).toFixed(0)+'px')); }; }); } // escudos com o mesmo tamanho nos dois lados
+else { $('centroImg').src=MOD[mo][0]; $('centroImg').alt=MOD[mo][1]; $('centro').classList.add('m'+mo); }
 if(Q.get('baixo')) document.documentElement.style.setProperty('--baixo',(+Q.get('baixo')||0)+'px');
 const curto=s=>(D.curto[s]||s||'').toUpperCase();
 function times(a,b){ $('nmA').textContent=curto(a); $('nmB').textContent=curto(b);
   $('escA').src=D.escudos[a]||'favicon.svg'; $('escB').src=D.escudos[b]||'favicon.svg';
-  const r=document.documentElement.style; r.setProperty('--corA',(D.cores[a]||['#c8102e'])[0]); r.setProperty('--corB',(D.cores[b]||['#7b1e22'])[0]); }
+  const C=coresTimes(a,b), r=document.documentElement.style; r.setProperty('--corA',C.A); r.setProperty('--corB',C.B); r.setProperty('--linA',C.lA); r.setProperty('--linB',C.lB); r.setProperty('--txB',C.tB); r.setProperty('--qtS',C.tB==='#fff'?'#ffd54f':C.lB); r.setProperty('--shB',C.tB==='#fff'?'0 2px 6px rgba(0,0,0,.6)':'none'); }
+// cores fiéis ao brasão (Magno, 23/11/2026): cor principal pura; time preto fica grafite com friso prata; se os dois times ficarem parecidos, o visitante usa a 2ª cor dele
+const hx=h=>{ const n=parseInt(String(h).slice(1),16); return [n>>16,(n>>8)&255,n&255]; }, lu=h=>{ const [r,g,b]=hx(h); return r*.299+g*.587+b*.114; }, di=(a,b)=>{ const x=hx(a),y=hx(b); return Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2]); };
+function coresTimes(a,b){ const ca=D.cores[a]||['#c8102e','#ffffff'], cb=D.cores[b]||['#7b1e22','#ffffff'];
+  const fundo=c=>lu(c)<40?'#2a2a2e':c, linha0=c=>lu(c)<40?'#d9d9d9':c;
+  const linha=(c,sig)=>{ const p=(typeof PAL!=='undefined'&&PAL[sig])||[]; const c2=p[1]; return (c===p[0]&&c2&&lu(c2)>=40&&lu(c2)<230)?c2:linha0(c); }; // friso na 2ª cor do brasão (ex.: verde do Fluminense)
+  let B=cb[0], tB='#fff';
+  if(di(fundo(ca[0]),fundo(B))<110){ const pb=(typeof PAL!=='undefined'&&PAL[b])||cb; // cores parecidas: o visitante vai para o branco do brasão (letra escura) ou para a 2ª cor dele
+    if(pb.some(c=>lu(c)>=230)){ B='#f2f2f2'; tB=pb.find(c=>lu(c)<50)||'#111111'; return {A:fundo(ca[0]),B,lA:linha(ca[0],a),lB:cb[0],tB}; }
+    const o=pb.find(c=>lu(c)<230&&di(fundo(ca[0]),fundo(c))>=110); if(o) B=o; }
+  return {A:fundo(ca[0]),B:fundo(B),lA:linha(ca[0],a),lB:linha(B,b),tB}; }
 let ULT={A:null,B:null};
 function pontos(a,b){ [['A',a],['B',b]].forEach(([l,v])=>{ const el=$('pt'+l); if(ULT[l]!==null&&v!==ULT[l]){ el.classList.remove('pulo'); void el.offsetWidth; el.classList.add('pulo'); } ULT[l]=v; el.textContent=v; }); }
-function quarto(q,fim){ const el=$('qt'); el.classList.toggle('fim',!!fim);
+function quarto(q,fim){ $('aQn').textContent=fim?'FIM':(q>=5?'OT':q+'º'); $('aQs').textContent=fim?'DE JOGO':(q>=5?'PRORROG.':'QUARTO');
+  const el=$('qt'); el.classList.toggle('fim',!!fim);
   if(fim){ $('qtN').textContent='FIM'; el.querySelector('small').textContent='DE JOGO'; return; }
   $('qtN').textContent=q>=5?'OT':q+'º'; el.querySelector('small').textContent=q>=5?'PRORROG.':'QUARTO'; }
 if(Q.has('obs')||window.obsstudio) document.body.classList.add('obs');
@@ -111,14 +170,15 @@ function escala(){ const e=Math.min(innerWidth/1920, innerHeight/1080)||1; docum
 escala(); addEventListener('resize',escala);
 // 9 modelos (nomes do Magno, 23/11/2026)
 const MODELOS=[];[['1','FBERJ'],['2','Klaus'],['3','Klaus TV']].forEach(([m,n])=>[['0',''],['1',' relógio'],['2',' relógio e cronômetro']].forEach(([c,t])=>MODELOS.push({m,c,nome:'Overlay '+n+t})));
+MODELOS.push({m:'4',c:'2',nome:'Overlay alto'}); // 10º modelo (Magno, 23/11/2026)
 $('selMod').innerHTML=MODELOS.map((o,i)=>`<option value="${i}"${o.m===mo&&o.c===CAM?' selected':''}>${o.nome}</option>`).join('');
 $('selMod').onchange=()=>{ const o=MODELOS[+$('selMod').value]; const u=new URL(location); u.searchParams.set('modelo',o.m); u.searchParams.set('cam',o.c); u.searchParams.delete('c24'); location.replace(u); };
 $('bCopiar').onclick=()=>{ const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1&modelo='+mo+'&cam='+CAM;
   (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{ $('bCopiar').textContent='✓ Copiado! Cole no OBS (fonte Navegador)'; setTimeout(()=>$('bCopiar').textContent='📋 Copiar URL de saída (OBS)',2500); }).catch(()=>prompt('Copie a URL de saída:',u)); };
 // nome: o maior que couber (nome completo da FBERJ → nome curto do site), diminuindo um pouco a letra antes de trocar
-function cabe(el,txt){ for(let f=31;f>=25;f--){ el.style.fontSize=f+'px'; el.textContent=txt; if(el.scrollWidth<=el.clientWidth+1) return true; } return false; }
+function cabe(el,txt){ const F=ALTO?40:31; for(let f=F;f>=F-8;f--){ el.style.fontSize=f+'px'; el.textContent=txt; if(el.scrollWidth<=el.clientWidth+1) return true; } return false; }
 function poeNome(el,completo,sig){ const op=[CAM==='2'?'':completo,D.curto[sig]||sig] /* com as duas câmeras: sempre o nome curto */.filter(Boolean).map(x=>String(x).toUpperCase());
-  for(const t of op){ if(cabe(el,t)) return; } el.style.fontSize='25px'; el.textContent=op[op.length-1]||''; }
+  for(const t of op){ if(cabe(el,t)) return; } el.style.fontSize=(ALTO?32:25)+'px'; el.textContent=op[op.length-1]||''; }
 let SIG='';
 function aplicar(r){ const sg=r.a+'|'+r.b+'|'+r.nA+'|'+r.nB;
   if(sg!==SIG){ SIG=sg; times(r.a,r.b); poeNome($('nmA'),r.nA,r.a); poeNome($('nmB'),r.nB,r.b); ULT={A:null,B:null}; }

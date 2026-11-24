@@ -168,6 +168,20 @@ body.semFoto #sf{display:block;} body.semFoto #times,body.semFoto #abas{display:
 .sfMeio .tx b.site{font-size:1.75cqw!important;text-align:center;}
 /* escudos com o mesmo "peso" visual (Magno, 23/11/2026): a altura se ajusta ao formato, para que o tamanho total (área) seja igual nos dois lados */
 .sfCab img{height:var(--eh,132%)!important;max-width:none!important;}
+
+/* temas claro/escuro por time (Magno, 23/11/2026) */
+.sfCab .fun{background:linear-gradient(180deg,var(--rb1) 0%,var(--rb2) 70%)!important;}
+.sfCab .nm b{color:var(--htx)!important;}
+.sfPn .tit{background:linear-gradient(180deg,var(--rb1),var(--rb2))!important;color:var(--htx)!important;}
+.sfPn .cx{background:var(--pbg)!important;}
+.sfLn .p{background:linear-gradient(180deg,var(--rb1) 0%,var(--rb2) 100%)!important;color:var(--rtx)!important;border-color:rgba(127,127,127,.35)!important;}
+.sfLn .p small{color:var(--apl)!important;}
+.sfTec{background:var(--pbg)!important;color:var(--rtx)!important;} .sfTec b{color:var(--apl)!important;}
+.sfCab,.sfDeco{transition:opacity .25s;} .sfCab.off,.sfDeco.off{opacity:0;pointer-events:none;}
+/* 3 bolinhas embaixo do Klaus TV (Magno, 23/11/2026): esquerda = só o time A, meio = os dois, direita = só o time B */
+.sfBol{position:absolute;left:50%;top:27cqh;transform:translateX(-50%);display:flex;gap:1.1cqw;z-index:3;}
+.sfBol i{width:1.05cqw;height:1.05cqw;border-radius:50%;background:#fff;border:.15cqw solid #fff;box-shadow:0 .2cqh .5cqw rgba(0,0,0,.8);cursor:pointer;opacity:.55;transition:opacity .15s,transform .15s;}
+.sfBol i:hover{opacity:.9;transform:scale(1.15);} .sfBol i.on{opacity:1;transform:scale(1.25);}
 </style>
 </head>
 <body>
@@ -333,14 +347,32 @@ document.addEventListener('change',e=>{ if(e.target.id!=='fMod') return; MODELO=
 const hex2=h=>{ const n=parseInt(String(h).slice(1),16); return [n>>16,(n>>8)&255,n&255]; };
 const lumH=h=>{ const [r,g,b]=hex2(h); return r*.299+g*.587+b*.114; };
 const dist=(a,b)=>{ const x=hex2(a),y=hex2(b); return Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2]); };
+// paleta de cada time pelas cores do brasão (Magno, 23/11/2026): só cores que o time tem
+const PAL={"ABIG":["#1F4E79","#FFFFFF"],"ACEAR":["#E2231A","#FFFFFF"],"ASPCM":["#2E3192","#E2231A","#FFFFFF"],"BFR":["#000000","#FFFFFF"],"BSA":["#F28C28","#FFFFFF"],"CCL":["#1F5FBF","#FFFFFF"],"CESC":["#000000","#FFFFFF"],"CFCSN":["#7B1E22","#FFFFFF"],"CK":["#1A1A1A","#B8860B"],"CRF":["#C8102E","#000000","#FFFFFF"],"EEPZ":["#1B2A4A","#F28C28"],"FFC":["#7A0026","#00613C","#FFFFFF"],"IB":["#E06A2C","#000000","#FFFFFF"],"IDEC":["#A4C639","#123A3F"],"IG":["#1F2E8A","#F07A1A","#FFFFFF"],"ITDA":["#0B1F4B","#FFFFFF"],"JTC":["#2E3448","#F2D33B"],"KE":["#000000","#FFD200"],"MB":["#1A1A1A","#F28C28","#FFFFFF"],"NBC":["#E2231A","#000000","#FFFFFF"],"TKA":["#1E8C3A","#F2C200","#0E4A1E"],"TTC":["#E2231A","#FFFFFF"]};
+const _hx=h=>{ const n=parseInt(String(h).slice(1),16); return [n>>16,(n>>8)&255,n&255]; }, _lu=h=>{ const [r,g,b]=_hx(h); return r*.299+g*.587+b*.114; }, _di=(a,b)=>{ const x=_hx(a),y=_hx(b); return Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2]); };
+// tema do lado do time: escuro (fundo na cor escura do time, letra branca) ou claro (fundo branco, letra escura) – nunca usa preto em time que não tem preto
+function temaTime(sig,forca){ const p=PAL[sig]||((window.D&&D.cores[sig])||['#1e90ff','#ffffff']);
+  const esc=p.find(c=>_lu(c)<50), bra=p.some(c=>_lu(c)>=230);
+  let dark=forca?forca==='escuro':(!!esc||!bra);
+  const bg=dark?(esc||p.find(c=>_lu(c)<230)||'#000'):'#FFFFFF';
+  const acc=p.find(c=>c!==bg&&_lu(c)>=40&&_lu(c)<230)||(dark?'#D9D9D9':(esc||'#222'));
+  return {sig,dark,bg,acc,txt:dark?'#FFFFFF':(esc||'#111111'),pal:p,esc,bra}; }
+function temasDuelo(a,b){ const A=temaTime(a); let B=temaTime(b);
+  if(_di(A.acc,B.acc)<110 && A.dark===B.dark){ // cores parecidas no mesmo tipo de fundo: o visitante muda
+    if(B.esc&&B.bra){ B=temaTime(b,A.dark?'claro':'escuro'); }
+    if(_di(A.acc,B.acc)<110 && A.dark===B.dark){ const o=B.pal.find(c=>c!==B.bg&&_lu(c)>=40&&_lu(c)<230&&_di(A.acc,c)>=110); B.acc=o||'#F2C200'; } }
+  return {A,B}; }
 const TERCEIRA='#F2C200'; // terceira cor quando os dois times ficam parecidos (amarelo-ouro)
 // cor de destaque do time: a principal; se for preta/escura demais, prata (como o Botafogo do modelo)
 function destaque(sig){ const c=(D.cores[sig]||['#1e90ff','#ffffff']); return lumH(c[0])<40?'#d9d9d9':c[0]; }
 function coresSF(sA,sB){ const a=destaque(sA); let b=destaque(sB);
   if(dist(a,b)<110){ const c2=(D.cores[sB]||[])[1]; b=(c2&&dist(a,c2)>=110&&lumH(c2)>=40)?c2:(dist(a,TERCEIRA)>=110?TERCEIRA:'#1e88e5'); } // cores coincidem: o visitante muda
   return {A:a,B:b}; }
-function estilo(c){ const t=lumH(c)>150?'#000':'#fff'; const esc_=lumH(c)<60; const claro=lumH(c)>200;
-  return `--glow:${c}99;--brd:linear-gradient(180deg,#fff,${c} 35%,${c} 70%,#555);--brd1:${c};--nb1:${c};--nb2:${claro?'#a9a9a9':c+'cc'};--ntx:${t};--sub:${claro?'#e6e6e6':c}`; }
+function estilo(t){ const c=t.acc, nt=_lu(c)>150?'#000':'#fff', claro=_lu(c)>200;
+  const rb1=t.dark?(t.bg==='#000000'||_lu(t.bg)<20?'#26262a':mix(t.bg,'#ffffff',.18)):'#ffffff', rb2=t.dark?(_lu(t.bg)<20?'#000':mix(t.bg,'#000000',.35)):'#e2e2e2';
+  const htx=t.dark?'#fff':(_lu(c)<170?c:t.txt);
+  return `--glow:${c}99;--brd:linear-gradient(180deg,#fff,${c} 35%,${c} 70%,${t.dark?'#555':'#999'});--brd1:${c};--nb1:${c};--nb2:${claro?'#a9a9a9':c+'cc'};--ntx:${nt};--sub:${t.dark?(claro||Math.abs(_lu(c)-_lu(t.bg))<50?'#e6e6e6':c):(_lu(c)<200?c:t.txt)};--rb1:${rb1};--rb2:${rb2};--rtx:${t.txt};--pbg:${t.dark?mix(t.bg,'#000000',.5)+'eb':'rgba(255,255,255,.95)'};--htx:${htx};--apl:${t.dark?'#ffd54f':c}`; }
+function mix(a,b,k){ const x=_hx(a),y=_hx(b); return '#'+x.map((v,i)=>Math.round(v+(y[i]-v)*k).toString(16).padStart(2,'0')).join(''); }
 function modeloReal(T){ if(MODELO!=='auto') return MODELO; const js=[...T.A.js,...T.B.js]; if(!js.length) return 'fotos'; const c=js.filter(a=>FOTOS[a.reg]).length; return c*2>=js.length?'fotos':'sem'; }
 
 // pinceladas nos cantos (Magno, 23/11/2026): cor do time da casa à esquerda, do visitante à direita; leve (desenho em código, sem imagem)
@@ -352,11 +384,11 @@ const REGATA='<svg viewBox="0 0 40 44"><defs><linearGradient id="rgG" x1="0" y1=
 function montaSF(T){ const m=modeloReal(T); document.body.classList.toggle('semFoto',m==='sem');
   $('fModAv').textContent=MODELO==='auto'?'Automático → '+(m==='sem'?'sem fotos':'com fotos'):'';
   if(m!=='sem'){ $('sf').innerHTML=''; return; }
-  const C=coresSF(T.A.sig,T.B.sig);
+  const C=temasDuelo(T.A.sig,T.B.sig);
   const cab=l=>{ const t=T[l], nm=String(t.nome||'').toUpperCase(); const fs=Math.min(3.9,44/Math.max(nm.length,1)); return `<div class="sfCab ${l.toLowerCase()}" style="${estilo(C[l])}" onclick="sfVer('${l}')" title="Mostrar só ${esc(t.nome)}"><div class="brd"></div><div class="fun"></div><img src="${esc(escudo(t.sig))}" alt=""><div class="nm"><b style="font-size:${fs}cqw">${esc(nm)}</b><i>Basquete</i></div></div>`; };
   const pn=l=>{ const t=T[l]; return `<div class="sfPn ${l.toLowerCase()}" id="sf${l}" style="${estilo(C[l])}"><div class="tit">ESCALAÇÃO</div><div class="cx">${t.js.map((a,i)=>{ const nm=nome2(a.nome).toUpperCase(), ap=APS[a.reg]||a.apelido||''; const fs=Math.min(2.1,(34-(ap?ap.length*.7:0))/Math.max(nm.length,1)*1.25); return `<div class="sfLn" onclick="ficha('${l}',${i})"><div class="n rg">${REGATA}<b>${esc(String(a.numero||'-').replace(/^0(\d)$/,'$1'))}</b></div><div class="p" style="font-size:${Math.max(1.3,fs).toFixed(2)}cqw">${esc(nm)}${ap?'<small>'+esc(ap)+'</small>':''}</div></div>`; }).join('')}</div>${t.tec?`<div class="sfTec">Técnico: <b>${esc(tecCurto(t.tec).n)}</b></div>`:''}</div>`; };
   const cat=String(J&&J.categoria||'').toUpperCase();
-  $('sf').innerHTML=SF_DEFS+['tl','bl'].map(k=>`<div class="sfDeco ${k}">${decoSF(C.A)}</div>`).join('')+['tr','br'].map(k=>`<div class="sfDeco ${k}">${decoSF(C.B)}</div>`).join('')+cab('A')+`<div class="sfMeio" onclick="sfVer('AB')" title="Mostrar os dois times"><img src="logo_klaustv_tv.png" alt=""><div class="lin"></div><div class="tx"><b class="site">klaustv.com</b></div></div>`+cab('B')+pn('A')+pn('B');
+  $('sf').innerHTML=SF_DEFS+['tl','bl'].map(k=>`<div class="sfDeco ${k}">${decoSF(C.A.acc)}</div>`).join('')+['tr','br'].map(k=>`<div class="sfDeco ${k}">${decoSF(C.B.acc)}</div>`).join('')+cab('A')+`<div class="sfMeio" onclick="sfVer('AB')" title="Mostrar os dois times"><img src="logo_klaustv_tv.png" alt=""><div class="lin"></div><div class="tx"><b class="site">klaustv.com</b></div></div><div class="sfBol"><i data-v="A" style="background:${C.A.acc}" onclick="sfVer('A')" title="Só ${esc(T.A.nome)}"></i><i data-v="AB" onclick="sfVer('AB')" title="Os dois times"></i><i data-v="B" style="background:${C.B.acc}" onclick="sfVer('B')" title="Só ${esc(T.B.nome)}"></i></div>`+cab('B')+pn('A')+pn('B');
   // os dois escudos com a mesma área; se um for largo demais e precisar encolher, o outro encolhe na mesma medida (nunca um maior que o outro)
   const ims=[...document.querySelectorAll('.sfCab img')];
   Promise.all(ims.map(im=>im.complete&&im.naturalWidth?1:new Promise(ok=>{ im.addEventListener('load',ok,{once:true}); im.addEventListener('error',ok,{once:true}); }))).then(()=>{
@@ -364,7 +396,12 @@ function montaSF(T){ const m=modeloReal(T); document.body.classList.toggle('semF
     ims.forEach((im,i)=>im.style.setProperty('--eh',(132*Math.sqrt(.8/rs[i])*k).toFixed(1)+'%')); });
   sfVer(SF_VER); }
 // clique no escudo/nome do time: só aquele time; clique no Klaus TV: os dois (Magno, 23/11/2026)
-function sfVer(v){ SF_VER=v; ['A','B'].forEach(l=>{ const e=$('sf'+l); if(e) e.classList.toggle('off',v.indexOf(l)<0); }); $('ficha').classList.remove('on'); }
+// 23/11/2026 (Magno): o time escondido some inteiro (escudo, nome, lista e pinceladas do canto)
+function sfVer(v){ SF_VER=v; ['A','B'].forEach(l=>{ const k=l.toLowerCase(), mostra=v.indexOf(l)>=0;
+    document.querySelectorAll('#sf .sfPn.'+k+',#sf .sfCab.'+k+(l==='A'?',#sf .sfDeco.tl,#sf .sfDeco.bl':',#sf .sfDeco.tr,#sf .sfDeco.br')).forEach(e=>e.classList.toggle('off',!mostra)); });
+  document.querySelectorAll('#sf .sfBol i').forEach(b=>b.classList.toggle('on',b.dataset.v===v)); $('ficha').classList.remove('on'); }
+// quadrado do Klaus TV dividido em 3 partes invisíveis: esquerda = time A, meio = os dois, direita = time B
+function sfMeio(ev,el){ const r=el.getBoundingClientRect(), x=(ev.clientX-r.left)/r.width; sfVer(x<1/3?'A':x>2/3?'B':'AB'); }
 
 let ULT=''; try{ ULT=localStorage.getItem('kt_esc_jogo')||''; }catch(e){}
 const HD=/[#&]d=([^&]+)/.exec(location.hash);
