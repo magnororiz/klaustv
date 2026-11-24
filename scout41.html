@@ -363,7 +363,7 @@ function relDesenha(){ const b=document.getElementById('relB'); if(!b||b.querySe
   const bq=document.getElementById('btQ'); bq.className='play'+(C.conf?' conf':!C.em?' ini':''); bq.textContent=C.em?'■':'▶';
   bq.title=C.em?'Encerrar o quarto (toque 2 vezes)':'Iniciar o próximo período';
   document.getElementById('btPlay').classList.toggle('on',C.em&&C.anda);
-  document.getElementById('btPaus').classList.toggle('on',C.em&&C.trava);
+  document.getElementById('btPaus').classList.toggle('on',C.em&&C.trava===true);
   document.getElementById('tarja').classList.toggle('on',!!C.tarja&&C.em); }
 // ▶ / ⏸ (Magno, 24/11/2026): o relógio segue automático, mas o Raoni pode segurar (discussão, atendimento, pedido de tempo
 // atrasado). ⏸ para e cancela a volta automática (substituição 4 s, falta 8 s); só volta no ▶.
@@ -489,7 +489,9 @@ function clicaLL(){ if(document.body.classList.contains('sub')) return aviso('Te
   if(LL.on){ if(!LL.n&&!LL.q){ fimLL(); return; }              // nada marcado ainda: o 2º toque fecha
     return LL.n?telaLL():aviso('Marque a camisa do jogador que vai bater o lance livre'); }
   LL.on=true; LL.t=null; LL.n=null; LL.q=0; LL.r=[]; LL.s12=0; telaLL(); }   // 1º marca o jogador, depois 1 · 2 · 3
-function paraLL(){ C.trava=true; C.tarja=true; clearTimeout(tSub); tSub=null; pausa(); }
+// Relógio no lance livre (Magno, 24/11/2026): para ao abrir e volta SOZINHO no último ✓/✗ (1º de 1, 2º de 2, 3º de 3) · sem tarja.
+// A trava 'll' é do lance livre; se o Raoni tocar ⏸ no meio, a trava vira dele (true) e o relógio só volta no ▶.
+function paraLL(){ if(C.trava!==true) C.trava='ll'; C.tarja=false; clearTimeout(tSub); tSub=null; pausa(); }
 function iniciaLL(t,q,sof,s12){ LL.on=true; LL.s12=s12?1:0; LL.t=t; LL.q=q; LL.r=[]; LL.n=sof&&sof.t===t?sof.n:null; paraLL(); telaLL(); }
 function marcaLL(t,n){ if(LL.t&&LL.t!==t) return aviso(`O lance livre é do ${T[LL.t].nome}`);
   if(LL.s12===1){ LL.s12=2; const o=t==='a'?'b':'a'; reg(o,'',`Falta técnica (categoria 0) ${T[o].nome}`,'Pressão: roubo de bola no campo do adversário · 1 lance livre e bola na lateral','fa'); }   // registra a falta do outro time ao marcar quem bate
@@ -511,8 +513,10 @@ function resLL(v){ LL.r.push(v); if(v){ PL[LL.t]++; desenhaPL(); }
   if(LL.r.length<LL.q) return telaLL();
   const j=jog(LL.t,LL.n), ok=LL.r.filter(x=>x).length;
   reg(LL.t,'',`Lance livre ${j[1]} - ${j[0]}`,`${ok} de ${LL.q} convertido${ok>1?'s':''}`,ok?'ok':'ou');
-  fimLL(); aviso('Lances livres registrados · toque ▶ quando o jogo reiniciar',1); }
-function cancelaLL(){ if(!LL.q){ fimLL(); return; } for(const x of LL.r) if(x===1) PL[LL.t]--; desenhaPL(); fimLL(); aviso('Lance livre cancelado · relógio parado, toque ▶ no reinício'); }
+  fimLL();
+  if(C.trava==='ll'){ solta(true); aviso('Lance livre registrado · relógio liberado',1); }
+  else aviso('Lance livre registrado · relógio pausado pelo Raoni · toque ▶ para liberar',1); }
+function cancelaLL(){ if(!LL.q){ fimLL(); return; } for(const x of LL.r) if(x===1) PL[LL.t]--; desenhaPL(); fimLL(); aviso('Lance livre cancelado · relógio parado, toque ▶ para liberar'); }
 function fimLL(){ LL.on=false; LL.s12=0; LL.t=null; LL.n=null; LL.q=0; LL.r=[]; document.getElementById('llMenu').classList.remove('on'); desenhaLL(); }
 function desenhaLL(){ const b=document.getElementById('btLL'); if(!b) return; b.classList.toggle('subOn',LL.on&&!LL.n);
   b.innerHTML=LL.on&&!LL.n?'LANCE LIVRE<small>marque o jogador que vai bater · toque aqui p/ fechar</small>':'LANCE<br>LIVRE'; }
