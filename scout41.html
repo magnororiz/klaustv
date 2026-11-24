@@ -238,7 +238,8 @@ const FE={
  tc:{ll:1,nm:'Técnica do técnico',d:'conduta do próprio técnico',tx:'Falta técnica do técnico',quem:'tec',k:'C'},
  tb:{ll:1,nm:'Técnica do banco',d:'reservas, assistente ou comissão',tx:'Falta técnica do banco',quem:'tec',k:'B'},
  dt:{ll:2,nm:'Desqualificante do técnico ou banco',d:'expulso na hora',tx:'Falta desqualificante do técnico ou banco',quem:'tec',dq:1},
- // Sub-12 do Rio (Magno, 24/11/2026, confirmado com o técnico Bruno Gonzalez): falta do TIME, não do jogador · não conta falta do jogador nem do time · o outro time escolhe quem bate, sempre 1 lance livre, e bola na lateral · fluxo: FALTA ESPECIAL › Técnica Sub-12 › camisa de quem bate › ✓/✗ (sem escolher time)
+ // REGRA (Magno, 24/11/2026): a Técnica Sub-12 NÃO entra em nenhuma estatística (nem FP, FR, falta do time, EF, Ao vivo ou planilha) · só vai para o lance a lance. Ao ligar os dados de verdade, não gravar como falta.
+// Sub-12 do Rio (Magno, 24/11/2026, confirmado com o técnico Bruno Gonzalez): falta do TIME, não do jogador · não conta falta do jogador nem do time · o outro time escolhe quem bate, sempre 1 lance livre, e bola na lateral · fluxo: FALTA ESPECIAL › Técnica Sub-12 › camisa de quem bate › ✓/✗ (sem escolher time)
  s12:{ll:0,nm:'Técnica Sub-12',d:'pressão · roubo de bola no campo do adversário',tx:'Falta técnica Sub-12',quem:'tec',s12:1}};
 const TC={a:{C:0,B:0,dq:0},b:{C:0,B:0,dq:0}};
 // camiseta regata (mesmo desenho da Escalação); listrada para o Flamengo, lisa para o Tijuca
