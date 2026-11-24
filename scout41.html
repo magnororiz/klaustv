@@ -114,6 +114,12 @@ body.sub .banco{display:grid}
 .bt small{display:block;font-size:11px;letter-spacing:.5px;margin-top:3px;font-weight:500}
 .bt.subOk{background:linear-gradient(180deg,#43c45a,#1f8a35);color:#fff;font-size:15px}
 .bt.subOn{font-size:15px;background:linear-gradient(180deg,#ff9d3a,#e06a00);color:#000;animation:pisca 1s steps(2) infinite}
+.bt.vazio{background:#15171c;border-style:dashed;opacity:.5}
+.jg.fez{box-shadow:0 0 0 3px #e53935,0 0 14px 4px rgba(229,57,53,.75)!important}
+.jg.fez::before{content:'FEZ';position:absolute;right:4px;top:4px;font-size:11px;letter-spacing:1px;background:#e53935;color:#fff;padding:1px 6px;border-radius:3px;font-weight:700;z-index:2}
+.jg.sof{box-shadow:0 0 0 3px #ffd54f,0 0 14px 4px rgba(255,213,79,.7)!important}
+.jg.sof::before{content:'SOFREU';position:absolute;right:4px;top:4px;font-size:11px;letter-spacing:1px;background:#ffd54f;color:#000;padding:1px 6px;border-radius:3px;font-weight:700;z-index:2}
+.top .cx.bonus b{color:#ff8a1a}
 @keyframes pisca{50%{filter:brightness(1.25)}}
 #aviso{position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#d32f2f;color:#fff;font:700 15px Arial;padding:8px 16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.6);display:none;z-index:9}
 #aviso.ok{background:#1b5e20}
@@ -134,7 +140,7 @@ body.sub .banco{display:grid}
 
 <header class="top">
   <div class="tm a"><img src="escudos/CRF.png" alt=""><span class="nm">FLAMENGO</span></div>
-  <div class="cx">F<b>3</b></div><div class="sep"></div>
+  <div class="cx" id="fA" title="Faltas do time no quarto">F<b>0</b></div><div class="sep"></div>
   <div class="cx tmp" id="tmA" onclick="pedeTempo('a')" title="Pedido de tempo do Flamengo: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div>
   <div class="pl">24</div>
   <div class="seta on" title="Posse alternada">◀</div>
@@ -142,7 +148,7 @@ body.sub .banco{display:grid}
   <div class="seta" title="Posse alternada">▶</div>
   <div class="pl">18</div>
   <div class="cx tmp" id="tmB" onclick="pedeTempo('b')" title="Pedido de tempo do Tijuca: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div><div class="sep"></div>
-  <div class="cx">F<b>2</b></div>
+  <div class="cx" id="fB" title="Faltas do time no quarto">F<b>0</b></div>
   <div class="tm b"><span class="nm">TIJUCA</span><img src="escudos/TTC.png" alt=""></div>
   <div class="play" id="btQ" onclick="clicaQuarto()" title="Encerrar o quarto">■</div>
 </header>
@@ -161,15 +167,15 @@ body.sub .banco{display:grid}
       <div class="bnc b"><h4>BANCO DE RESERVAS · TIJUCA</h4><button class="rol" onclick="rola('bnB',-1)">▲</button><div class="lis" id="bnB"></div><button class="rol" onclick="rola('bnB',1)">▼</button></div>
     </div>
     <div class="lal">
-      <h3>LANCE A LANCE <em class="tag41">SCOUT PRO 4.1 · em construção</em><span>4 últimos · role para ver os anteriores</span></h3>
+      <h3>LANCE A LANCE <em class="tag41">SCOUT PRO 4.1 · em construção · substituição, tempo e falta</em><span>4 últimos · role para ver os anteriores</span></h3>
       <ul id="lal"></ul>
     </div>
   </section>
 
   <section class="bts">
-    <div class="bt az ina" title="Em construção">FALTA<br>REC.</div><div class="bt az ina" title="Em construção">LANCE<br>LIVRE</div>
+    <div class="bt az ina vazio" title="Botão livre (a falta recebida agora sai junto com a FALTA)"></div><div class="bt az ina" title="Em construção">LANCE<br>LIVRE</div>
     <div class="bt vd ina" title="Em construção">ASSIST.</div><div class="bt vd ina" title="Em construção">REBOTE</div>
-    <div class="bt vm ina" title="Em construção">FALTA</div><div class="bt vm ina" title="Em construção">FALTA<br>TÉCNICA</div>
+    <div class="bt vm" id="btFal" onclick="clicaFalta()">FALTA</div><div class="bt vm ina" title="Em construção">FALTA<br>TÉCNICA</div>
     <div class="bt am ina" title="Em construção">ERRO</div><div class="bt am ina" title="Em construção">ROUBO</div>
     <div class="bt ina" title="Em construção">TEMPO</div><div class="bt ina" title="Em construção">TOCO</div>
     <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt undo ina" title="Desfazer a última ação · em construção">↶</div>
@@ -178,6 +184,7 @@ body.sub .banco{display:grid}
 <div id="aviso"></div>
 
 <script>
+const FA={on:false,fez:null,sof:null}, FT={a:0,b:0};   // falta em andamento · faltas do time no quarto
 // camiseta regata (mesmo desenho da Escalação); listrada para o Flamengo, lisa para o Tijuca
 const CORPO='M9 1.5h5Q19 10.5 24 1.5h5v5.4q1.4 7.6 7.5 8.6V42.5H1.5V15.5Q7.6 14.5 9 6.9z';
 function regata(id,n,lis){
@@ -200,7 +207,7 @@ const T={a:{nome:'Flamengo',lis:FLA,js:[[4,'Tozo',1,1],[5,'Pedro',2,1],[7,'Davi'
  b:{nome:'Tijuca',lis:TIJ,js:[[3,'Matheus',2,1],[5,'Kaique',1,1],[6,'Bruno',3,1],[9,'Igor',0,1],[12,'Léo',1,1],
  [4,'Vitor',0,0],[7,'Samuel',0,0],[8,'Thiago',0,0],[10,'Felipe',0,0],[11,'Nico',0,0],[13,'Heitor',0,0],[14,'Danilo',0,0]]}};
 const ENTRA={a:new Set(),b:new Set()}, SAI={a:new Set(),b:new Set()};
-function tile(t,[n,nm,f],onde){ const k=t+n, cls=[f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':''].join(' ');
+function tile(t,[n,nm,f],onde){ const k=t+n, cls=[f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':'',onde==='q'&&FA.fez&&FA.fez.t===t&&FA.fez.n===n?'fez':'',onde==='q'&&FA.sof&&FA.sof.t===t&&FA.sof.n===n?'sof':''].join(' ');
   return `<div class="jg ${cls}" title="${nm}" onclick="clicaJg('${t}',${n},'${onde}')"><div class="fl">${[1,2,3,4,5].map(x=>`<span class="${x<=f?'on':''}"></span>`).join('')}</div>
    ${regata(onde+k,n,T[t].lis)}<div class="nm">${nm}</div></div>`; }
 function desenha(){ for(const t of ['a','b']){ const q=T[t].js.filter(j=>j[3]), bc=T[t].js.filter(j=>!j[3]).sort((x,y)=>x[0]-y[0]);
@@ -209,15 +216,16 @@ function desenha(){ for(const t of ['a','b']){ const q=T[t].js.filter(j=>j[3]), 
    document.getElementById('bn'+t.toUpperCase()).innerHTML=bc.map(j=>tile(t,j,'b')).join(''); }
   const bt=document.getElementById('btSub'), ab=document.body.classList.contains('sub'), st=estadoSub();
   bt.classList.toggle('subOn',ab&&st!=='ok'); bt.classList.toggle('subOk',ab&&st==='ok');
-  bt.innerHTML=!ab?'SUBST.':st==='vazio'?'SUBST.<small>fechar banco</small>':st==='ok'?'CONFIRMAR<br>SUBSTITUIÇÃO':'SUBSTITUIÇÃO<br>PENDENTE'; }
+  desenhaFalta(); bt.innerHTML=!ab?'SUBST.':st==='vazio'?'SUBST.<small>fechar banco</small>':st==='ok'?'CONFIRMAR<br>SUBSTITUIÇÃO':'SUBSTITUIÇÃO<br>PENDENTE'; }
 // vazio = nada marcado; ok = nos dois times, quem entra = quem sai (e pelo menos 1); pend = falta marcar
 function estadoSub(){ let tot=0, ok=true; for(const t of ['a','b']){ const e=ENTRA[t].size, s=SAI[t].size; tot+=e+s; if(e!==s) ok=false; }
   return !tot?'vazio':ok?'ok':'pend'; }
 function aviso(t,ok){ const a=document.getElementById('aviso'); a.textContent=t; a.className=ok?'ok':''; a.style.display='block'; clearTimeout(a._t); a._t=setTimeout(()=>a.style.display='none',3200); }
-function clicaJg(t,n,onde){ if(!document.body.classList.contains('sub')) return; // fora da substituição, a camisa serve para marcar estatística (próxima etapa)
+function clicaJg(t,n,onde){ if(FA.on&&onde==='q') return marcaFalta(t,n);
+  if(!document.body.classList.contains('sub')) return; // fora da substituição e da falta, a camisa serve para as próximas estatísticas
   const jj=T[t].js.find(j=>j[0]===n); if(onde==='b'&&jj[2]>=5){ aviso(`${jj[1]} tem 5 faltas e não pode voltar`); return; }
   const S=onde==='b'?ENTRA[t]:SAI[t]; S.has(n)?S.delete(n):S.add(n); desenha(); }
-function clicaSub(){ const b=document.body;
+function clicaSub(){ const b=document.body; if(FA.on) return aviso('Termine ou feche a FALTA antes da substituição');
   if(!b.classList.contains('sub')){ b.classList.add('sub'); desenha(); return; }
   const tot=ENTRA.a.size+ENTRA.b.size+SAI.a.size+SAI.b.size;
   if(!tot){ b.classList.remove('sub'); desenha(); return; }           // nada marcado: só fecha
@@ -278,10 +286,12 @@ function jogoDe(q,raw){ const A=C.anc[q]||[[0,0]]; let i=A.length-1; while(i>0&&
 const mmss=x=>{ x=Math.max(0,Math.round(x)); return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0'); };
 const restante=(q,raw)=>Math.max(0,DUR(q)-jogoDe(q,raw));
 function pausa(){ if(C.anda){ C.raw=rawAgora(); C.anda=false; } relDesenha(); }
-function solta(){ if(C.em&&!C.anda&&!C.tmAb){ C.t0=performance.now(); C.anda=true; } relDesenha(); }
+function solta(){ clearTimeout(tSub); tSub=null; if(C.em&&!C.anda&&!C.tmAb){ C.t0=performance.now(); C.anda=true; } relDesenha(); }
 function bolaViva(){ solta(); }
 // substituição: o relógio para 4 s (tempo da troca) e volta sozinho · Magno, 24/11/2026
-let tSub=null; function pausaSub(){ const andava=C.anda; pausa(); clearTimeout(tSub); if(andava) tSub=setTimeout(()=>{ tSub=null; solta(); },4000); }   // os próximos botões (arremesso, rebote, roubo…) chamam isto
+// pausaPor: para o relógio e solta sozinho depois de "seg" (se ele estava correndo ou já ia voltar)
+let tSub=null; function pausaPor(seg){ const volta=C.anda||tSub; pausa(); clearTimeout(tSub); tSub=null; if(volta) tSub=setTimeout(()=>{ tSub=null; solta(); },seg*1000); }
+function pausaSub(){ pausaPor(4); }   // os próximos botões (arremesso, rebote, roubo…) chamam isto
 const limTm=q=>q<=2?2:q<=4?3:1;
 function relDesenha(){ const b=document.getElementById('relB'); if(!b||b.querySelector('input')) return;
   const r=restante(C.q,rawAgora()); b.textContent=mmss(r);
@@ -302,7 +312,7 @@ function clicaQuarto(){
     C.conf=0; if(C.tmAb) fechaTempo(); pausa(); const raw=C.raw, A=C.anc[C.q];
     if(raw>A[A.length-1][0]) A.push([raw,DUR(C.q)]);           // correção do fim do quarto
     C.em=false; relDesenha(); reg(null,'','',`Fim do ${NQ(C.q)}`,'qt'); aviso(`Fim do ${NQ(C.q)} · horários corrigidos`,1); return; }
-  C.q++; C.raw=0; C.anc[C.q]=[[0,0]]; C.em=true; if(C.q===3||C.q>4) C.tm={a:0,b:0};
+  C.q++; C.raw=0; C.anc[C.q]=[[0,0]]; C.em=true; FT.a=0; FT.b=0; desenhaFT(); if(C.q===3||C.q>4) C.tm={a:0,b:0};
   C.t0=performance.now(); C.anda=true; relDesenha(); reg(null,'','',`Início do ${NQ(C.q)} · cronômetro liberado (${mmss(DUR(C.q))})`,'qt'); aviso(`Início do ${NQ(C.q)}`,1); }
 function pedeTempo(t){ if(!C.em) return aviso('Quarto encerrado · toque ▶ para iniciar o próximo');
   if(C.tmAb===t) return fechaTempo();
@@ -319,6 +329,34 @@ function acerto(){ if(!C.em) return aviso('Quarto encerrado'); const b=document.
         reg(null,'','',`Relógio acertado pelo placar: ${mmss(rem)}`,'cr'); aviso('Relógio acertado',1); } }
     relDesenha(); logDesenha(); };
   i.onkeydown=e=>{ if(e.key==='Enter') fim(1); if(e.key==='Escape') fim(0); }; i.onblur=()=>fim(1); }
+
+// ===== FALTA (Magno + Claude, 24/11/2026) =====
+// FALTA → camisa de quem FEZ → (opcional) camisa de quem SOFREU, no outro time → FALTA de novo confirma.
+// Tocar de novo numa camisa desmarca; desmarcar quem fez libera tudo. FALTA sem nada marcado fecha.
+// A falta recebida (quem sofreu) é gravada junto, por isso o botão FALTA REC. ficou livre.
+const jog=(t,n)=>T[t].js.find(j=>j[0]===n);
+function desenhaFT(){ for(const t of ['a','b']){ const e=document.getElementById('f'+t.toUpperCase()); e.querySelector('b').textContent=FT[t]; e.classList.toggle('bonus',FT[t]>=4);
+   e.title=FT[t]>=4?'Faltas do time no quarto · a partir da próxima, lances livres (bônus)':'Faltas do time no quarto'; } }
+function desenhaFalta(){ const b=document.getElementById('btFal'); if(!b) return;
+  b.classList.toggle('subOn',FA.on&&!FA.fez); b.classList.toggle('subOk',FA.on&&!!FA.fez);
+  b.innerHTML=!FA.on?'FALTA':!FA.fez?'FALTA<small>marque quem fez · toque aqui p/ fechar</small>':FA.sof?'CONFIRMAR<br>FALTA':'CONFIRMAR<br>FALTA<small>quem sofreu: opcional</small>'; }
+function marcaFalta(t,n){
+  if(!FA.fez){ FA.fez={t,n}; }
+  else if(FA.fez.t===t){ if(FA.fez.n===n){ FA.fez=null; FA.sof=null; } else FA.fez={t,n}; }   // mesma camisa desmarca tudo; outra do mesmo time troca
+  else { FA.sof=FA.sof&&FA.sof.n===n?null:{t,n}; }
+  desenha(); }
+function clicaFalta(){ if(document.body.classList.contains('sub')) return aviso('Termine ou feche a substituição antes da FALTA');
+  if(!FA.on){ FA.on=true; desenha(); return; }
+  if(!FA.fez){ FA.on=false; FA.sof=null; desenha(); return; }
+  const {t,n}=FA.fez, j=jog(t,n); j[2]=Math.min(5,j[2]+1); FT[t]++;
+  let txt=`Falta (${j[2]}ª)`;
+  if(FA.sof){ const s=jog(FA.sof.t,FA.sof.n); s[4]=(s[4]||0)+1; txt+=` em ${s[1]} (${s[0]})`; }
+  if(FT[t]>=5) txt+=` · ${FT[t]}ª do time no quarto (bônus)`;
+  pausaPor(8);                                    // falta para o relógio; volta sozinho em 8 s (reposição) até o LANCE LIVRE existir
+  reg(t,n,j[1],txt,'fa');
+  FA.on=false; FA.fez=null; FA.sof=null; desenhaFT(); desenha();
+  if(j[2]>=5){ reg(t,n,j[1],'EXCLUÍDO (5 faltas) · faça a substituição','er'); aviso(`${j[1]} (${n}) excluído com 5 faltas · faça a substituição`); }
+  else aviso(`Falta de ${j[1]} (${n}) · relógio volta em 8 s`,1); }
 
 // ===== LANCE A LANCE (começa vazio; só recebe o que os botões registram; mais novo em cima) =====
 const LOG=[];
