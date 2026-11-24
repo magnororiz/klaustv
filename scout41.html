@@ -218,7 +218,7 @@ function clicaJg(t,n,onde){ if(!document.body.classList.contains('sub')) return;
   const jj=T[t].js.find(j=>j[0]===n); if(onde==='b'&&jj[2]>=5){ aviso(`${jj[1]} tem 5 faltas e não pode voltar`); return; }
   const S=onde==='b'?ENTRA[t]:SAI[t]; S.has(n)?S.delete(n):S.add(n); desenha(); }
 function clicaSub(){ const b=document.body;
-  if(!b.classList.contains('sub')){ b.classList.add('sub'); pausa(); desenha(); return; }
+  if(!b.classList.contains('sub')){ b.classList.add('sub'); desenha(); return; }
   const tot=ENTRA.a.size+ENTRA.b.size+SAI.a.size+SAI.b.size;
   if(!tot){ b.classList.remove('sub'); desenha(); return; }           // nada marcado: só fecha
   for(const t of ['a','b']){ const e=ENTRA[t].size, s=SAI[t].size;
@@ -229,7 +229,7 @@ function clicaSub(){ const b=document.body;
     const nomes=x=>[...x].map(n=>{const j=T[t].js.find(j=>j[0]===n); return `${j[1]} (${n})`;}).join(', ');
     reg(t,'',T[t].nome,`Entra ${nomes(ENTRA[t])} · Sai ${nomes(SAI[t])}`,'sb');
     T[t].js.forEach(j=>{ if(ENTRA[t].has(j[0])) j[3]=1; if(SAI[t].has(j[0])) j[3]=0; }); ENTRA[t].clear(); SAI[t].clear(); }
-  b.classList.remove('sub'); desenha(); logDesenha(); aviso('Substituição feita',1); }
+  b.classList.remove('sub'); desenha(); logDesenha(); pausaSub(); aviso('Substituição feita · relógio volta em 4 s',1); }
 desenha();
 function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
 
@@ -279,7 +279,9 @@ const mmss=x=>{ x=Math.max(0,Math.round(x)); return String(Math.floor(x/60)).pad
 const restante=(q,raw)=>Math.max(0,DUR(q)-jogoDe(q,raw));
 function pausa(){ if(C.anda){ C.raw=rawAgora(); C.anda=false; } relDesenha(); }
 function solta(){ if(C.em&&!C.anda&&!C.tmAb){ C.t0=performance.now(); C.anda=true; } relDesenha(); }
-function bolaViva(){ solta(); }   // os próximos botões (arremesso, rebote, roubo…) chamam isto
+function bolaViva(){ solta(); }
+// substituição: o relógio para 4 s (tempo da troca) e volta sozinho · Magno, 24/11/2026
+let tSub=null; function pausaSub(){ const andava=C.anda; pausa(); clearTimeout(tSub); if(andava) tSub=setTimeout(()=>{ tSub=null; solta(); },4000); }   // os próximos botões (arremesso, rebote, roubo…) chamam isto
 const limTm=q=>q<=2?2:q<=4?3:1;
 function relDesenha(){ const b=document.getElementById('relB'); if(!b||b.querySelector('input')) return;
   const r=restante(C.q,rawAgora()); b.textContent=mmss(r);
@@ -301,7 +303,7 @@ function clicaQuarto(){
     if(raw>A[A.length-1][0]) A.push([raw,DUR(C.q)]);           // correção do fim do quarto
     C.em=false; relDesenha(); reg(null,'','',`Fim do ${NQ(C.q)}`,'qt'); aviso(`Fim do ${NQ(C.q)} · horários corrigidos`,1); return; }
   C.q++; C.raw=0; C.anc[C.q]=[[0,0]]; C.em=true; if(C.q===3||C.q>4) C.tm={a:0,b:0};
-  C.t0=performance.now(); C.anda=true; relDesenha(); reg(null,'','',`Início do ${NQ(C.q)}`,'qt'); aviso(`Início do ${NQ(C.q)}`,1); }
+  C.t0=performance.now(); C.anda=true; relDesenha(); reg(null,'','',`Início do ${NQ(C.q)} · cronômetro liberado (${mmss(DUR(C.q))})`,'qt'); aviso(`Início do ${NQ(C.q)}`,1); }
 function pedeTempo(t){ if(!C.em) return aviso('Quarto encerrado · toque ▶ para iniciar o próximo');
   if(C.tmAb===t) return fechaTempo();
   if(C.tmAb) return aviso(`Feche antes o pedido de tempo do ${T[C.tmAb].nome}`);
@@ -326,7 +328,7 @@ function logDesenha(){ const ul=document.getElementById('lal');
   if(!LOG.length){ ul.innerHTML='<li class="vz">Nenhum lance registrado ainda · cada botão que você usar aparece aqui</li>'; return; }
   ul.innerHTML=LOG.map((e,i)=>{ const ant=LOG[i+1], dt=ant?'+'+mmss((e.real-ant.real)/1000).replace(/^0/,''):'';
     return `<li><span class="h">≈${mmss(restante(e.q,e.raw))}</span><span class="dt">${dt}</span><span class="q">${NQ(e.q)}</span><span class="d" style="${e.t?COR[e.t]:''}"></span><span class="c">${e.n}</span><span>${e.nm}</span><span class="ac ${e.k}">${e.a}</span></li>`; }).join(''); }
-reg(null,'','','Início do 1º Q','qt');   // teste: ao abrir a página o 1º quarto já começa correndo
+reg(null,'','','Início do 1º Q · cronômetro liberado (10:00)','qt');   // teste: ao abrir a página o 1º quarto já começa correndo
 </script>
 </body>
 </html>
