@@ -253,7 +253,7 @@ function dePacote(t){ const o=b64d(t); FOTOS={}; APS={}; PRE={}; const meta={};
   J={id:o.id,categoria:o.c,dataHora:o.d,timeA:meta.timeA.sigla,timeB:meta.timeB.sigla,meta}; TEMP={ok:true,ks:[],jogos:[]}; }
 function copiaSaida(b){
   if(!(J&&J.id)){ alert('Escolha o jogo primeiro (Categoria › Time › Jogo).'); return; }
-  const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1&jogo='+encodeURIComponent(J.id)+'&mod='+MODELO; // jogo escolhido na agenda, independente do Scout (Magno, 24/11/2026) // ligada ao Scout (Magno, 24/11/2026): o OBS mostra sempre o jogo aberto no Scout // v= muda a cada cópia: o OBS não usa a cópia velha guardada
+  const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1&mod='+MODELO+'&v='+Date.now().toString(36)+'#d='+pacote(); // endereço gigante de volta (Magno, 24/11/2026): a escalação inteira vai dentro da URL e o OBS não precisa buscar nada no servidor // jogo escolhido na agenda, independente do Scout (Magno, 24/11/2026) // ligada ao Scout (Magno, 24/11/2026): o OBS mostra sempre o jogo aberto no Scout // v= muda a cada cópia: o OBS não usa a cópia velha guardada
   (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{ b.textContent='✓ Copiado! Cole no OBS (fonte Navegador)'; setTimeout(()=>b.textContent='📋 Copiar URL de saída (OBS)',2500); }).catch(()=>prompt('Copie a URL de saída:',u)); }
 
 // ---------- filtros fixos: Categoria > Time > Jogo ----------

@@ -178,7 +178,7 @@ const MODELOS=[];[['1','FBERJ'],['2','Klaus'],['3','Klaus TV']].forEach(([m,n])=
 [['0',''],['1',' relógio'],['2',' relógio e cronômetro']].forEach(([c,t])=>MODELOS.push({m:'4',c,nome:'Overlay alto'+t})); // modelo alto nas 3 versões de câmera (Magno, 24/11/2026)
 $('selMod').innerHTML=MODELOS.map((o,i)=>`<option value="${i}"${o.m===mo&&o.c===CAM?' selected':''}>${o.nome}</option>`).join('');
 $('selMod').onchange=()=>{ const o=MODELOS[+$('selMod').value]; const u=new URL(location); u.searchParams.set('modelo',o.m); u.searchParams.set('cam',o.c); u.searchParams.delete('c24'); location.replace(u); };
-$('bCopiar').onclick=()=>{ const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1&modelo='+mo+'&cam='+CAM+(JOGO?'&jogo='+encodeURIComponent(JOGO):'');
+$('bCopiar').onclick=()=>{ const u=location.origin+location.pathname.replace(/\.html$/,'')+'?obs=1&modelo='+mo+'&cam='+CAM+(JOGO?'&jogo='+encodeURIComponent(JOGO):'')+'&v='+Date.now().toString(36); // v= muda a cada cópia: o OBS não usa cópia velha
   (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{ $('bCopiar').textContent='✓ Copiado! Cole no OBS (fonte Navegador)'; setTimeout(()=>$('bCopiar').textContent='📋 Copiar URL de saída (OBS)',2500); }).catch(()=>prompt('Copie a URL de saída:',u)); };
 // nome: o maior que couber (nome completo da FBERJ → nome médio → nome curto do site), diminuindo um pouco a letra antes de trocar
 function cabe(el,txt){ const F=ALTO?40:31; for(let f=F;f>=F-8;f--){ el.style.fontSize=f+'px'; el.textContent=txt; if(el.scrollWidth<=el.clientWidth+1) return true; } return false; }
