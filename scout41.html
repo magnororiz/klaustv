@@ -221,9 +221,9 @@ function clicaSub(){ const b=document.body;
 desenha();
 function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
 
-// meia quadra FIBA (metros × 40): 15 m de largura, mostrada até ~10,6 m; linha branca embaixo = fim da área marcada
+// meia quadra FIBA (metros × 40): 15 m de largura, até o meio (14 m) + um pedaço da defesa, com o círculo central (enquadramento do InGame)
 // estica para ocupar todo o espaço (pode ficar um pouco mais larga que o real) · Magno, 24/11/2026
-(function(){ const S=40,W=15*S,H=10.6*S,cx=W/2,cy=1.575*S;
+(function(){ const S=40,W=15*S,H=16*S,M=14*S,cx=W/2,cy=1.575*S;
  const r3=6.75*S, yq=cy+Math.sqrt(6.75**2-6.6**2)*S, x1=.9*S, x2=W-.9*S;
  const L='#e8e8e8', lw=3;
  document.getElementById('quadra').innerHTML=`<svg viewBox="-6 -6 ${W+12} ${H+12}" preserveAspectRatio="none">
@@ -234,7 +234,8 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
   <rect x="${cx-2.45*S}" y="0" width="${4.9*S}" height="${5.8*S}" fill="url(#gar)"/>
   <g fill="none" stroke="${L}" stroke-width="${lw}" vector-effect="non-scaling-stroke">
    <path d="M0 ${H}V0H${W}V${H}"/>
-   <line x1="0" y1="${H}" x2="${W}" y2="${H}" stroke="#ffffff" stroke-width="${lw+1}"/>
+   <line x1="0" y1="${M}" x2="${W}" y2="${M}"/>
+   <circle cx="${cx}" cy="${M}" r="${1.8*S}"/>
    <rect x="${cx-2.45*S}" y="0" width="${4.9*S}" height="${5.8*S}"/>
    <path d="M${cx-1.8*S} ${5.8*S}A${1.8*S} ${1.8*S} 0 0 0 ${cx+1.8*S} ${5.8*S}"/>
    <path d="M${cx-1.8*S} ${5.8*S}A${1.8*S} ${1.8*S} 0 0 1 ${cx+1.8*S} ${5.8*S}" stroke-dasharray="14 12"/>
@@ -243,7 +244,6 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
    <line x1="${cx-.9*S}" y1="${1.2*S}" x2="${cx+.9*S}" y2="${1.2*S}" stroke-width="5"/>
    <circle cx="${cx}" cy="${cy}" r="${.225*S}" stroke="#ff8a1a"/>
   </g>
-  <image href="logo_klaustv_tv.png" x="${cx-1.5*S}" y="${H-1.75*S}" width="${3*S}" height="${1.4*S}" opacity=".35" preserveAspectRatio="xMidYMid meet"/>
  </svg>`; })();
 
 // lance a lance: começa vazio e só recebe o que os botões registram (mais novo em cima) · Magno, 24/11/2026
