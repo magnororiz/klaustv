@@ -226,25 +226,28 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
 
 // meia quadra FIBA (metros × 40): 15 m de largura, até o meio (14 m) + um pedaço da defesa, com o círculo central (enquadramento do InGame)
 // estica para ocupar todo o espaço (pode ficar um pouco mais larga que o real) · Magno, 24/11/2026
-(function(){ const S=40,W=15*S,H=16*S,M=14*S,cx=W/2,cy=1.575*S;
- const r3=6.75*S, yq=cy+Math.sqrt(6.75**2-6.6**2)*S, x1=.9*S, x2=W-.9*S;
+(function(){ const S=40,W=15*S,H=16*S,M=14*S,cx=W/2;
+ // K estica só o ataque na vertical: garrafão mais comprido e linha de 3 mais perto do meio (não é medida real) · Magno, 24/11/2026
+ const K=1.28, y=m=>m*S*K, cy=y(1.575);
+ const r3=6.75*S, yq=y(1.575+Math.sqrt(6.75**2-6.6**2)), x1=.9*S, x2=W-.9*S, ry3=r3*K;
+ const gw=4.9*S, gh=y(5.8), rl=1.8*S, rlY=rl*K;
  const L='#e8e8e8', lw=3;
  document.getElementById('quadra').innerHTML=`<svg viewBox="-6 -6 ${W+12} ${H+12}" preserveAspectRatio="none">
   <defs><linearGradient id="pis" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151515"/><stop offset="1" stop-color="#0c0c0c"/></linearGradient>
   <linearGradient id="gar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d4a9e"/><stop offset="1" stop-color="#12306b"/></linearGradient></defs>
   <rect x="0" y="0" width="${W}" height="${H}" fill="url(#pis)"/>
-  <path d="M${x1} 0V${yq}A${r3} ${r3} 0 0 0 ${x2} ${yq}V0Z" fill="#ffffff" fill-opacity=".025"/>
-  <rect x="${cx-2.45*S}" y="0" width="${4.9*S}" height="${5.8*S}" fill="url(#gar)"/>
+  <path d="M${x1} 0V${yq}A${r3} ${ry3} 0 0 0 ${x2} ${yq}V0Z" fill="#ffffff" fill-opacity=".025"/>
+  <rect x="${cx-gw/2}" y="0" width="${gw}" height="${gh}" fill="url(#gar)"/>
   <g fill="none" stroke="${L}" stroke-width="${lw}" vector-effect="non-scaling-stroke">
    <path d="M0 ${H}V0H${W}V${H}"/>
    <line x1="0" y1="${M}" x2="${W}" y2="${M}"/>
    <circle cx="${cx}" cy="${M}" r="${1.8*S}"/>
-   <rect x="${cx-2.45*S}" y="0" width="${4.9*S}" height="${5.8*S}"/>
-   <path d="M${cx-1.8*S} ${5.8*S}A${1.8*S} ${1.8*S} 0 0 0 ${cx+1.8*S} ${5.8*S}"/>
-   <path d="M${cx-1.8*S} ${5.8*S}A${1.8*S} ${1.8*S} 0 0 1 ${cx+1.8*S} ${5.8*S}" stroke-dasharray="14 12"/>
-   <path d="M${x1} 0V${yq}A${r3} ${r3} 0 0 0 ${x2} ${yq}V0"/>
-   <path d="M${cx-1.25*S} ${cy}A${1.25*S} ${1.25*S} 0 0 0 ${cx+1.25*S} ${cy}"/>
-   <line x1="${cx-.9*S}" y1="${1.2*S}" x2="${cx+.9*S}" y2="${1.2*S}" stroke-width="5"/>
+   <rect x="${cx-gw/2}" y="0" width="${gw}" height="${gh}"/>
+   <path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 0 ${cx+rl} ${gh}"/>
+   <path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 1 ${cx+rl} ${gh}" stroke-dasharray="14 12"/>
+   <path d="M${x1} 0V${yq}A${r3} ${ry3} 0 0 0 ${x2} ${yq}V0"/>
+   <path d="M${cx-1.25*S} ${cy}A${1.25*S} ${1.25*S*K} 0 0 0 ${cx+1.25*S} ${cy}"/>
+   <line x1="${cx-.9*S}" y1="${y(1.2)}" x2="${cx+.9*S}" y2="${y(1.2)}" stroke-width="5"/>
    <circle cx="${cx}" cy="${cy}" r="${.225*S}" stroke="#ff8a1a"/>
   </g>
  </svg>`; })();
