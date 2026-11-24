@@ -131,6 +131,7 @@ body.sub .banco{display:grid}
 #zTip{position:absolute;left:50%;top:8px;transform:translateX(-50%);background:rgba(10,14,24,.85);border:1px solid #ffd54f;color:#ffe9a3;font:700 13px Arial;padding:4px 10px;border-radius:6px;pointer-events:none;display:none;z-index:6;white-space:nowrap}
 #arMenu{position:absolute;display:none;z-index:7;background:#121a2b;border:2px solid #ffd54f;border-radius:8px;padding:6px;gap:6px;box-shadow:0 6px 18px rgba(0,0,0,.7)}
 #arMenu.on{display:flex}#arMenu button{width:44px;height:38px;border-radius:6px;border:0;font:700 22px Arial;cursor:pointer;color:#fff}
+#arTxt{display:none;color:#ffe9a3;font:700 15px Arial;padding:0 8px;align-self:center;white-space:nowrap}#arMenu.jog #arTxt{display:block}#arMenu.jog .ok,#arMenu.jog .er{display:none}
 #arMenu .ok{background:#1b5e20}#arMenu .er{background:#7f1d1d}#arMenu .x{background:#2a3248;font-size:14px;width:28px}
 #aviso{pointer-events:none;position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#d32f2f;color:#fff;font:700 15px Arial;padding:8px 16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.6);display:none;z-index:9}
 #aviso.ok{background:#1b5e20}
@@ -208,7 +209,7 @@ body.sub .banco{display:grid}
   </section>
 
   <section class="meio"><div class="quadra" id="quadra"></div><div id="llMenu"><div class="cx"><h4><b id="llTit">LANCE LIVRE</b><span onclick="cancelaLL()">✕</span></h4><div id="llOp"></div></div></div>
-<div id="zTip"></div><div id="arMenu"><button class="ok" onclick="resAr(1)" title="Cesta">✓</button><button class="er" onclick="resAr(0)" title="Errou">✗</button><button class="x" onclick="cancelaAr()" title="Cancelar">✕</button></div><div id="tarja" onclick="clicaPlay()">⚠ LIBERE O RELÓGIO NO REINÍCIO DO JOGO ▶</div></section>
+<div id="zTip"></div><div id="arMenu"><button class="ok" onclick="resAr(1)" title="Cesta">✓</button><button class="er" onclick="resAr(0)" title="Errou">✗</button><span id="arTxt">Escolha o jogador</span><button class="x" onclick="cancelaAr()" title="Cancelar">✕</button></div><div id="tarja" onclick="clicaPlay()">⚠ LIBERE O RELÓGIO NO REINÍCIO DO JOGO ▶</div></section>
 
   <section class="baixo">
     <div class="banco">
@@ -325,17 +326,22 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
    <line x1="0" y1="${M}" x2="${W}" y2="${M}"/>
    <ellipse id="cc" cx="${cx}" cy="${M}" rx="${1.8*S}" ry="${1.8*S}"/>
    <rect x="${cx-gw/2}" y="0" width="${gw}" height="${gh}"/>
-   <path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 0 ${cx+rl} ${gh}"/>
-   <path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 1 ${cx+rl} ${gh}" stroke-dasharray="14 12"/>
+   <path id="ll1" d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 0 ${cx+rl} ${gh}"/>
+   <path id="ll2" d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 1 ${cx+rl} ${gh}" stroke-dasharray="14 12"/>
    <path d="M${x1} 0V${yq}A${r3} ${ry3} 0 0 0 ${x2} ${yq}V0"/>
-   <path d="M${cx-1.25*S} ${cy}A${1.25*S} ${1.25*S*K} 0 0 0 ${cx+1.25*S} ${cy}"/>
+   <path id="ra" d="M${cx-1.25*S} ${cy}A${1.25*S} ${1.25*S*K} 0 0 0 ${cx+1.25*S} ${cy}"/>
    <line x1="${cx-.9*S}" y1="${y(1.2)}" x2="${cx+.9*S}" y2="${y(1.2)}" stroke-width="5"/>
    <circle cx="${cx}" cy="${cy}" r="${.225*S}" stroke="#ff8a1a"/>
   </g>
  </svg>`;
  // círculo do meio sempre redondo na tela (a quadra é esticada); o que passa da borda de baixo fica cortado · Magno, 24/11/2026
  function redondo(){ const q=document.querySelector('#quadra svg'), w=q.clientWidth, h=q.clientHeight; if(!w||!h) return;
-   const sx=w/(W+12), sy=h/(H+12); document.getElementById('cc').setAttribute('ry',1.8*S*sx/sy); }
+   const sx=w/(W+12), sy=h/(H+12), f=sx/sy; document.getElementById('cc').setAttribute('ry',1.8*S*f);
+   // círculo do lance livre e área restrita também redondos na tela (Magno, 24/11/2026)
+   document.getElementById('ll1').setAttribute('d',`M${cx-rl} ${gh}A${rl} ${rl*f} 0 0 0 ${cx+rl} ${gh}`);
+   document.getElementById('ll2').setAttribute('d',`M${cx-rl} ${gh}A${rl} ${rl*f} 0 0 1 ${cx+rl} ${gh}`);
+   document.getElementById('ra').setAttribute('d',`M${cx-1.25*S} ${cy}A${1.25*S} ${1.25*S*f} 0 0 0 ${cx+1.25*S} ${cy}`);
+   window.zF=f; if(window.zOK) montaZonas(); }
  redondo(); addEventListener('resize',redondo); new ResizeObserver(redondo).observe(document.getElementById('quadra')); })();
 
 
@@ -347,7 +353,7 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
 //  · Embaixo da cesta (até 2,25 m), um setor só
 //  · Meia distância (2,25 a 4,4 m): lateral esquerda (θ>30°), frente (|θ|≤30°), lateral direita
 //  · Longe (4,4 m até a linha de 3): fundo (θ>50°), 45° (20–50°) e frente (|θ|≤20°), dos dois lados
-const ZG={S:40,K:1.28,cx:300,cyM:1.575,r1:2.25,r2:4.4};
+const ZG={S:40,K:1.28,cx:300,cyM:1.575,r1:2.25,r2:4.4,q:1};   // q: deixa os círculos dos setores redondos na tela
 const ZN={ce:'Embaixo da cesta',mL:'Meia distância · lateral esquerda',mC:'Meia distância · frente',mR:'Meia distância · lateral direita',
  oLC:'Longe · fundo esquerdo',oLW:'Longe · 45° esquerdo',oC:'Longe · frente',oRW:'Longe · 45° direito',oRC:'Longe · fundo direito'};
 const ST={}, AR={x:0,y:0,z:null,lado:'',res:null}, MARCAS=[];
@@ -356,33 +362,34 @@ function zM(x,y){ return {mx:(x-ZG.cx)/ZG.S, my:y/(ZG.S*ZG.K)-ZG.cyM}; }        
 function zS(mx,my){ return [ZG.cx+mx*ZG.S,(my+ZG.cyM)*ZG.S*ZG.K]; }              // metros → svg
 function den2(mx,my){ if(my<-ZG.cyM||Math.abs(mx)>=6.6) return false;          // dentro da quadra e da linha de 3
   return my<=Math.sqrt(6.75**2-6.6**2)||Math.hypot(mx,my)<6.75; }
-function zona(mx,my){ if(!den2(mx,my)) return null; const d=Math.hypot(mx,my), th=Math.atan2(mx,my)*180/Math.PI, a=Math.abs(th), E=mx<0;
+function zona(mx,my){ if(!den2(mx,my)) return null; const d=Math.hypot(mx,my*ZG.q), th=Math.atan2(mx,my*ZG.q)*180/Math.PI, a=Math.abs(th), E=mx<0;
   if(d<ZG.r1) return 'ce'; if(d<ZG.r2) return a<=30?'mC':E?'mL':'mR';
   return a<=20?'oC':a<=50?(E?'oLW':'oRW'):(E?'oLC':'oRC'); }
 const comLado=z=>false;
 function nomeZ(z,lado){ return ZN[z]+(comLado(z)?` · lado ${lado}`:''); }
-(function(){ const svg=document.querySelector('#quadra svg'); if(!svg) return;
-  const rMax=th=>{ let lo=0,hi=9; const dx=Math.sin(th),dy=Math.cos(th); for(let i=0;i<30;i++){ const m=(lo+hi)/2; den2(dx*m,dy*m)?lo=m:hi=m; } return lo; };
-  const pol=(a,b,rin,rout)=>{ const P=[], st=(b-a)/90; for(let i=0;i<=90;i++){ const th=(a+st*i)*Math.PI/180, r=Math.min(rout,rMax(th)); P.push(zS(Math.sin(th)*r,Math.cos(th)*r)); }
-    for(let i=90;i>=0;i--){ const th=(a+st*i)*Math.PI/180, r=Math.min(rin,rMax(th)); P.push(zS(Math.sin(th)*r,Math.cos(th)*r)); }
+function montaZonas(){ const svg=document.querySelector('#quadra svg'); if(!svg) return; ZG.q=ZG.K/(window.zF||1); const Q=ZG.q, zR=(u,v)=>zS(u,v/Q);
+  const rMax=th=>{ let lo=0,hi=9; const dx=Math.sin(th),dy=Math.cos(th); for(let i=0;i<30;i++){ const m=(lo+hi)/2; den2(dx*m,dy*m/Q)?lo=m:hi=m; } return lo; };
+  const pol=(a,b,rin,rout)=>{ const P=[], st=(b-a)/90; for(let i=0;i<=90;i++){ const th=(a+st*i)*Math.PI/180, r=Math.min(rout,rMax(th)); P.push(zR(Math.sin(th)*r,Math.cos(th)*r)); }
+    for(let i=90;i>=0;i--){ const th=(a+st*i)*Math.PI/180, r=Math.min(rin,rMax(th)); P.push(zR(Math.sin(th)*r,Math.cos(th)*r)); }
     return 'M'+P.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join('L')+'Z'; };
   // θ negativo = lado esquerdo da tela
   const Z=[['ce','',-180,180,0,ZG.r1],
    ['mL','',-180,-30,ZG.r1,ZG.r2],['mC','',-30,30,ZG.r1,ZG.r2],['mR','',30,180,ZG.r1,ZG.r2],
    ['oLC','',-180,-50,ZG.r2,9],['oLW','',-50,-20,ZG.r2,9],['oC','',-20,20,ZG.r2,9],['oRW','',20,50,ZG.r2,9],['oRC','',50,180,ZG.r2,9]];
-  const ns='http://www.w3.org/2000/svg', g=document.createElementNS(ns,'g'); g.id='zonas';
+  const ns='http://www.w3.org/2000/svg'; let g=document.getElementById('zonas'); if(!g){ g=document.createElementNS(ns,'g'); g.id='zonas'; svg.appendChild(g); }
   const lin=(d,cls)=>`<path class="${cls}" vector-effect="non-scaling-stroke" d="${d}"/>`;
   let h=Z.map(([z,l,a,b,ri,ro])=>`<path class="zn" data-z="${z}" data-l="${l}" d="${pol(a,b,ri,ro)}"/>`).join('');
   // linhas dos setores: círculos 2,25 e 4,4 m e os raios de 30°, 20° e 50°
-  const arco=r=>{ const P=[]; for(let i=0;i<=180;i++){ const th=(-180+i*2)*Math.PI/180, rr=Math.min(r,rMax(th)); if(rr<r-.01) continue; P.push(zS(Math.sin(th)*r,Math.cos(th)*r)); } return 'M'+P.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join('L'); };
-  const raio=(deg,r0,r1)=>{ const th=deg*Math.PI/180, a=zS(Math.sin(th)*r0,Math.cos(th)*r0), rr=Math.min(r1,rMax(th)), b=zS(Math.sin(th)*rr,Math.cos(th)*rr); return `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`; };
+  const arco=r=>{ const P=[]; for(let i=0;i<=180;i++){ const th=(-180+i*2)*Math.PI/180, rr=Math.min(r,rMax(th)); if(rr<r-.01) continue; P.push(zR(Math.sin(th)*r,Math.cos(th)*r)); } return 'M'+P.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join('L'); };
+  const raio=(deg,r0,r1)=>{ const th=deg*Math.PI/180, a=zR(Math.sin(th)*r0,Math.cos(th)*r0), rr=Math.min(r1,rMax(th)), b=zR(Math.sin(th)*rr,Math.cos(th)*rr); return `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`; };
   h+=lin(arco(ZG.r1),'znL')+lin(arco(ZG.r2),'znL');
   for(const d of [-30,30]) h+=lin(raio(d,ZG.r1,ZG.r2),'znL'); for(const d of [-20,20,-50,50]) h+=lin(raio(d,ZG.r2,9),'znL');
   h+=`<g id="marcas" style="pointer-events:none"></g>`;   // sem linha tracejada: o ponto exato do clique já mostra o lado (Magno, 24/11/2026)
-  g.innerHTML=h; g.querySelectorAll('.znL').forEach(e=>e.style.pointerEvents='none'); svg.appendChild(g);
+  g.innerHTML=h; g.querySelectorAll('.znL').forEach(e=>e.style.pointerEvents='none'); desenhaMarcas();
   const tip=document.getElementById('zTip');
   g.querySelectorAll('.zn').forEach(p=>{ p.onmouseenter=()=>{ if(AR.z) return; tip.textContent=nomeZ(p.dataset.z,p.dataset.l)+' · 2 pontos'; tip.style.display='block'; };
-    p.onmouseleave=()=>{ if(!AR.z) tip.style.display='none'; }; p.onclick=e=>clicaZona(e,p); }); })();
+    p.onmouseleave=()=>{ if(!AR.z) tip.style.display='none'; }; p.onclick=e=>clicaZona(e,p); }); }
+window.zOK=1; montaZonas();
 function ptSvg(e){ const svg=document.querySelector('#quadra svg'), pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
 function clicaZona(e,p){ const b=document.body;
   if(b.classList.contains('sub')) return aviso('Termine ou feche a substituição antes do arremesso');
@@ -394,10 +401,10 @@ function clicaZona(e,p){ const b=document.body;
   desenhaMarcas(); const m=document.getElementById('arMenu'), mr=document.querySelector('.meio').getBoundingClientRect();
   m.classList.add('on'); const mw=m.offsetWidth, mh=m.offsetHeight; let L=e.clientX-mr.left-mw/2, T=e.clientY-mr.top-mh-14; if(T<4) T=e.clientY-mr.top+14;
   m.style.left=Math.max(4,Math.min(mr.width-mw-4,L))+'px'; m.style.top=T+'px'; }
-function resAr(v){ if(!AR.z) return; AR.res=v; document.getElementById('arMenu').classList.remove('on'); desenhaMarcas();
+function resAr(v){ if(!AR.z) return; AR.res=v; const m=document.getElementById('arMenu'); m.classList.add('jog'); desenhaMarcas();   // no mesmo lugar: "Escolha o jogador"
   const tip=document.getElementById('zTip'); tip.textContent=`${v?'Cesta de 2':'Arremesso de 2 errado'} · toque na camisa de quem arremessou`; tip.style.display='block';
-  aviso('Toque na camisa de quem arremessou',1); }
-function cancelaAr(){ AR.z=null; AR.res=null; document.getElementById('arMenu').classList.remove('on'); document.getElementById('zTip').style.display='none';
+}
+function cancelaAr(){ AR.z=null; AR.res=null; document.getElementById('arMenu').classList.remove('on','jog'); document.getElementById('zTip').style.display='none';
   document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); desenhaMarcas(); }
 function marcaAr(t,n){ const j=jog(t,n), s=stJ(t,n), v=AR.res, onde=nomeZ(AR.z,AR.lado);
   if(v){ s.pts+=2; s.twoMade++; PL[t]+=2; desenhaPL(); } else s.twoMiss++;
