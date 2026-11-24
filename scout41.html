@@ -184,6 +184,7 @@ body.sub .banco{display:grid}
 .bt.ina{cursor:default}
 .az{--bar:#1e5bd8}.vd{--bar:#2fae4a}.vm{--bar:#d83a3a}.am{--bar:#e8a317}
 .bt.undo{font-size:28px}
+.bt2{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-height:0}.bt.undo.off{opacity:.3;cursor:default;filter:none;transform:none}   /* ↶ desfazer · ↷ refazer (Magno, 24/11/2026) */
 .marca{position:fixed;right:12px;bottom:8px;font:600 11px Arial;color:#ffd54f;background:rgba(0,0,0,.7);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
 </style>
 </head>
@@ -229,7 +230,7 @@ body.sub .banco{display:grid}
     <div class="bt vm" id="btFal" onclick="clicaFalta()">FALTA</div><div class="bt vm" id="btFE" onclick="clicaFE()" title="Técnica, disruptiva, flagrante, desqualificante e do técnico/banco">FALTA<br>ESPECIAL</div>
     <div class="bt am" id="bt_tov" onclick="clicaEst('tov')"><span>TURNOVER<small>erro</small></span></div><div class="bt am" id="bt_stl" onclick="clicaEst('stl')">ROUBO<br>DE BOLA</div>
     <div class="bt ina" title="Em construção">TEMPO</div><div class="bt" id="bt_blk" onclick="clicaEst('blk')">TOCO</div>
-    <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt undo ina" title="Desfazer a última ação · em construção">↶</div>
+    <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt2"><div class="bt undo off" id="btUn" onclick="desfaz()" title="Desfazer a última ação">↶</div><div class="bt undo off" id="btRe" onclick="refaz()" title="Refazer a ação desfeita">↷</div></div>
   </section>
 </main>
 <div id="aviso"></div>
@@ -652,7 +653,28 @@ function marcaEst(t,n){ const k=EST.k, [nm,,v]=ESN[k], j=jog(t,n), s=stJ(t,n); s
 
 // ===== LANCE A LANCE (começa vazio; só recebe o que os botões registram; mais novo em cima) =====
 const LOG=[];
-function reg(t,n,nm,a,k){ LOG.unshift({q:C.q,raw:rawAgora(),real:Date.now(),t,n,nm,a,k}); logDesenha(); }
+function reg(t,n,nm,a,k){ LOG.unshift({q:C.q,raw:rawAgora(),real:Date.now(),t,n,nm,a,k}); logDesenha(); histMarca(k); }
+
+// ===== ↶ DESFAZER · ↷ REFAZER (Magno, 24/11/2026) =====
+// Cada toque no ↶ desfaz a última ação (um toque de botão = uma ação, mesmo que tenha gerado 2 linhas no lance a lance).
+// O ↷ só acende depois de um ↶ e refaz o que foi desfeito; qualquer ação nova apaga o que dava para refazer.
+// Fim/início de quarto, acerto do relógio e pedido de tempo mexem no relógio: não se desfazem (viram o novo ponto de partida).
+const HI={h:[],i:-1,pend:0,base:0};
+function histFoto(){ return JSON.stringify({js:{a:T.a.js,b:T.b.js},PL,FT,TC,ST,MARCAS,LOG}); }
+function histMarca(k){ if(['qt','cr','tm'].includes(k)) HI.base=1; if(HI.pend) return; HI.pend=1;
+  queueMicrotask(()=>{ HI.pend=0; const f=histFoto(); if(HI.base){ HI.base=0; HI.h=[f]; HI.i=0; } else { HI.h=HI.h.slice(0,HI.i+1); HI.h.push(f); HI.i++; } desenhaUR(); }); }
+function histVolta(f){ const o=JSON.parse(f); T.a.js=o.js.a; T.b.js=o.js.b; Object.assign(PL,o.PL); Object.assign(FT,o.FT); Object.assign(TC,o.TC);
+  ST=o.ST; MARCAS.length=0; MARCAS.push(...o.MARCAS); LOG.length=0; LOG.push(...o.LOG);
+  desenha(); desenhaPL(); desenhaFT(); logDesenha(); desenhaMarcas(); relDesenha(); desenhaUR(); }
+function urLivre(){ if(document.body.classList.contains('sub')) return 'a substituição'; if(FA.on) return 'a falta'; if(LL.on) return 'o lance livre';
+  if(AR.z) return 'o arremesso'; if(EST.k) return 'o botão laranja'; if(C.tmAb) return 'o pedido de tempo'; return ''; }
+const linhaTxt=e=>e?[e.nm,e.a].filter(Boolean).join(' · '):'';
+function desfaz(){ if(HI.i<=0) return aviso(HI.h.length?'Nada para desfazer':'Nada para desfazer'); const o=urLivre(); if(o) return aviso(`Termine ou feche ${o} antes de desfazer`);
+  const tx=linhaTxt(LOG[0]); HI.i--; histVolta(HI.h[HI.i]); aviso('Desfeito: '+tx,1); }
+function refaz(){ if(HI.i>=HI.h.length-1) return; const o=urLivre(); if(o) return aviso(`Termine ou feche ${o} antes de refazer`);
+  HI.i++; histVolta(HI.h[HI.i]); aviso('Refeito: '+linhaTxt(LOG[0]),1); }
+function desenhaUR(){ const u=document.getElementById('btUn'), r=document.getElementById('btRe'); if(!u) return;
+  u.classList.toggle('off',HI.i<=0); r.classList.toggle('off',HI.i>=HI.h.length-1); }
 const COR={a:'background:repeating-linear-gradient(180deg,#C8102E 0 3px,#000 3px 6px)',b:'background:#E2231A;box-shadow:0 0 0 2px #fff'};
 function logDesenha(){ const ul=document.getElementById('lal');
   if(!LOG.length){ ul.innerHTML='<li class="vz">Nenhum lance registrado ainda · cada botão que você usar aparece aqui</li>'; return; }
