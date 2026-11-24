@@ -33,7 +33,9 @@ body{background:#05070d;color:#fff;font-family:'Oswald',Arial,sans-serif;overflo
 .top .play{width:40px;height:40px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;font-size:15px;margin-left:6px}
 
 /* ===== corpo: camisas | quadra + lance a lance | botões ===== */
-.corpo{display:grid;grid-template-columns:340px 1fr 270px;grid-template-rows:1fr 196px;gap:10px;padding:10px;min-height:0}
+.corpo{display:grid;grid-template-columns:340px 1fr 270px;grid-template-rows:1fr 134px;gap:10px;padding:10px;min-height:0}
+/* lance a lance baixo: só os 4 últimos à vista (a quadra ganha altura); na substituição volta a 196px para caber o banco · Magno, 24/11/2026 */
+body.sub .corpo{grid-template-rows:1fr 196px}
 .times{grid-column:1;grid-row:1}.meio{grid-column:2;grid-row:1}.bts{grid-column:3;grid-row:1/3}.baixo{grid-column:1/3;grid-row:2}
 
 /* colunas dos times */
@@ -67,6 +69,7 @@ body{background:#05070d;color:#fff;font-family:'Oswald',Arial,sans-serif;overflo
 .quadra svg{height:100%;width:100%}
 .lal{min-width:0;background:#0e1626;border:1px solid #2c4a80;border-radius:8px;display:flex;flex-direction:column;min-height:0}
 .lal h3{font-size:13px;letter-spacing:2px;color:#ffd54f;font-weight:600;padding:6px 12px;border-bottom:1px solid #22385f;display:flex;justify-content:space-between}
+.lal h3 .tag41{font-style:normal;font-size:10px;letter-spacing:1px;color:#000;background:#ffd54f;padding:1px 6px;border-radius:3px;margin:0 auto 0 12px;align-self:center}
 .lal h3 span{color:#7f93bd;font-weight:400;letter-spacing:1px}
 .lal ul{list-style:none;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:#2c4a80 transparent}
 .lal li{display:grid;grid-template-columns:54px 44px 14px 32px 1fr auto;align-items:center;gap:8px;padding:4px 12px;font-size:14px;border-bottom:1px solid #16243f;font-family:Arial,sans-serif}
@@ -149,7 +152,7 @@ body.sub .banco{display:grid}
       <div class="bnc b"><h4>BANCO DE RESERVAS · TIJUCA</h4><button class="rol" onclick="rola('bnB',-1)">▲</button><div class="lis" id="bnB"></div><button class="rol" onclick="rola('bnB',1)">▼</button></div>
     </div>
     <div class="lal">
-      <h3>LANCE A LANCE <span>(play-by-play) · role para ver tudo</span></h3>
+      <h3>LANCE A LANCE <em class="tag41">SCOUT PRO 4.1 · em construção</em><span>4 últimos · role para ver os anteriores</span></h3>
       <ul id="lal"></ul>
     </div>
   </section>
@@ -163,7 +166,7 @@ body.sub .banco{display:grid}
     <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt undo ina" title="Desfazer a última ação · em construção">↶</div>
   </section>
 </main>
-<div id="aviso"></div><div class="marca">SCOUT PRO 4.1 · em construção · só a substituição funciona</div>
+<div id="aviso"></div>
 
 <script>
 // camiseta regata (mesmo desenho da Escalação); listrada para o Flamengo, lisa para o Tijuca
