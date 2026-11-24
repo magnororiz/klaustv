@@ -48,7 +48,19 @@ body{background:#05070d;color:#fff;font-family:'Oswald',Arial,sans-serif;overflo
 .corpo{display:grid;grid-template-columns:460px 1fr 270px;grid-template-rows:1fr 134px;gap:10px;padding:10px;min-height:0}
 /* lance a lance baixo: só os 4 últimos à vista (a quadra ganha altura); na substituição volta a 196px para caber o banco · Magno, 24/11/2026 */
 body.sub .corpo{grid-template-rows:1fr 196px}
-.times{grid-column:1;grid-row:1}.meio{grid-column:2;grid-row:1}.bts{grid-column:3;grid-row:1/3}.baixo{grid-column:1/3;grid-row:2}
+.times{grid-column:1;grid-row:1}.meio{grid-column:2;grid-row:1}
+/* ESTATÍSTICAS (Magno, 24/11/2026): cobre os times e a quadra; um time em cima, outro embaixo, com rolagem · em ordem de camisa, como no Scout 4.0 */
+#stPainel{grid-column:1/3;grid-row:1;z-index:4;display:none;overflow:auto;background:#0b1220;border:1px solid #2a3b5c;border-radius:8px;padding:8px 10px}
+body.stat #stPainel{display:block}
+#stPainel h3{display:flex;align-items:center;gap:8px;font:700 15px Arial;letter-spacing:1px;color:#fff;margin:4px 0 6px}#stPainel h3 img{height:24px}
+#stPainel table{width:100%;border-collapse:collapse;margin-bottom:12px;font:14px Arial;color:#e8eefc}
+#stPainel th{background:#4a8ff0;color:#fff;font-weight:700;padding:6px 4px;text-align:center;position:sticky;top:-8px;z-index:1}
+#stPainel td{padding:5px 4px;text-align:center;border:1px solid #23314f;background:#141d31}
+#stPainel tr:nth-child(odd) td{background:#18233b}
+#stPainel td.nm{text-align:left;padding-left:10px;white-space:nowrap}#stPainel td.nm i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ee66b;margin-right:6px;font-style:normal}
+#stPainel td.nm i.bc{background:transparent;border:1px solid #556}
+#stPainel td.ef{color:#ffd54f;font-weight:700}#stPainel tr.tot td{background:#1c3e6e;font-weight:700}
+.bt.statOn{background:linear-gradient(180deg,#43c45a,#1f8a35);color:#fff}.bts{grid-column:3;grid-row:1/3}.baixo{grid-column:1/3;grid-row:2}
 
 /* colunas dos times */
 .times{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-height:0}
@@ -216,6 +228,7 @@ body.sub .banco{display:grid}
 </header>
 
 <main class="corpo">
+  <section id="stPainel"></section>
   <section class="times">
     <div class="col a" id="colA"><div class="cab"><img src="escudos/CRF.png" alt="">A · FLA</div></div>
     <div class="col b" id="colB"><div class="cab"><img src="escudos/TTC.png" alt="">B · TIJ</div></div>
@@ -242,7 +255,7 @@ body.sub .banco{display:grid}
     <div class="bt am" id="bt_tov" onclick="clicaEst('tov')"><span>TURNOVER<small>erro</small></span></div><div class="bt" id="bt_blk" onclick="clicaEst('blk')">TOCO</div>
     <div class="bt vm" id="btFal" onclick="clicaFalta()">FALTA</div><div class="bt vm" id="btFE" onclick="clicaFE()" title="Técnica, disruptiva, flagrante, desqualificante e do técnico/banco">FALTA<br>ESPECIAL</div>
     <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt ina" title="Em construção">TEMPO</div>
-    <div class="bt az ina vazio" title="Botão livre (a falta recebida agora sai junto com a FALTA)"></div><div class="bt2"><div class="bt undo off" id="btUn" onclick="desfaz()" title="Desfazer a última ação">↶</div><div class="bt undo off" id="btRe" onclick="refaz()" title="Refazer a ação desfeita">↷</div></div>
+    <div class="bt az" id="btStat" onclick="clicaStat()" title="Estatísticas completas dos dois times">ESTATÍSTICAS</div><div class="bt2"><div class="bt undo off" id="btUn" onclick="desfaz()" title="Desfazer a última ação">↶</div><div class="bt undo off" id="btRe" onclick="refaz()" title="Refazer a ação desfeita">↷</div></div>
   </section>
 </main>
 <div id="aviso"></div>
@@ -301,7 +314,7 @@ function desenha(){ for(const t of ['a','b']){ const q=T[t].js.filter(j=>j[3]), 
    document.getElementById('bn'+t.toUpperCase()).innerHTML=bc.map(j=>tile(t,j,'b')).join(''); }
   const bt=document.getElementById('btSub'), ab=document.body.classList.contains('sub'), st=estadoSub();
   bt.classList.toggle('subOn',ab&&st!=='ok'); bt.classList.toggle('subOk',ab&&st==='ok');
-  desenhaFalta(); bt.innerHTML=!ab?'SUBST.':st==='vazio'?'SUBST.<small>fechar banco</small>':st==='ok'?'CONFIRMAR<br>SUBSTITUIÇÃO':'SUBSTITUIÇÃO<br>PENDENTE'; }
+  desenhaFalta(); if(window.desenhaStat&&document.body.classList.contains('stat')) desenhaStat(); bt.innerHTML=!ab?'SUBST.':st==='vazio'?'SUBST.<small>fechar banco</small>':st==='ok'?'CONFIRMAR<br>SUBSTITUIÇÃO':'SUBSTITUIÇÃO<br>PENDENTE'; }
 // vazio = nada marcado; ok = nos dois times, quem entra = quem sai (e pelo menos 1); pend = falta marcar
 function estadoSub(){ let tot=0, ok=true; for(const t of ['a','b']){ const e=ENTRA[t].size, s=SAI[t].size; tot+=e+s; if(e!==s) ok=false; }
   return !tot?'vazio':ok?'ok':'pend'; }
@@ -661,8 +674,8 @@ const EST={k:null}, ESN={ast:['Assistência','que deu a assistência',1],reb:['R
 const ESR={ast:'ASSIST.',reb:'REBOTE',tov:'<span>TURNOVER<small>erro</small></span>',stl:'ROUBO<br>DE BOLA',blk:'TOCO'};
 function desenhaEst(){ for(const k in ESR){ const b=document.getElementById('bt_'+k); if(!b) continue; const on=EST.k===k; b.classList.toggle('subOn',on);
   b.innerHTML=on?`<span>${ESN[k][0].toUpperCase()}<small>escolha o jogador · toque aqui p/ fechar</small></span>`:ESR[k]; } }
-function fechaEst(){ if(EST.k){ EST.k=null; desenhaEst(); } }   // outro botão fecha o laranja sem marcar
-function clicaEst(k){ if(EST.k===k){ EST.k=null; desenhaEst(); return; }
+function fechaEst(){ fechaStat(); if(EST.k){ EST.k=null; desenhaEst(); } }   // outro botão fecha o laranja sem marcar
+function clicaEst(k){ fechaStat(); if(EST.k===k){ EST.k=null; desenhaEst(); return; }
   if(document.body.classList.contains('sub')) return aviso('Termine ou feche a substituição antes');
   if(FA.on) return aviso('Termine ou feche a FALTA antes'); if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes');
   if(AR.z) return aviso('Termine ou cancele o arremesso antes');
@@ -671,6 +684,24 @@ function marcaEst(t,n){ const k=EST.k, [nm,,v]=ESN[k], j=jog(t,n), s=stJ(t,n); s
   EST.k=null; desenhaEst(); desenha();
   reg(t,'',`${nm} ${j[1]} - ${n}`,`EF ${v>0?'+1':'−1'}`,v>0?'ok':'er'); bolaViva();
   aviso(`${nm} · ${j[1]} - ${n} · EF ${v>0?'+1':'−1'}`,v>0?1:0); }
+
+// ===== ESTATÍSTICAS (Magno, 24/11/2026) =====
+// O botão abre a tabela completa dos dois times no lugar dos times e da quadra e vira QUADRA (volta).
+// Qualquer outro botão de lance fecha a tabela sozinho, para o Raoni não perder o lance.
+function clicaStat(){ document.body.classList.toggle('stat'); desenhaStat(); }
+function fechaStat(){ if(document.body.classList.contains('stat')){ document.body.classList.remove('stat'); desenhaStat(); } }
+function desenhaStat(){ const on=document.body.classList.contains('stat'), b=document.getElementById('btStat'); if(!b) return;
+  b.classList.toggle('statOn',on); b.innerHTML=on?'<span>QUADRA<small>voltar ao jogo</small></span>':'ESTATÍSTICAS'; if(!on) return;
+  const pc=(m,a)=>`${m}/${a} (${a?Math.round(100*m/a):0}%)`, Z={pts:0,reb:0,ast:0,stl:0,blk:0,tov:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,eff:0};
+  let h='';
+  for(const t of ['a','b']){ const tt={...Z,f:0}; let lin='';
+    for(const j of [...T[t].js].sort((x,y)=>x[0]-y[0])){ const s={...Z,...(ST[t+j[0]]||{})};
+      for(const k in Z) tt[k]+=s[k]; tt.f+=j[2];
+      lin+=`<tr><td>${j[0]}</td><td class="nm"><i class="${j[3]?'':'bc'}" title="${j[3]?'em quadra':'no banco'}"></i>${j[1]}</td><td>${s.pts}</td><td>${pc(s.twoMade,s.twoMade+s.twoMiss)}</td><td>${pc(s.threeMade,s.threeMade+s.threeMiss)}</td><td>${pc(s.ftMade,s.ftMade+s.ftMiss)}</td><td>${s.reb}</td><td>${s.ast}</td><td>${s.stl}</td><td>${s.blk}</td><td>${s.tov}</td><td>${j[2]}</td><td class="ef">${s.eff}</td></tr>`; }
+    const esc=document.querySelector(`#col${t.toUpperCase()} .cab img`);
+    h+=`<h3>${esc?`<img src="${esc.getAttribute('src')}" alt="">`:''}${T[t].nome.toUpperCase()}</h3><table><tr><th>Camisa</th><th>Nome</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>F</th><th>EFF</th></tr>${lin}
+     <tr class="tot"><td colspan="2">TOTAL</td><td>${tt.pts}</td><td>${pc(tt.twoMade,tt.twoMade+tt.twoMiss)}</td><td>${pc(tt.threeMade,tt.threeMade+tt.threeMiss)}</td><td>${pc(tt.ftMade,tt.ftMade+tt.ftMiss)}</td><td>${tt.reb}</td><td>${tt.ast}</td><td>${tt.stl}</td><td>${tt.blk}</td><td>${tt.tov}</td><td>${tt.f}</td><td class="ef">${tt.eff}</td></tr></table>`; }
+  document.getElementById('stPainel').innerHTML=h; }
 
 // ===== LANCE A LANCE (começa vazio; só recebe o que os botões registram; mais novo em cima) =====
 const LOG=[];
