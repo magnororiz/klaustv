@@ -407,7 +407,12 @@ let ULT=''; try{ ULT=localStorage.getItem('kt_esc_jogo')||''; }catch(e){}
 const HD=/[#&]d=([^&]+)/.exec(location.hash);
 const SCOUT=Q.has('scout');
 // ===== Escalação ligada ao Scout (Magno, 24/11/2026): pergunta a cada 5 s qual jogo está aberto no Scout e mostra a escalação dele (JSONP, funciona no OBS) =====
-function jp(par){ return new Promise(ok=>{ const cb='kt_es'+Math.random().toString(36).slice(2,9), sc=document.createElement('script'); let feito=false;
+// primeiro busca normal (fetch); se o navegador recusar (como no OBS), usa <script> (JSONP)
+let JP_MODO='fetch';
+async function jp(par){ if(JP_MODO==='fetch'){ try{ const ct=new AbortController(), tm=setTimeout(()=>ct.abort(),15000);
+    const r=await fetch(KT_API+'?'+new URLSearchParams(Object.assign({},par,{_:Date.now()})).toString(),{signal:ct.signal}).then(x=>x.json()); clearTimeout(tm); return r; }catch(e){ JP_MODO='jsonp'; } }
+  return jpS(par); }
+function jpS(par){ return new Promise(ok=>{ const cb='kt_es'+Math.random().toString(36).slice(2,9), sc=document.createElement('script'); let feito=false;
   const fim=r=>{ if(feito) return; feito=true; delete window[cb]; sc.remove(); ok(r||{ok:false,erro:'sem resposta'}); };
   window[cb]=fim; sc.onerror=()=>fim(null); setTimeout(()=>fim(null),20000);
   sc.src=KT_API+'?'+new URLSearchParams(Object.assign({},par,{callback:cb,_:Date.now()})).toString(); document.head.appendChild(sc); }); }
