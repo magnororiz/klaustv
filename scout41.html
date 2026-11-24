@@ -350,12 +350,12 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
 // Depois toca na camisa de quem arremessou: ✓ = 2 pontos no placar e no jogador; ✗ = arremesso errado (tira 1 da eficiência).
 // O X pequeno (verde ou vermelho) fica na quadra; muitos X num lugar = muito arremesso ali.
 // Setores de 2 (medidas em metros a partir do centro da cesta; θ = ângulo a partir da linha do meio):
-//  · Embaixo da cesta (até 2,25 m), um setor só
-//  · Meia distância (2,25 a 4,4 m): lateral esquerda (θ>30°), frente (|θ|≤30°), lateral direita
-//  · Longe (4,4 m até a linha de 3): fundo (θ>50°), 45° (20–50°) e frente (|θ|≤20°), dos dois lados
+//  · Garrafão · perto da cesta (até 2,25 m), um setor só
+//  · Meia distância curta (2,25 a 4,4 m): esquerda (θ>30°), frente (|θ|≤30°), direita
+//  · Meia distância longa (4,4 m até a linha de 3): canto (θ>50°), 45° (20–50°) e frente (|θ|≤20°), dos dois lados
 const ZG={S:40,K:1.28,cx:300,cyM:1.575,r1:2.25,r2:4.4,q:1};   // q: deixa os círculos dos setores redondos na tela
-const ZN={ce:'Embaixo da cesta',mL:'Meia distância · lateral esquerda',mC:'Meia distância · frente',mR:'Meia distância · lateral direita',
- oLC:'Longe · fundo esquerdo',oLW:'Longe · 45° esquerdo',oC:'Longe · frente',oRW:'Longe · 45° direito',oRC:'Longe · fundo direito'};
+const ZN={ce:'Garrafão · perto da cesta',mL:'Meia distância curta · esquerda',mC:'Meia distância curta · frente',mR:'Meia distância curta · direita',
+ oLC:'Meia distância longa · canto esquerdo',oLW:'Meia distância longa · 45° esquerdo',oC:'Meia distância longa · frente',oRW:'Meia distância longa · 45° direito',oRC:'Meia distância longa · canto direito'};   // nomes no padrão internacional (Magno, 24/11/2026)
 const ST={}, AR={x:0,y:0,z:null,lado:'',res:null}, MARCAS=[];
 const stJ=(t,n)=>ST[t+n]||(ST[t+n]={pts:0,twoMade:0,twoMiss:0,eff:0});
 function zM(x,y){ return {mx:(x-ZG.cx)/ZG.S, my:y/(ZG.S*ZG.K)-ZG.cyM}; }          // svg → metros (cesta = 0,0)
@@ -402,7 +402,7 @@ function clicaZona(e,p){ const b=document.body;
   m.classList.add('on'); const mw=m.offsetWidth, mh=m.offsetHeight; let L=e.clientX-mr.left-mw/2, T=e.clientY-mr.top-mh-14; if(T<4) T=e.clientY-mr.top+14;
   m.style.left=Math.max(4,Math.min(mr.width-mw-4,L))+'px'; m.style.top=T+'px'; }
 function resAr(v){ if(!AR.z) return; AR.res=v; const m=document.getElementById('arMenu'); m.classList.add('jog'); desenhaMarcas();   // no mesmo lugar: "Escolha o jogador"
-  const tip=document.getElementById('zTip'); tip.textContent=`${v?'Cesta de 2':'Arremesso de 2 errado'} · toque na camisa de quem arremessou`; tip.style.display='block';
+  const tip=document.getElementById('zTip'); tip.textContent=`2 pontos ${v?'convertido':'perdido'} · toque na camisa de quem arremessou`; tip.style.display='block';
 }
 function cancelaAr(){ AR.z=null; AR.res=null; document.getElementById('arMenu').classList.remove('on','jog'); document.getElementById('zTip').style.display='none';
   document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); desenhaMarcas(); }
@@ -410,8 +410,8 @@ function marcaAr(t,n){ const j=jog(t,n), s=stJ(t,n), v=AR.res, onde=nomeZ(AR.z,A
   if(v){ s.pts+=2; s.twoMade++; PL[t]+=2; desenhaPL(); } else s.twoMiss++;
   s.eff=s.pts-s.twoMiss;      // por enquanto só arremessos de 2; rebote, assistência etc. entram quando os botões existirem
   MARCAS.push({x:AR.x,y:AR.y,ok:v,t,n,z:AR.z,lado:AR.lado});
-  reg(t,'',`${v?'Cesta de 2':'Arremesso de 2 errado'} ${j[1]} - ${n}`,onde,v?'ok':'ou');
-  cancelaAr(); bolaViva(); aviso(v?`+2 para ${j[1]} - ${n}`:`Arremesso errado de ${j[1]} - ${n}`,1); }
+  reg(t,'',`2 pontos ${v?'convertido':'perdido'} ${j[1]} - ${n}`,onde,v?'ok':'ou');   // estilo FIBA LiveStats
+  cancelaAr(); bolaViva(); aviso(v?`+2 para ${j[1]} - ${n}`:`2 pontos perdido · ${j[1]} - ${n}`,1); }
 function desenhaMarcas(){ const g=document.getElementById('marcas'); if(!g) return; const dx=5, dy=5*ZG.K;
   const X=(x,y,c)=>`<path d="M${x-dx} ${y-dy}L${x+dx} ${y+dy}M${x+dx} ${y-dy}L${x-dx} ${y+dy}" stroke="${c}" stroke-width="2.2" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
   let h=MARCAS.map(m=>X(m.x,m.y,m.ok?'#2ee66b':'#ff3b3b')).join('');
