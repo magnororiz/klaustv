@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Placar · Klaus TV (OBS)</title>
-<meta name="viewport" content="width=1920">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 <style>
 /* Placar para o OBS (Magno, 23/11/2026): fonte Navegador 1920 × 1080, fundo transparente.
@@ -11,8 +11,8 @@
    Nomes dos 9 modelos (Magno, 23/11/2026): Overlay FBERJ | Overlay FBERJ relógio | Overlay FBERJ relógio e cronômetro,
    e o mesmo para Klaus e Klaus TV. Modelos do meio (?modelo=): 1 = logo FBERJ, 2 = avatar do Klaus, 3 = logo Klaus TV. Nada ao lado do escudo do time A (neutralidade). */
 html,body{margin:0;background:transparent;overflow:hidden;}
-body{width:1920px;height:1080px;position:relative;font-family:'Oswald','Arial Narrow',Arial,sans-serif;color:#fff;}
-#placar{position:absolute;left:50%;bottom:var(--baixo,22px);transform:translateX(-50%);display:flex;align-items:stretch;height:92px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55));}
+body{width:100vw;height:100vh;position:relative;font-family:'Oswald','Arial Narrow',Arial,sans-serif;color:#fff;}
+#placar{position:absolute;left:50%;bottom:calc(var(--baixo,22px) * var(--esc,1));transform:translateX(-50%) scale(var(--esc,1));transform-origin:50% 100%;display:flex;align-items:stretch;height:92px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55));}
 /* janelas das câmeras: só a moldura, o meio fica transparente */
 .cam{width:168px;box-sizing:border-box;border:5px solid #f28c28;background:transparent;position:relative;}
 .cam.c24{width:150px;border-radius:22px 0 0 22px;border-right:none;}
@@ -106,6 +106,9 @@ function quarto(q,fim){ const el=$('qt'); el.classList.toggle('fim',!!fim);
   if(fim){ $('qtN').textContent='FIM'; el.querySelector('small').textContent='DE JOGO'; return; }
   $('qtN').textContent=q>=5?'OT':q+'º'; el.querySelector('small').textContent=q>=5?'PRORROG.':'QUARTO'; }
 if(Q.has('obs')||window.obsstudio) document.body.classList.add('obs');
+// o desenho é feito para 1920 × 1080; em qualquer outro tamanho (janela do navegador, fonte do OBS 800 × 600…) o placar diminui ou aumenta junto (Magno, 23/11/2026)
+function escala(){ const e=Math.min(innerWidth/1920, innerHeight/1080)||1; document.documentElement.style.setProperty('--esc',e); }
+escala(); addEventListener('resize',escala);
 // 9 modelos (nomes do Magno, 23/11/2026)
 const MODELOS=[];[['1','FBERJ'],['2','Klaus'],['3','Klaus TV']].forEach(([m,n])=>[['0',''],['1',' relógio'],['2',' relógio e cronômetro']].forEach(([c,t])=>MODELOS.push({m,c,nome:'Overlay '+n+t})));
 $('selMod').innerHTML=MODELOS.map((o,i)=>`<option value="${i}"${o.m===mo&&o.c===CAM?' selected':''}>${o.nome}</option>`).join('');
