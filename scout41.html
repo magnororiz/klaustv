@@ -127,6 +127,19 @@ body.sub .banco{display:grid}
 @keyframes pisca{50%{filter:brightness(1.25)}}
 #aviso{position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#d32f2f;color:#fff;font:700 15px Arial;padding:8px 16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.6);display:none;z-index:9}
 #aviso.ok{background:#1b5e20}
+/* FALTA ESPECIAL (Magno, 24/11/2026): lista de tipos · regras FIBA 2026 */
+.jg.dsq{filter:grayscale(1) brightness(.45);opacity:.9}
+.jg.dsq::after{content:'DESQUALIFICADO';position:absolute;right:4px;top:3px;font-size:9px;letter-spacing:1px;background:#000;color:#ff5a5a;border:1px solid #ff5a5a;padding:1px 4px;border-radius:3px;font-weight:700}
+#feMenu{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:8}
+#feMenu.on{display:grid}
+#feMenu .cx{background:#121a2b;border:2px solid #e53935;border-radius:10px;padding:14px;width:min(560px,92vw);box-shadow:0 10px 30px rgba(0,0,0,.7)}
+#feMenu h4{color:#ffd54f;font-size:15px;letter-spacing:2px;margin-bottom:10px;display:flex;justify-content:space-between}
+#feMenu h4 span{color:#9fb0d6;cursor:pointer;letter-spacing:0}
+#feMenu .op{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#feMenu button{background:#1f2633;border:1px solid #3a4560;border-radius:8px;color:#fff;font:600 15px Arial;padding:10px 8px;cursor:pointer;text-align:left;line-height:1.15}
+#feMenu button small{display:block;font-weight:400;font-size:11.5px;color:#9fb0d6;margin-top:3px}
+#feMenu button:hover{background:#2c3850;border-color:#e53935}
+#feMenu button.tm{text-align:center;font-size:18px;padding:16px}
 /* botões */
 .bts{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(6,1fr);gap:8px;min-height:0}
 .bt{background:linear-gradient(180deg,#2b2f38,#1d2027);border:1px solid #3a3f4b;border-radius:8px;display:grid;place-items:center;text-align:center;
@@ -170,7 +183,7 @@ body.sub .banco{display:grid}
       <div class="bnc b"><h4>BANCO DE RESERVAS · TIJUCA</h4><button class="rol" onclick="rola('bnB',-1)">▲</button><div class="lis" id="bnB"></div><button class="rol" onclick="rola('bnB',1)">▼</button></div>
     </div>
     <div class="lal">
-      <h3>LANCE A LANCE <em class="tag41">SCOUT PRO 4.1 · em construção · substituição, tempo e falta</em><span>4 últimos · role para ver os anteriores</span></h3>
+      <h3>LANCE A LANCE <em class="tag41">SCOUT PRO 4.1 · em construção · substituição, tempo, falta e falta especial</em><span>4 últimos · role para ver os anteriores</span></h3>
       <ul id="lal"></ul>
     </div>
   </section>
@@ -178,16 +191,28 @@ body.sub .banco{display:grid}
   <section class="bts">
     <div class="bt az ina vazio" title="Botão livre (a falta recebida agora sai junto com a FALTA)"></div><div class="bt az ina" title="Em construção">LANCE<br>LIVRE</div>
     <div class="bt vd ina" title="Em construção">ASSIST.</div><div class="bt vd ina" title="Em construção">REBOTE</div>
-    <div class="bt vm" id="btFal" onclick="clicaFalta()">FALTA</div><div class="bt vm ina" title="Em construção">FALTA<br>TÉCNICA</div>
+    <div class="bt vm" id="btFal" onclick="clicaFalta()">FALTA</div><div class="bt vm" id="btFE" onclick="clicaFE()" title="Técnica, disruptiva, flagrante, desqualificante e do técnico/banco">FALTA<br>ESPECIAL</div>
     <div class="bt am ina" title="Em construção">ERRO</div><div class="bt am ina" title="Em construção">ROUBO</div>
     <div class="bt ina" title="Em construção">TEMPO</div><div class="bt ina" title="Em construção">TOCO</div>
     <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt undo ina" title="Desfazer a última ação · em construção">↶</div>
   </section>
 </main>
 <div id="aviso"></div>
+<div id="feMenu" onclick="if(event.target===this) fechaFE()"><div class="cx"><h4><b id="feTit">FALTA ESPECIAL · escolha o tipo</b><span onclick="fechaFE()">✕ fechar</span></h4><div class="op" id="feOp"></div></div></div>
 
 <script>
-const FA={on:false,fez:null,sof:null}, FT={a:0,b:0};   // falta em andamento · faltas do time no quarto
+const FA={on:false,tipo:null,fez:null,sof:null}, FT={a:0,b:0};   // falta em andamento · faltas do time no quarto
+// tipos da FALTA ESPECIAL (regras FIBA 2026) · ver a seção FALTA ESPECIAL mais abaixo
+const FE={
+ t1:{nm:'Técnica',d:'categoria 1 · reclamação, provocação, simulação',tx:'Falta técnica (categoria 1)',quem:'jog',gd:1},
+ t2:{nm:'Técnica',d:'categoria 2 · atrasar o jogo, pendurar no aro, pressão proibida na base',tx:'Falta técnica (categoria 2)',quem:'jog'},
+ di:{nm:'Disruptiva',d:'parar contra-ataque ou o relógio · antiga antidesportiva leve',tx:'Falta disruptiva',quem:'jog',sof:1},
+ fl:{nm:'Flagrante',d:'imprudente, violenta ou perigosa · antiga antidesportiva grave',tx:'Falta flagrante',quem:'jog',sof:1,gd:1},
+ dj:{nm:'Desqualificante',d:'jogador expulso na hora · agressão, briga',tx:'Falta desqualificante',quem:'jog',sof:1,dq:1},
+ tc:{nm:'Técnica do técnico',d:'conduta do próprio técnico',tx:'Falta técnica do técnico',quem:'tec',k:'C'},
+ tb:{nm:'Técnica do banco',d:'reservas, assistente ou comissão',tx:'Falta técnica do banco',quem:'tec',k:'B'},
+ dt:{nm:'Desqualificante do técnico ou banco',d:'expulso na hora',tx:'Falta desqualificante do técnico ou banco',quem:'tec',dq:1}};
+const TC={a:{C:0,B:0,dq:0},b:{C:0,B:0,dq:0}};
 // camiseta regata (mesmo desenho da Escalação); listrada para o Flamengo, lisa para o Tijuca
 const CORPO='M9 1.5h5Q19 10.5 24 1.5h5v5.4q1.4 7.6 7.5 8.6V42.5H1.5V15.5Q7.6 14.5 9 6.9z';
 function regata(id,n,lis){
@@ -210,7 +235,7 @@ const T={a:{nome:'Flamengo',lis:FLA,js:[[4,'Tozo',0,1],[5,'Pedro',0,1],[7,'Davi'
  b:{nome:'Tijuca',lis:TIJ,js:[[3,'Matheus',0,1],[5,'Kaique',0,1],[6,'Bruno',0,1],[9,'Igor',0,1],[12,'Léo',0,1],
  [4,'Vitor',0,0],[7,'Samuel',0,0],[8,'Thiago',0,0],[10,'Felipe',0,0],[11,'Nico',0,0],[13,'Heitor',0,0],[14,'Danilo',0,0]]}};
 const ENTRA={a:new Set(),b:new Set()}, SAI={a:new Set(),b:new Set()};
-function tile(t,[n,nm,f],onde){ const k=t+n, cls=[f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':'',onde==='q'&&FA.fez&&FA.fez.t===t&&FA.fez.n===n?'fez':'',onde==='q'&&FA.sof&&FA.sof.t===t&&FA.sof.n===n?'sof':''].join(' ');
+function tile(t,[n,nm,f,,,,dq],onde){ const k=t+n, cls=[dq?'dsq':f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':'',onde==='q'&&FA.fez&&FA.fez.t===t&&FA.fez.n===n?'fez':'',onde==='q'&&FA.sof&&FA.sof.t===t&&FA.sof.n===n?'sof':''].join(' ');
   return `<div class="jg ${cls}" title="${nm}" onclick="clicaJg('${t}',${n},'${onde}')"><div class="fl">${[1,2,3,4,5].map(x=>`<span class="${x<=f?'on':''}"></span>`).join('')}</div>
    ${regata(onde+k,n,T[t].lis)}<div class="nm">${nm}</div></div>`; }
 function desenha(){ for(const t of ['a','b']){ const q=T[t].js.filter(j=>j[3]), bc=T[t].js.filter(j=>!j[3]).sort((x,y)=>x[0]-y[0]);
@@ -226,7 +251,8 @@ function estadoSub(){ let tot=0, ok=true; for(const t of ['a','b']){ const e=ENT
 function aviso(t,ok){ const a=document.getElementById('aviso'); a.textContent=t; a.className=ok?'ok':''; a.style.display='block'; clearTimeout(a._t); a._t=setTimeout(()=>a.style.display='none',3200); }
 function clicaJg(t,n,onde){ if(FA.on&&onde==='q') return marcaFalta(t,n);
   if(!document.body.classList.contains('sub')) return; // fora da substituição e da falta, a camisa serve para as próximas estatísticas
-  const jj=T[t].js.find(j=>j[0]===n); if(onde==='b'&&jj[2]>=5){ aviso(`${jj[1]} tem 5 faltas e não pode voltar`); return; }
+  const jj=T[t].js.find(j=>j[0]===n); if(onde==='b'&&jj[6]){ aviso(`${jj[1]} foi desqualificado e não pode voltar`); return; }
+  if(onde==='b'&&jj[2]>=5){ aviso(`${jj[1]} tem 5 faltas e não pode voltar`); return; }
   const S=onde==='b'?ENTRA[t]:SAI[t]; S.has(n)?S.delete(n):S.add(n); desenha(); }
 function clicaSub(){ const b=document.body; if(FA.on) return aviso('Termine ou feche a FALTA antes da substituição');
   if(!b.classList.contains('sub')){ b.classList.add('sub'); desenha(); return; }
@@ -350,15 +376,17 @@ function acerto(){ if(!C.em) return aviso('Quarto encerrado'); const b=document.
 const jog=(t,n)=>T[t].js.find(j=>j[0]===n);
 function desenhaFT(){ for(const t of ['a','b']){ const e=document.getElementById('f'+t.toUpperCase()); e.querySelector('b').textContent=FT[t]; e.classList.toggle('bonus',FT[t]>=4);
    e.title=FT[t]>=4?'Faltas do time no quarto · a partir da próxima, lances livres (bônus)':'Faltas do time no quarto'; } }
-function desenhaFalta(){ const b=document.getElementById('btFal'); if(!b) return;
-  b.classList.toggle('subOn',FA.on&&!FA.fez); b.classList.toggle('subOk',FA.on&&!!FA.fez);
-  b.innerHTML=!FA.on?'FALTA':!FA.fez?'FALTA<small>marque quem fez · toque aqui p/ fechar</small>':FA.sof?'CONFIRMAR<br>FALTA':'CONFIRMAR<br>FALTA<small>quem sofreu: opcional</small>'; }
-function marcaFalta(t,n){
+function desenhaFalta(){ const b=document.getElementById('btFal'); if(!b) return; desenhaFE();
+  const on=FA.on&&!FA.tipo; b.classList.toggle('subOn',on&&!FA.fez); b.classList.toggle('subOk',on&&!!FA.fez);
+  b.innerHTML=!on?'FALTA':!FA.fez?'FALTA<small>marque quem fez · toque aqui p/ fechar</small>':FA.sof?'CONFIRMAR<br>FALTA':'CONFIRMAR<br>FALTA<small>quem sofreu: opcional</small>'; }
+function marcaFalta(t,n){ if(FA.tipo&&FE[FA.tipo].quem==='tec') return aviso('Escolha o time na janela da FALTA ESPECIAL');
   if(!FA.fez){ FA.fez={t,n}; }
   else if(FA.fez.t===t){ if(FA.fez.n===n){ FA.fez=null; FA.sof=null; } else FA.fez={t,n}; }   // mesma camisa desmarca tudo; outra do mesmo time troca
-  else { FA.sof=FA.sof&&FA.sof.n===n?null:{t,n}; }
+  else { if(FA.tipo&&!FE[FA.tipo].sof) return aviso('Nesta falta não se marca quem sofreu');
+    FA.sof=FA.sof&&FA.sof.n===n?null:{t,n}; }
   desenha(); }
 function clicaFalta(){ if(document.body.classList.contains('sub')) return aviso('Termine ou feche a substituição antes da FALTA');
+  if(FA.tipo) return aviso('Termine ou feche a FALTA ESPECIAL antes');
   if(!FA.on){ FA.on=true; desenha(); return; }
   if(!FA.fez){ FA.on=false; FA.sof=null; desenha(); return; }
   const {t,n}=FA.fez, j=jog(t,n); j[2]=Math.min(5,j[2]+1); FT[t]++;
@@ -371,6 +399,46 @@ function clicaFalta(){ if(document.body.classList.contains('sub')) return aviso(
   FA.on=false; FA.fez=null; FA.sof=null; desenhaFT(); desenha();
   if(j[2]>=5){ reg(t,'',`${j[1]} - ${n}`,'EXCLUÍDO (5 faltas) · faça a substituição','er'); aviso(`${j[1]} - ${n} excluído com 5 faltas · faça a substituição`); }
   else aviso(`Falta de ${j[1]} - ${n} · relógio volta em 8 s`,1); }
+
+// ===== FALTA ESPECIAL (Magno + Claude, 24/11/2026) · regras FIBA 2026 (em vigor desde 01/10/2026) =====
+// FALTA ESPECIAL → escolhe o tipo → camisa de quem fez (ou o time, para técnico/banco) → (quem sofreu, quando cabe) → FALTA ESPECIAL confirma.
+// Expulsão do jogador: 2 técnicas cat. 1, 2 flagrantes ou 1 de cada (gd). Técnico: 2 do técnico, ou 3 somando as do banco.
+// No lance a lance o nome vai por extenso (as siglas DI, FL, C, B ficam só para a súmula).
+function clicaFE(){ const b=document.body; if(b.classList.contains('sub')) return aviso('Termine ou feche a substituição antes da FALTA ESPECIAL');
+  if(FA.on&&!FA.tipo) return aviso('Termine ou feche a FALTA antes');
+  if(!FA.on) return abreFE();
+  if(!FA.fez){ FA.on=false; FA.tipo=null; FA.sof=null; desenha(); return; }
+  confirmaFE(); }
+function abreFE(){ document.getElementById('feTit').textContent='FALTA ESPECIAL · escolha o tipo';
+  document.getElementById('feOp').innerHTML=Object.entries(FE).map(([k,f])=>`<button onclick="escolheFE('${k}')">${f.nm}<small>${f.d}</small></button>`).join('');
+  document.getElementById('feMenu').classList.add('on'); }
+function fechaFE(){ document.getElementById('feMenu').classList.remove('on'); }
+function escolheFE(k){ FA.tipo=k; FA.on=true; FA.fez=null; FA.sof=null;
+  if(FE[k].quem==='tec'){ document.getElementById('feTit').textContent=FE[k].nm.toUpperCase()+' · de qual time?';
+    document.getElementById('feOp').innerHTML=['a','b'].map(t=>`<button class="tm" onclick="timeFE('${t}')">${T[t].nome.toUpperCase()}</button>`).join(''); }
+  else fechaFE();
+  desenha(); }
+function timeFE(t){ FA.fez={t,n:'TEC'}; fechaFE(); desenha(); }
+function desenhaFE(){ const b=document.getElementById('btFE'); if(!b) return; const on=FA.on&&!!FA.tipo, f=FE[FA.tipo]||{};
+  b.classList.toggle('subOn',on&&!FA.fez); b.classList.toggle('subOk',on&&!!FA.fez);
+  b.innerHTML=!on?'FALTA<br>ESPECIAL':!FA.fez?`${f.nm.toUpperCase()}<small>marque quem fez · toque aqui p/ fechar</small>`
+   :`CONFIRMAR<br>${f.nm.toUpperCase()}`+(f.sof&&!FA.sof?'<small>quem sofreu: opcional</small>':''); }
+function confirmaFE(){ const f=FE[FA.tipo], {t,n}=FA.fez;
+  if(f.quem==='tec'){ const x=TC[t], quem=f.k==='C'?'Técnico':f.k==='B'?'Banco':'Técnico ou banco';
+    if(f.dq){ x.dq++; reg(t,'',`${quem} ${T[t].nome}`,`${f.tx} · fora do jogo`,'er'); }
+    else { x[f.k]++; reg(t,'',`${quem} ${T[t].nome}`,`${f.tx} (${x[f.k]}ª)`,'fa');
+      if(x.C>=2||x.C+x.B>=3) reg(t,'',`Técnico ${T[t].nome}`,`DESQUALIFICADO (${x.C>=2?'2 técnicas do técnico':'3 técnicas somando técnico e banco'})`,'er'); }
+    aviso(`${f.tx} · ${T[t].nome}`,1); }
+  else { const j=jog(t,n); j[2]=Math.min(5,j[2]+1); FT[t]++;
+    let txt=f.tx; if(FA.sof){ const s=jog(FA.sof.t,FA.sof.n); s[4]=(s[4]||0)+1; txt+=` em ${s[1]} - ${s[0]}`; }
+    if(FT[t]>=5) txt+=` · ${FT[t]}ª do time no quarto (bônus)`;
+    reg(t,'',`${j[2]}ª falta ${j[1]} - ${n}`,txt,'fa');
+    if(f.gd) j[5]=(j[5]||0)+1;
+    if(f.dq||j[5]>=2){ j[6]=1; reg(t,'',`${j[1]} - ${n}`,`DESQUALIFICADO${f.dq?'':' (2 faltas técnicas ou flagrantes)'} · faça a substituição`,'er'); aviso(`${j[1]} - ${n} desqualificado · faça a substituição`); }
+    else if(j[2]>=5){ reg(t,'',`${j[1]} - ${n}`,'EXCLUÍDO (5 faltas) · faça a substituição','er'); aviso(`${j[1]} - ${n} excluído com 5 faltas · faça a substituição`); }
+    else aviso(`${f.tx} de ${j[1]} - ${n}`,1); }
+  pausaPor(8);
+  FA.on=false; FA.tipo=null; FA.fez=null; FA.sof=null; desenhaFT(); desenha(); }
 
 // ===== LANCE A LANCE (começa vazio; só recebe o que os botões registram; mais novo em cima) =====
 const LOG=[];
