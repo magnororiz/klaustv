@@ -71,6 +71,7 @@ body.sub .corpo{grid-template-rows:1fr 196px}
 .jg.f4 .fl span.on{background:#ff8a1a}
 /* situação do jogador */
 .jg.banco{opacity:.42}
+.jg .ef{position:absolute;right:4px;top:3px;font:700 11px Arial;padding:0 4px;border-radius:3px;background:rgba(0,0,0,.55);color:#ffe9a3;z-index:1}.jg .ef.ng{color:#ff8a80}   /* EF na camisa (Magno, 24/11/2026) */
 .jg.emq{box-shadow:inset 0 0 0 2px #ffd54f}
 .jg.exc{filter:grayscale(1) brightness(.55);opacity:.9}
 .jg.exc::after{content:'EXCLUÍDO';position:absolute;right:4px;top:3px;font-size:9px;letter-spacing:1px;background:#d32f2f;color:#fff;padding:1px 4px;border-radius:3px;font-weight:700}
@@ -224,10 +225,10 @@ body.sub .banco{display:grid}
 
   <section class="bts">
     <div class="bt az ina vazio" title="Botão livre (a falta recebida agora sai junto com a FALTA)"></div><div class="bt az" id="btLL" onclick="clicaLL()">LANCE<br>LIVRE</div>
-    <div class="bt vd ina" title="Em construção">ASSIST.</div><div class="bt vd ina" title="Em construção">REBOTE</div>
+    <div class="bt vd" id="bt_ast" onclick="clicaEst('ast')">ASSIST.</div><div class="bt vd" id="bt_reb" onclick="clicaEst('reb')">REBOTE</div>
     <div class="bt vm" id="btFal" onclick="clicaFalta()">FALTA</div><div class="bt vm" id="btFE" onclick="clicaFE()" title="Técnica, disruptiva, flagrante, desqualificante e do técnico/banco">FALTA<br>ESPECIAL</div>
-    <div class="bt am ina" title="Em construção">ERRO</div><div class="bt am ina" title="Em construção">ROUBO</div>
-    <div class="bt ina" title="Em construção">TEMPO</div><div class="bt ina" title="Em construção">TOCO</div>
+    <div class="bt am" id="bt_tov" onclick="clicaEst('tov')"><span>TURNOVER<small>erro</small></span></div><div class="bt am" id="bt_stl" onclick="clicaEst('stl')">ROUBO<br>DE BOLA</div>
+    <div class="bt ina" title="Em construção">TEMPO</div><div class="bt" id="bt_blk" onclick="clicaEst('blk')">TOCO</div>
     <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt undo ina" title="Desfazer a última ação · em construção">↶</div>
   </section>
 </main>
@@ -274,7 +275,8 @@ const T={a:{nome:'Flamengo',lis:FLA,js:[[4,'Tozo',0,1],[5,'Pedro',0,1],[7,'Davi'
 const ENTRA={a:new Set(),b:new Set()}, SAI={a:new Set(),b:new Set()};
 function tile(t,[n,nm,f,,,,dq],onde){ const k=t+n, cls=[dq?'dsq':f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':'',onde==='q'&&FA.fez&&FA.fez.t===t&&FA.fez.n===n?'fez':'',onde==='q'&&FA.sof&&FA.sof.t===t&&FA.sof.n===n?'sof':''].join(' ');
   return `<div class="jg ${cls}" title="${nm}" onclick="clicaJg('${t}',${n},'${onde}')"><div class="fl">${[1,2,3,4,5].map(x=>`<span class="${x<=f?'on':''}"></span>`).join('')}</div>
-   ${regata(onde+k,n,T[t].lis)}<div class="nm">${nm}</div></div>`; }
+   ${efTag(t,n)}${regata(onde+k,n,T[t].lis)}<div class="nm">${nm}</div></div>`; }
+function efTag(t,n){ const s=ST&&ST[t+n]; if(!s) return ''; return `<span class="ef${s.eff<0?' ng':''}" title="Eficiência">EF ${s.eff}</span>`; }
 function desenha(){ for(const t of ['a','b']){ const q=T[t].js.filter(j=>j[3]), bc=T[t].js.filter(j=>!j[3]).sort((x,y)=>x[0]-y[0]);
    const col=document.getElementById('col'+t.toUpperCase()); col.querySelectorAll('.jg').forEach(e=>e.remove());
    col.insertAdjacentHTML('beforeend',q.map(j=>tile(t,j,'q')).join(''));
@@ -286,12 +288,12 @@ function desenha(){ for(const t of ['a','b']){ const q=T[t].js.filter(j=>j[3]), 
 function estadoSub(){ let tot=0, ok=true; for(const t of ['a','b']){ const e=ENTRA[t].size, s=SAI[t].size; tot+=e+s; if(e!==s) ok=false; }
   return !tot?'vazio':ok?'ok':'pend'; }
 function aviso(t,ok){ const a=document.getElementById('aviso'); a.textContent=t; a.className=ok?'ok':''; a.style.display='block'; clearTimeout(a._t); a._t=setTimeout(()=>a.style.display='none',3200); }
-function clicaJg(t,n,onde){ if(AR.res!==null&&onde==='q') return marcaAr(t,n); if(LL.on&&onde==='q') return marcaLL(t,n); if(FA.on&&onde==='q') return marcaFalta(t,n);
+function clicaJg(t,n,onde){ if(EST.k&&onde==='q') return marcaEst(t,n); if(AR.res!==null&&onde==='q') return marcaAr(t,n); if(LL.on&&onde==='q') return marcaLL(t,n); if(FA.on&&onde==='q') return marcaFalta(t,n);
   if(!document.body.classList.contains('sub')) return; // fora da substituição e da falta, a camisa serve para as próximas estatísticas
   const jj=T[t].js.find(j=>j[0]===n); if(onde==='b'&&jj[6]){ aviso(`${jj[1]} foi desqualificado e não pode voltar`); return; }
   if(onde==='b'&&jj[2]>=5){ aviso(`${jj[1]} tem 5 faltas e não pode voltar`); return; }
   const S=onde==='b'?ENTRA[t]:SAI[t]; S.has(n)?S.delete(n):S.add(n); desenha(); }
-function clicaSub(){ const b=document.body; if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes'); if(FA.on) return aviso('Termine ou feche a FALTA antes da substituição');
+function clicaSub(){ fechaEst(); const b=document.body; if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes'); if(FA.on) return aviso('Termine ou feche a FALTA antes da substituição');
   if(!b.classList.contains('sub')){ b.classList.add('sub'); desenha(); return; }
   const tot=ENTRA.a.size+ENTRA.b.size+SAI.a.size+SAI.b.size;
   if(!tot){ b.classList.remove('sub'); desenha(); return; }           // nada marcado: só fecha
@@ -358,8 +360,10 @@ const ZN={ce:'Garrafão · perto da cesta',mL:'Meia distância curta · esquerda
  oLC:'Meia distância longa · canto esquerdo',oLW:'Meia distância longa · 45° esquerdo',oC:'Meia distância longa · frente',oRW:'Meia distância longa · 45° direito',oRC:'Meia distância longa · canto direito',
  tLC:'Canto esquerdo (corner 3)',tLW:'Ala esquerda (45°)',tC:'Frente (above the break)',tRW:'Ala direita (45°)',tRC:'Canto direito (corner 3)',tM:'Meio de quadra'};   // setores de 3 (Magno, 24/11/2026)
 const vZ=z=>z&&z[0]==='t'?3:2;   // quanto vale o arremesso do setor   // nomes no padrão internacional (Magno, 24/11/2026)
-const ST={}, AR={x:0,y:0,z:null,lado:'',res:null}, MARCAS=[];
-const stJ=(t,n)=>ST[t+n]||(ST[t+n]={pts:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,eff:0});
+var ST={}; const AR={x:0,y:0,z:null,lado:'',res:null}, MARCAS=[];
+const stJ=(t,n)=>ST[t+n]||(ST[t+n]={pts:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,reb:0,ast:0,tov:0,stl:0,blk:0,eff:0});
+// EF (fórmula brasileira): PTS + REB + ASS + TOCO + ROUBO − (2P err. + 3P err. + LL err. + TURNOVER) · falta não entra
+function efJ(s){ s.eff=s.pts+s.reb+s.ast+s.blk+s.stl-(s.twoMiss+s.threeMiss+s.ftMiss+s.tov); return s.eff; }
 function zM(x,y){ return {mx:(x-ZG.cx)/ZG.S, my:y/(ZG.S*ZG.K)-ZG.cyM}; }          // svg → metros (cesta = 0,0)
 function zS(mx,my){ return [ZG.cx+mx*ZG.S,(my+ZG.cyM)*ZG.S*ZG.K]; }              // metros → svg
 function den2(mx,my){ if(my<-ZG.cyM||Math.abs(mx)>=6.6) return false;          // dentro da quadra e da linha de 3
@@ -411,7 +415,7 @@ window.zOK=1; montaZonas();
 function ptSvg(e){ const svg=document.querySelector('#quadra svg'), pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
 function clicaZona(e,p){ const b=document.body;
   if(b.classList.contains('sub')) return aviso('Termine ou feche a substituição antes do arremesso');
-  if(FA.on) return aviso('Termine ou feche a falta antes do arremesso'); if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes');
+  if(FA.on) return aviso('Termine ou feche a falta antes do arremesso'); if(EST.k) return aviso('Escolha o jogador ou feche o botão laranja antes do arremesso'); if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes');
   if(AR.res!==null) return aviso('Toque na camisa de quem arremessou (ou ✕ para cancelar)');
   const q=ptSvg(e); AR.x=q.x; AR.y=q.y; AR.z=p.dataset.z; AR.lado=p.dataset.l; AR.res=null;
   document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); p.classList.add('on');
@@ -427,7 +431,7 @@ function cancelaAr(){ AR.z=null; AR.res=null; document.getElementById('arMenu').
 function marcaAr(t,n){ const j=jog(t,n), s=stJ(t,n), v=AR.res, onde=nomeZ(AR.z,AR.lado);
   const p=vZ(AR.z), k=p===3?'three':'two';
   if(v){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); } else s[k+'Miss']++;
-  s.eff=s.pts-s.twoMiss-s.threeMiss;      // por enquanto só arremessos de 2 e 3; rebote, assistência etc. entram quando os botões existirem
+  efJ(s); desenha();      // EF completa; rebote, assistência etc. entram quando os botões existirem
   MARCAS.push({x:AR.x,y:AR.y,ok:v,t,n,z:AR.z,lado:AR.lado});
   reg(t,'',`${p} pontos ${v?'convertido':'perdido'} ${j[1]} - ${n}`,onde,v?'ok':'ou');   // estilo FIBA LiveStats
   cancelaAr(); bolaViva(); aviso(v?`+${p} para ${j[1]} - ${n}`:`${p} pontos perdido · ${j[1]} - ${n}`,1); }
@@ -521,7 +525,7 @@ function marcaFalta(t,n){ if(FA.tipo&&FE[FA.tipo].quem==='tec') return aviso('Es
   else { if(FA.tipo&&!FE[FA.tipo].sof) return aviso('Nesta falta não se marca quem sofreu');
     FA.sof=FA.sof&&FA.sof.n===n?null:{t,n}; }
   desenha(); }
-function clicaFalta(){ if(document.body.classList.contains('sub')) return aviso('Termine ou feche a substituição antes da FALTA');
+function clicaFalta(){ fechaEst(); if(document.body.classList.contains('sub')) return aviso('Termine ou feche a substituição antes da FALTA');
   if(FA.tipo) return aviso('Termine ou feche a FALTA ESPECIAL antes'); if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes');
   if(!FA.on){ FA.on=true; desenha(); return; }
   if(!FA.fez){ FA.on=false; FA.sof=null; desenha(); return; }
@@ -542,7 +546,7 @@ function clicaFalta(){ if(document.body.classList.contains('sub')) return aviso(
 // FALTA ESPECIAL → escolhe o tipo → camisa de quem fez (ou o time, para técnico/banco) → (quem sofreu, quando cabe) → FALTA ESPECIAL confirma.
 // Expulsão do jogador: 2 técnicas cat. 1, 2 flagrantes ou 1 de cada (gd). Técnico: 2 do técnico, ou 3 somando as do banco.
 // No lance a lance o nome vai por extenso (as siglas DI, FL, C, B ficam só para a súmula).
-function clicaFE(){ const b=document.body; if(b.classList.contains('sub')) return aviso('Termine ou feche a substituição antes da FALTA ESPECIAL');
+function clicaFE(){ fechaEst(); const b=document.body; if(b.classList.contains('sub')) return aviso('Termine ou feche a substituição antes da FALTA ESPECIAL');
   if(FA.on&&!FA.tipo) return aviso('Termine ou feche a FALTA antes'); if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes');
   if(!FA.on) return abreFE();
   if(!FA.fez){ FA.on=false; FA.tipo=null; FA.sof=null; desenha(); return; }
@@ -590,7 +594,7 @@ function confirmaFE(){ const f=FE[FA.tipo], {t,n}=FA.fez;
 // 1 = cesta + falta · 2 = falta no arremesso de 2 ou bônus · 3 = falta no arremesso de 3.
 const PL={a:0,b:0}, LL={on:false,t:null,n:null,q:0,r:[]};
 function desenhaPL(){ document.getElementById('plA').textContent=PL.a; document.getElementById('plB').textContent=PL.b; }
-function clicaLL(){ if(document.body.classList.contains('sub')) return aviso('Termine ou feche a substituição antes do LANCE LIVRE');
+function clicaLL(){ fechaEst(); if(document.body.classList.contains('sub')) return aviso('Termine ou feche a substituição antes do LANCE LIVRE');
   if(FA.on) return aviso('Termine ou feche a falta antes do LANCE LIVRE');
   if(LL.on){ if(!LL.n&&!LL.q){ fimLL(); return; }              // nada marcado ainda: o 2º toque fecha
     return LL.n?telaLL():aviso('Marque a camisa do jogador que vai bater o lance livre'); }
@@ -614,18 +618,37 @@ function telaLL(){ const m=document.getElementById('llMenu'), op=document.getEle
    <div class="rod"><span>${LL.s12?'falta técnica (categoria 0) · 1 lance livre':'trocar: '+[1,2,3].map(q=>`<a onclick="qtdLL(${q})">${q}</a>`).join(' · ')}</span><span><a onclick="trocaLL()">outro jogador</a>${vez?' · <a onclick="voltaLL()">↶ corrigir o último</a>':''}</span></div>`; }
 function qtdLL(q){ paraLL(); LL.q=q; LL.r=LL.r.slice(0,q); telaLL(); }
 function trocaLL(){ LL.n=null; telaLL(); }
-function voltaLL(){ const x=LL.r.pop(); if(x===1){ PL[LL.t]--; desenhaPL(); } telaLL(); }
-function resLL(v){ LL.r.push(v); if(v){ PL[LL.t]++; desenhaPL(); }
+function voltaLL(){ const x=LL.r.pop(); if(x!==undefined) llSt(x,-1); if(x===1){ PL[LL.t]--; desenhaPL(); } telaLL(); }
+function llSt(v,d){ if(LL.s12||!LL.n) return; const s=stJ(LL.t,LL.n); if(v){ s.pts+=d; s.ftMade+=d; } else s.ftMiss+=d; efJ(s); desenha(); }   // lance livre no jogador e na EF
+function resLL(v){ LL.r.push(v); llSt(v,1); if(v){ PL[LL.t]++; desenhaPL(); }
   if(LL.r.length<LL.q) return telaLL();
   const j=jog(LL.t,LL.n), ok=LL.r.filter(x=>x).length;
   reg(LL.t,'',`Lance livre ${j[1]} - ${j[0]}`,`${ok} de ${LL.q} convertido${ok>1?'s':''}`,ok?'ok':'ou');
   fimLL();
   if(C.trava==='ll'){ solta(true); aviso('Lance livre registrado · relógio liberado',1); }
   else aviso('Lance livre registrado · relógio pausado pelo Raoni · toque ▶ para liberar',1); }
-function cancelaLL(){ if(!LL.q){ fimLL(); return; } for(const x of LL.r) if(x===1) PL[LL.t]--; desenhaPL(); fimLL(); aviso('Lance livre cancelado · relógio parado, toque ▶ para liberar'); }
+function cancelaLL(){ if(!LL.q){ fimLL(); return; } for(const x of LL.r){ llSt(x,-1); if(x===1) PL[LL.t]--; } desenhaPL(); fimLL(); aviso('Lance livre cancelado · relógio parado, toque ▶ para liberar'); }
 function fimLL(){ LL.on=false; LL.s12=0; LL.t=null; LL.n=null; LL.q=0; LL.r=[]; document.getElementById('llMenu').classList.remove('on'); desenhaLL(); }
 function desenhaLL(){ const b=document.getElementById('btLL'); if(!b) return; b.classList.toggle('subOn',LL.on&&!LL.n);
   b.innerHTML=LL.on&&!LL.n?'LANCE LIVRE<small>marque o jogador que vai bater · toque aqui p/ fechar</small>':'LANCE<br>LIVRE'; }
+
+// ===== ASSIST. · REBOTE · TURNOVER · ROUBO DE BOLA · TOCO (Magno, 24/11/2026) =====
+// Toca no botão: fica laranja (igual à substituição) e pede "Escolha o jogador". Toca na camisa: soma a estatística,
+// mexe na EF (+1; o turnover tira 1) e vai para o lance a lance. Tocar de novo no botão laranja fecha sem marcar.
+const EST={k:null}, ESN={ast:['Assistência','que deu a assistência',1],reb:['Rebote','que pegou o rebote',1],tov:['Turnover (erro)','que cometeu o erro',-1],stl:['Roubo de bola','que roubou a bola',1],blk:['Toco','que deu o toco',1]};
+const ESR={ast:'ASSIST.',reb:'REBOTE',tov:'<span>TURNOVER<small>erro</small></span>',stl:'ROUBO<br>DE BOLA',blk:'TOCO'};
+function desenhaEst(){ for(const k in ESR){ const b=document.getElementById('bt_'+k); if(!b) continue; const on=EST.k===k; b.classList.toggle('subOn',on);
+  b.innerHTML=on?`<span>${ESN[k][0].toUpperCase()}<small>escolha o jogador · toque aqui p/ fechar</small></span>`:ESR[k]; } }
+function fechaEst(){ if(EST.k){ EST.k=null; desenhaEst(); } }   // outro botão fecha o laranja sem marcar
+function clicaEst(k){ if(EST.k===k){ EST.k=null; desenhaEst(); return; }
+  if(document.body.classList.contains('sub')) return aviso('Termine ou feche a substituição antes');
+  if(FA.on) return aviso('Termine ou feche a FALTA antes'); if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes');
+  if(AR.z) return aviso('Termine ou cancele o arremesso antes');
+  EST.k=k; desenhaEst(); aviso(`Escolha o jogador ${ESN[k][1]}`,1); }
+function marcaEst(t,n){ const k=EST.k, [nm,,v]=ESN[k], j=jog(t,n), s=stJ(t,n); s[k]++; efJ(s);
+  EST.k=null; desenhaEst(); desenha();
+  reg(t,'',`${nm} ${j[1]} - ${n}`,`EF ${v>0?'+1':'−1'}`,v>0?'ok':'er'); bolaViva();
+  aviso(`${nm} · ${j[1]} - ${n} · EF ${v>0?'+1':'−1'}`,v>0?1:0); }
 
 // ===== LANCE A LANCE (começa vazio; só recebe o que os botões registram; mais novo em cima) =====
 const LOG=[];
