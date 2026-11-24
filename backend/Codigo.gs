@@ -13,9 +13,10 @@ const HORAS_SESSAO = 12;
 function doGet(e) {
   const p = (e && e.parameter) || {};
   // Placar do OBS (Magno, 23/11/2026): GET com callback (JSONP) porque o navegador do OBS não consegue usar fetch no Google
-  if (p.acao === 'placar') { const cb = String(p.callback || ''); const o = placarAtual();
-    if (/^[A-Za-z_$][\w$]{0,40}$/.test(cb)) return ContentService.createTextOutput(cb + '(' + JSON.stringify(o) + ');').setMimeType(ContentService.MimeType.JAVASCRIPT);
-    return responder(o); }
+  if (p.acao === 'placar') return jsonp(p, placarAtual());
+  // Escalação ligada ao Scout (Magno, 24/11/2026): o OBS pergunta qual jogo está aberto no Scout (acao=placar) e busca a escalação dele
+  if (p.acao === 'escalacaoJogo') return jsonp(p, escalacaoJogo(p.id));
+  if (p.acao === 'atletasKT') return jsonp(p, atletasKT(p.categoria, p.ano));
   return responder({ ok: true, msg: 'Klaus TV backend ativo' });
 }
 
@@ -70,6 +71,12 @@ function doPost(e) {
   } finally { lock.releaseLock(); }
 }
 
+function jsonp(p, o) { const cb = String(p.callback || '');
+  if (/^[A-Za-z_$][\w$]{0,40}$/.test(cb)) return ContentService.createTextOutput(cb + '(' + JSON.stringify(o) + ');').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  return responder(o); }
+function escalacaoJogo(id) { id = String(id || ''); if (!id) return { ok: false, erro: 'Sem jogo.' };
+  const r = aoVivoJogoCompleto(id); if (!r || !r.ok) return r || { ok: false, erro: 'Jogo não encontrado.' };
+  return { ok: true, jogo: r.jogo, fotos: r.fotos, apelidos: r.apelidos, camisas: mapaCamisas(), agora: r.agora }; }
 function responder(obj) { return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON); }
 
 /* ---------- planilha ---------- */
