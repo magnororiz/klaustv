@@ -236,12 +236,13 @@ body.sub .banco{display:grid}
   </section>
 
   <section class="bts">
-    <div class="bt az ina vazio" title="Botão livre (a falta recebida agora sai junto com a FALTA)"></div><div class="bt az" id="btLL" onclick="clicaLL()">LANCE<br>LIVRE</div>
-    <div class="bt vd" id="bt_ast" onclick="clicaEst('ast')">ASSIST.</div><div class="bt vd" id="bt_reb" onclick="clicaEst('reb')">REBOTE</div>
+    <!-- ordem dos botões (Magno, 24/11/2026): esquerda | direita, de cima para baixo -->
+    <div class="bt vd" id="bt_ast" onclick="clicaEst('ast')">ASSIST.</div><div class="bt az" id="btLL" onclick="clicaLL()">LANCE<br>LIVRE</div>
+    <div class="bt vd" id="bt_reb" onclick="clicaEst('reb')">REBOTE</div><div class="bt am" id="bt_stl" onclick="clicaEst('stl')">ROUBO<br>DE BOLA</div>
+    <div class="bt am" id="bt_tov" onclick="clicaEst('tov')"><span>TURNOVER<small>erro</small></span></div><div class="bt" id="bt_blk" onclick="clicaEst('blk')">TOCO</div>
     <div class="bt vm" id="btFal" onclick="clicaFalta()">FALTA</div><div class="bt vm" id="btFE" onclick="clicaFE()" title="Técnica, disruptiva, flagrante, desqualificante e do técnico/banco">FALTA<br>ESPECIAL</div>
-    <div class="bt am" id="bt_tov" onclick="clicaEst('tov')"><span>TURNOVER<small>erro</small></span></div><div class="bt am" id="bt_stl" onclick="clicaEst('stl')">ROUBO<br>DE BOLA</div>
-    <div class="bt ina" title="Em construção">TEMPO</div><div class="bt" id="bt_blk" onclick="clicaEst('blk')">TOCO</div>
-    <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt2"><div class="bt undo off" id="btUn" onclick="desfaz()" title="Desfazer a última ação">↶</div><div class="bt undo off" id="btRe" onclick="refaz()" title="Refazer a ação desfeita">↷</div></div>
+    <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt ina" title="Em construção">TEMPO</div>
+    <div class="bt az ina vazio" title="Botão livre (a falta recebida agora sai junto com a FALTA)"></div><div class="bt2"><div class="bt undo off" id="btUn" onclick="desfaz()" title="Desfazer a última ação">↶</div><div class="bt undo off" id="btRe" onclick="refaz()" title="Refazer a ação desfeita">↷</div></div>
   </section>
 </main>
 <div id="aviso"></div>
