@@ -163,6 +163,7 @@ body.sub .banco{display:grid}
 #feMenu button,#llMenu button{background:#1f2633;border:1px solid #3a4560;border-radius:8px;color:#fff;font:600 15px Arial;padding:10px 8px;cursor:pointer;text-align:left;line-height:1.15}
 #feMenu button small,#llMenu button small{display:block;font-weight:400;font-size:11.5px;color:#9fb0d6;margin-top:3px}
 #feMenu button:hover,#llMenu button:hover{background:#2c3850;border-color:#e53935}
+#feMenu .op button.s12{grid-column:1/-1;border-color:#ffb300}#feMenu .op button.s12 small{color:#ffe0a3}
 #feMenu button.tm{text-align:center;font-size:18px;padding:16px}
 /* botões */
 .bts{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(6,1fr);gap:8px;min-height:0}
@@ -236,7 +237,9 @@ const FE={
  dj:{ll:2,nm:'Desqualificante',d:'jogador expulso na hora · agressão, briga',tx:'Falta desqualificante',quem:'jog',sof:1,dq:1},
  tc:{ll:1,nm:'Técnica do técnico',d:'conduta do próprio técnico',tx:'Falta técnica do técnico',quem:'tec',k:'C'},
  tb:{ll:1,nm:'Técnica do banco',d:'reservas, assistente ou comissão',tx:'Falta técnica do banco',quem:'tec',k:'B'},
- dt:{ll:2,nm:'Desqualificante do técnico ou banco',d:'expulso na hora',tx:'Falta desqualificante do técnico ou banco',quem:'tec',dq:1}};
+ dt:{ll:2,nm:'Desqualificante do técnico ou banco',d:'expulso na hora',tx:'Falta desqualificante do técnico ou banco',quem:'tec',dq:1},
+ // Sub-12 do Rio (Magno, 24/11/2026, provisório até confirmar na FBERJ): falta do TIME, não do jogador · não conta falta do jogador nem do time · 1 lance livre e bola na lateral
+ s12:{ll:1,nm:'Técnica Sub-12',d:'pressão · roubo de bola no campo do adversário',tx:'Falta técnica Sub-12',quem:'tec',s12:1}};
 const TC={a:{C:0,B:0,dq:0},b:{C:0,B:0,dq:0}};
 // camiseta regata (mesmo desenho da Escalação); listrada para o Flamengo, lisa para o Tijuca
 const CORPO='M9 1.5h5Q19 10.5 24 1.5h5v5.4q1.4 7.6 7.5 8.6V42.5H1.5V15.5Q7.6 14.5 9 6.9z';
@@ -438,7 +441,7 @@ function clicaFE(){ const b=document.body; if(b.classList.contains('sub')) retur
   if(!FA.fez){ FA.on=false; FA.tipo=null; FA.sof=null; desenha(); return; }
   confirmaFE(); }
 function abreFE(){ document.getElementById('feTit').textContent='FALTA ESPECIAL · escolha o tipo';
-  document.getElementById('feOp').innerHTML=Object.entries(FE).map(([k,f])=>`<button onclick="escolheFE('${k}')">${f.nm}<small>${f.d}</small></button>`).join('');
+  document.getElementById('feOp').innerHTML=Object.entries(FE).map(([k,f])=>`<button${f.s12?' class="s12"':''} onclick="escolheFE('${k}')">${f.nm}<small>${f.d}</small></button>`).join('');
   document.getElementById('feMenu').classList.add('on'); }
 function fechaFE(){ document.getElementById('feMenu').classList.remove('on'); }
 function escolheFE(k){ FA.tipo=k; FA.on=true; FA.fez=null; FA.sof=null;
@@ -452,7 +455,9 @@ function desenhaFE(){ const b=document.getElementById('btFE'); if(!b) return; co
   b.innerHTML=!on?'FALTA<br>ESPECIAL':!FA.fez?`${f.nm.toUpperCase()}<small>marque quem fez · toque aqui p/ fechar</small>`
    :`CONFIRMAR<br>${f.nm.toUpperCase()}`+(f.sof&&!FA.sof?'<small>quem sofreu: opcional</small>':''); }
 function confirmaFE(){ const f=FE[FA.tipo], {t,n}=FA.fez;
-  if(f.quem==='tec'){ const x=TC[t], quem=f.k==='C'?'Técnico':f.k==='B'?'Banco':'Técnico ou banco';
+  if(f.s12){ reg(t,'',`Falta técnica Sub-12 ${T[t].nome}`,'Pressão: roubo de bola no campo do adversário · 1 lance livre e bola na lateral','fa');
+    aviso(`Falta técnica Sub-12 · ${T[t].nome} · 1 lance livre e bola na lateral`,1); }
+  else if(f.quem==='tec'){ const x=TC[t], quem=f.k==='C'?'Técnico':f.k==='B'?'Banco':'Técnico ou banco';
     if(f.dq){ x.dq++; reg(t,'',`${quem} ${T[t].nome}`,`${f.tx} · fora do jogo`,'er'); }
     else { x[f.k]++; reg(t,'',`${quem} ${T[t].nome}`,`${f.tx} (${x[f.k]}ª)`,'fa');
       if(x.C>=2||x.C+x.B>=3) reg(t,'',`Técnico ${T[t].nome}`,`DESQUALIFICADO (${x.C>=2?'2 técnicas do técnico':'3 técnicas somando técnico e banco'})`,'er'); }
