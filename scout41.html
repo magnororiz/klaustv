@@ -241,7 +241,7 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
   <g fill="none" stroke="${L}" stroke-width="${lw}" vector-effect="non-scaling-stroke">
    <path d="M0 ${H}V0H${W}V${H}"/>
    <line x1="0" y1="${M}" x2="${W}" y2="${M}"/>
-   <circle cx="${cx}" cy="${M}" r="${1.8*S}"/>
+   <ellipse id="cc" cx="${cx}" cy="${M}" rx="${1.8*S}" ry="${1.8*S}"/>
    <rect x="${cx-gw/2}" y="0" width="${gw}" height="${gh}"/>
    <path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 0 ${cx+rl} ${gh}"/>
    <path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 1 ${cx+rl} ${gh}" stroke-dasharray="14 12"/>
@@ -250,7 +250,11 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
    <line x1="${cx-.9*S}" y1="${y(1.2)}" x2="${cx+.9*S}" y2="${y(1.2)}" stroke-width="5"/>
    <circle cx="${cx}" cy="${cy}" r="${.225*S}" stroke="#ff8a1a"/>
   </g>
- </svg>`; })();
+ </svg>`;
+ // círculo do meio sempre redondo na tela (a quadra é esticada); o que passa da borda de baixo fica cortado · Magno, 24/11/2026
+ function redondo(){ const q=document.querySelector('#quadra svg'), w=q.clientWidth, h=q.clientHeight; if(!w||!h) return;
+   const sx=w/(W+12), sy=h/(H+12); document.getElementById('cc').setAttribute('ry',1.8*S*sx/sy); }
+ redondo(); addEventListener('resize',redondo); new ResizeObserver(redondo).observe(document.getElementById('quadra')); })();
 
 // lance a lance: começa vazio e só recebe o que os botões registram (mais novo em cima) · Magno, 24/11/2026
 const LOG=[];
