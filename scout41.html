@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Scout PRO 4.1 – Klaus TV</title>
+<link rel="icon" href="favicon-32.png">
+<style>
+/* Scout PRO 4.1 – prévia 1 do layout (Magno, 24/11/2026): só desenho, botões ainda sem função */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#05070d;color:#fff;font-family:'Oswald',Arial,sans-serif;overflow:hidden;
+  display:grid;grid-template-rows:64px 1fr;height:100vh}
+
+/* ===== placar (faixa de cima) ===== */
+.top{display:flex;align-items:center;gap:14px;padding:0 16px;
+  background:linear-gradient(180deg,#16336b,#0b1d42);border-bottom:2px solid #2c4a80}
+.top .tm{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.top .tm.b{justify-content:flex-end}
+.top .tm img{height:42px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}
+.top .tm .nm{font-size:22px;font-weight:600;letter-spacing:1px;white-space:nowrap}
+.top .cx{display:flex;flex-direction:column;align-items:center;line-height:1;font-size:11px;letter-spacing:1px;color:#b9c7e6}
+.top .cx b{font-size:20px;color:#fff;font-weight:600;margin-top:2px}
+.top .sep{width:1px;height:34px;background:#3a5590}
+.top .pl{font-size:44px;font-weight:700;min-width:70px;text-align:center}
+.top .seta{width:44px;height:44px;display:grid;place-items:center;background:rgba(255,255,255,.06);border-radius:6px;color:#55688f;font-size:22px}
+.top .seta.on{color:#ffd54f;background:rgba(255,213,79,.12)}
+.top .rel{display:flex;flex-direction:column;align-items:center;line-height:1;padding-top:4px}
+.top .rel i{font-style:normal;font-size:13px;color:#ffd54f;letter-spacing:1px}
+.top .rel b{font-size:36px;font-weight:600;letter-spacing:1px}
+.top .net{font-size:11px;color:#57d36b;margin-top:2px}
+.top .play{width:40px;height:40px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;font-size:15px;margin-left:6px}
+
+/* ===== corpo: camisas | quadra + lance a lance | botões ===== */
+.corpo{display:grid;grid-template-columns:340px 1fr 270px;grid-template-rows:1fr 196px;gap:10px;padding:10px;min-height:0}
+.times{grid-column:1;grid-row:1}.meio{grid-column:2;grid-row:1}.bts{grid-column:3;grid-row:1/3}.baixo{grid-column:1/3;grid-row:2}
+
+/* colunas dos times */
+.times{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-height:0}
+.col{display:grid;grid-template-rows:40px repeat(5,1fr);gap:4px;min-height:0}
+.cab{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:6px;font-size:15px;font-weight:600;letter-spacing:1px}
+.cab img{height:30px}
+.col.a .cab{background:#141414;border:2px solid #C8102E}
+.col.b .cab{background:#fff;color:#7d0d10;border:2px solid #E2231A}
+
+.jg{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:2px 6px 2px 14px;border-radius:6px;cursor:pointer;min-height:0;overflow:hidden}
+.col.a .jg,.bnc.a .jg{background:linear-gradient(180deg,#232323,#121212);border:1px solid #3b3b3b}
+.col.b .jg,.bnc.b .jg{background:linear-gradient(180deg,#ffffff,#e9e9e9);border:1px solid #d0d0d0;color:#5c0a0c}
+.jg svg{height:62%;max-height:64px;flex:0 0 auto;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.jg .nm{font-size:16px;margin-top:2px;line-height:1;text-align:center;max-width:100%;font-weight:500;letter-spacing:.3px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jg .nm small{display:none;font-size:10px;letter-spacing:1px;opacity:.6;font-weight:400}
+/* quadradinhos de falta (5 = exclusão) */
+.jg .fl{position:absolute;left:5px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:3px}
+.jg .fl span{width:8px;height:10px;border-radius:1px;background:rgba(127,127,127,.35)}
+.jg .fl span.on{background:#ffd54f}
+.jg.f4 .fl span.on{background:#ff8a1a}
+/* situação do jogador */
+.jg.banco{opacity:.42}
+.jg.emq{box-shadow:inset 0 0 0 2px #ffd54f}
+.jg.exc{filter:grayscale(1) brightness(.55);opacity:.9}
+.jg.exc::after{content:'EXCLUÍDO';position:absolute;right:4px;top:3px;font-size:9px;letter-spacing:1px;background:#d32f2f;color:#fff;padding:1px 4px;border-radius:3px;font-weight:700}
+
+/* meio */
+.meio{display:flex;min-height:0;min-width:0}
+.quadra{flex:1;display:flex;align-items:center;justify-content:center;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;min-height:0;overflow:hidden}
+.quadra svg{height:100%;width:100%}
+.lal{min-width:0;background:#0e1626;border:1px solid #2c4a80;border-radius:8px;display:flex;flex-direction:column;min-height:0}
+.lal h3{font-size:13px;letter-spacing:2px;color:#ffd54f;font-weight:600;padding:6px 12px;border-bottom:1px solid #22385f;display:flex;justify-content:space-between}
+.lal h3 span{color:#7f93bd;font-weight:400;letter-spacing:1px}
+.lal ul{list-style:none;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:#2c4a80 transparent}
+.lal li{display:grid;grid-template-columns:54px 44px 14px 32px 1fr auto;align-items:center;gap:8px;padding:4px 12px;font-size:14px;border-bottom:1px solid #16243f;font-family:Arial,sans-serif}
+.lal li:first-child{background:rgba(255,213,79,.08)}
+.lal li .h{color:#9fb0d6;font-family:'Oswald',Arial;letter-spacing:1px}
+.lal li .q{color:#7f93bd;font-size:12px}
+.lal li .d{width:12px;height:12px;border-radius:50%}
+.lal li .c{font-weight:700;text-align:right}
+.lal li .ac{font-weight:700;font-size:13px;padding:1px 7px;border-radius:4px}
+.ac.ok{background:#1b5e20;color:#b9f6ca}.ac.er{background:#7f1d1d;color:#ffcdd2}.ac.ou{background:#1f3a6b;color:#cfe0ff}.ac.fa{background:#6b3a00;color:#ffe0b2}.ac.sb{background:#5a2a7a;color:#ecd4ff}
+
+/* substituição: banco abre embaixo da quadra, o lance a lance encolhe (Magno, 24/11/2026) */
+.baixo{display:grid;grid-template-columns:1fr;gap:0;min-height:0}
+body.sub .baixo{grid-template-columns:340px 1fr;gap:10px}
+.banco{display:none;grid-template-columns:1fr 1fr;gap:8px;min-height:0}
+body.sub .banco{display:grid}
+.bnc{border-radius:8px;padding:5px;min-height:0;display:grid;grid-template-rows:auto 18px 1fr 18px;gap:3px}
+.bnc.a{background:#151515;border:2px solid #C8102E}.bnc.b{background:#f4f4f4;border:2px solid #E2231A}
+.bnc h4{font-size:10.5px;letter-spacing:1px;text-align:center;font-weight:600;line-height:1.1}.bnc.a h4{color:#ff8a8a}.bnc.b h4{color:#9b1014}
+.bnc .rol{border:none;border-radius:4px;font-size:11px;cursor:pointer;background:rgba(127,127,127,.25);color:inherit}
+.bnc.a .rol{color:#fff}.bnc.b .rol{color:#9b1014}
+.bnc .lis{overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:6px;padding:4px;scrollbar-width:thin;scroll-behavior:smooth}
+.bnc .jg{flex:0 0 36px;flex-direction:row;justify-content:flex-start;gap:6px;padding:2px 6px 2px 12px}
+.bnc .jg svg{height:30px;max-height:30px}.bnc .jg .nm{font-size:14px;margin:0;text-align:left}
+.bnc .jg .fl span{width:4px;height:4px}
+.bnc .jg.pend::after,.bnc .jg.exc::after{top:50%;transform:translateY(-50%)}
+.jg.pend{opacity:1!important;box-shadow:0 0 0 3px #ff8a1a,0 0 14px 4px rgba(255,138,26,.75)!important;animation:aura 1.1s ease-in-out infinite alternate}
+.jg.pend::after{content:'ENTRA';position:absolute;right:3px;top:3px;font-size:9px;letter-spacing:1px;background:#ff8a1a;color:#000;padding:1px 4px;border-radius:3px;font-weight:700}
+.jg.sai{box-shadow:0 0 0 3px #29b6f6,0 0 14px 4px rgba(41,182,246,.7)!important}
+.jg.sai::after{content:'SAI';position:absolute;right:4px;top:4px;font-size:11px;letter-spacing:1px;background:#29b6f6;color:#000;padding:1px 6px;border-radius:3px;font-weight:700}
+@keyframes aura{from{box-shadow:0 0 0 3px #ff8a1a,0 0 6px 1px rgba(255,138,26,.5)}to{box-shadow:0 0 0 3px #ffb74d,0 0 18px 6px rgba(255,138,26,.9)}}
+.bt small{display:block;font-size:11px;letter-spacing:.5px;margin-top:3px;font-weight:500}
+.bt.subOk{background:linear-gradient(180deg,#43c45a,#1f8a35);color:#fff;font-size:15px}
+.bt.subOn{font-size:15px;background:linear-gradient(180deg,#ff9d3a,#e06a00);color:#000;animation:pisca 1s steps(2) infinite}
+@keyframes pisca{50%{filter:brightness(1.25)}}
+#aviso{position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#d32f2f;color:#fff;font:700 15px Arial;padding:8px 16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.6);display:none;z-index:9}
+#aviso.ok{background:#1b5e20}
+/* botões */
+.bts{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(6,1fr);gap:8px;min-height:0}
+.bt{background:linear-gradient(180deg,#2b2f38,#1d2027);border:1px solid #3a3f4b;border-radius:8px;display:grid;place-items:center;text-align:center;
+  font-size:17px;font-weight:600;letter-spacing:1px;line-height:1.05;cursor:pointer;box-shadow:inset 0 -4px 0 var(--bar,transparent),0 3px 6px rgba(0,0,0,.5)}
+.bt{transition:transform .12s,filter .12s}
+.bt:hover{filter:brightness(1.25);transform:translateY(-3px)}
+.bt:active{transform:translateY(1px)}
+.bt.ina{cursor:default}
+.az{--bar:#1e5bd8}.vd{--bar:#2fae4a}.vm{--bar:#d83a3a}.am{--bar:#e8a317}
+.bt.undo{font-size:28px}
+.marca{position:fixed;right:12px;bottom:8px;font:600 11px Arial;color:#ffd54f;background:rgba(0,0,0,.7);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="tm a"><img src="escudos/CRF.png" alt=""><span class="nm">FLAMENGO</span></div>
+  <div class="cx">F<b>3</b></div><div class="sep"></div>
+  <div class="cx">TEMPO<b>1/2</b></div>
+  <div class="pl">24</div>
+  <div class="seta on" title="Posse alternada">◀</div>
+  <div class="rel"><i>2º Q</i><b>07:48</b><span class="net">● online</span></div>
+  <div class="seta" title="Posse alternada">▶</div>
+  <div class="pl">18</div>
+  <div class="cx">TEMPO<b>0/2</b></div><div class="sep"></div>
+  <div class="cx">F<b>2</b></div>
+  <div class="tm b"><span class="nm">TIJUCA</span><img src="escudos/TTC.png" alt=""></div>
+  <div class="play" title="Cronômetro">▶</div>
+</header>
+
+<main class="corpo">
+  <section class="times">
+    <div class="col a" id="colA"><div class="cab"><img src="escudos/CRF.png" alt="">A · FLA</div></div>
+    <div class="col b" id="colB"><div class="cab"><img src="escudos/TTC.png" alt="">B · TIJ</div></div>
+  </section>
+
+  <section class="meio"><div class="quadra" id="quadra"></div></section>
+
+  <section class="baixo">
+    <div class="banco">
+      <div class="bnc a"><h4>BANCO DE RESERVAS · FLAMENGO</h4><button class="rol" onclick="rola('bnA',-1)">▲</button><div class="lis" id="bnA"></div><button class="rol" onclick="rola('bnA',1)">▼</button></div>
+      <div class="bnc b"><h4>BANCO DE RESERVAS · TIJUCA</h4><button class="rol" onclick="rola('bnB',-1)">▲</button><div class="lis" id="bnB"></div><button class="rol" onclick="rola('bnB',1)">▼</button></div>
+    </div>
+    <div class="lal">
+      <h3>LANCE A LANCE <span>(play-by-play) · role para ver tudo</span></h3>
+      <ul id="lal"></ul>
+    </div>
+  </section>
+
+  <section class="bts">
+    <div class="bt az ina" title="Em construção">FALTA<br>REC.</div><div class="bt az ina" title="Em construção">LANCE<br>LIVRE</div>
+    <div class="bt vd ina" title="Em construção">ASSIST.</div><div class="bt vd ina" title="Em construção">REBOTE</div>
+    <div class="bt vm ina" title="Em construção">FALTA</div><div class="bt vm ina" title="Em construção">FALTA<br>TÉCNICA</div>
+    <div class="bt am ina" title="Em construção">ERRO</div><div class="bt am ina" title="Em construção">ROUBO</div>
+    <div class="bt ina" title="Em construção">TEMPO</div><div class="bt ina" title="Em construção">TOCO</div>
+    <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt undo ina" title="Desfazer a última ação · em construção">↶</div>
+  </section>
+</main>
+<div id="aviso"></div><div class="marca">SCOUT PRO 4.1 · em construção · só a substituição funciona</div>
+
+<script>
+// camiseta regata (mesmo desenho da Escalação); listrada para o Flamengo, lisa para o Tijuca
+const CORPO='M9 1.5h5Q19 10.5 24 1.5h5v5.4q1.4 7.6 7.5 8.6V42.5H1.5V15.5Q7.6 14.5 9 6.9z';
+function regata(id,n,lis){
+  // lis: lista de cores das listras horizontais (1 cor = lisa); borda e número
+  const [cores,borda,num]=lis; const h=44/ (cores.length===1?1:8);
+  const faixas=cores.length===1?`<rect width="40" height="44" fill="${cores[0]}"/>`:
+    Array.from({length:8},(_,i)=>`<rect y="${i*h}" width="40" height="${h+.2}" fill="${cores[i%cores.length]}"/>`).join('');
+  return `<svg viewBox="0 0 40 44"><defs><clipPath id="c${id}"><path d="${CORPO}"/></clipPath>
+   <linearGradient id="g${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".25"/><stop offset=".45" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient></defs>
+   <g clip-path="url(#c${id})">${faixas}<rect width="40" height="44" fill="url(#g${id})"/></g>
+   <path d="${CORPO}" fill="none" stroke="${borda}" stroke-width="1.8" stroke-linejoin="round"/>
+   <text x="20" y="34" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="20" fill="${num}" stroke="${num==='#FFFFFF'?'#000':'#fff'}" stroke-width=".6" paint-order="stroke">${n}</text></svg>`;
+}
+const FLA=[['#C8102E','#000000'],'#FFFFFF','#FFFFFF'];   // listras vermelho e preto, número branco
+const TIJ=[['#E2231A'],'#FFFFFF','#FFFFFF'];             // vermelha lisa, número branco
+
+// elenco de teste (nome ou apelido) · faltas · em quadra (q=1)
+const T={a:{nome:'Flamengo',lis:FLA,js:[[4,'Tozo',1,1],[5,'Pedro',2,1],[7,'Davi',0,1],[8,'Gabriel',4,1],[10,'Lucas',1,1],
+ [6,'Caio',0,0],[9,'Miguel',0,0],[11,'Arthur',0,0],[12,'Bento',5,0],[13,'Enzo',0,0],[14,'Rafa',0,0],[15,'João',0,0]]},
+ b:{nome:'Tijuca',lis:TIJ,js:[[3,'Matheus',2,1],[5,'Kaique',1,1],[6,'Bruno',3,1],[9,'Igor',0,1],[12,'Léo',1,1],
+ [4,'Vitor',0,0],[7,'Samuel',0,0],[8,'Thiago',0,0],[10,'Felipe',0,0],[11,'Nico',0,0],[13,'Heitor',0,0],[14,'Danilo',0,0]]}};
+const ENTRA={a:new Set(),b:new Set()}, SAI={a:new Set(),b:new Set()};
+function tile(t,[n,nm,f],onde){ const k=t+n, cls=[f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':''].join(' ');
+  return `<div class="jg ${cls}" title="${nm}" onclick="clicaJg('${t}',${n},'${onde}')"><div class="fl">${[1,2,3,4,5].map(x=>`<span class="${x<=f?'on':''}"></span>`).join('')}</div>
+   ${regata(onde+k,n,T[t].lis)}<div class="nm">${nm}</div></div>`; }
+function desenha(){ for(const t of ['a','b']){ const q=T[t].js.filter(j=>j[3]), bc=T[t].js.filter(j=>!j[3]).sort((x,y)=>x[0]-y[0]);
+   const col=document.getElementById('col'+t.toUpperCase()); col.querySelectorAll('.jg').forEach(e=>e.remove());
+   col.insertAdjacentHTML('beforeend',q.map(j=>tile(t,j,'q')).join(''));
+   document.getElementById('bn'+t.toUpperCase()).innerHTML=bc.map(j=>tile(t,j,'b')).join(''); }
+  const bt=document.getElementById('btSub'), ab=document.body.classList.contains('sub'), st=estadoSub();
+  bt.classList.toggle('subOn',ab&&st!=='ok'); bt.classList.toggle('subOk',ab&&st==='ok');
+  bt.innerHTML=!ab?'SUBST.':st==='vazio'?'SUBST.<small>fechar banco</small>':st==='ok'?'CONFIRMAR<br>SUBSTITUIÇÃO':'SUBSTITUIÇÃO<br>PENDENTE'; }
+// vazio = nada marcado; ok = nos dois times, quem entra = quem sai (e pelo menos 1); pend = falta marcar
+function estadoSub(){ let tot=0, ok=true; for(const t of ['a','b']){ const e=ENTRA[t].size, s=SAI[t].size; tot+=e+s; if(e!==s) ok=false; }
+  return !tot?'vazio':ok?'ok':'pend'; }
+function aviso(t,ok){ const a=document.getElementById('aviso'); a.textContent=t; a.className=ok?'ok':''; a.style.display='block'; clearTimeout(a._t); a._t=setTimeout(()=>a.style.display='none',3200); }
+function clicaJg(t,n,onde){ if(!document.body.classList.contains('sub')) return; // fora da substituição, a camisa serve para marcar estatística (próxima etapa)
+  const jj=T[t].js.find(j=>j[0]===n); if(onde==='b'&&jj[2]>=5){ aviso(`${jj[1]} tem 5 faltas e não pode voltar`); return; }
+  const S=onde==='b'?ENTRA[t]:SAI[t]; S.has(n)?S.delete(n):S.add(n); desenha(); }
+function clicaSub(){ const b=document.body;
+  if(!b.classList.contains('sub')){ b.classList.add('sub'); desenha(); return; }
+  const tot=ENTRA.a.size+ENTRA.b.size+SAI.a.size+SAI.b.size;
+  if(!tot){ b.classList.remove('sub'); desenha(); return; }           // nada marcado: só fecha
+  for(const t of ['a','b']){ const e=ENTRA[t].size, s=SAI[t].size;
+    if(e&&!s){ aviso(`${T[t].nome}: marque entre os 5 em quadra quem vai sair`); return; }
+    if(s&&!e){ aviso(`${T[t].nome}: marque no banco quem vai entrar`); return; }
+    if(e!==s){ aviso(`${T[t].nome}: ${e} entra${e>1?'m':''}, ${s} sai${s>1?'em':''} — tem que ser o mesmo número`); return; } }
+  for(const t of ['a','b']){ if(!ENTRA[t].size) continue;
+    const nomes=x=>[...x].map(n=>{const j=T[t].js.find(j=>j[0]===n); return `${j[1]} (${n})`;}).join(', ');
+    LOG.unshift(['07:48','2º Q',t==='a'?'#C8102E':'#E2231A','',T[t].nome,`Entra ${nomes(ENTRA[t])} · Sai ${nomes(SAI[t])}`,'sb']);
+    T[t].js.forEach(j=>{ if(ENTRA[t].has(j[0])) j[3]=1; if(SAI[t].has(j[0])) j[3]=0; }); ENTRA[t].clear(); SAI[t].clear(); }
+  b.classList.remove('sub'); desenha(); logDesenha(); aviso('Substituição feita',1); }
+desenha();
+function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
+
+// meia quadra FIBA (metros × 40): 15 m de largura, 14 m até o meio
+(function(){ const S=40,W=15*S,H=10.6*S,cx=W/2,cy=1.575*S;
+ const r3=6.75*S, yq=cy+Math.sqrt(6.75**2-6.6**2)*S, x1=.9*S, x2=W-.9*S;
+ const L='#e8e8e8', lw=3;
+ document.getElementById('quadra').innerHTML=`<svg viewBox="-14 -14 ${W+28} ${H+20}" preserveAspectRatio="xMidYMid meet">
+  <defs><linearGradient id="pis" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151515"/><stop offset="1" stop-color="#0c0c0c"/></linearGradient>
+  <linearGradient id="gar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d4a9e"/><stop offset="1" stop-color="#12306b"/></linearGradient></defs>
+  <rect x="0" y="0" width="${W}" height="${H}" fill="url(#pis)"/>
+  <path d="M${x1} 0V${yq}A${r3} ${r3} 0 0 0 ${x2} ${yq}V0Z" fill="#ffffff" fill-opacity=".025"/>
+  <rect x="${cx-2.45*S}" y="0" width="${4.9*S}" height="${5.8*S}" fill="url(#gar)"/>
+  <g fill="none" stroke="${L}" stroke-width="${lw}">
+   <path d="M0 ${H}V0H${W}V${H}"/>
+   <rect x="${cx-2.45*S}" y="0" width="${4.9*S}" height="${5.8*S}"/>
+   <path d="M${cx-1.8*S} ${5.8*S}A${1.8*S} ${1.8*S} 0 0 0 ${cx+1.8*S} ${5.8*S}"/>
+   <path d="M${cx-1.8*S} ${5.8*S}A${1.8*S} ${1.8*S} 0 0 1 ${cx+1.8*S} ${5.8*S}" stroke-dasharray="14 12"/>
+   <path d="M${x1} 0V${yq}A${r3} ${r3} 0 0 0 ${x2} ${yq}V0"/>
+   <path d="M${cx-1.25*S} ${cy}A${1.25*S} ${1.25*S} 0 0 0 ${cx+1.25*S} ${cy}"/>
+   <line x1="${cx-.9*S}" y1="${1.2*S}" x2="${cx+.9*S}" y2="${1.2*S}" stroke-width="5"/>
+   <circle cx="${cx}" cy="${cy}" r="${.225*S}" stroke="#ff8a1a"/>
+  </g>
+  <image href="logo_klaustv_tv.png" x="${cx-1.5*S}" y="${H-1.75*S}" width="${3*S}" height="${1.4*S}" opacity=".35" preserveAspectRatio="xMidYMid meet"/>
+ </svg>`; })();
+
+// lance a lance de teste (mais novo em cima)
+const LOG=[['07:48','2º Q','#C8102E',4,'Tozo','+3 ala direita','ok'],['08:05','2º Q','#E2231A',6,'Bruno','Falta (3ª)','fa'],
+ ['08:21','2º Q','#E2231A',3,'Matheus','−2 garrafão','er'],['08:21','2º Q','#C8102E',8,'Gabriel','Rebote','ou'],
+ ['08:40','2º Q','#C8102E',10,'Lucas','Assistência','ou'],['08:40','2º Q','#C8102E',5,'Pedro','+2 garrafão','ok'],
+ ['09:15','2º Q','#E2231A',12,'Léo','LL certo','ok']];
+function logDesenha(){ document.getElementById('lal').innerHTML=LOG.map(([h,q,c,n,nm,a,k])=>`<li><span class="h">${h}</span><span class="q">${q}</span><span class="d" style="background:${c};${c==='#E2231A'?'box-shadow:0 0 0 2px #fff':'background:repeating-linear-gradient(180deg,#C8102E 0 3px,#000 3px 6px)'}"></span><span class="c">${n}</span><span>${nm}</span><span class="ac ${k}">${a}</span></li>`).join(''); }
+logDesenha();
+</script>
+</body>
+</html>
