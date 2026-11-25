@@ -409,7 +409,7 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
  // K estica só o ataque na vertical: garrafão mais comprido e linha de 3 mais perto do meio (não é medida real) · Magno, 24/11/2026
  const K=1.28, y=m=>m*S*K, cy=y(1.575);
  const r3=6.75*S, yq=y(1.575+Math.sqrt(6.75**2-6.6**2)), x1=.9*S, x2=W-.9*S, ry3=r3*K;
- const gw=4.9*S, gh=y(5.8), rl=1.8*S, rlY=rl*K;
+ const gw=4.9*S, gh=y(5.8), rl=1.7*S, rlY=rl*K;
  const L='#e8e8e8', lw=3;
  document.getElementById('quadra').innerHTML=`<svg viewBox="-6 -6 ${W+12} ${H+12}" preserveAspectRatio="none">
   <defs><linearGradient id="pis" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151515"/><stop offset="1" stop-color="#0c0c0c"/></linearGradient>
@@ -427,7 +427,7 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
    <path d="M${x1} 0V${yq}A${r3} ${ry3} 0 0 0 ${x2} ${yq}V0"/>
    <path id="ra" d="M${cx-1.25*S} ${cy}A${1.25*S} ${1.25*S*K} 0 0 0 ${cx+1.25*S} ${cy}"/>
    <line x1="${cx-.9*S}" y1="${y(1.2)}" x2="${cx+.9*S}" y2="${y(1.2)}" stroke-width="5"/>
-   <circle cx="${cx}" cy="${cy}" r="${.225*S}" stroke="#ff8a1a"/>
+   <ellipse id="aro" cx="${cx}" cy="${cy}" rx="${.225*S}" ry="${.225*S}" stroke="#ff8a1a"/>
   </g>
  </svg>`;
  // círculo do meio sempre redondo na tela (a quadra é esticada); o que passa da borda de baixo fica cortado · Magno, 24/11/2026
@@ -441,6 +441,7 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
    document.getElementById('ll1').setAttribute('d',`M${cx-rl} ${gh}A${rl} ${rl*f} 0 0 0 ${cx+rl} ${gh}`);
    document.getElementById('ll2').setAttribute('d',`M${cx-rl} ${gh}A${rl} ${rl*f} 0 0 1 ${cx+rl} ${gh}`);
    document.getElementById('ra').setAttribute('d',`M${cx-1.25*S} ${cy}A${1.25*S} ${1.25*S*f} 0 0 0 ${cx+1.25*S} ${cy}`);
+   document.getElementById('aro').setAttribute('ry',.225*S*f);   // aro redondo na tela (Magno, 25/11/2026)
    window.zF=f; if(window.zOK) montaZonas(); }
  redondo(); addEventListener('resize',redondo); new ResizeObserver(redondo).observe(document.getElementById('quadra')); })();
 
@@ -453,7 +454,7 @@ function rola(id,d){ const e=document.getElementById(id); e.scrollTop+=d*40; }
 //  · Garrafão · perto da cesta (até 2,25 m), um setor só
 //  · Meia distância curta (2,25 a 4,4 m): esquerda (θ>30°), frente (|θ|≤30°), direita
 //  · Meia distância longa (4,4 m até a linha de 3): canto (θ>50°), 45° (20–50°) e frente (|θ|≤20°), dos dois lados
-const ZG={S:40,K:1.28,cx:300,cyM:1.575,r1:2.25,r2:4.4,q:1};   // q: deixa os círculos dos setores redondos na tela
+const ZG={S:40,K:1.28,cx:300,cyM:1.575,r1:1.9,r2:4.4,q:1};   // q: deixa os círculos dos setores redondos na tela
 const ZN={ce:'Garrafão · perto da cesta',mL:'Meia distância curta · esquerda',mC:'Meia distância curta · frente',mR:'Meia distância curta · direita',
  oLC:'Meia distância longa · canto esquerdo',oLW:'Meia distância longa · 45° esquerdo',oC:'Meia distância longa · frente',oRW:'Meia distância longa · 45° direito',oRC:'Meia distância longa · canto direito',
  tLC:'Canto esquerdo (corner 3)',tLW:'Ala esquerda (45°)',tC:'Frente (above the break)',tRW:'Ala direita (45°)',tRC:'Canto direito (corner 3)',tM:'Meio de quadra'};   // setores de 3 (Magno, 24/11/2026)
