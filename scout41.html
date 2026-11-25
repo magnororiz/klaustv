@@ -501,9 +501,9 @@ function fechaAr(){ if(!AR.z) return; const {t,n,ok,err,reb}=AR;
   if(!ok&&!err&&!reb){ cancelaAr(); return aviso('Arremesso cancelado'); }
   const j=jog(t,n), s=stJ(t,n), p=vZ(AR.z), k=p===3?'three':'two', onde=nomeZ(AR.z,AR.lado);
   for(let i=0;i<Math.max(err,reb);i++){   // erro, rebote, erro, rebote… (no lance a lance, na ordem do jogo)
-    if(i<err){ s[k+'Miss']++; MARCAS.push({x:AR.x,y:AR.y,ok:0,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos perdido ${j[1]} - ${n}`,onde,'ou'); }
+    if(i<err){ s[k+'Miss']++; MARCAS.push({x:AR.x,y:AR.y,ok:0,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos perdido ${j[1]} - ${n}`,onde+' · EF −1','ou'); }
     if(i<reb){ s.reb++; reg(t,'',`Rebote ${j[1]} - ${n}`,'EF +1','ok'); } }
-  if(ok){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); MARCAS.push({x:AR.x,y:AR.y,ok:1,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos convertido ${j[1]} - ${n}`,onde,'ok'); }
+  if(ok){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); MARCAS.push({x:AR.x,y:AR.y,ok:1,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos convertido ${j[1]} - ${n}`,onde+` · EF +${p}`,'ok'); }
   efJ(s); SEL.t=null; SEL.n=null; selMarca(); cancelaAr(); desenha(); bolaViva();
   aviso((ok?`+${p} para ${j[1]} - ${n}`:`${p} pontos perdido · ${j[1]} - ${n}`)+(err>1?` · ${err} erros`:'')+(reb?` · ${reb} rebote${reb>1?'s':''}`:''),1);
   if(ok) perguntaAs(t,n); }
@@ -518,17 +518,18 @@ function asLugar(){ const m=document.getElementById('asMenu'), w=m.offsetWidth, 
   m.style.left=Math.max(4,Math.min(innerWidth-w-4,L))+'px'; m.style.top=Math.min(innerHeight-h-4,T)+'px'; }
 function fechaAs(){ AS.on=false; AS.esc=false; document.getElementById('asMenu').classList.remove('on','esc'); }
 function respAs(v){ if(!AS.on) return; if(!v){ fechaAs(); return aviso('Cesta sem assistência',1); }
-  AS.esc=true; document.getElementById('asMenu').classList.remove('on');   // some, para não cobrir nenhuma camisa
-  const j=jog(AS.t,AS.n); aviso(`Toque na camisa de quem deu a assistência · para desistir, toque de novo em ${j[1]}`,1); }
+  AS.esc=true; const m=document.getElementById('asMenu'); m.classList.add('esc'); document.getElementById('asTxt').textContent=`Toque na camisa de quem deu a assistência (${T[AS.t].nome})`;
+  const q=document.querySelector('.quadra').getBoundingClientRect(); m.style.left=(q.left+q.width/2-m.offsetWidth/2)+'px'; m.style.top=(q.top+8)+'px';   // no alto da quadra, longe das camisas
+  aviso('Toque na camisa de quem deu a assistência · ✕ para desistir',1); }
 function marcaAs(t,n){ if(t!==AS.t) return aviso(`A assistência tem que ser de um jogador do ${T[AS.t].nome}`);
-  if(n===AS.n){ fechaAs(); return aviso('Cesta sem assistência',1); }   // tocar de novo em quem fez a cesta = desistir
+  if(n===AS.n) return aviso(`${jog(t,n)[1]} fez a cesta e não pode dar a assistência para ele mesmo · escolha outro jogador`);
   const j=jog(t,n), s=stJ(t,n); s.ast++; efJ(s); fechaAs(); desenha();
   reg(t,'',`Assistência ${j[1]} - ${n}`,'EF +1','ok'); aviso(`Assistência · ${j[1]} - ${n} · EF +1`,1); }
 document.addEventListener('click',e=>{ if(!SEL.t||AR.z||AS.on||e.target.closest('.quadra,.jg,header.top,#arMenu')) return; e.stopPropagation(); e.preventDefault();
   aviso(`${jog(SEL.t,SEL.n)[1]} - ${SEL.n} escolhido · toque no local do arremesso, ou de novo na camisa para desmarcar`); },true);
 // enquanto a pergunta está aberta, só vale responder, tocar na camisa ou usar o placar/relógio
 document.addEventListener('click',e=>{ if(!AS.on||e.target.closest('#asMenu,.jg,header.top')) return; e.stopPropagation(); e.preventDefault();
-  aviso(AS.esc?`Toque na camisa de quem deu a assistência · para desistir, toque de novo em ${jog(AS.t,AS.n)[1]}`:'Responda antes: teve assistência? SIM ou NÃO'); },true);
+  aviso(AS.esc?'Toque na camisa de quem deu a assistência · ✕ para desistir':'Responda antes: teve assistência? SIM ou NÃO'); },true);
 function desenhaMarcas(){ const g=document.getElementById('marcas'); if(!g) return; const dx=5, dy=5*ZG.K;
   const X=(x,y,c)=>`<path d="M${x-dx} ${y-dy}L${x+dx} ${y+dy}M${x+dx} ${y-dy}L${x-dx} ${y+dy}" stroke="${c}" stroke-width="2.2" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
   let h=MARCAS.map(m=>X(m.x,m.y,m.ok?'#2ee66b':'#ff3b3b')).join('');
