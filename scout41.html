@@ -217,7 +217,17 @@ body.selArr .jg:not(.sel){opacity:.45}body.selArr .quadra{outline:3px dashed #4f
 .bt.ina{cursor:default}
 .az{--bar:#1e5bd8}.vd{--bar:#2fae4a}.vm{--bar:#d83a3a}.am{--bar:#e8a317}
 .bt.undo{font-size:28px}
-.bt2{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-height:0}.bt.undo.off{opacity:.3;cursor:default;filter:none;transform:none}   /* ↶ desfazer · ↷ refazer (Magno, 24/11/2026) */
+.bt2{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr auto;gap:6px;min-height:0}
+/* LAYOUT 1 · 2 · 3 (Magno, 25/11/2026): mesmos tamanhos do layout 1, só as colunas trocam de lugar · sempre abre no 1 */
+#laySeg{grid-column:1/3;display:flex;border:1px solid #4fc3f7;border-radius:6px;overflow:hidden;height:30px}
+#laySeg b{flex:1;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 15px Arial;background:#1a2233;color:#8a97b0;border-right:1px solid #2c3a55}
+#laySeg b:last-child{border-right:none}#laySeg b.on{background:#4fc3f7;color:#000}
+body.lay2 .corpo{grid-template-columns:270px 460px 1fr}
+body.lay2 .bts{grid-column:1;grid-row:1/3}body.lay2 .times{grid-column:2;grid-row:1}body.lay2 .meio{grid-column:3;grid-row:1}body.lay2 .baixo{grid-column:2/4;grid-row:2}
+body.lay2 #stPainel{grid-column:2/4}
+body.lay3 .corpo{grid-template-columns:1fr 460px 270px}
+body.lay3 .meio{grid-column:1;grid-row:1}body.lay3 .times{grid-column:2;grid-row:1}body.lay3 .bts{grid-column:3;grid-row:1/3}body.lay3 .baixo{grid-column:1/3;grid-row:2}
+body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}   /* banco embaixo dos times, que no 3 ficam à direita */.bt.undo.off{opacity:.3;cursor:default;filter:none;transform:none}   /* ↶ desfazer · ↷ refazer (Magno, 24/11/2026) */
 /* PEDIDO DE TEMPO com os escudos dos times do jogo carregado (Magno, 24/11/2026) */
 .bt.btTm{grid-template-rows:auto 1fr;padding:4px 4px 2px;gap:2px;cursor:default}.bt.btTm:hover{filter:none;transform:none}
 .bt.btTm small{margin:0;font-size:11px;letter-spacing:1px}
@@ -274,7 +284,7 @@ body.selArr .jg:not(.sel){opacity:.45}body.selArr .quadra{outline:3px dashed #4f
     <div class="bt am" id="bt_tov" onclick="clicaEst('tov')"><span>TURNOVER<small>erro</small></span></div><div class="bt" id="bt_blk" onclick="clicaEst('blk')">TOCO</div>
     <div class="bt vm" id="btFal" onclick="clicaFalta()">FALTA</div><div class="bt vm" id="btFE" onclick="clicaFE()" title="Técnica, disruptiva, flagrante, desqualificante e do técnico/banco">FALTA<br>ESPECIAL</div>
     <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt btTm" id="btTm"><small id="btTmT">PEDIDO DE TEMPO</small><div class="esc"><span id="btTmA" onclick="pedeTempo('a')"><img alt=""></span><span id="btTmB" onclick="pedeTempo('b')"><img alt=""></span></div></div>
-    <div class="bt az" id="btStat" onclick="clicaStat()" title="Estatísticas completas dos dois times">ESTATÍSTICAS</div><div class="bt2"><div class="bt undo off" id="btUn" onclick="desfaz()" title="Desfazer a última ação">↶</div><div class="bt undo off" id="btRe" onclick="refaz()" title="Refazer a ação desfeita">↷</div></div>
+    <div class="bt az" id="btStat" onclick="clicaStat()" title="Estatísticas completas dos dois times">ESTATÍSTICAS</div><div class="bt2"><div class="bt undo off" id="btUn" onclick="desfaz()" title="Desfazer a última ação">↶</div><div class="bt undo off" id="btRe" onclick="refaz()" title="Refazer a ação desfeita">↷</div><div id="laySeg"><b class="on" title="Layout 1" onclick="layout(1)">1</b><b title="Layout 2" onclick="layout(2)">2</b><b title="Layout 3" onclick="layout(3)">3</b></div></div>
   </section>
 </main>
 <div id="aviso"></div>
@@ -811,6 +821,8 @@ function desfaz(){ if(AR.z&&AR.multi) return arDesfaz(); if(HI.i<=0) return avis
   const tx=linhaTxt(LOG[0]); HI.i--; histVolta(HI.h[HI.i]); aviso('Desfeito: '+tx,1); }
 function refaz(){ if(AR.z&&AR.multi) return arRefaz(); if(HI.i>=HI.h.length-1) return; const o=urLivre(); if(o) return aviso(`Termine ou feche ${o} antes de refazer`);
   HI.i++; histVolta(HI.h[HI.i]); aviso('Refeito: '+linhaTxt(LOG[0]),1); }
+function layout(n){ document.body.classList.remove('lay2','lay3'); if(n>1) document.body.classList.add('lay'+n);
+  document.querySelectorAll('#laySeg b').forEach((b,i)=>b.classList.toggle('on',i===n-1)); dispatchEvent(new Event('resize')); }
 function desenhaUR(){ const u=document.getElementById('btUn'), r=document.getElementById('btRe'); if(!u) return;
   if(AR.z&&AR.multi){ u.classList.toggle('off',!AR.seq.length); r.classList.toggle('off',!AR.refaz.length); return; }   // retângulo aberto: ↶ ↷ valem só para os toques dele
   u.classList.toggle('off',HI.i<=0); r.classList.toggle('off',HI.i>=HI.h.length-1); }
