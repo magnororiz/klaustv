@@ -161,7 +161,9 @@ body.sub .banco{display:grid}
 #asMenu .si{background:#1b5e20}#asMenu .nao{background:#7f1d1d}#asMenu .x{background:#2a3248;font-size:14px;padding:0 9px}#asMenu.esc .si,#asMenu.esc .nao{display:none}   /* assistência colada no mouse (Magno, 24/11/2026) */
 #arMenu{flex-wrap:wrap;max-width:150px}#arMenu button{position:relative}#arMenu .rb{display:none;flex-basis:100%;height:34px;background:#2fae4a;font-size:15px}#arMenu.multi .rb{display:block}
 #arMenu i{position:absolute;top:-8px;right:-8px;background:#ffd54f;color:#000;border-radius:10px;font:700 12px Arial;padding:1px 6px;font-style:normal}#arMenu i:empty{display:none}#arMenu .ok.usado{opacity:.35}
-.jg.sel{box-shadow:0 0 0 3px #4fc3f7,0 0 14px 4px rgba(79,195,247,.7)!important}.jg.sel::before{content:'ARREMESSO';position:absolute;right:4px;top:4px;font-size:11px;letter-spacing:1px;background:#4fc3f7;color:#000;padding:1px 6px;border-radius:3px;font-weight:700;z-index:2}
+@keyframes auraSel{from{box-shadow:0 0 0 4px #4fc3f7,0 0 8px 2px rgba(79,195,247,.55)}to{box-shadow:0 0 0 5px #b3e5fc,0 0 26px 10px rgba(79,195,247,.95)}}
+.jg.sel{animation:auraSel .8s ease-in-out infinite alternate!important;z-index:3;transform:scale(1.03)}
+body.selArr .jg:not(.sel){opacity:.45}body.selArr .quadra{outline:3px dashed #4fc3f7;outline-offset:-3px;animation:suave 1.2s ease-in-out infinite}   /* jogador escolhido: tudo esperando o toque na quadra (Magno, 24/11/2026) */.jg.sel::before{content:'ARREMESSO';position:absolute;right:4px;bottom:4px;font-size:11px;letter-spacing:1px;background:#4fc3f7;color:#000;padding:1px 6px;border-radius:3px;font-weight:700;z-index:2}
 #arMenu .ok{background:#1b5e20}#arMenu .er{background:#7f1d1d}#arMenu .x{background:#2a3248;font-size:14px;width:28px}
 #aviso{pointer-events:none;position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#d32f2f;color:#fff;font:700 15px Arial;padding:8px 16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.6);display:none;z-index:9}
 #aviso.ok{background:#1b5e20}
@@ -475,15 +477,16 @@ function clicaZona(e,p){ const b=document.body;
   const j=jog(AR.t,AR.n), tip=document.getElementById('zTip');
   tip.textContent=`${j[1]} - ${AR.n} · ${nomeZ(AR.z,AR.lado)} · ${vZ(AR.z)} pontos`+(AR.multi?' · ✗ e REB quantas vezes precisar · ✕ fecha':' · cesta ✓ ou errou ✗?'); tip.style.display='block';
   desenhaMarcas(); const m=document.getElementById('arMenu'), mr=document.querySelector('.meio').getBoundingClientRect();
-  m.classList.toggle('multi',AR.multi); arConta(); m.classList.add('on'); const mw=m.offsetWidth, mh=m.offsetHeight; let L=e.clientX-mr.left-mw/2, T=e.clientY-mr.top-mh-14; if(T<4) T=e.clientY-mr.top+14;
+  selMarca(); m.classList.toggle('multi',AR.multi); arConta(); m.classList.add('on'); const mw=m.offsetWidth, mh=m.offsetHeight; let L=e.clientX-mr.left-mw/2, T=e.clientY-mr.top-mh-14; if(T<4) T=e.clientY-mr.top+14;
   m.style.left=Math.max(4,Math.min(mr.width-mw-4,L))+'px'; m.style.top=T+'px'; }
 // ===== ARREMESSO: jogador → quadra → ✓/✗ (Magno, 24/11/2026) =====
 // Garrafão e as 3 meias distâncias curtas: ✓ uma vez, ✗ e REB (rebote do mesmo jogador) quantas vezes precisar; o ✕ fecha e registra tudo.
 // Demais setores: um toque no ✓ ou no ✗ já registra. Com cesta, vem a pergunta da assistência perto do mouse.
 const PERTO=['ce','mL','mC','mR'];
 function selArr(t,n){ if(AR.z) return aviso('Feche antes o arremesso aberto no ✕'); if(AS.on) return;
-  if(SEL.t===t&&SEL.n===n){ SEL.t=null; SEL.n=null; desenha(); return; }
-  SEL.t=t; SEL.n=n; desenha(); const j=jog(t,n); aviso(`${j[1]} - ${n} · agora toque no local do arremesso na quadra`,1); }
+  if(SEL.t===t&&SEL.n===n){ SEL.t=null; SEL.n=null; selMarca(); desenha(); return aviso('Jogador desmarcado'); }
+  SEL.t=t; SEL.n=n; selMarca(); desenha(); const j=jog(t,n); aviso(`${j[1]} - ${n} · agora toque no local do arremesso na quadra`,1); }
+function selMarca(){ document.body.classList.toggle('selArr',!!SEL.t&&!AR.z); }
 function arConta(){ const o=document.getElementById('arNo'), e=document.getElementById('arNe'), r=document.getElementById('arNr');
   o.textContent=AR.multi&&AR.ok?'1':''; e.textContent=AR.multi&&AR.err?AR.err:''; r.textContent=AR.reb?AR.reb:'';
   document.querySelector('#arMenu .ok').classList.toggle('usado',!!AR.ok); }
@@ -501,7 +504,7 @@ function fechaAr(){ if(!AR.z) return; const {t,n,ok,err,reb}=AR;
     if(i<err){ s[k+'Miss']++; MARCAS.push({x:AR.x,y:AR.y,ok:0,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos perdido ${j[1]} - ${n}`,onde,'ou'); }
     if(i<reb){ s.reb++; reg(t,'',`Rebote ${j[1]} - ${n}`,'EF +1','ok'); } }
   if(ok){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); MARCAS.push({x:AR.x,y:AR.y,ok:1,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos convertido ${j[1]} - ${n}`,onde,'ok'); }
-  efJ(s); SEL.t=null; SEL.n=null; cancelaAr(); desenha(); bolaViva();
+  efJ(s); SEL.t=null; SEL.n=null; selMarca(); cancelaAr(); desenha(); bolaViva();
   aviso((ok?`+${p} para ${j[1]} - ${n}`:`${p} pontos perdido · ${j[1]} - ${n}`)+(err>1?` · ${err} erros`:'')+(reb?` · ${reb} rebote${reb>1?'s':''}`:''),1);
   if(ok) perguntaAs(t,n); }
 // ===== ASSISTÊNCIA depois da cesta (Magno, 24/11/2026) =====
@@ -521,6 +524,8 @@ function marcaAs(t,n){ if(t!==AS.t) return aviso(`A assistência tem que ser de 
   if(n===AS.n){ fechaAs(); return aviso('Cesta sem assistência',1); }   // tocar de novo em quem fez a cesta = desistir
   const j=jog(t,n), s=stJ(t,n); s.ast++; efJ(s); fechaAs(); desenha();
   reg(t,'',`Assistência ${j[1]} - ${n}`,'EF +1','ok'); aviso(`Assistência · ${j[1]} - ${n} · EF +1`,1); }
+document.addEventListener('click',e=>{ if(!SEL.t||AR.z||AS.on||e.target.closest('.quadra,.jg,header.top,#arMenu')) return; e.stopPropagation(); e.preventDefault();
+  aviso(`${jog(SEL.t,SEL.n)[1]} - ${SEL.n} escolhido · toque no local do arremesso, ou de novo na camisa para desmarcar`); },true);
 // enquanto a pergunta está aberta, só vale responder, tocar na camisa ou usar o placar/relógio
 document.addEventListener('click',e=>{ if(!AS.on||e.target.closest('#asMenu,.jg,header.top')) return; e.stopPropagation(); e.preventDefault();
   aviso(AS.esc?`Toque na camisa de quem deu a assistência · para desistir, toque de novo em ${jog(AS.t,AS.n)[1]}`:'Responda antes: teve assistência? SIM ou NÃO'); },true);
