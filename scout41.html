@@ -758,7 +758,8 @@ function clicaEst(k){ fechaStat(); if(EST.k===k){ const d=!!EST.rb; EST.k=null; 
 // Os dois entram juntos: roubo EF +1 e turnover EF −1; um ↶ desfaz os dois.
 function marcaRoubo(t,n){ const j=jog(t,n);
   if(!EST.rb){ EST.rb={t,n}; desenhaEst(); desenha(); return aviso(`Roubo de ${j[1]} - ${n} · agora marque o turnover no ${T[t==='a'?'b':'a'].nome}`,1); }
-  if(t===EST.rb.t) return aviso(`O turnover tem que ser de um jogador do ${T[EST.rb.t==='a'?'b':'a'].nome}`);
+  if(t===EST.rb.t&&n===EST.rb.n){ EST.rb=null; desenhaEst(); desenha(); return aviso(`${j[1]} - ${n} desmarcado · escolha o jogador que roubou a bola`,1); }   // toque de novo = desmarca (Magno, 25/11/2026)
+  if(t===EST.rb.t){ EST.rb={t,n}; desenha(); return aviso(`Roubo trocado para ${j[1]} - ${n} · agora marque o turnover no ${T[t==='a'?'b':'a'].nome}`,1); }   // outro do mesmo time = troca quem roubou
   const r=EST.rb, jr=jog(r.t,r.n), sr=stJ(r.t,r.n), st=stJ(t,n); sr.stl++; efJ(sr); st.tov++; efJ(st);
   EST.k=null; EST.rb=null; desenhaEst(); desenha();
   reg(r.t,'',`Roubo de bola ${jr[1]} - ${r.n}`,'EF +1','ok'); reg(t,'',`Turnover (erro) ${j[1]} - ${n}`,'EF −1','er'); bolaViva();
