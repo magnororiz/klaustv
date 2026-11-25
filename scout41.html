@@ -918,7 +918,7 @@ reg(null,'','','Início do 1º Q · 10:00 · relógio espera o ▶ (marque antes
 const K41_API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
 const K41_CURTO={"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN":"Funcionários","FFC":"Fluminense","TTC":"Tijuca","NBC":"Niterói","CCL":"Leopoldinense","IG":"Iguaba Grande","ABIG":"Jequiá","ACEAR":"Irajá","CESC":"Suzano Costa","EEPZ":"Passo Zero","IDEC":"IDEC","ITDA":"Atitude","KE":"K. Esportes","MB":"Mesquita","JTC":"Jacarepaguá","TKA":"Team Klun","ASPCM":"Municipal","CK":"Carioca King's","IB":"Itaipu","NBR":"NBR Campos"};
 // camisas: [listras ou cor lisa, borda, número] · time sem cor cadastrada: A azul, B laranja
-const K41_CAMISA={CRF:FLA,TTC:TIJ,BFR:[['#000000','#FFFFFF'],'#FFFFFF','#000000'],FFC:[['#7A1E2C','#00613C','#FFFFFF'],'#FFFFFF','#FFFFFF']};
+const K41_CAMISA={CRF:FLA,TTC:TIJ,BFR:[['#FFFFFF'],'#000000','#000000'],FFC:[['#7A1E2C','#00613C','#FFFFFF'],'#FFFFFF','#FFFFFF']};
 const K41_PADRAO={a:[['#1E5BD8'],'#FFFFFF','#FFFFFF'],b:[['#E8590C'],'#FFFFFF','#FFFFFF']};
 const K41={id:new URLSearchParams(location.search).get('jogo')||'',lista:null,reg:{a:{},b:{}},bloq:'',ultimo:'',enviando:false,PQ:{a:[0,0,0,0,0],b:[0,0,0,0,0]},msg:''};
 const k41Tok=()=>{ try{ return localStorage.getItem('klaustv_token_v1')||''; }catch(e){ return ''; } };
