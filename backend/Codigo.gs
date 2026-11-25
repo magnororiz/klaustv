@@ -48,6 +48,8 @@ function doPost(e) {
       case 'excluirJogo': return responder(excluirJogo(p.token, p.id));
       case 'placarDefinir': return responder(placarDefinir(p.token, p.id));
       case 'salvarStats': return responder(salvarStats(p.token, p.id, p.stats, p.status, p.dataHora));
+      case 'salvarStats41': return responder(salvarStats41(p.token, p.id, p.stats, p.status, p.lances));
+      case 'lances41': return responder(lances41(p.id));
       case 'salvarData': return responder(salvarData(p.token, p.id, p.dataHora));
       case 'salvarFoto': return responder(salvarFoto(p.token, p.chave, p.imagem));
       case 'listarFotos': return responder(listarFotos(p.token));
@@ -254,6 +256,51 @@ function salvarStats(token, id, stats, status, dataHora) {
   if (dataHora && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(String(dataHora))) { const c = sh.getRange(j.linha, 3); c.setNumberFormat('@'); c.setValue(String(dataHora).slice(0, 16)); }
   const c = CacheService.getScriptCache(); c.remove('j_' + id); c.remove('lista');
   return { ok: true, placar: pl };
+}
+/* ---------- Scout PRO 4.1 (Magno, 25/11/2026) ----------
+   Função própria do 4.1 (o salvarStats do 4.0 fica intocado).
+   Os números vão para a MESMA linha do jogo na aba JogosKT, no formato que o resto do site já lê
+   (A/B por registro: pts, twoMade… reb, ast, stl, blk, to, foul, eff), com OREB/DREB a mais e a marca versao:'4.1'.
+   Assim Atletas, Banco de dados, Cestinhas, Súmula e Ao Vivo enxergam o jogo do 4.1 igual a um do 4.0.
+   O lance a lance (com o local de cada arremesso) vai para a aba Lances41, uma linha por jogo. */
+const ABA_LANCES41 = 'Lances41';
+const LANCES41_PEDACO = 45000; // uma célula aceita até 50 mil caracteres; o lance a lance é dividido em pedaços
+function abaLances41() {
+  const ss = SpreadsheetApp.openById(PLANILHA_ID);
+  let sh = ss.getSheetByName(ABA_LANCES41);
+  if (!sh) { sh = ss.insertSheet(ABA_LANCES41); sh.getRange(1, 1, 1, 4).setValues([['id', 'atualizado', 'pedacos', 'lances (continua nas colunas seguintes)']]); sh.setFrozenRows(1); }
+  return sh;
+}
+function salvarStats41(token, id, stats, status, lances) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  const j = lerJogos().find(x => x.id === id); if (!j) return { ok: false, erro: 'Jogo não encontrado.' };
+  const ant = jsonOu(j.stats, {});
+  if (ant && (ant.A || ant.B) && ant.versao !== '4.1') return { ok: false, erro: 'Este jogo já tem números feitos no Scout 4.0. Continue nele no 4.0.' };
+  stats = stats || {}; stats.versao = '4.1';
+  ['A', 'B'].forEach(t => { const o = stats[t] || {}; Object.keys(o).forEach(reg => { const s = o[reg] || {};
+    s.oreb = Number(s.oreb || 0); s.dreb = Number(s.dreb || 0); s.reb = s.oreb + s.dreb; }); });
+  const pl = placarDe(stats); const sh = abaJogos();
+  sh.getRange(j.linha, 9, 1, 5).setValues([[JSON.stringify(stats), status || j.status || '', pl[0], pl[1], new Date()]]);
+  if (lances) {
+    const txt = JSON.stringify(lances); const partes = [];
+    for (let i = 0; i < txt.length; i += LANCES41_PEDACO) partes.push(txt.slice(i, i + LANCES41_PEDACO));
+    const la = abaLances41(); const ids = la.getLastRow() > 1 ? la.getRange(2, 1, la.getLastRow() - 1, 1).getValues().map(r => r[0]) : [];
+    let lin = ids.indexOf(id); lin = lin < 0 ? la.getLastRow() + 1 : lin + 2;
+    const velho = la.getLastColumn(); if (velho > 3) la.getRange(lin, 4, 1, velho - 3).clearContent();
+    la.getRange(lin, 1, 1, 3 + partes.length).setValues([[id, new Date(), partes.length].concat(partes)]);
+  }
+  const c = CacheService.getScriptCache(); c.remove('j_' + id); c.remove('lista'); c.remove('l41_' + id);
+  return { ok: true, placar: pl, versao: '4.1' };
+}
+function lances41(id) {
+  id = String(id || ''); if (!id) return { ok: false, erro: 'Sem jogo.' };
+  const c = CacheService.getScriptCache(); const hit = c.get('l41_' + id); if (hit) return JSON.parse(hit);
+  const la = abaLances41(); if (la.getLastRow() < 2) return { ok: true, lances: [] };
+  const v = la.getRange(2, 1, la.getLastRow() - 1, la.getLastColumn()).getValues().find(r => r[0] === id);
+  if (!v) return { ok: true, lances: [] };
+  const n = Number(v[2] || 0); const r = { ok: true, lances: jsonOu(v.slice(3, 3 + n).join(''), []) };
+  try { c.put('l41_' + id, JSON.stringify(r), 4); } catch (e) {}
+  return r;
 }
 function salvarData(token, id, dataHora) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
