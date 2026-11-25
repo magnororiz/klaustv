@@ -59,6 +59,9 @@ body.stat #stPainel{display:block}
 #stPainel tr:nth-child(odd) td{background:#18233b}
 #stPainel td.nm{text-align:left;padding-left:10px;white-space:nowrap}#stPainel td.nm i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ee66b;margin-right:6px;font-style:normal}
 #stPainel td.nm i.bc{background:transparent;border:1px solid #556}
+/* quinteto inicial (Magno, 25/11/2026): antes do 1º ▶ as bolinhas viram botão */
+#stPainel td.nm i.qi{width:16px;height:16px;vertical-align:middle;cursor:pointer;border:2px solid #2ee66b;box-sizing:border-box}#stPainel td.nm i.qi.bc{border-color:#8fa3c8;background:#0b1424}
+#stPainel .qiAv{display:block;margin:0 0 8px;padding:6px 10px;border-radius:6px;background:#3a2600;border:1px solid #ffb74d;color:#ffd08a;font:700 13px Arial}
 #stPainel td.ef{color:#ffd54f;font-weight:700}
 /* ✏️ editar a linha da tabela (Magno, 25/11/2026) */
 #stPainel td.edt b{cursor:pointer;display:inline-block;padding:1px 6px;border-radius:4px;border:1px solid #3b5584;font-style:normal}#stPainel td.edt b:hover{background:#24406e}
@@ -594,7 +597,8 @@ function jogoDe(q,raw){ const A=C.anc[q]||[[0,0]]; let i=A.length-1; while(i>0&&
 const mmss=x=>{ x=Math.max(0,Math.round(x)); return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0'); };
 const restante=(q,raw)=>Math.max(0,DUR(q)-jogoDe(q,raw));
 function pausa(){ if(C.anda){ C.raw=rawAgora(); C.anda=false; } relDesenha(); }
-function solta(mao){ if(C.trava&&!mao) return relDesenha();   // pausa do Raoni (⏸) vence o automático
+function solta(mao){ if(qiPre()&&!qiOk()){ aviso('Marque antes o quinteto inicial dos dois times · ESTATÍSTICAS › bolinha de cada titular'); return relDesenha(); }
+  if(C.trava&&!mao) return relDesenha();   // pausa do Raoni (⏸) vence o automático
   if(mao){ C.trava=false; C.tarja=false; } clearTimeout(tSub); tSub=null; if(C.em&&!C.anda&&!C.tmAb){ C.t0=performance.now(); C.anda=true; } relDesenha(); }
 function bolaViva(){ solta(); }
 // substituição: o relógio para 4 s (tempo da troca) e volta sozinho · Magno, 24/11/2026
@@ -625,7 +629,7 @@ function relDesenha(){ const b=document.getElementById('relB'); if(!b||b.querySe
 // atrasado). ⏸ para e cancela a volta automática (substituição 4 s, falta 8 s); só volta no ▶.
 function clicaPausa(){ if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
   C.trava=true; clearTimeout(tSub); tSub=null; pausa(); aviso('Relógio pausado · toque ▶ para liberar'); }
-function clicaPlay(){ if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
+function clicaPlay(){ if(qiPre()&&!qiOk()) return aviso('Marque antes o quinteto inicial dos dois times · ESTATÍSTICAS › bolinha de cada titular'); if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
   if(C.tmAb) return aviso('Pedido de tempo aberto · toque de novo no escudo do time para encerrar');
   solta(1); aviso('Relógio correndo',1); }
 function escTempo(){ for(const t of ['a','b']){ const o=document.querySelector('.top .tm.'+t+' img'), d=document.querySelector('#btTm'+t.toUpperCase()+' img');
@@ -848,10 +852,11 @@ function desenhaStat(){ const on=document.body.classList.contains('stat'), b=doc
     for(const j of [...T[t].js].sort((x,y)=>x[0]-y[0])){ const s={...Z,...(ST[t+j[0]]||{})};
       for(const k in Z) tt[k]+=s[k]; tt.f+=j[2];
       const ed=ED.k===t+':'+j[0], I=(f,v)=>`<input id="ed_${f}" type="number" min="0" value="${v}">`, A=(m,x)=>ed?`${I(m,s[m])} / ${I(m+'T',s[m]+s[x])}`:pc(s[m],s[m]+s[x]), V=f=>ed?I(f,f==='f'?j[2]:s[f]):(f==='f'?j[2]:s[f]);
-      lin+=`<tr class="${ed?'edOn':''}"><td>${j[0]}</td><td class="nm"><i class="${j[3]?'':'bc'}" title="${j[3]?'em quadra':'no banco'}"></i>${j[1]}</td><td>${s.pts}</td><td>${A('twoMade','twoMiss')}</td><td>${A('threeMade','threeMiss')}</td><td>${A('ftMade','ftMiss')}</td><td>${V('oreb')}</td><td>${V('dreb')}</td><td>${V('ast')}</td><td>${V('stl')}</td><td>${V('blk')}</td><td>${V('tov')}</td><td>${V('f')}</td><td class="ef">${s.eff}</td><td class="edt"><b onclick="edLinha('${t}',${j[0]})" title="${ed?'Gravar e travar a linha':'Editar a linha'}">✏️</b></td></tr>`; }
+      lin+=`<tr class="${ed?'edOn':''}"><td>${j[0]}</td><td class="nm"><i class="${j[3]?'':'bc'}${qiPre()?' qi':''}" title="${qiPre()?'Toque para marcar ou desmarcar no quinteto inicial':(j[3]?'em quadra':'no banco')}"${qiPre()?` onclick="quinteto('${t}',${j[0]})"`:''}></i>${j[1]}</td><td>${s.pts}</td><td>${A('twoMade','twoMiss')}</td><td>${A('threeMade','threeMiss')}</td><td>${A('ftMade','ftMiss')}</td><td>${V('oreb')}</td><td>${V('dreb')}</td><td>${V('ast')}</td><td>${V('stl')}</td><td>${V('blk')}</td><td>${V('tov')}</td><td>${V('f')}</td><td class="ef">${s.eff}</td><td class="edt"><b onclick="edLinha('${t}',${j[0]})" title="${ed?'Gravar e travar a linha':'Editar a linha'}">✏️</b></td></tr>`; }
     const esc=document.querySelector(`#col${t.toUpperCase()} .cab img`);
     h+=`<h3>${esc?`<img src="${esc.getAttribute('src')}" alt="">`:''}${T[t].nome.toUpperCase()}${t==='a'?cxHTML():''}</h3><table><tr><th>Camisa</th><th>Nome</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th title="Rebote ofensivo">OREB</th><th title="Rebote defensivo">DREB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>F</th><th>EFF</th><th title="Editar a linha">✏️</th></tr>${lin}
      <tr class="tot"><td colspan="2">TOTAL</td><td>${tt.pts}</td><td>${pc(tt.twoMade,tt.twoMade+tt.twoMiss)}</td><td>${pc(tt.threeMade,tt.threeMade+tt.threeMiss)}</td><td>${pc(tt.ftMade,tt.ftMade+tt.ftMiss)}</td><td>${tt.oreb}</td><td>${tt.dreb}</td><td>${tt.ast}</td><td>${tt.stl}</td><td>${tt.blk}</td><td>${tt.tov}</td><td>${tt.f}</td><td class="ef">${tt.eff}</td><td></td></tr></table>`; }
+  if(qiPre()) h=`<span class="qiAv">🏀 Quinteto inicial: toque na bolinha dos 5 titulares de cada time (${T.a.nome} ${qiConta('a')}/${qiMax('a')} · ${T.b.nome} ${qiConta('b')}/${qiMax('b')}). Depois do ▶, só por SUBST.</span>`+h;
   document.getElementById('stPainel').innerHTML=h; }
 
 // ✏️ da linha (Magno, 25/11/2026): 1º toque libera os números da linha; 2º toque grava e trava.
@@ -902,7 +907,7 @@ function logDesenha(){ const ul=document.getElementById('lal');
   if(!LOG.length){ ul.innerHTML='<li class="vz">Nenhum lance registrado ainda · cada botão que você usar aparece aqui</li>'; return; }
   ul.innerHTML=LOG.map((e,i)=>{ const ant=LOG[i+1], dt=ant?'+'+mmss((e.real-ant.real)/1000).replace(/^0/,''):'';
     return `<li><span class="h">≈${mmss(restante(e.q,e.raw))}</span><span class="dt">${dt}</span><span class="q">${NQ(e.q)}</span><span class="d" style="${e.t?COR[e.t]:''}"></span><span class="c">${e.n}</span><span>${e.nm}</span><span class="ac ${e.k}">${e.a}</span></li>`; }).join(''); }
-reg(null,'','','Início do 1º Q · cronômetro liberado (10:00)','qt');   // teste: ao abrir a página o 1º quarto já começa correndo
+reg(null,'','','Início do 1º Q · 10:00 · relógio espera o ▶ (marque antes o quinteto inicial)','qt');
 
 // ===== JOGO DE VERDADE + GRAVAÇÃO NA PLANILHA (Scout PRO 4.1 · Magno, 25/11/2026) =====
 // A caixinha "Jogo" lista os jogos montados (ao vivo e em breve). Escolher um jogo recarrega a página com ?jogo=ID
@@ -913,7 +918,7 @@ reg(null,'','','Início do 1º Q · cronômetro liberado (10:00)','qt');   // te
 const K41_API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
 const K41_CURTO={"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN":"Funcionários","FFC":"Fluminense","TTC":"Tijuca","NBC":"Niterói","CCL":"Leopoldinense","IG":"Iguaba Grande","ABIG":"Jequiá","ACEAR":"Irajá","CESC":"Suzano Costa","EEPZ":"Passo Zero","IDEC":"IDEC","ITDA":"Atitude","KE":"K. Esportes","MB":"Mesquita","JTC":"Jacarepaguá","TKA":"Team Klun","ASPCM":"Municipal","CK":"Carioca King's","IB":"Itaipu","NBR":"NBR Campos"};
 // camisas: [listras ou cor lisa, borda, número] · time sem cor cadastrada: A azul, B laranja
-const K41_CAMISA={CRF:FLA,TTC:TIJ,BFR:[['#000000','#FFFFFF'],'#FFFFFF','#FFFFFF'],FFC:[['#7A1E2C','#00613C','#FFFFFF'],'#FFFFFF','#FFFFFF']};
+const K41_CAMISA={CRF:FLA,TTC:TIJ,BFR:[['#000000','#FFFFFF'],'#FFFFFF','#000000'],FFC:[['#7A1E2C','#00613C','#FFFFFF'],'#FFFFFF','#FFFFFF']};
 const K41_PADRAO={a:[['#1E5BD8'],'#FFFFFF','#FFFFFF'],b:[['#E8590C'],'#FFFFFF','#FFFFFF']};
 const K41={id:new URLSearchParams(location.search).get('jogo')||'',lista:null,reg:{a:{},b:{}},bloq:'',ultimo:'',enviando:false,PQ:{a:[0,0,0,0,0],b:[0,0,0,0,0]},msg:''};
 const k41Tok=()=>{ try{ return localStorage.getItem('klaustv_token_v1')||''; }catch(e){ return ''; } };
@@ -952,7 +957,7 @@ async function k41Abre(){ if(!K41.id) return;
     const nm=k41Nome(sg,m.avulso,tm.nome);
     T[t].nome=nm; T[t].lis=K41_CAMISA[sg]||K41_PADRAO[t]; COR[t]=k41CorLog(T[t].lis); K41.reg[t]={};
     T[t].js=atl.map((a,i)=>{ const n=parseInt(a.numero,10); const w=String(a.nome||'').trim().split(/\s+/); const curto=w.length>1?w[0]+' '+w[w.length-1]:(w[0]||'');
-      K41.reg[t][n]=a.reg; return [n,ap[a.reg]||a.apelido||curto,0,i<5?1:0]; }).filter(x=>!isNaN(x[0]));
+      K41.reg[t][n]=a.reg; return [n,ap[a.reg]||a.apelido||curto,0,0]; }).filter(x=>!isNaN(x[0]));
     const esc=m.avulso?(tm.escudo||''):('escudos/'+encodeURIComponent(sg)+'.png');
     document.querySelectorAll(`.top .tm.${t} img, #col${t.toUpperCase()} .cab img`).forEach(im=>{ if(esc) im.src=esc; else im.style.visibility='hidden'; });
     document.querySelector(`.top .tm.${t} .nm`).textContent=nm.toUpperCase();
@@ -1074,6 +1079,21 @@ async function fbEnvia(){ if(!FB.user||!FB.db||!K41.id||K41.leitura||K41.bloq||F
   catch(e){ fbPinta(/permission/i.test(String(e))?'sem permissão':'falhou'); }
   FB.pend=false; }
 setInterval(fbEnvia,700);
+
+// ===== QUINTETO INICIAL (Magno, 25/11/2026) =====
+// O jogo abre com o relógio parado em 10:00 e ninguém em quadra. Em ESTATÍSTICAS, as bolinhas verdes viram botão:
+// o Raoni marca os 5 titulares de cada time. O ▶ só libera com os dois quintetos completos; depois disso, só por SUBST.
+const qiPre=()=>C.q===1&&!LOG.some(e=>e.t)&&rawAgora()<0.5&&!C.anda;
+const qiConta=t=>T[t].js.filter(j=>j[3]).length, qiMax=t=>Math.min(5,T[t].js.length);
+const qiOk=()=>['a','b'].every(t=>qiConta(t)===qiMax(t));
+function quinteto(t,n){ if(typeof K41!=='undefined'&&K41.leitura) return aviso('👁️ Segunda tela · só acompanha');
+  if(!qiPre()) return aviso('O jogo já começou · para trocar use SUBST.');
+  const j=T[t].js.find(x=>x[0]===n); if(!j) return;
+  if(!j[3]&&qiConta(t)>=qiMax(t)) return aviso(`${T[t].nome} já tem ${qiMax(t)} titulares · desmarque um antes`);
+  j[3]=j[3]?0:1; desenha(); desenhaStat();
+  if(qiOk()) aviso('Quintetos completos · toque ▶ para começar o jogo',1); }
+// abre parado em 10:00, sem ninguém em quadra (o jogo recuperado volta como estava)
+C.anda=false; C.raw=0; C.trava=true; T.a.js.forEach(j=>j[3]=0); T.b.js.forEach(j=>j[3]=0); desenha(); relDesenha(); HI.h=[]; HI.i=-1;
 setInterval(k41Envia,3000);
 addEventListener('pagehide',()=>{ if(!K41.leitura&&(LOG.some(e=>e.t)||C.fim)) k41Guarda(); });
 k41Lista(); k41Abre().then(()=>{ if(K41.id&&!K41.bloq) fbCarrega(); });
