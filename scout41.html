@@ -472,7 +472,7 @@ function clicaZona(e,p){ const b=document.body;
   if(FA.on) return aviso('Termine ou feche a falta antes do arremesso'); if(EST.k) return aviso('Escolha o jogador ou feche o botão laranja antes do arremesso'); if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes');
   if(AR.z) return aviso('Feche antes o arremesso aberto no ✕');
   if(!SEL.t) return aviso('Escolha primeiro o jogador (toque na camisa) e depois o local do arremesso');
-  const q=ptSvg(e); AR.x=q.x; AR.y=q.y; AR.z=p.dataset.z; AR.lado=p.dataset.l; AR.res=null; AR.t=SEL.t; AR.n=SEL.n; AR.ok=0; AR.err=0; AR.reb=0; AR.multi=true;   // todos os setores: o retângulo só fecha no ✕ (Magno, 25/11/2026)
+  const q=ptSvg(e); AR.x=q.x; AR.y=q.y; AR.z=p.dataset.z; AR.lado=p.dataset.l; AR.res=null; AR.t=SEL.t; AR.n=SEL.n; AR.ok=0; AR.err=0; AR.reb=0; AR.seq=[]; AR.refaz=[]; AR.multi=true;   // todos os setores: o retângulo só fecha no ✕ (Magno, 25/11/2026)
   document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); p.classList.add('on');
   const j=jog(AR.t,AR.n), tip=document.getElementById('zTip');
   tip.textContent=`${j[1]} - ${AR.n} · ${nomeZ(AR.z,AR.lado)} · ${vZ(AR.z)} pontos`+(AR.multi?' · ✗ e REB quantas vezes precisar · ✕ fecha':' · cesta ✓ ou errou ✗?'); tip.style.display='block';
@@ -489,20 +489,24 @@ function selArr(t,n){ if(AR.z) return aviso('Feche antes o arremesso aberto no �
 function selMarca(){ document.body.classList.toggle('selArr',!!SEL.t&&!AR.z); }
 function arConta(){ const o=document.getElementById('arNo'), e=document.getElementById('arNe'), r=document.getElementById('arNr');
   o.textContent=AR.multi&&AR.ok?'1':''; e.textContent=AR.multi&&AR.err?AR.err:''; r.textContent=AR.reb?AR.reb:'';
-  document.querySelector('#arMenu .ok').classList.toggle('usado',!!AR.ok); }
+  document.querySelector('#arMenu .ok').classList.toggle('usado',!!AR.ok); desenhaUR(); }
 function resAr(v){ if(!AR.z) return;
   if(!AR.multi){ AR.ok=v?1:0; AR.err=v?0:1; return fechaAr(); }
-  if(v){ AR.ok=1; return fechaAr(); } else AR.err++;   // ✓ fecha na hora e já pergunta da assistência (Magno, 25/11/2026)
+  if(v){ AR.ok=1; return fechaAr(); } else { AR.err++; AR.seq.push('e'); AR.refaz=[]; }   // ✓ fecha na hora e já pergunta da assistência (Magno, 25/11/2026)
   arConta(); }
-function resReb(){ if(!AR.z||!AR.multi) return; AR.reb++; arConta(); }
+function resReb(){ if(!AR.z||!AR.multi) return; AR.reb++; AR.seq.push('r'); AR.refaz=[]; arConta(); }
+// ↶ ↷ dentro do retângulo aberto: desfaz/refaz o último ✗ ou REB, um por vez, na ordem inversa, sem fechar (Magno, 25/11/2026)
+const NOME_AR={e:'erro de arremesso',r:'rebote'};
+function arDesfaz(){ const k=AR.seq.pop(); if(!k) return aviso('Nada para desfazer neste arremesso'); if(k==='e') AR.err--; else AR.reb--; AR.refaz.push(k); arConta(); desenhaUR(); aviso('Desfeito: 1 '+NOME_AR[k],1); }
+function arRefaz(){ const k=AR.refaz.pop(); if(!k) return; if(k==='e') AR.err++; else AR.reb++; AR.seq.push(k); arConta(); desenhaUR(); aviso('Refeito: 1 '+NOME_AR[k],1); }
 function cancelaAr(){ AR.z=null; AR.res=null; document.getElementById('arMenu').classList.remove('on','jog','multi'); document.getElementById('zTip').style.display='none';
-  document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); desenhaMarcas(); }
+  document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); desenhaMarcas(); desenhaUR(); }
 function fechaAr(){ if(!AR.z) return; const {t,n,ok,err,reb}=AR;
   if(!ok&&!err&&!reb){ cancelaAr(); return aviso('Arremesso cancelado'); }
   const j=jog(t,n), s=stJ(t,n), p=vZ(AR.z), k=p===3?'three':'two', onde=nomeZ(AR.z,AR.lado);
-  for(let i=0;i<Math.max(err,reb);i++){   // erro, rebote, erro, rebote… (no lance a lance, na ordem do jogo)
-    if(i<err){ s[k+'Miss']++; MARCAS.push({x:AR.x,y:AR.y,ok:0,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos perdido ${j[1]} - ${n}`,onde+' · EF −1','ou'); }
-    if(i<reb){ s.reb++; reg(t,'',`Rebote ${j[1]} - ${n}`,'EF +1','ok'); } }
+  for(const c of AR.seq){   // erros e rebotes no lance a lance na ordem em que foram tocados (Magno, 25/11/2026)
+    if(c==='e'){ s[k+'Miss']++; MARCAS.push({x:AR.x,y:AR.y,ok:0,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos perdido ${j[1]} - ${n}`,onde+' · EF −1','ou'); }
+    else { s.reb++; reg(t,'',`Rebote ${j[1]} - ${n}`,'EF +1','ok'); } }
   if(ok){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); MARCAS.push({x:AR.x,y:AR.y,ok:1,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos convertido ${j[1]} - ${n}`,onde+` · EF +${p}`,'ok'); }
   efJ(s); SEL.t=null; SEL.n=null; selMarca(); cancelaAr(); desenha(); bolaViva();
   aviso((ok?`+${p} para ${j[1]} - ${n}`:`${p} pontos perdido · ${j[1]} - ${n}`)+(err>1?` · ${err} erros`:'')+(reb?` · ${reb} rebote${reb>1?'s':''}`:''),1);
@@ -789,11 +793,12 @@ function histVolta(f){ const o=JSON.parse(f); T.a.js=o.js.a; T.b.js=o.js.b; Obje
 function urLivre(){ if(document.body.classList.contains('sub')) return 'a substituição'; if(FA.on) return 'a falta'; if(LL.on) return 'o lance livre';
   if(AR.z) return 'o arremesso'; if(AS.on) return 'a pergunta da assistência'; if(EST.k) return 'o botão laranja'; if(C.tmAb) return 'o pedido de tempo'; return ''; }
 const linhaTxt=e=>e?[e.nm,e.a].filter(Boolean).join(' · '):'';
-function desfaz(){ if(HI.i<=0) return aviso(HI.h.length?'Nada para desfazer':'Nada para desfazer'); const o=urLivre(); if(o) return aviso(`Termine ou feche ${o} antes de desfazer`);
+function desfaz(){ if(AR.z&&AR.multi) return arDesfaz(); if(HI.i<=0) return aviso(HI.h.length?'Nada para desfazer':'Nada para desfazer'); const o=urLivre(); if(o) return aviso(`Termine ou feche ${o} antes de desfazer`);
   const tx=linhaTxt(LOG[0]); HI.i--; histVolta(HI.h[HI.i]); aviso('Desfeito: '+tx,1); }
-function refaz(){ if(HI.i>=HI.h.length-1) return; const o=urLivre(); if(o) return aviso(`Termine ou feche ${o} antes de refazer`);
+function refaz(){ if(AR.z&&AR.multi) return arRefaz(); if(HI.i>=HI.h.length-1) return; const o=urLivre(); if(o) return aviso(`Termine ou feche ${o} antes de refazer`);
   HI.i++; histVolta(HI.h[HI.i]); aviso('Refeito: '+linhaTxt(LOG[0]),1); }
 function desenhaUR(){ const u=document.getElementById('btUn'), r=document.getElementById('btRe'); if(!u) return;
+  if(AR.z&&AR.multi){ u.classList.toggle('off',!AR.seq.length); r.classList.toggle('off',!AR.refaz.length); return; }   // retângulo aberto: ↶ ↷ valem só para os toques dele
   u.classList.toggle('off',HI.i<=0); r.classList.toggle('off',HI.i>=HI.h.length-1); }
 const COR={a:'background:repeating-linear-gradient(180deg,#C8102E 0 3px,#000 3px 6px)',b:'background:#E2231A;box-shadow:0 0 0 2px #fff'};
 function logDesenha(){ const ul=document.getElementById('lal');
