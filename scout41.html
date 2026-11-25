@@ -59,7 +59,19 @@ body.stat #stPainel{display:block}
 #stPainel tr:nth-child(odd) td{background:#18233b}
 #stPainel td.nm{text-align:left;padding-left:10px;white-space:nowrap}#stPainel td.nm i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ee66b;margin-right:6px;font-style:normal}
 #stPainel td.nm i.bc{background:transparent;border:1px solid #556}
-#stPainel td.ef{color:#ffd54f;font-weight:700}#stPainel tr.tot td{background:#1c3e6e;font-weight:700}
+#stPainel td.ef{color:#ffd54f;font-weight:700}
+/* ✏️ editar a linha da tabela (Magno, 25/11/2026) */
+#stPainel td.edt b{cursor:pointer;display:inline-block;padding:1px 6px;border-radius:4px;border:1px solid #3b5584;font-style:normal}#stPainel td.edt b:hover{background:#24406e}
+#stPainel tr.edOn td{background:#3a2f0b!important}#stPainel tr.edOn td.edt b{background:#ffd54f;border-color:#ffd54f}
+#stPainel td input{width:30px;font:700 13px Arial;text-align:center;background:#0d1526;color:#fff;border:1px solid #ffd54f;border-radius:3px;padding:2px 0}
+/* fim de partida · caixinhas do lance a lance (Magno, 25/11/2026) */
+#stPainel h3 .cxs{display:flex;gap:10px;flex:1;margin-left:28px}#stPainel h3 #selJogo{flex:1}#stPainel h3 #selTrava{width:150px}#stPainel h3 .cxs select{font:600 13px Arial;height:28px;padding:0 6px;cursor:pointer;background:#0d1526;color:#fff;border:1px solid #3b5584;border-radius:4px;letter-spacing:0}
+#stPainel h3 .cxs select.esc{display:none}#selTrava{border-color:#ffd54f!important;color:#ffd54f!important}
+#otMenu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20;align-items:center;justify-content:center}#otMenu.on{display:flex}
+#otMenu div{background:#14213d;border:2px solid #ffd54f;border-radius:12px;padding:22px 28px;text-align:center;font:700 20px Arial;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+#otMenu small{display:block;font:400 13px Arial;color:#9fb3d9;margin:6px 0 16px}#otMenu button{font:700 18px Arial;padding:10px 26px;margin:0 8px;border:0;border-radius:8px;cursor:pointer;color:#fff}
+#otMenu .si{background:#1b5e20}#otMenu .nao{background:#b71c1c}
+body.travado #zTip{display:none!important}body.travado header.top,body.travado .times,body.travado .quadra,body.travado .banco,body.travado .bts .bt:not(#btStat){opacity:.45;filter:grayscale(.5)}#stPainel tr.tot td{background:#1c3e6e;font-weight:700}
 .bt.statOn{background:linear-gradient(180deg,#43c45a,#1f8a35);color:#fff}.bts{grid-column:3;grid-row:1/3}.baixo{grid-column:1/3;grid-row:2}
 
 /* colunas dos times */
@@ -287,7 +299,7 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
     <div class="bt az" id="btStat" onclick="clicaStat()" title="Estatísticas completas dos dois times">ESTATÍSTICAS</div><div class="bt2"><div class="bt undo off" id="btUn" onclick="desfaz()" title="Desfazer a última ação">↶</div><div class="bt undo off" id="btRe" onclick="refaz()" title="Refazer a ação desfeita">↷</div><div id="laySeg"><b class="on" title="Layout 1" onclick="layout(1)">1</b><b title="Layout 2" onclick="layout(2)">2</b><b title="Layout 3" onclick="layout(3)">3</b></div></div>
   </section>
 </main>
-<div id="aviso"></div>
+<div id="aviso"></div><div id="otMenu"><div>Vai ter tempo extra?<small id="otTx">Fim do 4º Q</small><button class="si" onclick="respOT(1)">SIM</button><button class="nao" onclick="respOT(0)">NÃO</button></div></div>
 <div id="feMenu" onclick="if(event.target===this) fechaFE()"><div class="cx"><h4><b id="feTit">FALTA ESPECIAL · escolha o tipo</b><span onclick="fechaFE()">✕ fechar</span></h4><div class="op" id="feOp"></div></div></div>
 
 <script>
@@ -582,13 +594,13 @@ function relDesenha(){ const b=document.getElementById('relB'); if(!b||b.querySe
   b.className=!C.em?'fim':C.anda?'':'par'; b.title=C.em&&!C.anda?'Relógio parado: toque para voltar a correr':'';
   document.getElementById('relQ').textContent=NQ(C.q);
   const st=document.getElementById('relSt');
-  st.textContent=!C.em?(C.q>=4?'■ fim do quarto · ▶ prorrogação':'■ fim do quarto · ▶ próximo'):C.tmAb?'■ pedido de tempo':C.anda?(r?'● correndo':'● 00:00 · toque Q no fim'):'■ parado';
+  st.textContent=C.fim?'■ fim de partida':!C.em?'■ fim do quarto · ▶ próximo':C.tmAb?'■ pedido de tempo':C.anda?(r?'● correndo':'● 00:00 · toque Q no fim'):'■ parado';
   st.className='net'+(!C.em?' fq':C.anda?'':' par');
   for(const t of ['a','b']){ const e=document.getElementById('tm'+t.toUpperCase()); e.classList.toggle('on',C.tmAb===t); e.querySelector('b').textContent=`${C.tm[t]}/${limTm(C.q)}`;
     const s=document.getElementById('btTm'+t.toUpperCase()); if(s) s.classList.toggle('off',!C.em||(C.tmAb?C.tmAb!==t:!!tmPode(t))); }
   const bT=document.getElementById('btTm'); if(bT){ bT.classList.toggle('on',!!C.tmAb); document.getElementById('btTmT').textContent=C.tmAb?'TEMPO – '+T[C.tmAb].nome.toUpperCase():'PEDIDO DE TEMPO'; }
   const bq=document.getElementById('btQ'); bq.className='play'+(C.conf?' conf':!C.em?' ini':''); bq.textContent=C.em?'Q':'▶';   // Q = encerrar o quarto (Magno, 24/11/2026)
-  bq.title=C.em?'Encerrar o quarto (toque 2 vezes)':'Iniciar o próximo período';
+  bq.title=C.fim?'Partida encerrada':C.em?'Encerrar o quarto (toque 2 vezes)':'Iniciar o próximo período'; bq.style.visibility=C.fim?'hidden':'';
   document.getElementById('btPlay').classList.toggle('on',C.em&&C.anda);
   document.getElementById('btPaus').classList.toggle('on',C.em&&C.trava===true);
   document.getElementById('tarja').classList.toggle('on',!!C.tarja&&C.em); }
@@ -605,13 +617,36 @@ escTempo(); setInterval(relDesenha,250);
 function clicaRel(){ if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
   if(C.tmAb) return aviso('Pedido de tempo aberto · toque de novo no escudo do time para encerrar');
   if(C.anda) clicaPausa(); else clicaPlay(); }
-function clicaQuarto(){
+function clicaQuarto(){ if(C.fim) return aviso('Partida encerrada');
   if(C.em){ if(!C.conf){ C.conf=1; relDesenha(); aviso('Clique duas vezes em sequência para finalizar o '+NQ(C.q)); setTimeout(()=>{C.conf=0;relDesenha();},3000); return; }
     C.conf=0; if(C.tmAb) fechaTempo(); C.trava=false; pausa(); const raw=C.raw, A=C.anc[C.q];
     if(raw>A[A.length-1][0]) A.push([raw,DUR(C.q)]);           // correção do fim do quarto
-    C.em=false; relDesenha(); reg(null,'','',`Fim do ${NQ(C.q)}`,'qt'); aviso(`Fim do ${NQ(C.q)} · horários corrigidos`,1); return; }
+    C.em=false; relDesenha(); reg(null,'','',`Fim do ${NQ(C.q)}`,'qt'); if(C.q>=4) return perguntaOT(); aviso(`Fim do ${NQ(C.q)} · horários corrigidos`,1); return; }
   C.q++; C.raw=0; C.anc[C.q]=[[0,0]]; C.em=true; FT.a=0; FT.b=0; desenhaFT(); if(C.q===3||C.q>4) C.tm={a:0,b:0}; C.tmF={a:0,b:0};
   C.t0=performance.now(); C.anda=true; C.trava=false; relDesenha(); reg(null,'','',`Início do ${NQ(C.q)} · cronômetro liberado (${mmss(DUR(C.q))})`,'qt'); aviso(`Início do ${NQ(C.q)}`,1); }
+// ===== FIM DE PARTIDA (Magno, 25/11/2026) =====
+// Q no fim do 4º Q (ou de uma prorrogação) pergunta se vai ter tempo extra.
+// SIM: abre a próxima prorrogação (05:00) parada, esperando o ▶. NÃO: fim de partida, tudo travado;
+// só a caixinha 🔒 Travado / ✏️ Editar (e ESTATÍSTICAS, layouts e lance a lance para olhar) continuam funcionando.
+let OT=false;
+function perguntaOT(){ OT=true; document.getElementById('otTx').textContent='Fim do '+NQ(C.q); document.getElementById('otMenu').classList.add('on'); }
+function respOT(si){ OT=false; document.getElementById('otMenu').classList.remove('on');
+  if(si){ C.q++; C.raw=0; C.anc[C.q]=[[0,0]]; C.em=true; FT.a=0; FT.b=0; desenhaFT(); C.tm={a:0,b:0}; C.tmF={a:0,b:0};
+    C.anda=false; C.trava=true; C.tarja=true; relDesenha(); reg(null,'','',`${NQ(C.q)} aberta · aguardando ▶ (${mmss(DUR(C.q))})`,'qt'); aviso(`${NQ(C.q)} aberta · toque ▶ para começar`,1); return; }
+  C.fim=true; C.edit=false; reg(null,'','','Fim de partida · jogo travado','qt'); aplicaTrava(); relDesenha(); aviso('Fim de partida · jogo travado',1); }
+function aplicaTrava(){ const tv=C.fim&&!C.edit; document.body.classList.toggle('travado',tv);
+  if(document.body.classList.contains('stat')) desenhaStat(); }
+function trocaTrava(v){ C.edit=v==='e'; if(!C.edit&&ED.k) edLinha(...ED.k.split(':')); aplicaTrava(); aviso(C.edit?'Edição liberada · escolha 🔒 Travado quando terminar':'Jogo travado',1); }
+// caixinha de escolher o jogo: some depois do primeiro lance e volta no fim de partida
+// (caixinhas ficam na tela ESTATÍSTICAS, na linha do escudo do 1º time · Magno, 25/11/2026)
+function cxJogo(){}
+function cxHTML(){ const usou=LOG.some(e=>e.t);
+  return `<span class="cxs"><select id="selJogo" class="${usou&&!C.fim?'esc':''}" title="Escolha o jogo montado · depois toque em QUADRA para marcar"><option>Jogo de teste · Flamengo x Tijuca</option></select><select id="selTrava" class="${C.fim?'':'esc'}" onchange="trocaTrava(this.value)" title="Partida encerrada: travada ou liberada para editar"><option value="t"${C.edit?'':' selected'}>🔒 Travado</option><option value="e"${C.edit?' selected':''}>✏️ Editar</option></select></span>`; }
+const LIVRE='#selJogo,#selTrava,#btStat,#laySeg,.lal,#stPainel';
+function bloqueio(e){ const ot=OT, tv=C.fim&&!C.edit; if(!ot&&!tv) return;
+  if(e.target.closest(ot?'#otMenu':LIVRE)) return; e.stopImmediatePropagation(); e.preventDefault();
+  if(e.type==='click') aviso(ot?'Responda primeiro: vai ter tempo extra?':'Partida encerrada e travada · em ESTATÍSTICAS, escolha ✏️ Editar'); }
+window.addEventListener('click',bloqueio,true); window.addEventListener('pointerdown',bloqueio,true);
 function pedeTempo(t){ if(!C.em) return aviso('Quarto encerrado · toque ▶ para iniciar o próximo');
   if(C.tmAb===t) return fechaTempo();
   if(C.tmAb) return aviso(`Feche antes o pedido de tempo do ${T[C.tmAb].nome}`);
@@ -785,7 +820,7 @@ function marcaEst(t,n){ if(EST.k==='stl') return marcaRoubo(t,n); const k=EST.k,
 // O botão abre a tabela completa dos dois times no lugar dos times e da quadra e vira QUADRA (volta).
 // Qualquer outro botão de lance fecha a tabela sozinho, para o Raoni não perder o lance.
 function clicaStat(){ document.body.classList.toggle('stat'); desenhaStat(); }
-function fechaStat(){ if(document.body.classList.contains('stat')){ document.body.classList.remove('stat'); desenhaStat(); } }
+function fechaStat(){ ED.k=null; if(document.body.classList.contains('stat')){ document.body.classList.remove('stat'); desenhaStat(); } }
 function desenhaStat(){ const on=document.body.classList.contains('stat'), b=document.getElementById('btStat'); if(!b) return;
   b.classList.toggle('statOn',on); b.innerHTML=on?'<span>QUADRA<small>voltar ao jogo</small></span>':'ESTATÍSTICAS'; if(!on) return;
   const pc=(m,a)=>`${m}/${a} (${a?Math.round(100*m/a):0}%)`, Z={pts:0,oreb:0,dreb:0,reb:0,ast:0,stl:0,blk:0,tov:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,eff:0};
@@ -793,15 +828,31 @@ function desenhaStat(){ const on=document.body.classList.contains('stat'), b=doc
   for(const t of ['a','b']){ const tt={...Z,f:0}; let lin='';
     for(const j of [...T[t].js].sort((x,y)=>x[0]-y[0])){ const s={...Z,...(ST[t+j[0]]||{})};
       for(const k in Z) tt[k]+=s[k]; tt.f+=j[2];
-      lin+=`<tr><td>${j[0]}</td><td class="nm"><i class="${j[3]?'':'bc'}" title="${j[3]?'em quadra':'no banco'}"></i>${j[1]}</td><td>${s.pts}</td><td>${pc(s.twoMade,s.twoMade+s.twoMiss)}</td><td>${pc(s.threeMade,s.threeMade+s.threeMiss)}</td><td>${pc(s.ftMade,s.ftMade+s.ftMiss)}</td><td>${s.oreb}</td><td>${s.dreb}</td><td>${s.ast}</td><td>${s.stl}</td><td>${s.blk}</td><td>${s.tov}</td><td>${j[2]}</td><td class="ef">${s.eff}</td></tr>`; }
+      const ed=ED.k===t+':'+j[0], I=(f,v)=>`<input id="ed_${f}" type="number" min="0" value="${v}">`, A=(m,x)=>ed?`${I(m,s[m])} / ${I(m+'T',s[m]+s[x])}`:pc(s[m],s[m]+s[x]), V=f=>ed?I(f,f==='f'?j[2]:s[f]):(f==='f'?j[2]:s[f]);
+      lin+=`<tr class="${ed?'edOn':''}"><td>${j[0]}</td><td class="nm"><i class="${j[3]?'':'bc'}" title="${j[3]?'em quadra':'no banco'}"></i>${j[1]}</td><td>${s.pts}</td><td>${A('twoMade','twoMiss')}</td><td>${A('threeMade','threeMiss')}</td><td>${A('ftMade','ftMiss')}</td><td>${V('oreb')}</td><td>${V('dreb')}</td><td>${V('ast')}</td><td>${V('stl')}</td><td>${V('blk')}</td><td>${V('tov')}</td><td>${V('f')}</td><td class="ef">${s.eff}</td><td class="edt"><b onclick="edLinha('${t}',${j[0]})" title="${ed?'Gravar e travar a linha':'Editar a linha'}">✏️</b></td></tr>`; }
     const esc=document.querySelector(`#col${t.toUpperCase()} .cab img`);
-    h+=`<h3>${esc?`<img src="${esc.getAttribute('src')}" alt="">`:''}${T[t].nome.toUpperCase()}</h3><table><tr><th>Camisa</th><th>Nome</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th title="Rebote ofensivo">OREB</th><th title="Rebote defensivo">DREB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>F</th><th>EFF</th></tr>${lin}
-     <tr class="tot"><td colspan="2">TOTAL</td><td>${tt.pts}</td><td>${pc(tt.twoMade,tt.twoMade+tt.twoMiss)}</td><td>${pc(tt.threeMade,tt.threeMade+tt.threeMiss)}</td><td>${pc(tt.ftMade,tt.ftMade+tt.ftMiss)}</td><td>${tt.oreb}</td><td>${tt.dreb}</td><td>${tt.ast}</td><td>${tt.stl}</td><td>${tt.blk}</td><td>${tt.tov}</td><td>${tt.f}</td><td class="ef">${tt.eff}</td></tr></table>`; }
+    h+=`<h3>${esc?`<img src="${esc.getAttribute('src')}" alt="">`:''}${T[t].nome.toUpperCase()}${t==='a'?cxHTML():''}</h3><table><tr><th>Camisa</th><th>Nome</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th title="Rebote ofensivo">OREB</th><th title="Rebote defensivo">DREB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>F</th><th>EFF</th><th title="Editar a linha">✏️</th></tr>${lin}
+     <tr class="tot"><td colspan="2">TOTAL</td><td>${tt.pts}</td><td>${pc(tt.twoMade,tt.twoMade+tt.twoMiss)}</td><td>${pc(tt.threeMade,tt.threeMade+tt.threeMiss)}</td><td>${pc(tt.ftMade,tt.ftMade+tt.ftMiss)}</td><td>${tt.oreb}</td><td>${tt.dreb}</td><td>${tt.ast}</td><td>${tt.stl}</td><td>${tt.blk}</td><td>${tt.tov}</td><td>${tt.f}</td><td class="ef">${tt.eff}</td><td></td></tr></table>`; }
   document.getElementById('stPainel').innerHTML=h; }
 
+// ✏️ da linha (Magno, 25/11/2026): 1º toque libera os números da linha; 2º toque grava e trava.
+// PTS, REB e EFF se refazem sozinhos e o placar do time acompanha a diferença de pontos. Vai para o lance a lance e o ↶ desfaz.
+const ED={k:null};
+function edLinha(t,n){ n=+n; const k=t+':'+n;
+  if(C.fim&&!C.edit) return aviso('Partida travada · escolha ✏️ Editar na caixinha lá em cima');
+  if(ED.k&&ED.k!==k) return aviso('Termine primeiro a linha que está aberta (toque no ✏️ dela)');
+  if(!ED.k){ ED.k=k; return desenhaStat(); }
+  const g=f=>{ const v=document.getElementById('ed_'+f).value.trim(); return v===''?0:Number(v); }, F=['twoMade','twoMadeT','threeMade','threeMadeT','ftMade','ftMadeT','oreb','dreb','ast','stl','blk','tov','f'], v={};
+  for(const f of F){ v[f]=g(f); if(!Number.isInteger(v[f])||v[f]<0) return aviso('Use só números inteiros, de 0 para cima'); }
+  for(const m of ['twoMade','threeMade','ftMade']) if(v[m]>v[m+'T']) return aviso('As certas não podem passar das tentadas');
+  const j=jog(t,n), s=stJ(t,n), antes=s.pts||0;
+  s.twoMade=v.twoMade; s.twoMiss=v.twoMadeT-v.twoMade; s.threeMade=v.threeMade; s.threeMiss=v.threeMadeT-v.threeMade; s.ftMade=v.ftMade; s.ftMiss=v.ftMadeT-v.ftMade;
+  s.oreb=v.oreb; s.dreb=v.dreb; s.reb=v.oreb+v.dreb; s.ast=v.ast; s.stl=v.stl; s.blk=v.blk; s.tov=v.tov; j[2]=v.f;
+  s.pts=2*s.twoMade+3*s.threeMade+s.ftMade; efJ(s); PL[t]+=s.pts-antes; ED.k=null;
+  desenha(); desenhaPL(); reg(t,n,j[1],'Estatística corrigida à mão','ou'); desenhaStat(); aviso(`${j[1]}: linha gravada e travada`,1); }
 // ===== LANCE A LANCE (começa vazio; só recebe o que os botões registram; mais novo em cima) =====
 const LOG=[];
-function reg(t,n,nm,a,k){ LOG.unshift({q:C.q,raw:rawAgora(),real:Date.now(),t,n,nm,a,k}); logDesenha(); histMarca(k); }
+function reg(t,n,nm,a,k){ LOG.unshift({q:C.q,raw:rawAgora(),real:Date.now(),t,n,nm,a,k}); logDesenha(); histMarca(k); if(typeof cxJogo==='function') cxJogo(); }
 
 // ===== ↶ DESFAZER · ↷ REFAZER (Magno, 24/11/2026) =====
 // Cada toque no ↶ desfaz a última ação (um toque de botão = uma ação, mesmo que tenha gerado 2 linhas no lance a lance).
@@ -813,7 +864,7 @@ function histMarca(k){ if(['qt','cr','tm'].includes(k)) HI.base=1; if(HI.pend) r
   queueMicrotask(()=>{ HI.pend=0; const f=histFoto(); if(HI.base){ HI.base=0; HI.h=[f]; HI.i=0; } else { HI.h=HI.h.slice(0,HI.i+1); HI.h.push(f); HI.i++; } desenhaUR(); }); }
 function histVolta(f){ const o=JSON.parse(f); T.a.js=o.js.a; T.b.js=o.js.b; Object.assign(PL,o.PL); Object.assign(FT,o.FT); Object.assign(TC,o.TC);
   ST=o.ST; MARCAS.length=0; MARCAS.push(...o.MARCAS); LOG.length=0; LOG.push(...o.LOG);
-  desenha(); desenhaPL(); desenhaFT(); logDesenha(); desenhaMarcas(); relDesenha(); desenhaUR(); }
+  desenha(); desenhaPL(); desenhaFT(); logDesenha(); desenhaMarcas(); relDesenha(); desenhaUR(); cxJogo(); if(document.body.classList.contains('stat')) desenhaStat(); }
 function urLivre(){ if(document.body.classList.contains('sub')) return 'a substituição'; if(FA.on) return 'a falta'; if(LL.on) return 'o lance livre';
   if(AR.z) return 'o arremesso'; if(AS.on) return 'a pergunta da assistência'; if(EST.k) return 'o botão laranja'; if(C.tmAb) return 'o pedido de tempo'; return ''; }
 const linhaTxt=e=>e?[e.nm,e.a].filter(Boolean).join(' · '):'';
