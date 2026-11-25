@@ -159,6 +159,9 @@ body.sub .banco{display:grid}
 #asMenu{position:fixed;display:none;z-index:60;background:#121a2b;border:2px solid #ffd54f;border-radius:8px;padding:6px;gap:6px;box-shadow:0 6px 18px rgba(0,0,0,.7)}#asMenu.on{display:flex}
 #asMenu span{color:#ffe9a3;font:700 15px Arial;padding:0 8px;align-self:center;white-space:nowrap}#asMenu button{height:38px;border-radius:6px;border:0;font:700 15px Arial;cursor:pointer;color:#fff;padding:0 14px}
 #asMenu .si{background:#1b5e20}#asMenu .nao{background:#7f1d1d}#asMenu .x{background:#2a3248;font-size:14px;padding:0 9px}#asMenu.esc .si,#asMenu.esc .nao{display:none}   /* assistência colada no mouse (Magno, 24/11/2026) */
+#arMenu{flex-wrap:wrap;max-width:150px}#arMenu button{position:relative}#arMenu .rb{display:none;flex-basis:100%;height:34px;background:#2fae4a;font-size:15px}#arMenu.multi .rb{display:block}
+#arMenu i{position:absolute;top:-8px;right:-8px;background:#ffd54f;color:#000;border-radius:10px;font:700 12px Arial;padding:1px 6px;font-style:normal}#arMenu i:empty{display:none}#arMenu .ok.usado{opacity:.35}
+.jg.sel{box-shadow:0 0 0 3px #4fc3f7,0 0 14px 4px rgba(79,195,247,.7)!important}.jg.sel::before{content:'ARREMESSO';position:absolute;right:4px;top:4px;font-size:11px;letter-spacing:1px;background:#4fc3f7;color:#000;padding:1px 6px;border-radius:3px;font-weight:700;z-index:2}
 #arMenu .ok{background:#1b5e20}#arMenu .er{background:#7f1d1d}#arMenu .x{background:#2a3248;font-size:14px;width:28px}
 #aviso{pointer-events:none;position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#d32f2f;color:#fff;font:700 15px Arial;padding:8px 16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.6);display:none;z-index:9}
 #aviso.ok{background:#1b5e20}
@@ -247,7 +250,7 @@ body.sub .banco{display:grid}
   </section>
 
   <section class="meio"><div class="quadra" id="quadra"></div><div id="llMenu"><div class="cx"><h4><b id="llTit">LANCE LIVRE</b><span onclick="cancelaLL()">✕</span></h4><div id="llOp"></div></div></div>
-<div id="asMenu"><span id="asTxt">Teve assistência?</span><button class="si" onclick="respAs(1)">SIM</button><button class="nao" onclick="respAs(0)">NÃO</button><button class="x" onclick="fechaAs()" title="Fechar (sem assistência)">✕</button></div><div id="zTip"></div><div id="arMenu"><button class="ok" onclick="resAr(1)" title="Cesta">✓</button><button class="er" onclick="resAr(0)" title="Errou">✗</button><span id="arTxt">Escolha o jogador</span><button class="x" onclick="cancelaAr()" title="Cancelar">✕</button></div><div id="tarja" onclick="clicaPlay()">⚠ LIBERE O RELÓGIO NO REINÍCIO DO JOGO ▶</div></section>
+<div id="asMenu"><span id="asTxt">Teve assistência?</span><button class="si" onclick="respAs(1)">SIM</button><button class="nao" onclick="respAs(0)">NÃO</button><button class="x" onclick="fechaAs()" title="Fechar (sem assistência)">✕</button></div><div id="zTip"></div><div id="arMenu"><button class="ok" onclick="resAr(1)" title="Cesta">✓<i id="arNo"></i></button><button class="er" onclick="resAr(0)" title="Errou">✗<i id="arNe"></i></button><button class="x" onclick="fechaAr()" title="Fechar e registrar">✕</button><button class="rb" onclick="resReb()" title="Rebote do mesmo jogador">REB<i id="arNr"></i></button></div><div id="tarja" onclick="clicaPlay()">⚠ LIBERE O RELÓGIO NO REINÍCIO DO JOGO ▶</div></section>
 
   <section class="baixo">
     <div class="banco">
@@ -310,8 +313,9 @@ const T={a:{nome:'Flamengo',lis:FLA,js:[[4,'Tozo',0,1],[5,'Pedro',0,1],[7,'Davi'
  [6,'Caio',0,0],[9,'Miguel',0,0],[11,'Arthur',0,0],[12,'Bento',0,0],[13,'Enzo',0,0],[14,'Rafa',0,0],[15,'João',0,0]]},
  b:{nome:'Tijuca',lis:TIJ,js:[[3,'Matheus',0,1],[5,'Kaique',0,1],[6,'Bruno',0,1],[9,'Igor',0,1],[12,'Léo',0,1],
  [4,'Vitor',0,0],[7,'Samuel',0,0],[8,'Thiago',0,0],[10,'Felipe',0,0],[11,'Nico',0,0],[13,'Heitor',0,0],[14,'Danilo',0,0]]}};
+const SEL={t:null,n:null};   // jogador escolhido para o arremesso
 const ENTRA={a:new Set(),b:new Set()}, SAI={a:new Set(),b:new Set()};
-function tile(t,[n,nm,f,,,,dq],onde){ const k=t+n, cls=[dq?'dsq':f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':'',onde==='q'&&FA.fez&&FA.fez.t===t&&FA.fez.n===n?'fez':'',onde==='q'&&FA.sof&&FA.sof.t===t&&FA.sof.n===n?'sof':''].join(' ');
+function tile(t,[n,nm,f,,,,dq],onde){ const k=t+n, cls=[dq?'dsq':f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':'',onde==='q'&&FA.fez&&FA.fez.t===t&&FA.fez.n===n?'fez':'',onde==='q'&&FA.sof&&FA.sof.t===t&&FA.sof.n===n?'sof':'',onde==='q'&&SEL.t===t&&SEL.n===n?'sel':''].join(' ');
   return `<div class="jg ${cls}" title="${nm}" onclick="clicaJg('${t}',${n},'${onde}')"><div class="fl">${[1,2,3,4,5].map(x=>`<span class="${x<=f?'on':''}"></span>`).join('')}</div>
    ${regata(onde+k,n,T[t].lis)}<div class="nm">${nm}</div>${onde==='q'?estTag(t,n):''}</div>`; }
 // quadro de estatísticas na camisa (Magno, 24/11/2026): EF amarelo · PTS REB ASS ROU TOC verde · 2P 3P LL acerto/tentativa branco · TO vermelho
@@ -331,7 +335,8 @@ function desenha(){ for(const t of ['a','b']){ const q=T[t].js.filter(j=>j[3]), 
 function estadoSub(){ let tot=0, ok=true; for(const t of ['a','b']){ const e=ENTRA[t].size, s=SAI[t].size; tot+=e+s; if(e!==s) ok=false; }
   return !tot?'vazio':ok?'ok':'pend'; }
 function aviso(t,ok){ const a=document.getElementById('aviso'); a.textContent=t; a.className=ok?'ok':''; a.style.display='block'; clearTimeout(a._t); a._t=setTimeout(()=>a.style.display='none',3200); }
-function clicaJg(t,n,onde){ if(AS.esc&&onde==='q') return marcaAs(t,n); if(AS.on&&onde==='q') return aviso('Responda antes: teve assistência? SIM ou NÃO'); if(EST.k&&onde==='q') return marcaEst(t,n); if(AR.res!==null&&onde==='q') return marcaAr(t,n); if(LL.on&&onde==='q') return marcaLL(t,n); if(FA.on&&onde==='q') return marcaFalta(t,n);
+function clicaJg(t,n,onde){ if(AS.esc&&onde==='q') return marcaAs(t,n); if(AS.on&&onde==='q') return aviso('Responda antes: teve assistência? SIM ou NÃO'); if(EST.k&&onde==='q') return marcaEst(t,n); if(LL.on&&onde==='q') return marcaLL(t,n); if(FA.on&&onde==='q') return marcaFalta(t,n);
+  if(onde==='q'&&!document.body.classList.contains('sub')) return selArr(t,n);   // jogador primeiro, depois a quadra (Magno, 24/11/2026)
   if(!document.body.classList.contains('sub')) return; // fora da substituição e da falta, a camisa serve para as próximas estatísticas
   const jj=T[t].js.find(j=>j[0]===n); if(onde==='b'&&jj[6]){ aviso(`${jj[1]} foi desqualificado e não pode voltar`); return; }
   if(onde==='b'&&jj[2]>=5){ aviso(`${jj[1]} tem 5 faltas e não pode voltar`); return; }
@@ -463,26 +468,42 @@ function ptSvg(e){ const svg=document.querySelector('#quadra svg'), pt=svg.creat
 function clicaZona(e,p){ const b=document.body;
   if(b.classList.contains('sub')) return aviso('Termine ou feche a substituição antes do arremesso');
   if(FA.on) return aviso('Termine ou feche a falta antes do arremesso'); if(EST.k) return aviso('Escolha o jogador ou feche o botão laranja antes do arremesso'); if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes');
-  if(AR.res!==null) return aviso('Toque na camisa de quem arremessou (ou ✕ para cancelar)');
-  const q=ptSvg(e); AR.x=q.x; AR.y=q.y; AR.z=p.dataset.z; AR.lado=p.dataset.l; AR.res=null;
+  if(AR.z) return aviso('Feche antes o arremesso aberto no ✕');
+  if(!SEL.t) return aviso('Escolha primeiro o jogador (toque na camisa) e depois o local do arremesso');
+  const q=ptSvg(e); AR.x=q.x; AR.y=q.y; AR.z=p.dataset.z; AR.lado=p.dataset.l; AR.res=null; AR.t=SEL.t; AR.n=SEL.n; AR.ok=0; AR.err=0; AR.reb=0; AR.multi=PERTO.includes(AR.z);
   document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); p.classList.add('on');
-  const tip=document.getElementById('zTip'); tip.textContent=nomeZ(AR.z,AR.lado)+` · ${vZ(AR.z)} pontos · cesta ✓ ou errou ✗?`; tip.style.display='block';
+  const j=jog(AR.t,AR.n), tip=document.getElementById('zTip');
+  tip.textContent=`${j[1]} - ${AR.n} · ${nomeZ(AR.z,AR.lado)} · ${vZ(AR.z)} pontos`+(AR.multi?' · ✗ e REB quantas vezes precisar · ✕ fecha':' · cesta ✓ ou errou ✗?'); tip.style.display='block';
   desenhaMarcas(); const m=document.getElementById('arMenu'), mr=document.querySelector('.meio').getBoundingClientRect();
-  m.classList.add('on'); const mw=m.offsetWidth, mh=m.offsetHeight; let L=e.clientX-mr.left-mw/2, T=e.clientY-mr.top-mh-14; if(T<4) T=e.clientY-mr.top+14;
+  m.classList.toggle('multi',AR.multi); arConta(); m.classList.add('on'); const mw=m.offsetWidth, mh=m.offsetHeight; let L=e.clientX-mr.left-mw/2, T=e.clientY-mr.top-mh-14; if(T<4) T=e.clientY-mr.top+14;
   m.style.left=Math.max(4,Math.min(mr.width-mw-4,L))+'px'; m.style.top=T+'px'; }
-function resAr(v){ if(!AR.z) return; AR.res=v; const m=document.getElementById('arMenu'); m.classList.add('jog'); desenhaMarcas();   // no mesmo lugar: "Escolha o jogador"
-  const tip=document.getElementById('zTip'); tip.textContent=`${vZ(AR.z)} pontos ${v?'convertido':'perdido'} · toque na camisa de quem arremessou`; tip.style.display='block';
-}
-function cancelaAr(){ AR.z=null; AR.res=null; document.getElementById('arMenu').classList.remove('on','jog'); document.getElementById('zTip').style.display='none';
+// ===== ARREMESSO: jogador → quadra → ✓/✗ (Magno, 24/11/2026) =====
+// Garrafão e as 3 meias distâncias curtas: ✓ uma vez, ✗ e REB (rebote do mesmo jogador) quantas vezes precisar; o ✕ fecha e registra tudo.
+// Demais setores: um toque no ✓ ou no ✗ já registra. Com cesta, vem a pergunta da assistência perto do mouse.
+const PERTO=['ce','mL','mC','mR'];
+function selArr(t,n){ if(AR.z) return aviso('Feche antes o arremesso aberto no ✕'); if(AS.on) return;
+  if(SEL.t===t&&SEL.n===n){ SEL.t=null; SEL.n=null; desenha(); return; }
+  SEL.t=t; SEL.n=n; desenha(); const j=jog(t,n); aviso(`${j[1]} - ${n} · agora toque no local do arremesso na quadra`,1); }
+function arConta(){ const o=document.getElementById('arNo'), e=document.getElementById('arNe'), r=document.getElementById('arNr');
+  o.textContent=AR.multi&&AR.ok?'1':''; e.textContent=AR.multi&&AR.err?AR.err:''; r.textContent=AR.reb?AR.reb:'';
+  document.querySelector('#arMenu .ok').classList.toggle('usado',!!AR.ok); }
+function resAr(v){ if(!AR.z) return;
+  if(!AR.multi){ AR.ok=v?1:0; AR.err=v?0:1; return fechaAr(); }
+  if(v){ if(AR.ok) return aviso('A cesta já foi marcada · toque ✕ para fechar'); AR.ok=1; } else AR.err++;
+  arConta(); }
+function resReb(){ if(!AR.z||!AR.multi) return; AR.reb++; arConta(); }
+function cancelaAr(){ AR.z=null; AR.res=null; document.getElementById('arMenu').classList.remove('on','jog','multi'); document.getElementById('zTip').style.display='none';
   document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); desenhaMarcas(); }
-function marcaAr(t,n){ const j=jog(t,n), s=stJ(t,n), v=AR.res, onde=nomeZ(AR.z,AR.lado);
-  const p=vZ(AR.z), k=p===3?'three':'two';
-  if(v){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); } else s[k+'Miss']++;
-  efJ(s); desenha();      // EF completa; rebote, assistência etc. entram quando os botões existirem
-  MARCAS.push({x:AR.x,y:AR.y,ok:v,t,n,z:AR.z,lado:AR.lado});
-  reg(t,'',`${p} pontos ${v?'convertido':'perdido'} ${j[1]} - ${n}`,onde,v?'ok':'ou');   // estilo FIBA LiveStats
-  cancelaAr(); bolaViva(); aviso(v?`+${p} para ${j[1]} - ${n}`:`${p} pontos perdido · ${j[1]} - ${n}`,1);
-  if(v) perguntaAs(t,n); }
+function fechaAr(){ if(!AR.z) return; const {t,n,ok,err,reb}=AR;
+  if(!ok&&!err&&!reb){ cancelaAr(); return aviso('Arremesso cancelado'); }
+  const j=jog(t,n), s=stJ(t,n), p=vZ(AR.z), k=p===3?'three':'two', onde=nomeZ(AR.z,AR.lado);
+  for(let i=0;i<Math.max(err,reb);i++){   // erro, rebote, erro, rebote… (no lance a lance, na ordem do jogo)
+    if(i<err){ s[k+'Miss']++; MARCAS.push({x:AR.x,y:AR.y,ok:0,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos perdido ${j[1]} - ${n}`,onde,'ou'); }
+    if(i<reb){ s.reb++; reg(t,'',`Rebote ${j[1]} - ${n}`,'EF +1','ok'); } }
+  if(ok){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); MARCAS.push({x:AR.x,y:AR.y,ok:1,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos convertido ${j[1]} - ${n}`,onde,'ok'); }
+  efJ(s); SEL.t=null; SEL.n=null; cancelaAr(); desenha(); bolaViva();
+  aviso((ok?`+${p} para ${j[1]} - ${n}`:`${p} pontos perdido · ${j[1]} - ${n}`)+(err>1?` · ${err} erros`:'')+(reb?` · ${reb} rebote${reb>1?'s':''}`:''),1);
+  if(ok) perguntaAs(t,n); }
 // ===== ASSISTÊNCIA depois da cesta (Magno, 24/11/2026) =====
 // Cesta ✓ → camisa de quem fez → "Teve assistência?" · SIM → camisa de quem deu (mesmo time, EF +1) · NÃO → termina.
 const AS={on:false,t:null,n:null,esc:false}, MOUSE={x:0,y:0};
