@@ -492,7 +492,7 @@ function arConta(){ const o=document.getElementById('arNo'), e=document.getEleme
   document.querySelector('#arMenu .ok').classList.toggle('usado',!!AR.ok); }
 function resAr(v){ if(!AR.z) return;
   if(!AR.multi){ AR.ok=v?1:0; AR.err=v?0:1; return fechaAr(); }
-  if(v){ if(AR.ok) return aviso('A cesta já foi marcada · toque ✕ para fechar'); AR.ok=1; } else AR.err++;
+  if(v){ AR.ok=1; return fechaAr(); } else AR.err++;   // ✓ fecha na hora e já pergunta da assistência (Magno, 25/11/2026)
   arConta(); }
 function resReb(){ if(!AR.z||!AR.multi) return; AR.reb++; arConta(); }
 function cancelaAr(){ AR.z=null; AR.res=null; document.getElementById('arMenu').classList.remove('on','jog','multi'); document.getElementById('zTip').style.display='none';
