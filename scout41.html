@@ -163,6 +163,8 @@ body.sub .banco{display:grid}
 #arMenu i{position:absolute;top:-8px;right:-8px;background:#ffd54f;color:#000;border-radius:10px;font:700 12px Arial;padding:1px 6px;font-style:normal}#arMenu i:empty{display:none}#arMenu .ok.usado{opacity:.35}
 @keyframes auraSel{from{box-shadow:0 0 0 4px #4fc3f7,0 0 8px 2px rgba(79,195,247,.55)}to{box-shadow:0 0 0 5px #b3e5fc,0 0 26px 10px rgba(79,195,247,.95)}}
 .jg.sel{animation:auraSel .8s ease-in-out infinite alternate!important;z-index:3;transform:scale(1.03)}
+/* roubo de bola: aura em quem roubou, time dele apagado, esperando o turnover no outro time (Magno, 25/11/2026) */
+.jg.rou{animation:auraSel .8s ease-in-out infinite alternate!important;z-index:3;transform:scale(1.03)}.jg.rou::before{content:'ROUBO';position:absolute;right:4px;bottom:4px;font-size:11px;letter-spacing:1px;background:#4fc3f7;color:#000;padding:1px 6px;border-radius:3px;font-weight:700;z-index:2}.jg.apaga{opacity:.45}
 body.selArr .jg:not(.sel){opacity:.45}body.selArr .quadra{outline:3px dashed #4fc3f7;outline-offset:-3px;animation:suave 1.2s ease-in-out infinite}   /* jogador escolhido: tudo esperando o toque na quadra (Magno, 24/11/2026) */.jg.sel::before{content:'ARREMESSO';position:absolute;right:4px;bottom:4px;font-size:11px;letter-spacing:1px;background:#4fc3f7;color:#000;padding:1px 6px;border-radius:3px;font-weight:700;z-index:2}
 #arMenu .ok{background:#1b5e20}#arMenu .er{background:#7f1d1d}#arMenu .x{background:#2a3248;font-size:14px;width:28px}
 #aviso{pointer-events:none;position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#d32f2f;color:#fff;font:700 15px Arial;padding:8px 16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.6);display:none;z-index:9}
@@ -315,9 +317,9 @@ const T={a:{nome:'Flamengo',lis:FLA,js:[[4,'Tozo',0,1],[5,'Pedro',0,1],[7,'Davi'
  [6,'Caio',0,0],[9,'Miguel',0,0],[11,'Arthur',0,0],[12,'Bento',0,0],[13,'Enzo',0,0],[14,'Rafa',0,0],[15,'João',0,0]]},
  b:{nome:'Tijuca',lis:TIJ,js:[[3,'Matheus',0,1],[5,'Kaique',0,1],[6,'Bruno',0,1],[9,'Igor',0,1],[12,'Léo',0,1],
  [4,'Vitor',0,0],[7,'Samuel',0,0],[8,'Thiago',0,0],[10,'Felipe',0,0],[11,'Nico',0,0],[13,'Heitor',0,0],[14,'Danilo',0,0]]}};
-const SEL={t:null,n:null};   // jogador escolhido para o arremesso
+const SEL={t:null,n:null}, EST={k:null,rb:null};   // jogador escolhido para o arremesso
 const ENTRA={a:new Set(),b:new Set()}, SAI={a:new Set(),b:new Set()};
-function tile(t,[n,nm,f,,,,dq],onde){ const k=t+n, cls=[dq?'dsq':f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':'',onde==='q'&&FA.fez&&FA.fez.t===t&&FA.fez.n===n?'fez':'',onde==='q'&&FA.sof&&FA.sof.t===t&&FA.sof.n===n?'sof':'',onde==='q'&&SEL.t===t&&SEL.n===n?'sel':''].join(' ');
+function tile(t,[n,nm,f,,,,dq],onde){ const k=t+n, cls=[dq?'dsq':f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':'',onde==='q'&&FA.fez&&FA.fez.t===t&&FA.fez.n===n?'fez':'',onde==='q'&&FA.sof&&FA.sof.t===t&&FA.sof.n===n?'sof':'',onde==='q'&&SEL.t===t&&SEL.n===n?'sel':'',onde==='q'&&EST.rb?(EST.rb.t===t?(EST.rb.n===n?'rou':'apaga'):'alvo'):''].join(' ');
   return `<div class="jg ${cls}" title="${nm}" onclick="clicaJg('${t}',${n},'${onde}')"><div class="fl">${[1,2,3,4,5].map(x=>`<span class="${x<=f?'on':''}"></span>`).join('')}</div>
    ${regata(onde+k,n,T[t].lis)}<div class="nm">${nm}</div>${onde==='q'?estTag(t,n):''}</div>`; }
 // quadro de estatísticas na camisa (Magno, 24/11/2026): EF amarelo · PTS REB ASS ROU TOC verde · 2P 3P LL acerto/tentativa branco · TO vermelho
@@ -742,17 +744,26 @@ function desenhaLL(){ const b=document.getElementById('btLL'); if(!b) return; b.
 // ===== ASSIST. · REBOTE · TURNOVER · ROUBO DE BOLA · TOCO (Magno, 24/11/2026) =====
 // Toca no botão: fica laranja (igual à substituição) e pede "Escolha o jogador". Toca na camisa: soma a estatística,
 // mexe na EF (+1; o turnover tira 1) e vai para o lance a lance. Tocar de novo no botão laranja fecha sem marcar.
-const EST={k:null}, ESN={ast:['Assistência','que deu a assistência',1],reb:['Rebote','que pegou o rebote',1],tov:['Turnover (erro)','que cometeu o erro',-1],stl:['Roubo de bola','que roubou a bola',1],blk:['Toco','que deu o toco',1]};
+const ESN={ast:['Assistência','que deu a assistência',1],reb:['Rebote','que pegou o rebote',1],tov:['Turnover (erro)','que cometeu o erro',-1],stl:['Roubo de bola','que roubou a bola',1],blk:['Toco','que deu o toco',1]};
 const ESR={ast:'ASSIST.',reb:'REBOTE',tov:'<span>TURNOVER<small>erro</small></span>',stl:'ROUBO<br>DE BOLA',blk:'TOCO'};
 function desenhaEst(){ for(const k in ESR){ const b=document.getElementById('bt_'+k); if(!b) continue; const on=EST.k===k; b.classList.toggle('subOn',on);
-  b.innerHTML=on?`<span>${ESN[k][0].toUpperCase()}<small>escolha o jogador · toque aqui p/ fechar</small></span>`:ESR[k]; } }
-function fechaEst(){ fechaStat(); if(EST.k){ EST.k=null; desenhaEst(); } }   // outro botão fecha o laranja sem marcar
-function clicaEst(k){ fechaStat(); if(EST.k===k){ EST.k=null; desenhaEst(); return; }
+  b.innerHTML=on?(k==='stl'&&EST.rb?`<span>MARQUE O TURNOVER<small>camisa do outro time · toque aqui p/ cancelar</small></span>`:`<span>${ESN[k][0].toUpperCase()}<small>escolha o jogador · toque aqui p/ fechar</small></span>`):ESR[k]; } }
+function fechaEst(){ fechaStat(); if(EST.k){ const d=!!EST.rb; EST.k=null; EST.rb=null; desenhaEst(); if(d) desenha(); } }   // outro botão fecha o laranja sem marcar
+function clicaEst(k){ fechaStat(); if(EST.k===k){ const d=!!EST.rb; EST.k=null; EST.rb=null; desenhaEst(); if(d){ desenha(); aviso('Roubo de bola cancelado'); } return; }
   if(document.body.classList.contains('sub')) return aviso('Termine ou feche a substituição antes');
   if(FA.on) return aviso('Termine ou feche a FALTA antes'); if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes');
   if(AR.z) return aviso('Termine ou cancele o arremesso antes');
   EST.k=k; desenhaEst(); aviso(`Escolha o jogador ${ESN[k][1]}`,1); }
-function marcaEst(t,n){ const k=EST.k, [nm,,v]=ESN[k], j=jog(t,n), s=stJ(t,n); s[k]++; efJ(s);
+// ROUBO DE BOLA em 2 toques (Magno, 25/11/2026): 1º = quem roubou (aura) · 2º = quem perdeu a bola, no outro time (turnover).
+// Os dois entram juntos: roubo EF +1 e turnover EF −1; um ↶ desfaz os dois.
+function marcaRoubo(t,n){ const j=jog(t,n);
+  if(!EST.rb){ EST.rb={t,n}; desenhaEst(); desenha(); return aviso(`Roubo de ${j[1]} - ${n} · agora marque o turnover no ${T[t==='a'?'b':'a'].nome}`,1); }
+  if(t===EST.rb.t) return aviso(`O turnover tem que ser de um jogador do ${T[EST.rb.t==='a'?'b':'a'].nome}`);
+  const r=EST.rb, jr=jog(r.t,r.n), sr=stJ(r.t,r.n), st=stJ(t,n); sr.stl++; efJ(sr); st.tov++; efJ(st);
+  EST.k=null; EST.rb=null; desenhaEst(); desenha();
+  reg(r.t,'',`Roubo de bola ${jr[1]} - ${r.n}`,'EF +1','ok'); reg(t,'',`Turnover (erro) ${j[1]} - ${n}`,'EF −1','er'); bolaViva();
+  aviso(`Roubo ${jr[1]} - ${r.n} (EF +1) · turnover ${j[1]} - ${n} (EF −1)`,1); }
+function marcaEst(t,n){ if(EST.k==='stl') return marcaRoubo(t,n); const k=EST.k, [nm,,v]=ESN[k], j=jog(t,n), s=stJ(t,n); s[k]++; efJ(s);
   EST.k=null; desenhaEst(); desenha();
   reg(t,'',`${nm} ${j[1]} - ${n}`,`EF ${v>0?'+1':'−1'}`,v>0?'ok':'er'); bolaViva();
   aviso(`${nm} · ${j[1]} - ${n} · EF ${v>0?'+1':'−1'}`,v>0?1:0); }
