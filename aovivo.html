@@ -338,7 +338,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
 .arrBts span{padding:7px 14px;border-radius:20px;border:1px solid #2c4a80;background:#1c2738;color:#7f93bd;font-weight:700;font-size:13px;cursor:pointer;user-select:none;text-decoration:line-through}
 .arrBts span.on{background:#1e5bd8;color:#fff;border-color:#4f86f7;text-decoration:none}
 .arrNum{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-size:14px;color:#334}.arrNum b{font-size:18px;color:#000}
-.arrQ{width:100%;max-width:520px}.arrQ svg{width:100%;height:auto;display:block;border-radius:8px}
+.arrQ{width:100%;max-width:980px}.arrQ svg{width:100%;height:auto;display:block;border-radius:8px}
 .arrLeg{font-size:12px;color:#556;text-align:center;line-height:1.6}
 .vivo41{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:10px;background:#0d3b1f;color:#7ee2a1;border:1px solid #2f8f55;font-size:11px;font-weight:700;vertical-align:middle}
 </style>
@@ -353,7 +353,7 @@ html.ktDono .ktFaixa a.soDono{display:flex;}
    ele liga o Firebase e recebe cada lance na hora; sem a marca, continua tudo igual ao 4.0 (planilha a cada 5 s).
    Se o Firebase não responder (ex.: mais de 100 pessoas ao mesmo tempo no plano grátis), a planilha segue atualizando.
    A aba Arremessos mostra os arremessos do jogo na quadra: acerto verde, erro vermelho; time A bolinha cheia, time B contorno. */
-const KT41={id:null,ref:null,dado:null,carregando:false,marcasPl:null,marcasPlT:0,filtro:{A:1,B:1,ok:1,er:1}};
+const KT41={id:null,ref:null,dado:null,carregando:false,marcasPl:null,marcasPlT:0,filtro:{ver:'amb'}};
 function kt41_sdk(){ if(window.firebase&&firebase.database) return Promise.resolve();
   if(KT41.carregando) return KT41.carregando; const V='10.14.1';
   const um=u=>new Promise((ok,er)=>{ const sc=document.createElement('script'); sc.src=u; sc.onload=ok; sc.onerror=er; document.head.appendChild(sc); });
@@ -381,26 +381,32 @@ async function kt41_marcasPlanilha(id){ if(KT41.marcasPlT&&Date.now()-KT41.marca
   const r=await api({acao:'lances41',id}); const L=r.ok&&r.lances&&r.lances.foto&&r.lances.foto.MARCAS; KT41.marcasPl={id,m:L||[]}; if(KT_ABA==='arr'&&KT_ULT&&KT_ULT.id===id) kt_render(KT_ULT); }
 function kt41_marcas(j){ const d=KT41.id===j.id&&KT41.dado; if(d&&d.marcas) return Object.values(d.marcas).filter(Boolean);
   if(!KT41.marcasPl||KT41.marcasPl.id!==j.id||status(j)==='vivo') kt41_marcasPlanilha(j.id); return (KT41.marcasPl&&KT41.marcasPl.id===j.id)?KT41.marcasPl.m:[]; }
-function kt41_filtro(k){ KT41.filtro[k]=KT41.filtro[k]?0:1; if(KT_ULT) kt_render(KT_ULT); }
-function kt_arrHTML(j){ const m=j.meta||{}, nm=l=>{ const t=m['time'+l]||{}; return m.avulso?(t.nome||t.sigla||'Time '+l):(D.curto[t.sigla]||t.nome||t.sigla||'Time '+l); };
-  const F=KT41.filtro, M=kt41_marcas(j);
-  // mesma meia quadra do Scout 4.1 (FIBA em metros × 40, ataque esticado 1,28 na vertical)
-  const S=40,W=15*S,H=16*S,Mm=14*S,cx=W/2,K=1.28,y=v=>v*S*K,cy=y(1.575),r3=6.75*S,yq=y(1.575+Math.sqrt(6.75**2-6.6**2)),x1=.9*S,x2=W-.9*S,ry3=r3*K,gw=4.9*S,gh=y(5.8),rl=1.8*S,rlY=rl*K,L='#e8e8e8';
-  const vis=M.filter(x=>F[(x.t||'a').toUpperCase()]);
-  const pontos=vis.filter(x=>x.ok?F.ok:F.er).map(x=>{ const A=(x.t||'a')==='a', c=x.ok?'#2ee66b':'#ff3b3b';
-    return `<circle cx="${x.x}" cy="${x.y}" r="9" fill="${A?c:'none'}" stroke="${c}" stroke-width="${A?1.5:3.5}"${A?' stroke-opacity=".9"':''}><title>${esc(nm(A?'A':'B'))} · ${x.ok?'acerto':'erro'}${x.n?' · camisa '+esc(x.n):''}${x.z?' · '+esc(x.z):''}${x.q?' · '+(x.q<=4?x.q+'º Q':(x.q-4)+'ª PR'):''}</title></circle>`; }).join('');
-  const conta=l=>{ const s=M.filter(x=>(x.t||'a').toUpperCase()===l), a=s.length, c=s.filter(x=>x.ok).length; return `<span>${esc(nm(l))}: <b>${c} de ${a}</b> (${a?Math.round(c*100/a):0}%)</span>`; };
-  const bt=(k,t)=>`<span class="${F[k]?'on':''}" onclick="kt41_filtro('${k}')">${t}</span>`;
-  const quadra=`<svg viewBox="-6 -6 ${W+12} ${H+12}"><rect x="0" y="0" width="${W}" height="${H}" fill="#121212"/>
-    <path d="M${x1} 0V${yq}A${r3} ${ry3} 0 0 0 ${x2} ${yq}V0Z" fill="#fff" fill-opacity=".03"/><rect x="${cx-gw/2}" y="0" width="${gw}" height="${gh}" fill="#173f86"/>
-    <g fill="none" stroke="${L}" stroke-width="3"><path d="M0 ${H}V0H${W}V${H}"/><line x1="0" y1="${Mm}" x2="${W}" y2="${Mm}"/><circle cx="${cx}" cy="${Mm}" r="${1.8*S}"/>
-    <rect x="${cx-gw/2}" y="0" width="${gw}" height="${gh}"/><path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 0 ${cx+rl} ${gh}"/><path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 1 ${cx+rl} ${gh}" stroke-dasharray="14 12"/>
+function kt41_filtro(k){ KT41.filtro.ver=k; if(KT_ULT) kt_render(KT_ULT); }
+// quadra inteira (Magno, 25/11/2026): metade esquerda = time A (escudo dele), metade direita = time B; cada time com seus acertos e erros.
+// Filtro: Acertos · Erros · Ambos. As duas metades são a mesma meia quadra do Scout 4.1, uma virada para cada lado.
+function kt_arrHTML(j){ const m=j.meta||{}, tA=m.timeA||{}, tB=m.timeB||{}, nm=l=>{ const t=m['time'+l]||{}; return m.avulso?(t.nome||t.sigla||'Time '+l):(D.curto[t.sigla]||t.nome||t.sigla||'Time '+l); };
+  const ver=KT41.filtro.ver||'amb', M=kt41_marcas(j);
+  const S=40,W=15*S,Mm=14*S,cx=W/2,K=1.28,y=v=>v*S*K,cy=y(1.575),r3=6.75*S,yq=y(1.575+Math.sqrt(6.75**2-6.6**2)),x1=.9*S,x2=W-.9*S,ry3=r3*K,gw=4.9*S,gh=y(5.8),rl=1.8*S,rlY=rl*K,L='#e8e8e8';
+  const meia=`<path d="M${x1} 0V${yq}A${r3} ${ry3} 0 0 0 ${x2} ${yq}V0Z" fill="#fff" fill-opacity=".03"/><rect x="${cx-gw/2}" y="0" width="${gw}" height="${gh}" fill="#173f86"/>
+    <g fill="none" stroke="${L}" stroke-width="3"><rect x="${cx-gw/2}" y="0" width="${gw}" height="${gh}"/><path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 0 ${cx+rl} ${gh}"/><path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 1 ${cx+rl} ${gh}" stroke-dasharray="14 12"/>
     <path d="M${x1} 0V${yq}A${r3} ${ry3} 0 0 0 ${x2} ${yq}V0"/><path d="M${cx-1.25*S} ${cy}A${1.25*S} ${1.25*S*K} 0 0 0 ${cx+1.25*S} ${cy}"/>
-    <line x1="${cx-.9*S}" y1="${y(1.2)}" x2="${cx+.9*S}" y2="${y(1.2)}" stroke-width="5"/><circle cx="${cx}" cy="${cy}" r="${.225*S}" stroke="#ff8a1a"/></g>${pontos}</svg>`;
+    <line x1="${cx-.9*S}" y1="${y(1.2)}" x2="${cx+.9*S}" y2="${y(1.2)}" stroke-width="5"/><circle cx="${cx}" cy="${cy}" r="${.225*S}" stroke="#ff8a1a"/></g>`;
+  const pts=l=>M.filter(x=>(x.t||'a').toUpperCase()===l&&(ver==='amb'||(ver==='ok')===!!x.ok)).map(x=>{ const c=x.ok?'#2ee66b':'#ff3b3b';
+    return `<circle cx="${x.x}" cy="${Math.min(x.y,Mm-6)}" r="10" fill="${c}" stroke="#000" stroke-opacity=".5" stroke-width="1.5"><title>${esc(nm(l))} · ${x.ok?'acerto':'erro'}${x.n?' · camisa '+esc(x.n):''}${x.z?' · '+esc(x.z):''}${x.q?' · '+(x.q<=4?x.q+'º Q':(x.q-4)+'ª PR'):''}</title></circle>`; }).join('');
+  // escudos pequenos no alto da quadra, um de cada lado da linha do meio (Magno, 25/11/2026)
+  const escImg=(t,x)=>`<image href="${esc(escudo(t.sigla))}" x="${x}" y="14" width="64" height="64" preserveAspectRatio="xMidYMid meet" style="pointer-events:none"/>`;
+  const conta=l=>{ const s=M.filter(x=>(x.t||'a').toUpperCase()===l), a=s.length, c=s.filter(x=>x.ok).length; return `<span>${esc(nm(l))}: <b>${c} de ${a}</b> (${a?Math.round(c*100/a):0}%)</span>`; };
+  const bt=(k,t)=>`<span class="${ver===k?'on':''}" onclick="kt41_filtro('${k}')">${t}</span>`;
+  // esquerda: (x,y) da meia quadra → (y, W−x) · direita: → (2·Mm−y, x)
+  const quadra=`<svg viewBox="-6 -6 ${2*Mm+12} ${W+12}"><rect x="0" y="0" width="${2*Mm}" height="${W}" fill="#121212"/>
+    <g transform="translate(0,${W}) rotate(-90)">${meia}</g><g transform="translate(${2*Mm},0) rotate(90)">${meia}</g>
+    ${escImg(tA,Mm-84)}${escImg(tB,Mm+20)}
+    <g transform="translate(0,${W}) rotate(-90)">${pts('A')}</g><g transform="translate(${2*Mm},0) rotate(90)">${pts('B')}</g>
+    <g fill="none" stroke="${L}" stroke-width="3"><rect x="0" y="0" width="${2*Mm}" height="${W}"/><line x1="${Mm}" y1="0" x2="${Mm}" y2="${W}"/><circle cx="${Mm}" cy="${W/2}" r="${1.8*S}"/></g></svg>`;
   return `<div class="abaTopo">🎯 Arremessos · ${esc(nm('A'))} x ${esc(nm('B'))} · ${esc(j.categoria||'')}<span class="vivo41">Scout PRO 4.1</span></div>
-    <div class="arrBox"><div class="arrBts">${bt('A',esc(nm('A')))}${bt('B',esc(nm('B')))}${bt('ok','Acertos')}${bt('er','Erros')}</div>
+    <div class="arrBox"><div class="arrBts">${bt('ok','Acertos')}${bt('er','Erros')}${bt('amb','Ambos')}</div>
     <div class="arrNum">${conta('A')}${conta('B')}</div><div class="arrQ">${quadra}</div>
-    <div class="arrLeg">● ${esc(nm('A'))} (bolinha cheia) · ○ ${esc(nm('B'))} (contorno) · <b style="color:#2ee66b">verde</b> = acerto · <b style="color:#ff3b3b">vermelho</b> = erro<br>Arremessos de quadra (2 e 3 pontos). Lances livres não entram no mapa.${M.length?'':'<br>Nenhum arremesso marcado ainda.'}</div></div>`; }
+    <div class="arrLeg">Esquerda: ${esc(nm('A'))} · Direita: ${esc(nm('B'))} · <b style="color:#2ee66b">verde</b> = acerto · <b style="color:#ff3b3b">vermelho</b> = erro<br>Arremessos de quadra (2 e 3 pontos). Lances livres não entram no mapa.${M.length?'':'<br>Nenhum arremesso marcado ainda.'}</div></div>`; }
 </script>
 <!--ktMenu-->
 <header class="ktMenu">
