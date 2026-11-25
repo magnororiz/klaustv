@@ -42,7 +42,7 @@ body{background:#05070d;color:#fff;font-family:'Oswald',Arial,sans-serif;overflo
 .top .rel input{width:92px;height:30px;padding:0;font:600 24px Oswald,Arial;text-align:center;background:#fff;color:#000;border:none;border-radius:4px}
 .top .net.par{color:#ff8a8a}.top .net.fq{color:#ffd54f}
 .top .play{cursor:pointer;width:28px;height:28px;box-sizing:border-box;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;font-size:11px;margin-left:2px}   /* ao lado do ✎ (Magno, 24/11/2026) */
-.top .play.conf{background:#d32f2f;border-color:#d32f2f}.top .play.ini{background:#2fae4a;border-color:#2fae4a}
+.top .play{font-weight:700;font-size:14px}.top .play.conf{background:#d32f2f;border-color:#d32f2f}.top .play.ini{background:#2fae4a;border-color:#2fae4a}
 
 /* ===== corpo: camisas | quadra + lance a lance | botões ===== */
 .corpo{display:grid;grid-template-columns:460px 1fr 270px;grid-template-rows:1fr 134px;gap:10px;padding:10px;min-height:0}
@@ -228,7 +228,7 @@ body.sub .banco{display:grid}
   <div class="cx tmp" id="tmA" onclick="pedeTempo('a')" title="Pedido de tempo do Flamengo: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div>
   <div class="pl" id="plA">0</div>
   <div class="seta sPl" id="btPlay" onclick="clicaPlay()" title="Liberar o relógio">▶</div>
-  <div class="rel"><i id="relQ">1º Q</i><div class="rl"><b id="relB" onclick="clicaRel()" title="Relógio parado: toque para voltar a correr">10:00</b><span class="ed" onclick="acerto()" title="Acertar pelo placar do ginásio">✎</span><div class="play" id="btQ" onclick="clicaQuarto()" title="Encerrar o quarto">■</div></div><span class="net" id="relSt">● correndo</span></div>
+  <div class="rel"><i id="relQ">1º Q</i><div class="rl"><b id="relB" onclick="clicaRel()" title="Relógio parado: toque para voltar a correr">10:00</b><span class="ed" onclick="acerto()" title="Acertar pelo placar do ginásio">✎</span><div class="play" id="btQ" onclick="clicaQuarto()" title="Encerrar o quarto">Q</div></div><span class="net" id="relSt">● correndo</span></div>
   <div class="seta sPa" id="btPaus" onclick="clicaPausa()" title="Pausar o relógio (não volta sozinho)">⏸</div>
   <div class="pl" id="plB">0</div>
   <div class="cx tmp" id="tmB" onclick="pedeTempo('b')" title="Pedido de tempo do Tijuca: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div><div class="sep"></div>
@@ -486,7 +486,7 @@ function desenhaMarcas(){ const g=document.getElementById('marcas'); if(!g) retu
   g.innerHTML=h; }
 
 // ===== CRONÔMETRO ESPERTO (opção C, Magno 24/11/2026) =====
-// O Raoni só dá ■ no fim do quarto e ▶ no início do próximo. O relógio para sozinho na substituição e no pedido de tempo
+// O Raoni só dá Q no fim do quarto e ▶ no início do próximo. O relógio para sozinho na substituição e no pedido de tempo
 // e volta a correr no próximo lance de bola viva (por enquanto: toque no relógio). ✎ acerta pelo placar do ginásio.
 // Cada lance guarda o "tempo bruto" do nosso relógio; o horário mostrado é corrigido pelos acertos e pelo fim do quarto.
 const DUR=q=>q<=4?600:300, NQ=q=>q<=4?`${q}º Q`:`${q-4}ª PR`;
@@ -515,12 +515,12 @@ function relDesenha(){ const b=document.getElementById('relB'); if(!b||b.querySe
   b.className=!C.em?'fim':C.anda?'':'par'; b.title=C.em&&!C.anda?'Relógio parado: toque para voltar a correr':'';
   document.getElementById('relQ').textContent=NQ(C.q);
   const st=document.getElementById('relSt');
-  st.textContent=!C.em?(C.q>=4?'■ fim do quarto · ▶ prorrogação':'■ fim do quarto · ▶ próximo'):C.tmAb?'■ pedido de tempo':C.anda?(r?'● correndo':'● 00:00 · toque ■ no fim'):'■ parado';
+  st.textContent=!C.em?(C.q>=4?'■ fim do quarto · ▶ prorrogação':'■ fim do quarto · ▶ próximo'):C.tmAb?'■ pedido de tempo':C.anda?(r?'● correndo':'● 00:00 · toque Q no fim'):'■ parado';
   st.className='net'+(!C.em?' fq':C.anda?'':' par');
   for(const t of ['a','b']){ const e=document.getElementById('tm'+t.toUpperCase()); e.classList.toggle('on',C.tmAb===t); e.querySelector('b').textContent=`${C.tm[t]}/${limTm(C.q)}`;
     const s=document.getElementById('btTm'+t.toUpperCase()); if(s) s.classList.toggle('off',!C.em||(C.tmAb?C.tmAb!==t:!!tmPode(t))); }
   const bT=document.getElementById('btTm'); if(bT){ bT.classList.toggle('on',!!C.tmAb); document.getElementById('btTmT').textContent=C.tmAb?'TEMPO – '+T[C.tmAb].nome.toUpperCase():'PEDIDO DE TEMPO'; }
-  const bq=document.getElementById('btQ'); bq.className='play'+(C.conf?' conf':!C.em?' ini':''); bq.textContent=C.em?'■':'▶';
+  const bq=document.getElementById('btQ'); bq.className='play'+(C.conf?' conf':!C.em?' ini':''); bq.textContent=C.em?'Q':'▶';   // Q = encerrar o quarto (Magno, 24/11/2026)
   bq.title=C.em?'Encerrar o quarto (toque 2 vezes)':'Iniciar o próximo período';
   document.getElementById('btPlay').classList.toggle('on',C.em&&C.anda);
   document.getElementById('btPaus').classList.toggle('on',C.em&&C.trava===true);
@@ -539,7 +539,7 @@ function clicaRel(){ if(!C.em) return aviso('O quarto está encerrado · toque �
   if(C.tmAb) return aviso('Pedido de tempo aberto · toque de novo no escudo do time para encerrar');
   if(C.anda) clicaPausa(); else clicaPlay(); }
 function clicaQuarto(){
-  if(C.em){ if(!C.conf){ C.conf=1; relDesenha(); aviso('Toque de novo no ■ para encerrar o '+NQ(C.q)); setTimeout(()=>{C.conf=0;relDesenha();},3000); return; }
+  if(C.em){ if(!C.conf){ C.conf=1; relDesenha(); aviso('Clique duas vezes em sequência para finalizar o '+NQ(C.q)); setTimeout(()=>{C.conf=0;relDesenha();},3000); return; }
     C.conf=0; if(C.tmAb) fechaTempo(); C.trava=false; pausa(); const raw=C.raw, A=C.anc[C.q];
     if(raw>A[A.length-1][0]) A.push([raw,DUR(C.q)]);           // correção do fim do quarto
     C.em=false; relDesenha(); reg(null,'','',`Fim do ${NQ(C.q)}`,'qt'); aviso(`Fim do ${NQ(C.q)} · horários corrigidos`,1); return; }
