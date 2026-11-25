@@ -208,6 +208,15 @@ body.sub .banco{display:grid}
 .az{--bar:#1e5bd8}.vd{--bar:#2fae4a}.vm{--bar:#d83a3a}.am{--bar:#e8a317}
 .bt.undo{font-size:28px}
 .bt2{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-height:0}.bt.undo.off{opacity:.3;cursor:default;filter:none;transform:none}   /* ↶ desfazer · ↷ refazer (Magno, 24/11/2026) */
+/* PEDIDO DE TEMPO com os escudos dos times do jogo carregado (Magno, 24/11/2026) */
+.bt.btTm{grid-template-rows:auto 1fr;padding:4px 4px 2px;gap:2px;cursor:default}.bt.btTm:hover{filter:none;transform:none}
+.bt.btTm small{margin:0;font-size:11px;letter-spacing:1px}
+.btTm .esc{display:grid;grid-template-columns:1fr 1fr;width:100%;height:100%;min-height:0}
+.btTm .esc span{display:grid;place-items:center;cursor:pointer;min-height:0;border-radius:6px;transition:transform .12s,filter .12s}
+.btTm .esc span:hover{filter:brightness(1.2);transform:translateY(-2px)}
+.btTm .esc img{max-height:46px;max-width:80%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}
+.btTm .esc span.off{opacity:.25;cursor:default;filter:grayscale(1);transform:none}
+.bt.btTm.on{background:linear-gradient(180deg,#ff9d3a,#e06a00);color:#000;border-color:#ff9d3a}
 .marca{position:fixed;right:12px;bottom:8px;font:600 11px Arial;color:#ffd54f;background:rgba(0,0,0,.7);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
 </style>
 </head>
@@ -254,7 +263,7 @@ body.sub .banco{display:grid}
     <div class="bt vd" id="bt_reb" onclick="clicaEst('reb')">REBOTE</div><div class="bt am" id="bt_stl" onclick="clicaEst('stl')">ROUBO<br>DE BOLA</div>
     <div class="bt am" id="bt_tov" onclick="clicaEst('tov')"><span>TURNOVER<small>erro</small></span></div><div class="bt" id="bt_blk" onclick="clicaEst('blk')">TOCO</div>
     <div class="bt vm" id="btFal" onclick="clicaFalta()">FALTA</div><div class="bt vm" id="btFE" onclick="clicaFE()" title="Técnica, disruptiva, flagrante, desqualificante e do técnico/banco">FALTA<br>ESPECIAL</div>
-    <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt ina" title="Em construção">TEMPO</div>
+    <div class="bt" id="btSub" onclick="clicaSub()">SUBST.</div><div class="bt btTm" id="btTm"><small id="btTmT">PEDIDO DE TEMPO</small><div class="esc"><span id="btTmA" onclick="pedeTempo('a')"><img alt=""></span><span id="btTmB" onclick="pedeTempo('b')"><img alt=""></span></div></div>
     <div class="bt az" id="btStat" onclick="clicaStat()" title="Estatísticas completas dos dois times">ESTATÍSTICAS</div><div class="bt2"><div class="bt undo off" id="btUn" onclick="desfaz()" title="Desfazer a última ação">↶</div><div class="bt undo off" id="btRe" onclick="refaz()" title="Refazer a ação desfeita">↷</div></div>
   </section>
 </main>
@@ -481,7 +490,7 @@ function desenhaMarcas(){ const g=document.getElementById('marcas'); if(!g) retu
 // e volta a correr no próximo lance de bola viva (por enquanto: toque no relógio). ✎ acerta pelo placar do ginásio.
 // Cada lance guarda o "tempo bruto" do nosso relógio; o horário mostrado é corrigido pelos acertos e pelo fim do quarto.
 const DUR=q=>q<=4?600:300, NQ=q=>q<=4?`${q}º Q`:`${q-4}ª PR`;
-const C={q:1,em:true,anda:true,trava:false,raw:0,t0:performance.now(),anc:{1:[[0,0]]},tm:{a:0,b:0},tmAb:null,tmIni:0,conf:0};
+const C={q:1,em:true,anda:true,trava:false,raw:0,t0:performance.now(),anc:{1:[[0,0]]},tm:{a:0,b:0},tmF:{a:0,b:0},tmAb:null,tmIni:0,conf:0};
 const rawAgora=()=>C.raw+(C.anda?(performance.now()-C.t0)/1000:0);
 // tempo de jogo decorrido (s) para um tempo bruto, interpolando entre os acertos
 function jogoDe(q,raw){ const A=C.anc[q]||[[0,0]]; let i=A.length-1; while(i>0&&A[i][0]>raw) i--;
@@ -497,6 +506,10 @@ function bolaViva(){ solta(); }
 let tSub=null; function pausaPor(seg){ const volta=C.anda||tSub; pausa(); clearTimeout(tSub); tSub=null; if(volta) tSub=setTimeout(()=>{ tSub=null; solta(); },seg*1000); }
 function pausaSub(){ pausaPor(4); }   // os próximos botões (arremesso, rebote, roubo…) chamam isto
 const limTm=q=>q<=2?2:q<=4?3:1;
+// FIBA Art. 18.2.5: no 4º quarto, com 2:00 ou menos, no máximo 2 tempos (C.tmF conta os pedidos nesse trecho)
+const fim2=()=>C.q===4&&restante(4,rawAgora())<=120;
+function tmPode(t){ if(C.tm[t]>=limTm(C.q)) return `${T[t].nome} não tem mais pedidos de tempo neste período`;
+  if(fim2()&&C.tmF[t]>=2) return `${T[t].nome} já usou os 2 tempos permitidos nos 2 minutos finais`; return ''; }
 function relDesenha(){ const b=document.getElementById('relB'); if(!b||b.querySelector('input')) return;
   const r=restante(C.q,rawAgora()); b.textContent=mmss(r);
   b.className=!C.em?'fim':C.anda?'':'par'; b.title=C.em&&!C.anda?'Relógio parado: toque para voltar a correr':'';
@@ -504,7 +517,9 @@ function relDesenha(){ const b=document.getElementById('relB'); if(!b||b.querySe
   const st=document.getElementById('relSt');
   st.textContent=!C.em?(C.q>=4?'■ fim do quarto · ▶ prorrogação':'■ fim do quarto · ▶ próximo'):C.tmAb?'■ pedido de tempo':C.anda?(r?'● correndo':'● 00:00 · toque ■ no fim'):'■ parado';
   st.className='net'+(!C.em?' fq':C.anda?'':' par');
-  for(const t of ['a','b']){ const e=document.getElementById('tm'+t.toUpperCase()); e.classList.toggle('on',C.tmAb===t); e.querySelector('b').textContent=`${C.tm[t]}/${limTm(C.q)}`; }
+  for(const t of ['a','b']){ const e=document.getElementById('tm'+t.toUpperCase()); e.classList.toggle('on',C.tmAb===t); e.querySelector('b').textContent=`${C.tm[t]}/${limTm(C.q)}`;
+    const s=document.getElementById('btTm'+t.toUpperCase()); if(s) s.classList.toggle('off',!C.em||(C.tmAb?C.tmAb!==t:!!tmPode(t))); }
+  const bT=document.getElementById('btTm'); if(bT){ bT.classList.toggle('on',!!C.tmAb); document.getElementById('btTmT').textContent=C.tmAb?'TEMPO – '+T[C.tmAb].nome.toUpperCase():'PEDIDO DE TEMPO'; }
   const bq=document.getElementById('btQ'); bq.className='play'+(C.conf?' conf':!C.em?' ini':''); bq.textContent=C.em?'■':'▶';
   bq.title=C.em?'Encerrar o quarto (toque 2 vezes)':'Iniciar o próximo período';
   document.getElementById('btPlay').classList.toggle('on',C.em&&C.anda);
@@ -515,24 +530,26 @@ function relDesenha(){ const b=document.getElementById('relB'); if(!b||b.querySe
 function clicaPausa(){ if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
   C.trava=true; clearTimeout(tSub); tSub=null; pausa(); aviso('Relógio pausado · toque ▶ para liberar'); }
 function clicaPlay(){ if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
-  if(C.tmAb) return aviso('Pedido de tempo aberto · toque de novo no TEMPO do time para encerrar');
+  if(C.tmAb) return aviso('Pedido de tempo aberto · toque de novo no escudo do time para encerrar');
   solta(1); aviso('Relógio correndo',1); }
-setInterval(relDesenha,250);
+function escTempo(){ for(const t of ['a','b']){ const o=document.querySelector('.top .tm.'+t+' img'), d=document.querySelector('#btTm'+t.toUpperCase()+' img');
+  if(o&&d){ d.src=o.src; d.parentNode.title=`Pedido de tempo do ${T[t].nome}: 1º toque inicia, 2º toque encerra`; } } }
+escTempo(); setInterval(relDesenha,250);
 function clicaRel(){ if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
-  if(C.tmAb) return aviso('Pedido de tempo aberto · toque de novo no TEMPO do time para encerrar');
+  if(C.tmAb) return aviso('Pedido de tempo aberto · toque de novo no escudo do time para encerrar');
   if(C.anda) clicaPausa(); else clicaPlay(); }
 function clicaQuarto(){
   if(C.em){ if(!C.conf){ C.conf=1; relDesenha(); aviso('Toque de novo no ■ para encerrar o '+NQ(C.q)); setTimeout(()=>{C.conf=0;relDesenha();},3000); return; }
     C.conf=0; if(C.tmAb) fechaTempo(); C.trava=false; pausa(); const raw=C.raw, A=C.anc[C.q];
     if(raw>A[A.length-1][0]) A.push([raw,DUR(C.q)]);           // correção do fim do quarto
     C.em=false; relDesenha(); reg(null,'','',`Fim do ${NQ(C.q)}`,'qt'); aviso(`Fim do ${NQ(C.q)} · horários corrigidos`,1); return; }
-  C.q++; C.raw=0; C.anc[C.q]=[[0,0]]; C.em=true; FT.a=0; FT.b=0; desenhaFT(); if(C.q===3||C.q>4) C.tm={a:0,b:0};
+  C.q++; C.raw=0; C.anc[C.q]=[[0,0]]; C.em=true; FT.a=0; FT.b=0; desenhaFT(); if(C.q===3||C.q>4) C.tm={a:0,b:0}; C.tmF={a:0,b:0};
   C.t0=performance.now(); C.anda=true; C.trava=false; relDesenha(); reg(null,'','',`Início do ${NQ(C.q)} · cronômetro liberado (${mmss(DUR(C.q))})`,'qt'); aviso(`Início do ${NQ(C.q)}`,1); }
 function pedeTempo(t){ if(!C.em) return aviso('Quarto encerrado · toque ▶ para iniciar o próximo');
   if(C.tmAb===t) return fechaTempo();
   if(C.tmAb) return aviso(`Feche antes o pedido de tempo do ${T[C.tmAb].nome}`);
-  if(C.tm[t]>=limTm(C.q)) return aviso(`${T[t].nome} não tem mais pedidos de tempo neste período`);
-  pausa(); C.tm[t]++; C.tmAb=t; C.tmIni=Date.now(); reg(t,'',T[t].nome,`Início do pedido de tempo (${C.tm[t]}/${limTm(C.q)})`,'tm'); }
+  const nao=tmPode(t); if(nao) return aviso(nao);
+  pausa(); if(fim2()) C.tmF[t]++; C.tm[t]++; C.tmAb=t; C.tmIni=Date.now(); reg(t,'',T[t].nome,`Início do pedido de tempo (${C.tm[t]}/${limTm(C.q)})`,'tm'); }
 function fechaTempo(){ const t=C.tmAb; C.tmAb=null; reg(t,'',T[t].nome,`Fim do pedido de tempo (${mmss((Date.now()-C.tmIni)/1000)})`,'tm'); solta(); }
 function acerto(){ if(!C.em) return aviso('Quarto encerrado'); const b=document.getElementById('relB'), andava=C.anda;
   b.innerHTML='<input inputmode="numeric" maxlength="5" placeholder="mm:ss">'; const i=b.querySelector('input'); i.focus(); let feito=0;
