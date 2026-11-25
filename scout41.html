@@ -156,8 +156,9 @@ body.sub .banco{display:grid}
 #arMenu{position:absolute;display:none;z-index:7;background:#121a2b;border:2px solid #ffd54f;border-radius:8px;padding:6px;gap:6px;box-shadow:0 6px 18px rgba(0,0,0,.7)}
 #arMenu.on{display:flex}#arMenu button{width:44px;height:38px;border-radius:6px;border:0;font:700 22px Arial;cursor:pointer;color:#fff}
 #arTxt{display:none;color:#ffe9a3;font:700 15px Arial;padding:0 8px;align-self:center;white-space:nowrap}#arMenu.jog #arTxt{display:block}#arMenu.jog .ok,#arMenu.jog .er{display:none}
-#arMenu .si,#arMenu .nao{display:none;width:auto!important;padding:0 14px;font-size:15px!important}#arMenu .si{background:#1b5e20}#arMenu .nao{background:#7f1d1d}
-#arMenu.ast .ok,#arMenu.ast .er{display:none}#arMenu.ast #arTxt{display:block}#arMenu.ast .si,#arMenu.ast .nao{display:block}#arMenu.ast.esc .si,#arMenu.ast.esc .nao{display:none}   /* assistência depois da cesta (Magno, 24/11/2026) */
+#asMenu{position:fixed;display:none;z-index:60;background:#121a2b;border:2px solid #ffd54f;border-radius:8px;padding:6px;gap:6px;box-shadow:0 6px 18px rgba(0,0,0,.7)}#asMenu.on{display:flex}
+#asMenu span{color:#ffe9a3;font:700 15px Arial;padding:0 8px;align-self:center;white-space:nowrap}#asMenu button{height:38px;border-radius:6px;border:0;font:700 15px Arial;cursor:pointer;color:#fff;padding:0 14px}
+#asMenu .si{background:#1b5e20}#asMenu .nao{background:#7f1d1d}#asMenu .x{background:#2a3248;font-size:14px;padding:0 9px}#asMenu.esc .si,#asMenu.esc .nao{display:none}   /* assistência colada no mouse (Magno, 24/11/2026) */
 #arMenu .ok{background:#1b5e20}#arMenu .er{background:#7f1d1d}#arMenu .x{background:#2a3248;font-size:14px;width:28px}
 #aviso{pointer-events:none;position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#d32f2f;color:#fff;font:700 15px Arial;padding:8px 16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.6);display:none;z-index:9}
 #aviso.ok{background:#1b5e20}
@@ -246,7 +247,7 @@ body.sub .banco{display:grid}
   </section>
 
   <section class="meio"><div class="quadra" id="quadra"></div><div id="llMenu"><div class="cx"><h4><b id="llTit">LANCE LIVRE</b><span onclick="cancelaLL()">✕</span></h4><div id="llOp"></div></div></div>
-<div id="zTip"></div><div id="arMenu"><button class="ok" onclick="resAr(1)" title="Cesta">✓</button><button class="er" onclick="resAr(0)" title="Errou">✗</button><span id="arTxt">Escolha o jogador</span><button class="si" onclick="respAs(1)">SIM</button><button class="nao" onclick="respAs(0)">NÃO</button><button class="x" onclick="cancelaAr()" title="Cancelar">✕</button></div><div id="tarja" onclick="clicaPlay()">⚠ LIBERE O RELÓGIO NO REINÍCIO DO JOGO ▶</div></section>
+<div id="asMenu"><span id="asTxt">Teve assistência?</span><button class="si" onclick="respAs(1)">SIM</button><button class="nao" onclick="respAs(0)">NÃO</button><button class="x" onclick="fechaAs()" title="Fechar (sem assistência)">✕</button></div><div id="zTip"></div><div id="arMenu"><button class="ok" onclick="resAr(1)" title="Cesta">✓</button><button class="er" onclick="resAr(0)" title="Errou">✗</button><span id="arTxt">Escolha o jogador</span><button class="x" onclick="cancelaAr()" title="Cancelar">✕</button></div><div id="tarja" onclick="clicaPlay()">⚠ LIBERE O RELÓGIO NO REINÍCIO DO JOGO ▶</div></section>
 
   <section class="baixo">
     <div class="banco">
@@ -472,7 +473,7 @@ function clicaZona(e,p){ const b=document.body;
 function resAr(v){ if(!AR.z) return; AR.res=v; const m=document.getElementById('arMenu'); m.classList.add('jog'); desenhaMarcas();   // no mesmo lugar: "Escolha o jogador"
   const tip=document.getElementById('zTip'); tip.textContent=`${vZ(AR.z)} pontos ${v?'convertido':'perdido'} · toque na camisa de quem arremessou`; tip.style.display='block';
 }
-function cancelaAr(){ AR.z=null; AR.res=null; AS.on=false; AS.esc=false; document.getElementById('arMenu').classList.remove('on','jog','ast','esc'); document.getElementById('arTxt').textContent='Escolha o jogador'; document.getElementById('zTip').style.display='none';
+function cancelaAr(){ AR.z=null; AR.res=null; document.getElementById('arMenu').classList.remove('on','jog'); document.getElementById('zTip').style.display='none';
   document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); desenhaMarcas(); }
 function marcaAr(t,n){ const j=jog(t,n), s=stJ(t,n), v=AR.res, onde=nomeZ(AR.z,AR.lado);
   const p=vZ(AR.z), k=p===3?'three':'two';
@@ -484,19 +485,24 @@ function marcaAr(t,n){ const j=jog(t,n), s=stJ(t,n), v=AR.res, onde=nomeZ(AR.z,A
   if(v) perguntaAs(t,n); }
 // ===== ASSISTÊNCIA depois da cesta (Magno, 24/11/2026) =====
 // Cesta ✓ → camisa de quem fez → "Teve assistência?" · SIM → camisa de quem deu (mesmo time, EF +1) · NÃO → termina.
-const AS={on:false,t:null,n:null,esc:false};
-function perguntaAs(t,n){ AS.on=true; AS.t=t; AS.n=n; AS.esc=false; const m=document.getElementById('arMenu'); m.classList.add('on','ast');
-  document.getElementById('arTxt').textContent='Teve assistência?'; }
-function respAs(v){ if(!AS.on) return; if(!v){ cancelaAr(); return aviso('Cesta sem assistência',1); }
-  AS.esc=true; document.getElementById('arMenu').classList.add('esc'); document.getElementById('arTxt').textContent='Escolha o jogador da assistência';
-  aviso(`Toque na camisa de quem deu a assistência (${T[AS.t].nome})`,1); }
+const AS={on:false,t:null,n:null,esc:false}, MOUSE={x:0,y:0};
+document.addEventListener('pointerdown',e=>{ MOUSE.x=e.clientX; MOUSE.y=e.clientY; },true);
+function perguntaAs(t,n){ AS.on=true; AS.t=t; AS.n=n; AS.esc=false; const m=document.getElementById('asMenu'); if(m.parentNode!==document.body) document.body.appendChild(m);
+  document.getElementById('asTxt').textContent='Teve assistência?'; m.classList.remove('esc'); m.classList.add('on'); asLugar(); }
+function asLugar(){ const m=document.getElementById('asMenu'), w=m.offsetWidth, h=m.offsetHeight;   // logo acima do mouse, dentro da tela
+  let L=MOUSE.x-w/2, T=MOUSE.y-h-12; if(T<4) T=MOUSE.y+12;
+  m.style.left=Math.max(4,Math.min(innerWidth-w-4,L))+'px'; m.style.top=Math.min(innerHeight-h-4,T)+'px'; }
+function fechaAs(){ AS.on=false; AS.esc=false; document.getElementById('asMenu').classList.remove('on','esc'); }
+function respAs(v){ if(!AS.on) return; if(!v){ fechaAs(); return aviso('Cesta sem assistência',1); }
+  AS.esc=true; document.getElementById('asMenu').classList.remove('on');   // some, para não cobrir nenhuma camisa
+  const j=jog(AS.t,AS.n); aviso(`Toque na camisa de quem deu a assistência · para desistir, toque de novo em ${j[1]}`,1); }
 function marcaAs(t,n){ if(t!==AS.t) return aviso(`A assistência tem que ser de um jogador do ${T[AS.t].nome}`);
-  if(n===AS.n) return aviso('Quem fez a cesta não pode ser o da assistência');
-  const j=jog(t,n), s=stJ(t,n); s.ast++; efJ(s); cancelaAr(); desenha();
+  if(n===AS.n){ fechaAs(); return aviso('Cesta sem assistência',1); }   // tocar de novo em quem fez a cesta = desistir
+  const j=jog(t,n), s=stJ(t,n); s.ast++; efJ(s); fechaAs(); desenha();
   reg(t,'',`Assistência ${j[1]} - ${n}`,'EF +1','ok'); aviso(`Assistência · ${j[1]} - ${n} · EF +1`,1); }
 // enquanto a pergunta está aberta, só vale responder, tocar na camisa ou usar o placar/relógio
-document.addEventListener('click',e=>{ if(!AS.on||e.target.closest('#arMenu,.jg,header.top')) return; e.stopPropagation(); e.preventDefault();
-  aviso(AS.esc?'Toque na camisa de quem deu a assistência (ou ✕ para fechar)':'Responda antes: teve assistência? SIM ou NÃO'); },true);
+document.addEventListener('click',e=>{ if(!AS.on||e.target.closest('#asMenu,.jg,header.top')) return; e.stopPropagation(); e.preventDefault();
+  aviso(AS.esc?`Toque na camisa de quem deu a assistência · para desistir, toque de novo em ${jog(AS.t,AS.n)[1]}`:'Responda antes: teve assistência? SIM ou NÃO'); },true);
 function desenhaMarcas(){ const g=document.getElementById('marcas'); if(!g) return; const dx=5, dy=5*ZG.K;
   const X=(x,y,c)=>`<path d="M${x-dx} ${y-dy}L${x+dx} ${y+dy}M${x+dx} ${y-dy}L${x-dx} ${y+dy}" stroke="${c}" stroke-width="2.2" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
   let h=MARCAS.map(m=>X(m.x,m.y,m.ok?'#2ee66b':'#ff3b3b')).join('');
