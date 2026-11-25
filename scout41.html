@@ -119,6 +119,13 @@ body.sub .est i small{display:none}body.sub .est .efg small{display:inline}body.
 .lal h3{height:28px;box-sizing:border-box;align-items:center;font-size:13px;letter-spacing:2px;color:#ffd54f;font-weight:600;padding:6px 12px;border-bottom:1px solid #22385f;display:flex;justify-content:space-between}
 .lal h3 .tag41{font-style:normal;font-size:10px;letter-spacing:1px;color:#000;background:#ffd54f;padding:1px 6px;border-radius:3px;margin:0 auto 0 12px;align-self:center}
 .lal h3 span{color:#7f93bd;font-weight:400;letter-spacing:1px}
+/* ✏️ Marcando / 👁️ Segunda tela (Magno, 25/11/2026): igual ao Scout 4.0 · só aparece em jogo de verdade */
+.lal h3 #btModo{display:none;font:700 11px Arial;letter-spacing:.5px;color:#fff;background:#1f9a55;border:1px solid #43c97b;border-radius:20px;padding:2px 10px;margin:0 10px 0 0;cursor:pointer;align-self:center}
+body.k41real .lal h3 #btModo{display:inline-block}
+body.leitura .lal h3 #btModo{background:#c77700;border-color:#ffb74d}
+#faixaLeit{display:none;position:fixed;left:50%;bottom:150px;transform:translateX(-50%);z-index:60;background:#3a2600;border:1px solid #ffb74d;color:#ffd08a;border-radius:8px;padding:5px 14px;font:800 13px Arial;letter-spacing:.5px;pointer-events:none}
+body.leitura #faixaLeit{display:block}
+body.leitura .corpo{outline:3px solid #c77700;outline-offset:-3px}
 .lal ul{list-style:none;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:#2c4a80 transparent}
 .lal li{display:grid;grid-template-columns:62px 48px 40px 14px 32px 1fr auto;align-items:center;gap:8px;height:26px;padding:0 12px;box-sizing:border-box;font-size:14px;border-bottom:1px solid #16243f;font-family:Arial,sans-serif}
 .lal li:first-child{background:rgba(255,213,79,.08)}
@@ -284,7 +291,7 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
       <div class="bnc b"><h4>BANCO DE RESERVAS · TIJUCA</h4><button class="rol" onclick="rola('bnB',-1)">▲</button><div class="lis" id="bnB"></div><button class="rol" onclick="rola('bnB',1)">▼</button></div>
     </div>
     <div class="lal">
-      <h3>LANCE A LANCE <em class="tag41">SCOUT PRO 4.1 · em construção</em><span>4 últimos · role para ver os anteriores</span></h3>
+      <h3>LANCE A LANCE <em class="tag41">SCOUT PRO 4.1 · em construção</em><b id="btModo" onclick="k41Modo()" title="Este aparelho está marcando. Toque para virar segunda tela (só leitura).">✏️ Marcando</b><span>4 últimos · role para ver os anteriores</span></h3>
       <ul id="lal"></ul>
     </div>
   </section>
@@ -299,7 +306,7 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
     <div class="bt az" id="btStat" onclick="clicaStat()" title="Estatísticas completas dos dois times">ESTATÍSTICAS</div><div class="bt2"><div class="bt undo off" id="btUn" onclick="desfaz()" title="Desfazer a última ação">↶</div><div class="bt undo off" id="btRe" onclick="refaz()" title="Refazer a ação desfeita">↷</div><div id="laySeg"><b class="on" title="Layout 1" onclick="layout(1)">1</b><b title="Layout 2" onclick="layout(2)">2</b><b title="Layout 3" onclick="layout(3)">3</b></div></div>
   </section>
 </main>
-<div id="aviso"></div><div id="otMenu"><div>Vai ter tempo extra?<small id="otTx">Fim do 4º Q</small><button class="si" onclick="respOT(1)">SIM</button><button class="nao" onclick="respOT(0)">NÃO</button></div></div>
+<div id="aviso"></div><div id="faixaLeit">👁️ SEGUNDA TELA — só leitura · acompanhando o que o outro aparelho marca</div><div id="otMenu"><div>Vai ter tempo extra?<small id="otTx">Fim do 4º Q</small><button class="si" onclick="respOT(1)">SIM</button><button class="nao" onclick="respOT(0)">NÃO</button></div></div>
 <div id="feMenu" onclick="if(event.target===this) fechaFE()"><div class="cx"><h4><b id="feTit">FALTA ESPECIAL · escolha o tipo</b><span onclick="fechaFE()">✕ fechar</span></h4><div class="op" id="feOp"></div></div></div>
 
 <script>
@@ -636,14 +643,16 @@ function respOT(si){ OT=false; document.getElementById('otMenu').classList.remov
   C.fim=true; C.edit=false; reg(null,'','','Fim de partida · jogo travado','qt'); aplicaTrava(); relDesenha(); aviso('Fim de partida · jogo travado',1); }
 function aplicaTrava(){ const tv=C.fim&&!C.edit; document.body.classList.toggle('travado',tv);
   if(document.body.classList.contains('stat')) desenhaStat(); }
-function trocaTrava(v){ C.edit=v==='e'; if(!C.edit&&ED.k) edLinha(...ED.k.split(':')); aplicaTrava(); aviso(C.edit?'Edição liberada · escolha 🔒 Travado quando terminar':'Jogo travado',1); }
+function trocaTrava(v){ if(typeof K41!=='undefined'&&K41.leitura){ desenhaStat(); return aviso('👁️ Segunda tela · só acompanha'); } C.edit=v==='e'; if(!C.edit&&ED.k) edLinha(...ED.k.split(':')); aplicaTrava(); aviso(C.edit?'Edição liberada · escolha 🔒 Travado quando terminar':'Jogo travado',1); }
 // caixinha de escolher o jogo: some depois do primeiro lance e volta no fim de partida
 // (caixinhas ficam na tela ESTATÍSTICAS, na linha do escudo do 1º time · Magno, 25/11/2026)
 function cxJogo(){}
 function cxHTML(){ const usou=LOG.some(e=>e.t);
   return `<span class="cxs"><select id="selJogo" onchange="k41Escolhe(this.value)" class="${usou&&!C.fim?'esc':''}" title="Escolha o jogo montado · depois toque em QUADRA para marcar">${k41Opcoes()}</select><select id="selTrava" class="${C.fim?'':'esc'}" onchange="trocaTrava(this.value)" title="Partida encerrada: travada ou liberada para editar"><option value="t"${C.edit?'':' selected'}>🔒 Travado</option><option value="e"${C.edit?' selected':''}>✏️ Editar</option></select></span>`; }
 const LIVRE='#selJogo,#selTrava,#btStat,#laySeg,.lal,#stPainel';
-function bloqueio(e){ const ot=OT, tv=C.fim&&!C.edit; if(!ot&&!tv) return;
+function bloqueio(e){ if(typeof K41!=='undefined'&&K41.leitura){ if(e.target.closest('#btModo,#selJogo,#btStat,#laySeg,.lal')||e.target.closest('#stPainel')) return;
+    e.stopImmediatePropagation(); e.preventDefault(); if(e.type==='click') aviso('👁️ Segunda tela · só acompanha. Para marcar aqui, toque em 👁️ Segunda tela (lance a lance)'); return; }
+  const ot=OT, tv=C.fim&&!C.edit; if(!ot&&!tv) return;
   if(e.target.closest(ot?'#otMenu':LIVRE)) return; e.stopImmediatePropagation(); e.preventDefault();
   if(e.type==='click') aviso(ot?'Responda primeiro: vai ter tempo extra?':'Partida encerrada e travada · em ESTATÍSTICAS, escolha ✏️ Editar'); }
 window.addEventListener('click',bloqueio,true); window.addEventListener('pointerdown',bloqueio,true);
@@ -839,6 +848,7 @@ function desenhaStat(){ const on=document.body.classList.contains('stat'), b=doc
 // PTS, REB e EFF se refazem sozinhos e o placar do time acompanha a diferença de pontos. Vai para o lance a lance e o ↶ desfaz.
 const ED={k:null};
 function edLinha(t,n){ n=+n; const k=t+':'+n;
+  if(typeof K41!=='undefined'&&K41.leitura) return aviso('👁️ Segunda tela · só acompanha');
   if(C.fim&&!C.edit) return aviso('Partida travada · escolha ✏️ Editar na caixinha lá em cima');
   if(ED.k&&ED.k!==k) return aviso('Termine primeiro a linha que está aberta (toque no ✏️ dela)');
   if(!ED.k){ ED.k=k; return desenhaStat(); }
@@ -915,7 +925,7 @@ function k41Escolhe(id){ if(id===K41.id) return;
 async function k41Lista(){ const r=await k41Api({acao:'aoVivoLista'}); K41.lista=r.ok?(r.jogos||[]):[]; if(document.body.classList.contains('stat')) desenhaStat(); }
 function k41CorLog(lis){ const c=lis[0]; return c.length===1?`background:${c[0]};box-shadow:0 0 0 2px #fff`:`background:repeating-linear-gradient(180deg,${c.map((x,i)=>`${x} ${i*3}px ${i*3+3}px`).join(',')})`; }
 // foto completa do jogo (o mesmo que o ↶ usa) + relógio + pontos por quarto
-function k41Foto(){ const c=Object.assign({},C,{raw:rawAgora(),anda:false,trava:true}); delete c.t0; return {v:'4.1',ts:Date.now(),foto:JSON.parse(histFoto()),C:c,PQ:K41.PQ,OT}; }
+function k41Foto(){ const c=Object.assign({},C,{raw:rawAgora(),anda:false,trava:true}); delete c.t0; return {v:'4.1',ts:Date.now(),foto:JSON.parse(histFoto()),C:c,PQ:K41.PQ,OT,anda:!!C.anda}; }
 function k41Guarda(){ if(!K41.id) return; try{ localStorage.setItem('kt41_'+K41.id,JSON.stringify(k41Foto())); }catch(e){} }
 function k41Volta(o){ const f=o.foto; histVolta(JSON.stringify(f)); HI.h=[JSON.stringify(f)]; HI.i=0; desenhaUR();
   Object.assign(C,o.C,{t0:performance.now(),anda:false,trava:true}); K41.PQ=o.PQ||K41.PQ;
@@ -943,6 +953,11 @@ async function k41Abre(){ if(!K41.id) return;
   let loc=null; try{ loc=JSON.parse(localStorage.getItem('kt41_'+K41.id)||'null'); }catch(e){}
   const rl=st.versao==='4.1'?await k41Api({acao:'lances41',id:K41.id}):null; const rem=rl&&rl.ok&&rl.lances&&rl.lances.foto?rl.lances:null;
   const o=[loc,rem].filter(Boolean).sort((x,y)=>(y.ts||0)-(x.ts||0))[0];
+  const ed=st.editor; K41.donoTs=(ed&&ed.dev===K41_DEV)?(+ed.ts||Date.now()):Date.now();
+  if(ed&&ed.dev!==K41_DEV&&st.versao==='4.1'&&j.status!=='FINAL') K41.leitura=true;   // outro aparelho já está marcando: abre como segunda tela
+  try{ if(localStorage.getItem('kt41_leitura')==='1') K41.leitura=true; }catch(e){}
+  document.body.classList.add('k41real'); k41PintaModo();
+  if(K41.leitura){ if(rem) k41Le(rem); else { desenha(); desenhaPL(); desenhaFT(); } k41LerLoop(); aviso('👁️ Segunda tela · acompanhando o aparelho que marca',1); document.title='Scout 4.1 · '+T.a.nome+' x '+T.b.nome; return; }
   if(o){ k41Volta(o); K41.ultimo=k41Chave(); aviso('🔄 Jogo recuperado · relógio parado, toque ▶ para continuar',1); }
   else { desenha(); desenhaPL(); desenhaFT(); desenhaMarcas(); HI.h=[histFoto()]; HI.i=0; desenhaUR(); aviso(K41.bloq?'⚠️ '+K41.bloq:'Jogo aberto · '+T.a.nome+' x '+T.b.nome,!K41.bloq); }
   if(!k41Tok()&&!K41.bloq) K41.msg='⚠️ Para gravar na planilha, entre no site (login) neste aparelho · os números ficam guardados aqui enquanto isso';
@@ -956,9 +971,9 @@ function k41Corpo(){ const out={A:{},B:{},periodos:{A:[],B:[]}};
         oreb:v('oreb'),dreb:v('dreb'),reb:v('oreb')+v('dreb'),ast:v('ast'),stl:v('stl'),blk:v('blk'),to:v('tov'),foul:+j[2]||0,eff:v('eff')}; }
     const pq=K41.PQ[t]; for(let i=0;i<5;i++) soma+=pq[i]||0; const d=PL[t]-soma; if(d) pq[Math.min(C.q,5)-1]+=d;   // pontos novos entram no período atual (prorrogações somadas no 5º)
     out.periodos[T2]=C.q<=4?pq.slice(0,4).map((x,i)=>i<C.q?x:null).concat([null]):pq.slice(); }
-  out.qFech=Math.min(5,C.em?C.q-1:C.q); return out; }
+  out.qFech=Math.min(5,C.em?C.q-1:C.q); out.editor={dev:K41_DEV,ts:K41.donoTs||Date.now()}; return out; }
 const k41Chave=()=>JSON.stringify(k41Corpo())+'|'+LOG.length+'|'+MARCAS.length+'|'+C.fim+'|'+HI.i;
-async function k41Envia(){ if(!K41.id||K41.bloq||K41.enviando) return;
+async function k41Envia(){ if(!K41.id||K41.bloq||K41.enviando||K41.leitura) return;
   if(!LOG.some(e=>e.t)&&!C.fim) return;   // só grava depois do 1º lance (abrir o jogo não mexe na planilha nem guarda nada)
   k41Guarda();
   const chave=k41Chave(); if(chave===K41.ultimo) return; const st=k41Corpo();
@@ -968,8 +983,40 @@ async function k41Envia(){ if(!K41.id||K41.bloq||K41.enviando) return;
   else if(/Sessão expirada/.test(r.erro||'')){ if(!K41.msg){ K41.msg='⚠️ Login vencido · entre de novo no site para voltar a gravar (os números ficam guardados aqui)'; aviso(K41.msg); } }
   else if(/Scout 4.0/.test(r.erro||'')){ K41.bloq=r.erro; aviso('⚠️ '+r.erro); }
   else if(!K41.msg){ K41.msg='⚠️ Sem conexão com a planilha · os números ficam guardados aqui e vão quando voltar'; aviso(K41.msg); setTimeout(()=>K41.msg='',30000); } }
+
+// ===== ✏️ MARCANDO / 👁️ SEGUNDA TELA (Magno, 25/11/2026) · igual ao Scout 4.0 =====
+// Segunda tela: só acompanha (lê da planilha a cada 4 s, com o relógio andando junto); nenhum botão de lance funciona.
+// Tocar em 👁️ Segunda tela assume a marcação: pega o jogo mais novo da planilha e passa a gravar daqui.
+// Quem marca confere a cada 10 s se outro aparelho assumiu; se sim, vira segunda tela sozinho.
+const K41_DEV=(()=>{ try{ let d=localStorage.getItem('kt_dev'); if(!d){ d='D'+Math.random().toString(36).slice(2,10); localStorage.setItem('kt_dev',d); } return d; }catch(e){ return 'D0'; } })();
+K41.leitura=false; K41.donoTs=0; K41.lidoTs=0;
+function k41PintaModo(){ const b=document.getElementById('btModo'); document.body.classList.toggle('leitura',!!K41.leitura);
+  b.textContent=K41.leitura?'👁️ Segunda tela':'✏️ Marcando';
+  b.title=K41.leitura?'Só leitura. Toque para assumir a marcação neste aparelho.':'Este aparelho está marcando. Toque para virar segunda tela (só leitura).'; }
+// aplica o que veio da planilha na segunda tela, com o relógio andando se estava andando
+function k41Le(o){ if(!o||!o.foto||(o.ts||0)<=K41.lidoTs) return; K41.lidoTs=o.ts||0;
+  const aberta=document.body.classList.contains('stat'); histVolta(JSON.stringify(o.foto)); HI.h=[JSON.stringify(o.foto)]; HI.i=0; desenhaUR();
+  const atraso=Math.max(0,(Date.now()-(o.ts||Date.now()))/1000);
+  Object.assign(C,o.C,{anda:false,trava:true}); if(o.anda&&C.em&&!C.fim){ C.raw=(o.C.raw||0); C.t0=performance.now()-atraso*1000; C.anda=true; C.trava=false; }
+  K41.PQ=o.PQ||K41.PQ; if(C.fim) aplicaTrava(); desenhaFT(); relDesenha(); if(aberta) desenhaStat(); }
+let k41LerT=null;
+async function k41LerLoop(){ clearTimeout(k41LerT); if(!K41.leitura||!K41.id) return;
+  if(!document.hidden){ const r=await k41Api({acao:'lances41',id:K41.id}); if(K41.leitura&&r.ok&&r.lances) k41Le(r.lances); }
+  k41LerT=setTimeout(k41LerLoop,4000); }
+async function k41Modo(){ if(!K41.id) return;
+  if(!K41.leitura){ await k41Envia(); K41.leitura=true; try{ localStorage.setItem('kt41_leitura','1'); }catch(e){} k41PintaModo(); K41.lidoTs=0; k41LerLoop();
+    aviso('👁️ Este aparelho agora só acompanha · para voltar a marcar, toque em 👁️ Segunda tela',1); return; }
+  aviso('Buscando a versão mais nova do jogo…',1);
+  const r=await k41Api({acao:'lances41',id:K41.id}); clearTimeout(k41LerT);
+  K41.leitura=false; try{ localStorage.removeItem('kt41_leitura'); }catch(e){}
+  if(r.ok&&r.lances&&r.lances.foto) k41Volta(r.lances);   // relógio fica parado: o ▶ libera
+  K41.donoTs=Date.now(); K41.ultimo=''; k41PintaModo(); await k41Envia();
+  aviso('✏️ Este aparelho assumiu a marcação · relógio parado, toque ▶ para liberar',1); }
+setInterval(async()=>{ if(K41.leitura||!K41.id||!K41.donoTs) return; const r=await k41Api({acao:'aoVivoJogo',id:K41.id,leve:true}); const ed=r.ok&&r.jogo&&r.jogo.stats&&r.jogo.stats.editor;
+  if(ed&&ed.dev!==K41_DEV&&+ed.ts>K41.donoTs){ K41.leitura=true; try{ localStorage.setItem('kt41_leitura','1'); }catch(e){} k41PintaModo(); K41.lidoTs=0; k41LerLoop();
+    aviso('👁️ Outro aparelho assumiu a marcação · esta tela virou segunda tela (só leitura)'); } },10000);
 setInterval(k41Envia,3000);
-addEventListener('pagehide',()=>{ if(LOG.some(e=>e.t)||C.fim) k41Guarda(); });
+addEventListener('pagehide',()=>{ if(!K41.leitura&&(LOG.some(e=>e.t)||C.fim)) k41Guarda(); });
 k41Lista(); k41Abre();
 </script>
 </body>
