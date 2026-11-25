@@ -188,6 +188,16 @@ body.selArr .jg:not(.sel){opacity:.45}body.selArr .quadra{outline:3px dashed #4f
 #arMenu .ok{background:#1b5e20}#arMenu .er{background:#7f1d1d}#arMenu .x{background:#2a3248;font-size:14px;width:28px}
 #aviso{pointer-events:none;position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#d32f2f;color:#fff;font:700 15px Arial;padding:8px 16px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.6);display:none;z-index:9}
 #aviso.ok{background:#1b5e20}
+/* telinha de entrada do scout (Firebase · 1ª vez em cada aparelho) · Magno, 25/11/2026 */
+#fbEnt{display:none;position:fixed;inset:0;z-index:90;background:rgba(5,10,20,.82);align-items:center;justify-content:center}
+#fbEnt.on{display:flex}
+#fbEnt .cx{background:#0e1626;border:2px solid #2c4a80;border-radius:12px;padding:22px 26px;width:380px;color:#fff;font-family:Arial;box-shadow:0 10px 40px #000}
+#fbEnt h4{margin:0 0 6px;font:700 18px Oswald,Arial;letter-spacing:1px;color:#ffd54f}#fbEnt p{margin:0 0 14px;font-size:13px;color:#9fb0d6;line-height:1.4}
+#fbEnt label{display:block;font-size:12px;color:#9fb0d6;margin:8px 0 4px}#fbEnt input{width:100%;box-sizing:border-box;height:38px;border-radius:6px;border:1px solid #2c4a80;background:#08101e;color:#fff;font-size:15px;padding:0 10px}
+#fbEnt .bt{display:flex;gap:10px;margin-top:16px}#fbEnt button{flex:1;height:40px;border-radius:8px;border:0;font:700 14px Arial;cursor:pointer}
+#fbEnt .si{background:#1f9a55;color:#fff}#fbEnt .nao{background:#2a3550;color:#cfd8ee}#fbEnt .er{color:#ff8a80;font-size:13px;min-height:18px;margin-top:8px}
+.lal h3 #fbSt{font:700 10px Arial;letter-spacing:.5px;padding:2px 8px;border-radius:20px;margin-right:8px;align-self:center;display:none;cursor:pointer}
+body.k41real .lal h3 #fbSt{display:inline-block}#fbSt.on{background:#0d3b1f;color:#7ee2a1;border:1px solid #2f8f55}#fbSt.off{background:#3b0d0d;color:#ff9a9a;border:1px solid #8f2f2f}
 /* LANCE LIVRE (Magno, 24/11/2026) */
 .meio{position:relative}
 #tarja{position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);background:rgba(183,28,28,.82);color:#fff;font:600 13.5px Arial;letter-spacing:.5px;padding:6px 14px;border-radius:6px;
@@ -291,7 +301,7 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
       <div class="bnc b"><h4>BANCO DE RESERVAS · TIJUCA</h4><button class="rol" onclick="rola('bnB',-1)">▲</button><div class="lis" id="bnB"></div><button class="rol" onclick="rola('bnB',1)">▼</button></div>
     </div>
     <div class="lal">
-      <h3>LANCE A LANCE <em class="tag41">SCOUT PRO 4.1 · em construção</em><b id="btModo" onclick="k41Modo()" title="Este aparelho está marcando. Toque para virar segunda tela (só leitura).">✏️ Marcando</b><span>4 últimos · role para ver os anteriores</span></h3>
+      <h3>LANCE A LANCE <em class="tag41">SCOUT PRO 4.1 · em construção</em><b id="fbSt" class="off" onclick="fbAbreEnt()" title="Ao Vivo pelo Firebase">AO VIVO: desligado</b><b id="btModo" onclick="k41Modo()" title="Este aparelho está marcando. Toque para virar segunda tela (só leitura).">✏️ Marcando</b><span>4 últimos · role para ver os anteriores</span></h3>
       <ul id="lal"></ul>
     </div>
   </section>
@@ -306,7 +316,7 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
     <div class="bt az" id="btStat" onclick="clicaStat()" title="Estatísticas completas dos dois times">ESTATÍSTICAS</div><div class="bt2"><div class="bt undo off" id="btUn" onclick="desfaz()" title="Desfazer a última ação">↶</div><div class="bt undo off" id="btRe" onclick="refaz()" title="Refazer a ação desfeita">↷</div><div id="laySeg"><b class="on" title="Layout 1" onclick="layout(1)">1</b><b title="Layout 2" onclick="layout(2)">2</b><b title="Layout 3" onclick="layout(3)">3</b></div></div>
   </section>
 </main>
-<div id="aviso"></div><div id="faixaLeit">👁️ SEGUNDA TELA — só leitura · acompanhando o que o outro aparelho marca</div><div id="otMenu"><div>Vai ter tempo extra?<small id="otTx">Fim do 4º Q</small><button class="si" onclick="respOT(1)">SIM</button><button class="nao" onclick="respOT(0)">NÃO</button></div></div>
+<div id="aviso"></div><div id="fbEnt"><div class="cx"><h4>ENTRAR NO SCOUT</h4><p>Só na 1ª vez neste aparelho. Liga o envio de cada lance para o Ao Vivo. Depois o aparelho fica lembrado.</p><label>Usuário do scout</label><input id="fbEm" type="email" value="scout@klaustv.com" autocomplete="username"><label>Senha</label><input id="fbSe" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')fbEntra()"><div class="er" id="fbEr"></div><div class="bt"><button class="nao" onclick="fbFechaEnt()">Agora não</button><button class="si" onclick="fbEntra()">Entrar</button></div></div></div><div id="faixaLeit">👁️ SEGUNDA TELA — só leitura · acompanhando o que o outro aparelho marca</div><div id="otMenu"><div>Vai ter tempo extra?<small id="otTx">Fim do 4º Q</small><button class="si" onclick="respOT(1)">SIM</button><button class="nao" onclick="respOT(0)">NÃO</button></div></div>
 <div id="feMenu" onclick="if(event.target===this) fechaFE()"><div class="cx"><h4><b id="feTit">FALTA ESPECIAL · escolha o tipo</b><span onclick="fechaFE()">✕ fechar</span></h4><div class="op" id="feOp"></div></div></div>
 
 <script>
@@ -536,9 +546,9 @@ function fechaAr(){ if(!AR.z) return; const {t,n,ok,err,reb}=AR;
   if(!ok&&!err&&!reb){ cancelaAr(); return aviso('Arremesso cancelado'); }
   const j=jog(t,n), s=stJ(t,n), p=vZ(AR.z), k=p===3?'three':'two', onde=nomeZ(AR.z,AR.lado);
   for(const c of AR.seq){   // erros e rebotes no lance a lance na ordem em que foram tocados (Magno, 25/11/2026)
-    if(c==='e'){ s[k+'Miss']++; MARCAS.push({x:AR.x,y:AR.y,ok:0,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos perdido ${j[1]} - ${n}`,onde+' · EF −1','ou'); }
+    if(c==='e'){ s[k+'Miss']++; MARCAS.push({q:C.q,x:AR.x,y:AR.y,ok:0,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos perdido ${j[1]} - ${n}`,onde+' · EF −1','ou'); }
     else { s.reb++; s.oreb=(s.oreb||0)+1; reg(t,'',`Rebote ofensivo ${j[1]} - ${n}`,'EF +1','ok'); } }   // REB do retângulo = ofensivo (Magno, 25/11/2026)
-  if(ok){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); MARCAS.push({x:AR.x,y:AR.y,ok:1,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos convertido ${j[1]} - ${n}`,onde+` · EF +${p}`,'ok'); }
+  if(ok){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); MARCAS.push({q:C.q,x:AR.x,y:AR.y,ok:1,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos convertido ${j[1]} - ${n}`,onde+` · EF +${p}`,'ok'); }
   efJ(s); SEL.t=null; SEL.n=null; selMarca(); cancelaAr(); desenha(); bolaViva();
   aviso((ok?`+${p} para ${j[1]} - ${n}`:`${p} pontos perdido · ${j[1]} - ${n}`)+(err>1?` · ${err} erros`:'')+(reb?` · ${reb} rebote${reb>1?'s':''}`:''),1);
   if(ok) perguntaAs(t,n); }
@@ -1010,14 +1020,63 @@ async function k41Modo(){ if(!K41.id) return;
   const r=await k41Api({acao:'lances41',id:K41.id}); clearTimeout(k41LerT);
   K41.leitura=false; try{ localStorage.removeItem('kt41_leitura'); }catch(e){}
   if(r.ok&&r.lances&&r.lances.foto) k41Volta(r.lances);   // relógio fica parado: o ▶ libera
-  K41.donoTs=Date.now(); K41.ultimo=''; k41PintaModo(); await k41Envia();
+  K41.donoTs=Date.now(); K41.ultimo=''; k41PintaModo(); await k41Envia(); if(typeof FB!=='undefined'){ FB.enviado={}; if(!FB.user) fbAbreEnt(); }
   aviso('✏️ Este aparelho assumiu a marcação · relógio parado, toque ▶ para liberar',1); }
 setInterval(async()=>{ if(K41.leitura||!K41.id||!K41.donoTs) return; const r=await k41Api({acao:'aoVivoJogo',id:K41.id,leve:true}); const ed=r.ok&&r.jogo&&r.jogo.stats&&r.jogo.stats.editor;
   if(ed&&ed.dev!==K41_DEV&&+ed.ts>K41.donoTs){ K41.leitura=true; try{ localStorage.setItem('kt41_leitura','1'); }catch(e){} k41PintaModo(); K41.lidoTs=0; k41LerLoop();
     aviso('👁️ Outro aparelho assumiu a marcação · esta tela virou segunda tela (só leitura)'); } },10000);
+
+// ===== AO VIVO PELO FIREBASE (Scout PRO 4.1 · Magno, 25/11/2026) =====
+// Cada lance vai na hora para o Firebase em /aovivo/[jogo], com a marca v:"4.1" e o local de cada arremesso.
+// Só o usuário do scout grava (regras do banco); o público só lê. A telinha "Entrar no scout" aparece
+// na 1ª vez em cada aparelho; depois o Firebase lembra sozinho. Vai só o que mudou (economiza internet de quem assiste).
+// A planilha continua sendo o arquivo oficial (salvarStats41); o Firebase é só para o ao vivo.
+const FB={app:null,db:null,user:null,pronto:false,enviado:{},pend:false,tempo:null};
+function fbCarrega(){ if(FB.pronto||!K41.id) return; FB.pronto=true;
+  const V='10.14.1', js=['app','auth','database'].map(n=>`https://www.gstatic.com/firebasejs/${V}/firebase-${n}-compat.js`);
+  const um=(u)=>new Promise((ok,er)=>{ const sc=document.createElement('script'); sc.src=u; sc.onload=ok; sc.onerror=er; document.head.appendChild(sc); });
+  um('firebase-config.js').then(()=>js.reduce((p,u)=>p.then(()=>um(u)),Promise.resolve())).then(()=>{
+    FB.app=firebase.initializeApp(window.KT_FIREBASE); FB.db=firebase.database();
+    firebase.auth().onAuthStateChanged(u=>{ FB.user=u; fbPinta(); if(u){ fbFechaEnt(); FB.enviado={}; fbEnvia(); } else if(!K41.leitura) fbAbreEnt(); });
+  }).catch(()=>{ FB.pronto=false; fbPinta('sem internet'); }); }
+function fbPinta(x){ const b=document.getElementById('fbSt'); if(!b) return; const on=!!FB.user&&!x;
+  b.className=on?'on':'off'; b.textContent=on?'AO VIVO: ligado':('AO VIVO: '+(x||'desligado'));
+  b.title=on?'Cada lance vai na hora para o Ao Vivo (Firebase)':'Toque para entrar no scout e ligar o Ao Vivo'; }
+function fbAbreEnt(){ if(K41.leitura||FB.user) return; document.getElementById('fbEr').textContent=''; document.getElementById('fbEnt').classList.add('on'); setTimeout(()=>document.getElementById('fbSe').focus(),50); }
+function fbFechaEnt(){ document.getElementById('fbEnt').classList.remove('on'); document.getElementById('fbSe').value=''; }
+async function fbEntra(){ const em=document.getElementById('fbEm').value.trim(), se=document.getElementById('fbSe').value, er=document.getElementById('fbEr');
+  if(!window.firebase){ er.textContent='Sem conexão com o Firebase · tente de novo'; return; }
+  er.textContent='Entrando…';
+  try{ await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); await firebase.auth().signInWithEmailAndPassword(em,se); aviso('✅ Scout liberado neste aparelho · Ao Vivo ligado',1); }
+  catch(e){ er.textContent=/password|credential|user/i.test(e.code||'')?'Usuário ou senha não conferem':'Não deu para entrar ('+(e.code||'erro')+')'; } }
+// o que vai para o Ao Vivo, quebrado em pedaços (só o pedaço que mudou é enviado)
+function fbPedacos(){ const P={}, L=x=>JSON.parse(JSON.stringify(x));
+  P['v']='4.1';
+  P['estado']=L({ts:Date.now(),q:C.q,em:C.em,fim:!!C.fim,ot:!!OT,raw:rawAgora(),anda:!!C.anda,tm:C.tm,tmAb:C.tmAb||'',pl:PL,ft:FT,pq:K41.PQ,
+    nomes:{a:T.a.nome,b:T.b.nome}});
+  for(const t of ['a','b']){ P['quadra/'+t]=L(T[t].js.map(j=>({n:j[0],nm:j[1],f:j[2]||0,q:j[3]?1:0,reg:K41.reg[t][j[0]]||''})));
+    for(const j of T[t].js){ const s=ST[t+j[0]]; if(s) P['stats/'+t+'/'+j[0]]=L(Object.assign({},s,{f:j[2]||0})); } }
+  LOG.forEach((e,i)=>P['lances/'+String(LOG.length-1-i).padStart(4,'0')]=L({q:e.q,raw:e.raw,real:e.real,t:e.t||'',n:e.n||'',nm:e.nm||'',a:e.a||'',k:e.k||''}));
+  MARCAS.forEach((m,i)=>P['marcas/'+i]=L(m));
+  return P; }
+async function fbEnvia(){ if(!FB.user||!FB.db||!K41.id||K41.leitura||K41.bloq||FB.pend) return;
+  if(!LOG.some(e=>e.t)&&!C.fim) return;
+  const P=fbPedacos(), up={}, base='aovivo/'+K41.id+'/';
+  for(const k in P){ const v=JSON.stringify(P[k]); if(k==='estado'){ const a=FB.enviado[k]&&JSON.parse(FB.enviado[k]); if(a){ const b=P[k]; if(JSON.stringify(Object.assign({},a,{ts:0,raw:0}))===JSON.stringify(Object.assign({},b,{ts:0,raw:0}))&&Math.abs((a.raw||0)-(b.raw||0))<30&&a.anda===b.anda) continue; } }
+    if(FB.enviado[k]!==v) up[base+k]=P[k]; }
+  for(const k in FB.enviado) if(!(k in P)) up[base+k]=null;   // ↶ desfez: some do Ao Vivo também
+  if(!Object.keys(up).length) return;
+  FB.pend=true;
+  const tudo=!Object.keys(FB.enviado).length;   // 1º envio (ou aparelho que assumiu): troca o jogo inteiro, sem sobras
+  if(tudo){ const n={}; for(const k in P){ const ps=k.split('/'); let o=n; ps.slice(0,-1).forEach(x=>o=o[x]=o[x]||{}); o[ps[ps.length-1]]=P[k]; } for(const k in P) up[base+k]=P[k];
+    try{ await FB.db.ref(base.slice(0,-1)).set(n); for(const k in P) FB.enviado[k]=JSON.stringify(P[k]); fbPinta(); }catch(e){ fbPinta(/permission/i.test(String(e))?'sem permissão':'falhou'); } FB.pend=false; return; }
+  try{ await FB.db.ref().update(up); for(const k in up){ const kk=k.slice(base.length); if(up[k]===null) delete FB.enviado[kk]; else FB.enviado[kk]=JSON.stringify(P[kk]); } fbPinta(); }
+  catch(e){ fbPinta(/permission/i.test(String(e))?'sem permissão':'falhou'); }
+  FB.pend=false; }
+setInterval(fbEnvia,700);
 setInterval(k41Envia,3000);
 addEventListener('pagehide',()=>{ if(!K41.leitura&&(LOG.some(e=>e.t)||C.fim)) k41Guarda(); });
-k41Lista(); k41Abre();
+k41Lista(); k41Abre().then(()=>{ if(K41.id&&!K41.bloq) fbCarrega(); });
 </script>
 </body>
 </html>
