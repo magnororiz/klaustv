@@ -508,7 +508,7 @@ function fechaAr(){ if(!AR.z) return; const {t,n,ok,err,reb}=AR;
   const j=jog(t,n), s=stJ(t,n), p=vZ(AR.z), k=p===3?'three':'two', onde=nomeZ(AR.z,AR.lado);
   for(const c of AR.seq){   // erros e rebotes no lance a lance na ordem em que foram tocados (Magno, 25/11/2026)
     if(c==='e'){ s[k+'Miss']++; MARCAS.push({x:AR.x,y:AR.y,ok:0,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos perdido ${j[1]} - ${n}`,onde+' · EF −1','ou'); }
-    else { s.reb++; reg(t,'',`Rebote ${j[1]} - ${n}`,'EF +1','ok'); } }
+    else { s.reb++; s.oreb=(s.oreb||0)+1; reg(t,'',`Rebote ofensivo ${j[1]} - ${n}`,'EF +1','ok'); } }   // REB do retângulo = ofensivo (Magno, 25/11/2026)
   if(ok){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); MARCAS.push({x:AR.x,y:AR.y,ok:1,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos convertido ${j[1]} - ${n}`,onde+` · EF +${p}`,'ok'); }
   efJ(s); SEL.t=null; SEL.n=null; selMarca(); cancelaAr(); desenha(); bolaViva();
   aviso((ok?`+${p} para ${j[1]} - ${n}`:`${p} pontos perdido · ${j[1]} - ${n}`)+(err>1?` · ${err} erros`:'')+(reb?` · ${reb} rebote${reb>1?'s':''}`:''),1);
@@ -744,7 +744,7 @@ function desenhaLL(){ const b=document.getElementById('btLL'); if(!b) return; b.
 // ===== ASSIST. · REBOTE · TURNOVER · ROUBO DE BOLA · TOCO (Magno, 24/11/2026) =====
 // Toca no botão: fica laranja (igual à substituição) e pede "Escolha o jogador". Toca na camisa: soma a estatística,
 // mexe na EF (+1; o turnover tira 1) e vai para o lance a lance. Tocar de novo no botão laranja fecha sem marcar.
-const ESN={ast:['Assistência','que deu a assistência',1],reb:['Rebote','que pegou o rebote',1],tov:['Turnover (erro)','que cometeu o erro',-1],stl:['Roubo de bola','que roubou a bola',1],blk:['Toco','que deu o toco',1]};
+const ESN={ast:['Assistência','que deu a assistência',1],reb:['Rebote defensivo','que pegou o rebote',1],tov:['Turnover (erro)','que cometeu o erro',-1],stl:['Roubo de bola','que roubou a bola',1],blk:['Toco','que deu o toco',1]};
 const ESR={ast:'ASSIST.',reb:'REBOTE',tov:'<span>TURNOVER<small>erro</small></span>',stl:'ROUBO<br>DE BOLA',blk:'TOCO'};
 function desenhaEst(){ for(const k in ESR){ const b=document.getElementById('bt_'+k); if(!b) continue; const on=EST.k===k; b.classList.toggle('subOn',on);
   b.innerHTML=on?(k==='stl'&&EST.rb?`<span>MARQUE O TURNOVER<small>camisa do outro time · toque aqui p/ cancelar</small></span>`:`<span>${ESN[k][0].toUpperCase()}<small>escolha o jogador · toque aqui p/ fechar</small></span>`):ESR[k]; } }
@@ -766,7 +766,7 @@ function marcaRoubo(t,n){ const j=jog(t,n);
   EST.k=null; EST.rb=null; desenhaEst(); desenha();
   reg(r.t,'',`Roubo de bola ${jr[1]} - ${r.n}`,'EF +1','ok'); reg(t,'',`Turnover (erro) ${j[1]} - ${n}`,'EF −1','er'); bolaViva();
   aviso(`Roubo ${jr[1]} - ${r.n} (EF +1) · turnover ${j[1]} - ${n} (EF −1)`,1); }
-function marcaEst(t,n){ if(EST.k==='stl') return marcaRoubo(t,n); const k=EST.k, [nm,,v]=ESN[k], j=jog(t,n), s=stJ(t,n); s[k]++; efJ(s);
+function marcaEst(t,n){ if(EST.k==='stl') return marcaRoubo(t,n); const k=EST.k, [nm,,v]=ESN[k], j=jog(t,n), s=stJ(t,n); s[k]++; if(k==='reb') s.dreb=(s.dreb||0)+1; efJ(s);   // botão REBOTE = defensivo (Magno, 25/11/2026)
   EST.k=null; desenhaEst(); desenha();
   reg(t,'',`${nm} ${j[1]} - ${n}`,`EF ${v>0?'+1':'−1'}`,v>0?'ok':'er'); bolaViva();
   aviso(`${nm} · ${j[1]} - ${n} · EF ${v>0?'+1':'−1'}`,v>0?1:0); }
@@ -778,15 +778,15 @@ function clicaStat(){ document.body.classList.toggle('stat'); desenhaStat(); }
 function fechaStat(){ if(document.body.classList.contains('stat')){ document.body.classList.remove('stat'); desenhaStat(); } }
 function desenhaStat(){ const on=document.body.classList.contains('stat'), b=document.getElementById('btStat'); if(!b) return;
   b.classList.toggle('statOn',on); b.innerHTML=on?'<span>QUADRA<small>voltar ao jogo</small></span>':'ESTATÍSTICAS'; if(!on) return;
-  const pc=(m,a)=>`${m}/${a} (${a?Math.round(100*m/a):0}%)`, Z={pts:0,reb:0,ast:0,stl:0,blk:0,tov:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,eff:0};
+  const pc=(m,a)=>`${m}/${a} (${a?Math.round(100*m/a):0}%)`, Z={pts:0,oreb:0,dreb:0,reb:0,ast:0,stl:0,blk:0,tov:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,eff:0};
   let h='';
   for(const t of ['a','b']){ const tt={...Z,f:0}; let lin='';
     for(const j of [...T[t].js].sort((x,y)=>x[0]-y[0])){ const s={...Z,...(ST[t+j[0]]||{})};
       for(const k in Z) tt[k]+=s[k]; tt.f+=j[2];
-      lin+=`<tr><td>${j[0]}</td><td class="nm"><i class="${j[3]?'':'bc'}" title="${j[3]?'em quadra':'no banco'}"></i>${j[1]}</td><td>${s.pts}</td><td>${pc(s.twoMade,s.twoMade+s.twoMiss)}</td><td>${pc(s.threeMade,s.threeMade+s.threeMiss)}</td><td>${pc(s.ftMade,s.ftMade+s.ftMiss)}</td><td>${s.reb}</td><td>${s.ast}</td><td>${s.stl}</td><td>${s.blk}</td><td>${s.tov}</td><td>${j[2]}</td><td class="ef">${s.eff}</td></tr>`; }
+      lin+=`<tr><td>${j[0]}</td><td class="nm"><i class="${j[3]?'':'bc'}" title="${j[3]?'em quadra':'no banco'}"></i>${j[1]}</td><td>${s.pts}</td><td>${pc(s.twoMade,s.twoMade+s.twoMiss)}</td><td>${pc(s.threeMade,s.threeMade+s.threeMiss)}</td><td>${pc(s.ftMade,s.ftMade+s.ftMiss)}</td><td>${s.oreb}</td><td>${s.dreb}</td><td>${s.reb}</td><td>${s.ast}</td><td>${s.stl}</td><td>${s.blk}</td><td>${s.tov}</td><td>${j[2]}</td><td class="ef">${s.eff}</td></tr>`; }
     const esc=document.querySelector(`#col${t.toUpperCase()} .cab img`);
-    h+=`<h3>${esc?`<img src="${esc.getAttribute('src')}" alt="">`:''}${T[t].nome.toUpperCase()}</h3><table><tr><th>Camisa</th><th>Nome</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>F</th><th>EFF</th></tr>${lin}
-     <tr class="tot"><td colspan="2">TOTAL</td><td>${tt.pts}</td><td>${pc(tt.twoMade,tt.twoMade+tt.twoMiss)}</td><td>${pc(tt.threeMade,tt.threeMade+tt.threeMiss)}</td><td>${pc(tt.ftMade,tt.ftMade+tt.ftMiss)}</td><td>${tt.reb}</td><td>${tt.ast}</td><td>${tt.stl}</td><td>${tt.blk}</td><td>${tt.tov}</td><td>${tt.f}</td><td class="ef">${tt.eff}</td></tr></table>`; }
+    h+=`<h3>${esc?`<img src="${esc.getAttribute('src')}" alt="">`:''}${T[t].nome.toUpperCase()}</h3><table><tr><th>Camisa</th><th>Nome</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th title="Rebote ofensivo">OREB</th><th title="Rebote defensivo">DREB</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>F</th><th>EFF</th></tr>${lin}
+     <tr class="tot"><td colspan="2">TOTAL</td><td>${tt.pts}</td><td>${pc(tt.twoMade,tt.twoMade+tt.twoMiss)}</td><td>${pc(tt.threeMade,tt.threeMade+tt.threeMiss)}</td><td>${pc(tt.ftMade,tt.ftMade+tt.ftMiss)}</td><td>${tt.oreb}</td><td>${tt.dreb}</td><td>${tt.reb}</td><td>${tt.ast}</td><td>${tt.stl}</td><td>${tt.blk}</td><td>${tt.tov}</td><td>${tt.f}</td><td class="ef">${tt.eff}</td></tr></table>`; }
   document.getElementById('stPainel').innerHTML=h; }
 
 // ===== LANCE A LANCE (começa vazio; só recebe o que os botões registram; mais novo em cima) =====
