@@ -641,7 +641,7 @@ function trocaTrava(v){ C.edit=v==='e'; if(!C.edit&&ED.k) edLinha(...ED.k.split(
 // (caixinhas ficam na tela ESTATÍSTICAS, na linha do escudo do 1º time · Magno, 25/11/2026)
 function cxJogo(){}
 function cxHTML(){ const usou=LOG.some(e=>e.t);
-  return `<span class="cxs"><select id="selJogo" class="${usou&&!C.fim?'esc':''}" title="Escolha o jogo montado · depois toque em QUADRA para marcar"><option>Jogo de teste · Flamengo x Tijuca</option></select><select id="selTrava" class="${C.fim?'':'esc'}" onchange="trocaTrava(this.value)" title="Partida encerrada: travada ou liberada para editar"><option value="t"${C.edit?'':' selected'}>🔒 Travado</option><option value="e"${C.edit?' selected':''}>✏️ Editar</option></select></span>`; }
+  return `<span class="cxs"><select id="selJogo" onchange="k41Escolhe(this.value)" class="${usou&&!C.fim?'esc':''}" title="Escolha o jogo montado · depois toque em QUADRA para marcar">${k41Opcoes()}</select><select id="selTrava" class="${C.fim?'':'esc'}" onchange="trocaTrava(this.value)" title="Partida encerrada: travada ou liberada para editar"><option value="t"${C.edit?'':' selected'}>🔒 Travado</option><option value="e"${C.edit?' selected':''}>✏️ Editar</option></select></span>`; }
 const LIVRE='#selJogo,#selTrava,#btStat,#laySeg,.lal,#stPainel';
 function bloqueio(e){ const ot=OT, tv=C.fim&&!C.edit; if(!ot&&!tv) return;
   if(e.target.closest(ot?'#otMenu':LIVRE)) return; e.stopImmediatePropagation(); e.preventDefault();
@@ -883,6 +883,93 @@ function logDesenha(){ const ul=document.getElementById('lal');
   ul.innerHTML=LOG.map((e,i)=>{ const ant=LOG[i+1], dt=ant?'+'+mmss((e.real-ant.real)/1000).replace(/^0/,''):'';
     return `<li><span class="h">≈${mmss(restante(e.q,e.raw))}</span><span class="dt">${dt}</span><span class="q">${NQ(e.q)}</span><span class="d" style="${e.t?COR[e.t]:''}"></span><span class="c">${e.n}</span><span>${e.nm}</span><span class="ac ${e.k}">${e.a}</span></li>`; }).join(''); }
 reg(null,'','','Início do 1º Q · cronômetro liberado (10:00)','qt');   // teste: ao abrir a página o 1º quarto já começa correndo
+
+// ===== JOGO DE VERDADE + GRAVAÇÃO NA PLANILHA (Scout PRO 4.1 · Magno, 25/11/2026) =====
+// A caixinha "Jogo" lista os jogos montados (ao vivo e em breve). Escolher um jogo recarrega a página com ?jogo=ID
+// e troca os times, camisas e escudos. Os números vão para a planilha pela função própria do 4.1 (salvarStats41),
+// no mesmo formato do 4.0 (REB = OREB + DREB, TO, faltas), para Atletas, Banco de dados, Súmula e Ao Vivo enxergarem.
+// O lance a lance, o local dos arremessos e o relógio vão juntos (aba Lances41): se a página for atualizada,
+// o jogo volta do ponto em que estava, com o relógio parado esperando o ▶. O "Jogo de teste" continua sem gravar.
+const K41_API='https://script.google.com/macros/s/AKfycbxJBusZKcHRLpV9_qG4Gs6_8b37Dp5lj5OSXXXdcMRNrRnrO_K1sLo3MiQQ_wEjDx-S/exec';
+const K41_CURTO={"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN":"Funcionários","FFC":"Fluminense","TTC":"Tijuca","NBC":"Niterói","CCL":"Leopoldinense","IG":"Iguaba Grande","ABIG":"Jequiá","ACEAR":"Irajá","CESC":"Suzano Costa","EEPZ":"Passo Zero","IDEC":"IDEC","ITDA":"Atitude","KE":"K. Esportes","MB":"Mesquita","JTC":"Jacarepaguá","TKA":"Team Klun","ASPCM":"Municipal","CK":"Carioca King's","IB":"Itaipu","NBR":"NBR Campos"};
+// camisas: [listras ou cor lisa, borda, número] · time sem cor cadastrada: A azul, B laranja
+const K41_CAMISA={CRF:FLA,TTC:TIJ,BFR:[['#000000','#FFFFFF'],'#FFFFFF','#FFFFFF'],FFC:[['#7A1E2C','#00613C','#FFFFFF'],'#FFFFFF','#FFFFFF']};
+const K41_PADRAO={a:[['#1E5BD8'],'#FFFFFF','#FFFFFF'],b:[['#E8590C'],'#FFFFFF','#FFFFFF']};
+const K41={id:new URLSearchParams(location.search).get('jogo')||'',lista:null,reg:{a:{},b:{}},bloq:'',ultimo:'',enviando:false,PQ:{a:[0,0,0,0,0],b:[0,0,0,0,0]},msg:''};
+const k41Tok=()=>{ try{ return localStorage.getItem('klaustv_token_v1')||''; }catch(e){ return ''; } };
+async function k41Api(d){ try{ const r=await fetch(K41_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(d)}); return await r.json(); }catch(e){ return {ok:false,erro:'Sem conexão com a planilha.'}; } }
+const k41E=x=>String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const k41Nome=(sg,avulso,nome)=>avulso?(nome||sg):(K41_CURTO[sg]||nome||sg);
+function k41Rotulo(j){ const d=String(j.dataHora||'').replace(' ','T'); return d.slice(8,10)+'/'+d.slice(5,7)+' '+d.slice(11,16)+' · '+(j.categoria||'')+' · '+k41Nome(j.timeA,j.avulso)+' x '+k41Nome(j.timeB,j.avulso)+(j.status==='FINAL'?' · finalizado':''); }
+function k41Opcoes(){ const L=K41.lista;
+  let h=`<option value=""${K41.id?'':' selected'}>Jogo de teste · Flamengo x Tijuca (não grava)</option>`;
+  if(!L) return h+'<option disabled>Carregando os jogos montados…</option>';
+  const hoje=new Date(Date.now()-12*3600e3).toISOString().slice(0,10);
+  const vis=L.filter(j=>j.id===K41.id||(j.status!=='FINAL'&&String(j.dataHora).slice(0,10)>=hoje)).sort((x,y)=>String(x.dataHora).localeCompare(String(y.dataHora)));
+  if(!vis.length) h+='<option disabled>Nenhum jogo montado ao vivo ou em breve</option>';
+  return h+vis.map(j=>`<option value="${k41E(j.id)}"${j.id===K41.id?' selected':''}>${k41E(k41Rotulo(j))}</option>`).join(''); }
+function k41Escolhe(id){ if(id===K41.id) return;
+  if(LOG.some(e=>e.t)&&!C.fim){ aviso('O jogo já começou · a troca de jogo só volta no fim de partida'); desenhaStat(); return; }
+  if(K41.id) k41Guarda();
+  location.search=id?('?jogo='+encodeURIComponent(id)):''; }
+async function k41Lista(){ const r=await k41Api({acao:'aoVivoLista'}); K41.lista=r.ok?(r.jogos||[]):[]; if(document.body.classList.contains('stat')) desenhaStat(); }
+function k41CorLog(lis){ const c=lis[0]; return c.length===1?`background:${c[0]};box-shadow:0 0 0 2px #fff`:`background:repeating-linear-gradient(180deg,${c.map((x,i)=>`${x} ${i*3}px ${i*3+3}px`).join(',')})`; }
+// foto completa do jogo (o mesmo que o ↶ usa) + relógio + pontos por quarto
+function k41Foto(){ const c=Object.assign({},C,{raw:rawAgora(),anda:false,trava:true}); delete c.t0; return {v:'4.1',ts:Date.now(),foto:JSON.parse(histFoto()),C:c,PQ:K41.PQ,OT}; }
+function k41Guarda(){ if(!K41.id) return; try{ localStorage.setItem('kt41_'+K41.id,JSON.stringify(k41Foto())); }catch(e){} }
+function k41Volta(o){ const f=o.foto; histVolta(JSON.stringify(f)); HI.h=[JSON.stringify(f)]; HI.i=0; desenhaUR();
+  Object.assign(C,o.C,{t0:performance.now(),anda:false,trava:true}); K41.PQ=o.PQ||K41.PQ;
+  if(o.OT) perguntaOT(); if(C.fim) aplicaTrava(); desenhaFT(); relDesenha(); cxJogo(); }
+async function k41Abre(){ if(!K41.id) return;
+  aviso('Abrindo o jogo…',1);
+  const r=await k41Api({acao:'aoVivoJogo',id:K41.id});
+  if(!r.ok||!r.jogo){ K41.bloq='Jogo não encontrado na planilha'; aviso('⚠️ '+K41.bloq+' · ficou o jogo de teste'); K41.id=''; return; }
+  const j=r.jogo, m=j.meta||{}, st=j.stats||{}, ap=r.apelidos||{};
+  if((st.A&&Object.keys(st.A).length||st.B&&Object.keys(st.B).length)&&st.versao!=='4.1'&&Object.values(st.A||{}).concat(Object.values(st.B||{})).some(s=>s&&(+s.pts||+s.reb||+s.ast||+s.foul||+s.twoMiss||+s.threeMiss||+s.ftMiss)))
+    K41.bloq='Este jogo já tem números feitos no Scout 4.0 · continue nele no 4.0 (o 4.1 não grava por cima)';
+  for(const t of ['a','b']){ const tm=m['time'+t.toUpperCase()]||{}, sg=tm.sigla||'';
+    const atl=(tm.atletas||[]).slice(0,12).slice().sort((x,y)=>(parseInt(x.numero,10)||999)-(parseInt(y.numero,10)||999));
+    const nm=k41Nome(sg,m.avulso,tm.nome);
+    T[t].nome=nm; T[t].lis=K41_CAMISA[sg]||K41_PADRAO[t]; COR[t]=k41CorLog(T[t].lis); K41.reg[t]={};
+    T[t].js=atl.map((a,i)=>{ const n=parseInt(a.numero,10); const w=String(a.nome||'').trim().split(/\s+/); const curto=w.length>1?w[0]+' '+w[w.length-1]:(w[0]||'');
+      K41.reg[t][n]=a.reg; return [n,ap[a.reg]||a.apelido||curto,0,i<5?1:0]; }).filter(x=>!isNaN(x[0]));
+    const esc=m.avulso?(tm.escudo||''):('escudos/'+encodeURIComponent(sg)+'.png');
+    document.querySelectorAll(`.top .tm.${t} img, #col${t.toUpperCase()} .cab img`).forEach(im=>{ if(esc) im.src=esc; else im.style.visibility='hidden'; });
+    document.querySelector(`.top .tm.${t} .nm`).textContent=nm.toUpperCase();
+    const cab=document.querySelector(`#col${t.toUpperCase()} .cab`); cab.lastChild.textContent=`${t.toUpperCase()} · ${String(sg||nm).slice(0,4).toUpperCase()}`;
+    document.getElementById('tm'+t.toUpperCase()).title=`Pedido de tempo do ${nm}: 1º toque inicia, 2º toque encerra`; }
+  ST={}; PL.a=0; PL.b=0; FT.a=0; FT.b=0; MARCAS.length=0; escTempo();
+  // volta do ponto em que estava: o mais novo entre este aparelho e a planilha
+  let loc=null; try{ loc=JSON.parse(localStorage.getItem('kt41_'+K41.id)||'null'); }catch(e){}
+  const rl=st.versao==='4.1'?await k41Api({acao:'lances41',id:K41.id}):null; const rem=rl&&rl.ok&&rl.lances&&rl.lances.foto?rl.lances:null;
+  const o=[loc,rem].filter(Boolean).sort((x,y)=>(y.ts||0)-(x.ts||0))[0];
+  if(o){ k41Volta(o); K41.ultimo=k41Chave(); aviso('🔄 Jogo recuperado · relógio parado, toque ▶ para continuar',1); }
+  else { desenha(); desenhaPL(); desenhaFT(); desenhaMarcas(); HI.h=[histFoto()]; HI.i=0; desenhaUR(); aviso(K41.bloq?'⚠️ '+K41.bloq:'Jogo aberto · '+T.a.nome+' x '+T.b.nome,!K41.bloq); }
+  if(!k41Tok()&&!K41.bloq) K41.msg='⚠️ Para gravar na planilha, entre no site (login) neste aparelho · os números ficam guardados aqui enquanto isso';
+  if(K41.msg) aviso(K41.msg);
+  document.title='Scout 4.1 · '+T.a.nome+' x '+T.b.nome; if(document.body.classList.contains('stat')) desenhaStat(); }
+// números no formato do site: por registro do atleta · REB = OREB + DREB · TO · faltas
+function k41Corpo(){ const out={A:{},B:{},periodos:{A:[],B:[]}};
+  for(const t of ['a','b']){ const T2=t.toUpperCase(); let soma=0;
+    for(const j of T[t].js){ const reg=K41.reg[t][j[0]]; if(!reg) continue; const s=ST[t+j[0]]||{}, v=k=>+s[k]||0;
+      out[T2][reg]={pts:v('pts'),twoMade:v('twoMade'),twoMiss:v('twoMiss'),threeMade:v('threeMade'),threeMiss:v('threeMiss'),ftMade:v('ftMade'),ftMiss:v('ftMiss'),
+        oreb:v('oreb'),dreb:v('dreb'),reb:v('oreb')+v('dreb'),ast:v('ast'),stl:v('stl'),blk:v('blk'),to:v('tov'),foul:+j[2]||0,eff:v('eff')}; }
+    const pq=K41.PQ[t]; for(let i=0;i<5;i++) soma+=pq[i]||0; const d=PL[t]-soma; if(d) pq[Math.min(C.q,5)-1]+=d;   // pontos novos entram no período atual (prorrogações somadas no 5º)
+    out.periodos[T2]=C.q<=4?pq.slice(0,4).map((x,i)=>i<C.q?x:null).concat([null]):pq.slice(); }
+  out.qFech=Math.min(5,C.em?C.q-1:C.q); return out; }
+const k41Chave=()=>JSON.stringify(k41Corpo())+'|'+LOG.length+'|'+MARCAS.length+'|'+C.fim+'|'+HI.i;
+async function k41Envia(){ if(!K41.id||K41.bloq||K41.enviando) return; k41Guarda();
+  if(!LOG.some(e=>e.t)&&!C.fim) return;   // só grava depois do 1º lance (abrir o jogo não mexe na planilha)
+  const chave=k41Chave(); if(chave===K41.ultimo) return; const st=k41Corpo();
+  if(!k41Tok()) return;
+  K41.enviando=true; const r=await k41Api({acao:'salvarStats41',token:k41Tok(),id:K41.id,stats:st,status:C.fim?'FINAL':'',lances:k41Foto()}); K41.enviando=false;
+  if(r.ok){ K41.ultimo=chave; if(K41.msg){ K41.msg=''; aviso('📡 Gravando na planilha',1); } }
+  else if(/Sessão expirada/.test(r.erro||'')){ if(!K41.msg){ K41.msg='⚠️ Login vencido · entre de novo no site para voltar a gravar (os números ficam guardados aqui)'; aviso(K41.msg); } }
+  else if(/Scout 4.0/.test(r.erro||'')){ K41.bloq=r.erro; aviso('⚠️ '+r.erro); }
+  else if(!K41.msg){ K41.msg='⚠️ Sem conexão com a planilha · os números ficam guardados aqui e vão quando voltar'; aviso(K41.msg); setTimeout(()=>K41.msg='',30000); } }
+setInterval(k41Envia,3000);
+addEventListener('pagehide',k41Guarda);
+k41Lista(); k41Abre();
 </script>
 </body>
 </html>
