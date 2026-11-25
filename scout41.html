@@ -910,7 +910,7 @@ function k41Opcoes(){ const L=K41.lista;
   return h+vis.map(j=>`<option value="${k41E(j.id)}"${j.id===K41.id?' selected':''}>${k41E(k41Rotulo(j))}</option>`).join(''); }
 function k41Escolhe(id){ if(id===K41.id) return;
   if(LOG.some(e=>e.t)&&!C.fim){ aviso('O jogo já começou · a troca de jogo só volta no fim de partida'); desenhaStat(); return; }
-  if(K41.id) k41Guarda();
+  if(K41.id&&LOG.some(e=>e.t)) k41Guarda();
   location.search=id?('?jogo='+encodeURIComponent(id)):''; }
 async function k41Lista(){ const r=await k41Api({acao:'aoVivoLista'}); K41.lista=r.ok?(r.jogos||[]):[]; if(document.body.classList.contains('stat')) desenhaStat(); }
 function k41CorLog(lis){ const c=lis[0]; return c.length===1?`background:${c[0]};box-shadow:0 0 0 2px #fff`:`background:repeating-linear-gradient(180deg,${c.map((x,i)=>`${x} ${i*3}px ${i*3+3}px`).join(',')})`; }
@@ -958,8 +958,9 @@ function k41Corpo(){ const out={A:{},B:{},periodos:{A:[],B:[]}};
     out.periodos[T2]=C.q<=4?pq.slice(0,4).map((x,i)=>i<C.q?x:null).concat([null]):pq.slice(); }
   out.qFech=Math.min(5,C.em?C.q-1:C.q); return out; }
 const k41Chave=()=>JSON.stringify(k41Corpo())+'|'+LOG.length+'|'+MARCAS.length+'|'+C.fim+'|'+HI.i;
-async function k41Envia(){ if(!K41.id||K41.bloq||K41.enviando) return; k41Guarda();
-  if(!LOG.some(e=>e.t)&&!C.fim) return;   // só grava depois do 1º lance (abrir o jogo não mexe na planilha)
+async function k41Envia(){ if(!K41.id||K41.bloq||K41.enviando) return;
+  if(!LOG.some(e=>e.t)&&!C.fim) return;   // só grava depois do 1º lance (abrir o jogo não mexe na planilha nem guarda nada)
+  k41Guarda();
   const chave=k41Chave(); if(chave===K41.ultimo) return; const st=k41Corpo();
   if(!k41Tok()) return;
   K41.enviando=true; const r=await k41Api({acao:'salvarStats41',token:k41Tok(),id:K41.id,stats:st,status:C.fim?'FINAL':'',lances:k41Foto()}); K41.enviando=false;
@@ -968,7 +969,7 @@ async function k41Envia(){ if(!K41.id||K41.bloq||K41.enviando) return; k41Guarda
   else if(/Scout 4.0/.test(r.erro||'')){ K41.bloq=r.erro; aviso('⚠️ '+r.erro); }
   else if(!K41.msg){ K41.msg='⚠️ Sem conexão com a planilha · os números ficam guardados aqui e vão quando voltar'; aviso(K41.msg); setTimeout(()=>K41.msg='',30000); } }
 setInterval(k41Envia,3000);
-addEventListener('pagehide',k41Guarda);
+addEventListener('pagehide',()=>{ if(LOG.some(e=>e.t)||C.fim) k41Guarda(); });
 k41Lista(); k41Abre();
 </script>
 </body>
