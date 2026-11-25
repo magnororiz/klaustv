@@ -275,7 +275,8 @@ function salvarStats41(token, id, stats, status, lances) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
   const j = lerJogos().find(x => x.id === id); if (!j) return { ok: false, erro: 'Jogo não encontrado.' };
   const ant = jsonOu(j.stats, {});
-  if (ant && (ant.A || ant.B) && ant.versao !== '4.1') return { ok: false, erro: 'Este jogo já tem números feitos no Scout 4.0. Continue nele no 4.0.' };
+  const tem40 = ant && ant.versao !== '4.1' && ['A', 'B'].some(t => Object.values(ant[t] || {}).some(x => x && ['pts', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'twoMiss', 'threeMiss', 'ftMiss'].some(k => Number(x[k] || 0))));   // zeros que o 4.0 grava ao abrir não contam
+  if (tem40) return { ok: false, erro: 'Este jogo já tem números feitos no Scout 4.0. Continue nele no 4.0.' };
   stats = stats || {}; stats.versao = '4.1';
   ['A', 'B'].forEach(t => { const o = stats[t] || {}; Object.keys(o).forEach(reg => { const s = o[reg] || {};
     s.oreb = Number(s.oreb || 0); s.dreb = Number(s.dreb || 0); s.reb = s.oreb + s.dreb; }); });

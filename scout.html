@@ -221,6 +221,7 @@ hr{
 /*ktJMcss*/
 .ktJM{box-sizing:border-box;width:100%;max-width:none;margin:6px 0 16px;padding:12px 14px;border:2px solid #ffd54f;border-radius:12px;background:#101826;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:center;}
 .ktJM label{color:#ffd54f;font-weight:700;font-size:15px;}
+.ktJogoVer{display:flex;align-items:center;gap:10px;min-width:0}.ktJogoVer #ktSelJogo{flex:1}.ktJM .ktJogoVer .ktVerLb{min-width:0;text-align:right;white-space:nowrap}.ktJM .ktJogoVer #ktSelVer{flex:0 0 96px;width:96px !important}
 .ktJM select{flex:1;min-width:260px;max-width:600px;padding:9px;border-radius:8px;border:none;font-size:14px;}
 .ktJM label{min-width:170px;text-align:right;}
 .ktJM button{width:230px;font-size:13px;padding:9px 10px;}
@@ -418,7 +419,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktJogoTravado .ktQck,html.ktJog
 
 <!--ktJogoMontado--><div class="ktJM"><button type="button" id="ktModo" class="ktModo" onclick="kt_trocarModoTela()" title="Trocar entre marcar o jogo e só acompanhar (segunda tela)">✏️ Marcando</button>
 <label for="ktSelJogo">🏀 Jogo montado</label>
-<select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select>
+<div class="ktJogoVer"><select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select><label for="ktSelVer" class="ktVerLb">Versão</label><select id="ktSelVer" onchange="kt_trocaVer(this.value)" title="Escolha o jogo e depois a versão do scout"><option value="40">4.0</option><option value="41">4.1</option></select></div>
 <div class="ktBtPar"><button type="button" class="ktBtSalvar" onclick="kt_salvarAndamento()" title="Grava o jogo na planilha agora">Salvar jogo</button><button type="button" class="ktBtFim" onclick="kt_finalizar(this)" title="Encerra o jogo: o Ao vivo para de atualizar e mostra JOGO FINALIZADO">Finalizar jogo</button></div>
 <input type="hidden" id="ktDataJogo">
 <label for="ktSelAnt">📚 Jogos anteriores</label>
@@ -1492,6 +1493,7 @@ async function kt_abrirMontado(id,restaurando){
   KT_SUJO=!!rasc;
   if(KT_LEITURA){ KT_SUJO=false; kt_lerLoop(); } else if(!KT_DONO_TS){ const ed=st.editor; KT_DONO_TS=(ed&&ed.dev===KT_DEV)?(+ed.ts||Date.now()):Date.now(); }
   kt_listarAnteriores(j);
+  if(kt_verPintar(st)) return;   // jogo marcado no 4.1: abre direto lá
   KT_TRAVADO=kt_encerrado(j) && !rasc; KT_SNAP=null; kt_pintarTrava();
   KT_QEDIT=false; kt_qCarregar((rasc&&rasc.stats&&rasc.stats.qFech!==undefined)?rasc.stats.qFech:st.qFech);
   document.querySelectorAll('.ktPremL').forEach(l=>{ if(typeof kt_premOpcoes==='function') kt_premOpcoes(l); });
@@ -1844,6 +1846,20 @@ function kt_mapaFooter(nome){
   if(el.dataset.q !== q){ el.src = src; el.dataset.q = q; }
   document.getElementById('ktLocalNome').innerText = n ? n : 'Cristo Redentor, Rio de Janeiro';
 }
+</script>
+<script>
+/* ===== ESCOLHA DA VERSÃO 4.0 · 4.1 (Magno, 25/11/2026) =====
+   Primeiro o jogo, depois a versão. Troca livre até o 1º lance; depois fica travada na versão usada até o fim.
+   Jogo já marcado no 4.1 abre direto no 4.1; jogo com números do 4.0 não vai para o 4.1. */
+function kt_verPintar(st){ const v=document.getElementById('ktSelVer'); v.value='40';
+  if(!KT_JOGO_ID){ v.disabled=true; v.title='Escolha primeiro o jogo'; return false; }
+  if(st&&st.versao==='4.1'){ v.value='41'; kt_msg('Este jogo é do Scout 4.1 · abrindo…'); setTimeout(()=>kt_ir41(true),600); return true; }
+  const usado=kt_temNumeros(); v.disabled=usado; v.title=usado?'O jogo já começou no 4.0 · fica no 4.0 até o fim':'Escolha a versão do scout'; return false; }
+function kt_trocaVer(x){ if(x==='41') kt_ir41(); }
+function kt_ir41(forca){ const v=document.getElementById('ktSelVer'); if(!KT_JOGO_ID){ v.value='40'; return kt_msg('Escolha primeiro o jogo.'); }
+  if(!forca&&kt_temNumeros()){ v.value='40'; return kt_msg('O jogo já começou no 4.0 · ele fica no 4.0 até o fim.'); }
+  location.href='scout41.html?jogo='+encodeURIComponent(KT_JOGO_ID); }
+setInterval(()=>{ if(KT_JOGO_ID) kt_verPintar(null); },2000); kt_verPintar(null);
 </script>
 </body>
 </html>
