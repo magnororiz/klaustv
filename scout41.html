@@ -472,7 +472,7 @@ function clicaZona(e,p){ const b=document.body;
   if(FA.on) return aviso('Termine ou feche a falta antes do arremesso'); if(EST.k) return aviso('Escolha o jogador ou feche o botão laranja antes do arremesso'); if(LL.on) return aviso('Termine ou cancele o LANCE LIVRE antes');
   if(AR.z) return aviso('Feche antes o arremesso aberto no ✕');
   if(!SEL.t) return aviso('Escolha primeiro o jogador (toque na camisa) e depois o local do arremesso');
-  const q=ptSvg(e); AR.x=q.x; AR.y=q.y; AR.z=p.dataset.z; AR.lado=p.dataset.l; AR.res=null; AR.t=SEL.t; AR.n=SEL.n; AR.ok=0; AR.err=0; AR.reb=0; AR.multi=PERTO.includes(AR.z);
+  const q=ptSvg(e); AR.x=q.x; AR.y=q.y; AR.z=p.dataset.z; AR.lado=p.dataset.l; AR.res=null; AR.t=SEL.t; AR.n=SEL.n; AR.ok=0; AR.err=0; AR.reb=0; AR.multi=true;   // todos os setores: o retângulo só fecha no ✕ (Magno, 25/11/2026)
   document.querySelectorAll('.zn.on').forEach(x=>x.classList.remove('on')); p.classList.add('on');
   const j=jog(AR.t,AR.n), tip=document.getElementById('zTip');
   tip.textContent=`${j[1]} - ${AR.n} · ${nomeZ(AR.z,AR.lado)} · ${vZ(AR.z)} pontos`+(AR.multi?' · ✗ e REB quantas vezes precisar · ✕ fecha':' · cesta ✓ ou errou ✗?'); tip.style.display='block';
