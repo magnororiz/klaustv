@@ -6,12 +6,15 @@
 <meta name="robots" content="noindex">
 <title>Scout PRO 4.1 – Klaus TV</title>
 <link rel="icon" href="favicon-32.png">
+<link rel="stylesheet" href="scout-topo.css">
 <style>
 /* Scout PRO 4.1 – prévia 1 do layout (Magno, 24/11/2026): só desenho, botões ainda sem função */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{background:#05070d;color:#fff;font-family:'Oswald',Arial,sans-serif;overflow:hidden;
   display:grid;grid-template-rows:64px 1fr;height:100vh}
+/* parte de cima igual ao Scout 4.0 (Magno, 25/11/2026): fica acima do scout; o scout continua com a tela inteira logo abaixo dela */
+body{height:auto;min-height:100vh;overflow-x:hidden;overflow-y:auto;grid-template-rows:auto 64px calc(100vh - 64px)}
 
 /* ===== placar (faixa de cima) ===== */
 .top{display:flex;align-items:center;gap:14px;padding:0 16px;
@@ -273,6 +276,20 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
 </style>
 </head>
 <body>
+
+<!--ktJogoMontado: IGUAL em todas as versões do Scout (desenho em scout-topo.css)--><div class="ktJM"><button type="button" id="ktModo" class="ktModo" onclick="kt_trocarModoTela()" title="Trocar entre marcar o jogo e só acompanhar (segunda tela)">✏️ Marcando</button>
+<label for="ktSelJogo">🏀 Jogo montado</label>
+<div class="ktJogoVer"><select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select><label for="ktOficial" class="ktVerLb">Versão</label><button type="button" id="ktOficial" class="ktOficial" data-v="4.1" onclick="kt_ofClique()" title="⭐ Scout oficial deste jogo: liga e desliga">⭐ 4.1</button></div>
+<div class="ktBtPar"><button type="button" class="ktBtSalvar" onclick="kt_salvarAndamento()" title="Grava o jogo na planilha agora">Salvar jogo</button><button type="button" class="ktBtFim" onclick="kt_finalizar(this)" title="Encerra o jogo: o Ao vivo para de atualizar e mostra JOGO FINALIZADO">Finalizar jogo</button></div>
+<input type="hidden" id="ktDataJogo">
+<label for="ktSelAnt">📚 Jogos anteriores</label>
+<span class="ktAntSel"><select id="ktSelAntCat" onchange="kt_listarAnteriores()"><option value="">Categoria</option></select><select id="ktSelAnt" onchange="kt_verAnterior(this.value)"><option value="">Carregando jogos encerrados…</option></select></span>
+<button type="button" onclick="kt_editarAnterior()">✏️ Editar</button>
+<div id="ktFaixaTrava"></div>
+<div id="ktFaixaOficial"></div>
+<div id="ktFaixaLeitura">👁️ SEGUNDA TELA — só leitura · acompanhando o que o outro computador marca</div>
+<div id="ktJMmsg" class="ktJMmsg"></div>
+</div><!--/ktJogoMontado-->
 
 <header class="top">
   <div class="tm a"><img src="escudos/CRF.png" alt=""><span class="nm">FLAMENGO</span></div>
@@ -663,9 +680,11 @@ function trocaTrava(v){ if(typeof K41!=='undefined'&&K41.leitura){ desenhaStat()
 // (caixinhas ficam na tela ESTATÍSTICAS, na linha do escudo do 1º time · Magno, 25/11/2026)
 function cxJogo(){}
 function cxHTML(){ const usou=LOG.some(e=>e.t);
-  return `<span class="cxs"><select id="selJogo" onchange="k41Escolhe(this.value)" class="${usou&&!C.fim?'esc':''}" title="Escolha o jogo montado · depois toque em QUADRA para marcar">${k41Opcoes()}</select>${(K41.id&&!LOG.some(e=>e.t))?`<button id="bt40" onclick="k41Ir40()" title="Abrir este jogo no Scout 4.0 (só antes do 1º lance)">↩ Scout 4.0</button>`:''}<select id="selTrava" class="${C.fim?'':'esc'}" onchange="trocaTrava(this.value)" title="Partida encerrada: travada ou liberada para editar"><option value="t"${C.edit?'':' selected'}>🔒 Travado</option><option value="e"${C.edit?' selected':''}>✏️ Editar</option></select></span>`; }
+  return `<span class="cxs"><select id="selTrava" class="${C.fim?'':'esc'}" onchange="trocaTrava(this.value)" title="Partida encerrada: travada ou liberada para editar"><option value="t"${C.edit?'':' selected'}>🔒 Travado</option><option value="e"${C.edit?' selected':''}>✏️ Editar</option></select></span>`; }
 const LIVRE='#selJogo,#selTrava,#bt40,#btStat,#laySeg,.lal,#stPainel';
-function bloqueio(e){ if(typeof K41!=='undefined'&&K41.leitura){ if(e.target.closest('#btModo,#selJogo,#btStat,#laySeg,.lal')||e.target.closest('#stPainel')) return;
+function bloqueio(e){ if(e.target.closest&&e.target.closest('.ktJM,#fbEnt')) return;   // a parte de cima (igual ao 4.0) sempre funciona
+  if(typeof K41!=='undefined'&&!K41.leitura&&typeof kt_desligado==='function'&&kt_desligado()&&!e.target.closest(LIVRE)){ e.stopImmediatePropagation(); e.preventDefault(); if(e.type==='click') kt_ofAviso(); return; }
+  if(typeof K41!=='undefined'&&K41.leitura){ if(e.target.closest('#btModo,#selJogo,#btStat,#laySeg,.lal')||e.target.closest('#stPainel')) return;
     e.stopImmediatePropagation(); e.preventDefault(); if(e.type==='click') aviso('👁️ Segunda tela · só acompanha. Para marcar aqui, toque em 👁️ Segunda tela (lance a lance)'); return; }
   const ot=OT, tv=C.fim&&!C.edit; if(!ot&&!tv) return;
   if(e.target.closest(ot?'#otMenu':LIVRE)) return; e.stopImmediatePropagation(); e.preventDefault();
@@ -950,7 +969,7 @@ async function k41Abre(){ if(!K41.id) return;
   aviso('Abrindo o jogo…',1);
   const r=await k41Api({acao:'aoVivoJogo',id:K41.id});
   if(!r.ok||!r.jogo){ K41.bloq='Jogo não encontrado na planilha'; aviso('⚠️ '+K41.bloq+' · ficou o jogo de teste'); K41.id=''; return; }
-  const j=r.jogo, m=j.meta||{}, st=j.stats||{}, ap=r.apelidos||{};
+  const j=r.jogo, m=j.meta||{}, st=j.stats||{}, ap=r.apelidos||{}; KT_OFICIAL=j.oficial||''; KT_JREF=j;
   if((st.A&&Object.keys(st.A).length||st.B&&Object.keys(st.B).length)&&st.versao!=='4.1'&&Object.values(st.A||{}).concat(Object.values(st.B||{})).some(s=>s&&(+s.pts||+s.reb||+s.ast||+s.foul||+s.twoMiss||+s.threeMiss||+s.ftMiss)))
     K41.bloq='Este jogo já tem números feitos no Scout 4.0 · continue nele no 4.0 (o 4.1 não grava por cima)';
   for(const t of ['a','b']){ const tm=m['time'+t.toUpperCase()]||{}, sg=tm.sigla||'';
@@ -990,7 +1009,7 @@ function k41Corpo(){ const out={A:{},B:{},periodos:{A:[],B:[]}};
     out.periodos[T2]=C.q<=4?pq.slice(0,4).map((x,i)=>i<C.q?x:null).concat([null]):pq.slice(); }
   out.qFech=Math.min(5,C.em?C.q-1:C.q); out.editor={dev:K41_DEV,ts:K41.donoTs||Date.now()}; return out; }
 const k41Chave=()=>JSON.stringify(k41Corpo())+'|'+LOG.length+'|'+MARCAS.length+'|'+C.fim+'|'+HI.i;
-async function k41Envia(){ if(!K41.id||K41.bloq||K41.enviando||K41.leitura) return;
+async function k41Envia(){ if(!K41.id||K41.bloq||K41.enviando||K41.leitura) return; if(kt_desligado()) return;   // ⭐ scout desligado: não grava
   if(!LOG.some(e=>e.t)&&!C.fim) return;   // só grava depois do 1º lance (abrir o jogo não mexe na planilha nem guarda nada)
   k41Guarda();
   const chave=k41Chave(); if(chave===K41.ultimo) return; const st=k41Corpo();
@@ -998,6 +1017,7 @@ async function k41Envia(){ if(!K41.id||K41.bloq||K41.enviando||K41.leitura) retu
   K41.enviando=true; const r=await k41Api({acao:'salvarStats41',token:k41Tok(),id:K41.id,stats:st,status:C.fim?'FINAL':'',lances:k41Foto()}); K41.enviando=false;
   if(r.ok){ K41.ultimo=chave; if(K41.msg){ K41.msg=''; aviso('📡 Gravando na planilha',1); } }
   else if(/Sessão expirada/.test(r.erro||'')){ if(!K41.msg){ K41.msg='⚠️ Login vencido · entre de novo no site para voltar a gravar (os números ficam guardados aqui)'; aviso(K41.msg); } }
+  else if(r.desligado){ KT_OFICIAL=r.oficial||''; kt_ofPintar(); aviso('⚠️ '+r.erro); }
   else if(/Scout 4.0/.test(r.erro||'')){ K41.bloq=r.erro; aviso('⚠️ '+r.erro); }
   else if(!K41.msg){ K41.msg='⚠️ Sem conexão com a planilha · os números ficam guardados aqui e vão quando voltar'; aviso(K41.msg); setTimeout(()=>K41.msg='',30000); } }
 
@@ -1008,6 +1028,7 @@ async function k41Envia(){ if(!K41.id||K41.bloq||K41.enviando||K41.leitura) retu
 const K41_DEV=(()=>{ try{ let d=localStorage.getItem('kt_dev'); if(!d){ d='D'+Math.random().toString(36).slice(2,10); localStorage.setItem('kt_dev',d); } return d; }catch(e){ return 'D0'; } })();
 K41.leitura=false; K41.donoTs=0; K41.lidoTs=0;
 function k41PintaModo(){ const b=document.getElementById('btModo'); document.body.classList.toggle('leitura',!!K41.leitura);
+  document.documentElement.classList.toggle('ktLeitura',!!K41.leitura); const bc=document.getElementById('ktModo'); if(bc){ bc.textContent=K41.leitura?'👁️ Segunda tela':'✏️ Marcando'; bc.title=K41.leitura?'Só leitura. Toque para assumir a marcação neste aparelho.':'Este aparelho está marcando. Toque para virar segunda tela (só leitura).'; }
   b.textContent=K41.leitura?'👁️ Segunda tela':'✏️ Marcando';
   b.title=K41.leitura?'Só leitura. Toque para assumir a marcação neste aparelho.':'Este aparelho está marcando. Toque para virar segunda tela (só leitura).'; }
 // aplica o que veio da planilha na segunda tela, com o relógio andando se estava andando
@@ -1066,7 +1087,7 @@ function fbPedacos(){ const P={}, L=x=>JSON.parse(JSON.stringify(x));
   LOG.forEach((e,i)=>P['lances/'+String(LOG.length-1-i).padStart(4,'0')]=L({q:e.q,raw:e.raw,real:e.real,t:e.t||'',n:e.n||'',nm:e.nm||'',a:e.a||'',k:e.k||''}));
   MARCAS.forEach((m,i)=>P['marcas/'+i]=L(m));
   return P; }
-async function fbEnvia(){ if(!FB.user||!FB.db||!K41.id||K41.leitura||K41.bloq||FB.pend) return;
+async function fbEnvia(){ if(!FB.user||!FB.db||!K41.id||K41.leitura||K41.bloq||FB.pend||kt_desligado()) return;
   if(!LOG.some(e=>e.t)&&!C.fim) return;
   const P=fbPedacos(), up={}, base='aovivo/'+K41.id+'/';
   for(const k in P){ const v=JSON.stringify(P[k]); if(k==='estado'){ const a=FB.enviado[k]&&JSON.parse(FB.enviado[k]); if(a){ const b=P[k]; if(JSON.stringify(Object.assign({},a,{ts:0,raw:0}))===JSON.stringify(Object.assign({},b,{ts:0,raw:0}))&&Math.abs((a.raw||0)-(b.raw||0))<30&&a.anda===b.anda) continue; } }
@@ -1103,7 +1124,118 @@ function k41Ir40(){ if(LOG.some(e=>e.t)) return aviso('O jogo já começou no 4.
   location.href='scout.html'; }
 setInterval(k41Envia,3000);
 addEventListener('pagehide',()=>{ if(!K41.leitura&&(LOG.some(e=>e.t)||C.fim)) k41Guarda(); });
-k41Lista(); k41Abre().then(()=>{ if(K41.id&&!K41.bloq) fbCarrega(); });
+
+// ===== PARTE DE CIMA IGUAL AO SCOUT 4.0 + ⭐ SCOUT OFICIAL DESTE JOGO (Magno, 25/11/2026) =====
+// Mesma caixa do 4.0 (Jogo montado · ⭐ · Salvar/Finalizar · Jogos anteriores · Editar · ✏️ Marcando), com os mesmos nomes de função,
+// ligada por baixo nas funções do 4.1. Cada jogo em andamento tem um só scout ligado (4.0 ou 4.1): só ele marca, grava e manda para o Ao Vivo.
+// Para trocar no meio do jogo: desliga um e liga o outro. Jogo encerrado não precisa de scout ligado (correções pelo Editar).
+const KT_VER='4.1'; var KT_OFICIAL='', KT_JREF=null, KT_MONTADOS=[], KT_ANT_REF=null;
+function kt_msg(t){ document.getElementById('ktJMmsg').textContent=t||''; }
+function kt_encerrado(j){ if(!j) return false; if(j.status==='FINAL') return true; const d=new Date(String(j.dataHora||'').replace(' ','T')); return !isNaN(d) && Date.now()>d.getTime()+3*3600e3; }
+function kt_nomeTime(t){ return t.avulso?(t.nome||t.sigla):(K41_CURTO[t.sigla]||t.nome||t.sigla); }
+function kt_rotuloJM(j){ const d=String(j.dataHora||''); const dt=d.slice(8,10)+'/'+d.slice(5,7)+(d.length>11?' '+d.slice(11,16):'');
+  const m=j.meta||{}; const a=m.timeA||{}, b=m.timeB||{};
+  return dt+' · '+(j.categoria||'')+' · '+kt_nomeTime(Object.assign({avulso:m.avulso},a))+' x '+kt_nomeTime(Object.assign({avulso:m.avulso},b))+(j.jogoFed?' · Jogo '+j.jogoFed:'')+(m.avulso?' · avulso':'')+(j.status==='FINAL'?' · finalizado':''); }
+async function kt_listarMontados(){ const sel=document.getElementById('ktSelJogo');
+  const r=await k41Api({acao:'listarJogos',token:k41Tok()});
+  if(!r.ok){ sel.innerHTML='<option value="">Não foi possível carregar: '+k41E(r.erro||'tente de novo')+'</option>'; return; }
+  KT_MONTADOS=(r.jogos||[]).map(j=>Object.assign(j,{dataHora:String(j.dataHora||'').replace(' ','T').slice(0,16)})).filter(j=>(j.meta||{}).timeA&&(j.meta||{}).timeB);
+  const ativos=KT_MONTADOS.filter(j=>!kt_encerrado(j)||j.id===K41.id).sort((x,y)=>y.dataHora.localeCompare(x.dataHora));
+  sel.innerHTML='<option value="">'+(ativos.length?'— jogos ao vivo e em breve ('+ativos.length+') —':'Nenhum jogo ao vivo ou em breve')+'</option>'+ativos.map(j=>'<option value="'+k41E(j.id)+'">'+k41E(kt_rotuloJM(j))+'</option>').join('');
+  sel.value=K41.id&&ativos.some(j=>j.id===K41.id)?K41.id:'';
+  kt_listarAnteriores(KT_MONTADOS.find(j=>j.id===K41.id)); kt_ofPintar(); }
+function kt_abrirMontado(id){ const sel=document.getElementById('ktSelJogo');
+  if(!id||id===K41.id){ sel.value=K41.id||''; return; }
+  k41Escolhe(id); setTimeout(()=>{ sel.value=K41.id||''; },80); }   // se o jogo já começou, o k41Escolhe avisa e não troca
+function kt_listarAnteriores(atual){ if(atual) KT_ANT_REF=atual; const ref=KT_ANT_REF||{};
+  const sc=document.getElementById('ktSelAntCat'), sel=document.getElementById('ktSelAnt');
+  const enc=KT_MONTADOS.filter(j=>kt_encerrado(j)&&(j.id!==K41.id||j.status==='FINAL'));
+  const cats=[...new Set(enc.map(j=>j.categoria).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
+  const antes=sc.value;
+  sc.innerHTML=cats.length?cats.map(c=>'<option value="'+k41E(c)+'">'+k41E(c)+'</option>').join(''):'<option value="">Categoria</option>';
+  if(atual&&cats.includes(atual.categoria)) sc.value=atual.categoria; else if(cats.includes(antes)) sc.value=antes;
+  const cat=sc.value, js=enc.filter(j=>j.categoria===cat).sort((x,y)=>String(y.dataHora).localeCompare(String(x.dataHora)));
+  sel.innerHTML='<option value="">'+(js.length?'— jogos encerrados do '+k41E(cat)+' ('+js.length+') —':'Nenhum jogo encerrado'+(cat?' do '+k41E(cat):''))+'</option>'+js.map(j=>'<option value="'+k41E(j.id)+'"'+(j.id===K41.id?' selected':'')+'>'+k41E(kt_rotuloJM(j))+'</option>').join(''); }
+// jogo anterior: abre o jogo aqui no 4.1 (travado; o ✏️ Editar libera)
+function kt_verAnterior(id){ if(!id||id===K41.id) return; k41Escolhe(id); }
+function kt_editarAnterior(){ const v=document.getElementById('ktSelAnt').value;
+  if(v&&v!==K41.id){ if(LOG.some(e=>e.t)&&!C.fim) return aviso('O jogo já começou · a troca de jogo só volta no fim de partida');
+    location.search='?jogo='+encodeURIComponent(v)+'&editar=1'; return; }
+  if(!K41.id) return alert('Escolha um jogo anterior na lista.');
+  if(K41.bloq){ if(confirm('Este jogo foi feito no Scout 4.0.\n\nAbrir o jogo no Scout 4.0 para editar?')){ try{ localStorage.setItem('kt_scout_atual',JSON.stringify({id:K41.id,ts:Date.now()})); }catch(e){} location.href='scout.html'; } return; }
+  if(!C.fim) return kt_msg('Este jogo não está travado · dá para corrigir direto na tela.');
+  if(C.edit) return kt_msg('O jogo já está liberado para editar.');
+  if(!confirm('Você vai alterar um jogo encerrado. Continuar?')) return;
+  trocaTrava('e'); }
+function kt_pintarTrava(){ const f=document.getElementById('ktFaixaTrava'); if(!f) return; const tv=!!(K41.id&&C.fim&&!C.edit), ed=!!(K41.id&&C.fim&&C.edit);
+  f.className=tv?'on':(ed?'ed':'');
+  f.innerHTML=tv?'🔒 JOGO ENCERRADO — travado para não mudar sem querer <button type="button" onclick="kt_editarAnterior()">✏️ Editar</button>':(ed?'✏️ EDITANDO JOGO ENCERRADO — as mudanças vão para a planilha <button type="button" onclick="trocaTrava(\'t\')">🔒 Travar de novo</button>':''); }
+aplicaTrava=(f=>function(){ const r=f.apply(this,arguments); kt_pintarTrava(); return r; })(aplicaTrava);
+function kt_trocarModoTela(){ if(!K41.id) return kt_msg('Escolha primeiro o jogo montado.'); return k41Modo(); }
+async function kt_salvarAndamento(){ if(!K41.id) return alert('Escolha primeiro o jogo montado.');
+  if(kt_desligado()) return kt_ofAviso(true);
+  if(K41.bloq) return alert(K41.bloq);
+  if(!LOG.some(e=>e.t)&&!C.fim) return kt_msg('Ainda não tem lance marcado · nada para gravar.');
+  kt_msg('Salvando na planilha…'); K41.ultimo=''; while(K41.enviando) await new Promise(r=>setTimeout(r,200)); await k41Envia();
+  if(K41.ultimo===k41Chave()) kt_msg('✅ Jogo salvo na planilha às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' · placar '+PL.a+' x '+PL.b+'.');
+  else { kt_msg(''); alert('Não foi possível salvar agora'+(K41.msg?': '+K41.msg.replace(/^⚠️ /,''):'')+'. Os números ficam guardados neste aparelho.'); } }
+async function kt_finalizar(bt){ if(!K41.id) return alert('Escolha primeiro o jogo montado.');
+  if(kt_desligado()) return kt_ofAviso(true);
+  if(K41.leitura) return alert('👁️ Esta tela está como segunda tela (só leitura).');
+  if(C.fim) return kt_msg('Este jogo já está finalizado.');
+  if(!confirm('Finalizar o jogo?\n\n'+T.a.nome+' '+PL.a+' x '+PL.b+' '+T.b.nome+'\n\nO Ao vivo para de atualizar e o jogo passa a aparecer como JOGO FINALIZADO. O jogo vai para "Jogos anteriores" e fica travado (dá para corrigir pelo Editar).')) return;
+  if(C.tmAb&&typeof fechaTempo==='function') fechaTempo(); pausa(); C.em=false; OT=false; document.getElementById('otMenu').classList.remove('on');
+  C.fim=true; C.edit=false; reg(null,'','','Fim de partida · jogo travado','qt'); aplicaTrava(); relDesenha();
+  bt.disabled=true; kt_msg('Finalizando o jogo…'); K41.ultimo=''; while(K41.enviando) await new Promise(r=>setTimeout(r,200)); await k41Envia(); bt.disabled=false;
+  if(K41.ultimo===k41Chave()){ kt_msg('✅ Jogo finalizado · placar final '+PL.a+' x '+PL.b+'. O Ao vivo já mostra JOGO FINALIZADO.'); kt_listarMontados(); }
+  else kt_msg('⚠️ Jogo travado aqui, mas ainda não foi para a planilha · ele vai sozinho quando a conexão voltar.'); }
+// ⭐ scout oficial
+function kt_desligado(){ return !!(K41.id&&KT_JREF&&!K41.bloq&&!kt_encerrado(KT_JREF)&&KT_OFICIAL!==KT_VER); }
+function kt_ofAviso(alerta){ const t=KT_OFICIAL?'⭐ O Scout '+KT_OFICIAL+' está ligado neste jogo. Para marcar aqui, ligue o Scout '+KT_VER+' (botão ⭐ lá em cima).':'⭐ Scout desligado: toque em "⭐ Ligar '+KT_VER+'" lá em cima para começar a marcar.'; kt_msg(t); aviso(t); if(alerta) alert(t); }
+function kt_ofPintar(){ const b=document.getElementById('ktOficial'), f=document.getElementById('ktFaixaOficial'); if(!b) return; const j=K41.id?KT_JREF:null;
+  b.className='ktOficial'; b.disabled=false;
+  if(!j){ b.textContent='⭐ '+KT_VER; b.disabled=true; b.title='Escolha primeiro o jogo montado'; }
+  else if(K41.bloq){ b.textContent='⭐ '+KT_VER; b.disabled=true; b.title=K41.bloq; }
+  else if(kt_encerrado(j)){ b.textContent='⭐ '+KT_VER; b.disabled=true; b.title='Jogo encerrado: não precisa ligar o scout (correções pelo Editar)'; }
+  else if(KT_OFICIAL===KT_VER){ b.textContent='⭐ '+KT_VER+' LIGADO'; b.classList.add('lig'); b.title='Este é o scout oficial do jogo: ele marca e o Ao Vivo transmite. Toque para desligar.'; }
+  else if(KT_OFICIAL){ b.textContent='⭐ '+KT_OFICIAL+' ligado'; b.classList.add('outro'); b.title='O Scout '+KT_OFICIAL+' está ligado neste jogo. Toque para trocar para o '+KT_VER+'.'; }
+  else { b.textContent='⭐ Ligar '+KT_VER; b.title='Ligar o Scout '+KT_VER+' como scout oficial deste jogo'; }
+  const off=kt_desligado(); document.documentElement.classList.toggle('ktDesligado',off);
+  if(f) f.innerHTML=!off?'':(KT_OFICIAL?'⭐ O SCOUT '+KT_OFICIAL+' ESTÁ LIGADO NESTE JOGO — o Ao Vivo transmite ele; aqui só dá para olhar <button type="button" onclick="kt_ofClique()">Trocar para o '+KT_VER+'</button>':'⭐ SCOUT DESLIGADO — carregue o jogo, confira os jogadores e ligue para começar a marcar <button type="button" onclick="kt_ofClique()">⭐ Ligar '+KT_VER+'</button>'); }
+const kt_ofApi=(versao,ligar)=>k41Api({acao:'scoutOficial',token:k41Tok(),id:K41.id,versao,ligar});
+const kt_irScout=()=>{ const h=document.querySelector('header.top'); if(h) scrollTo({top:h.getBoundingClientRect().top+scrollY,behavior:'smooth'}); };
+async function kt_ofClique(){ const j=KT_JREF; if(!K41.id||!j) return alert('Escolha primeiro o jogo montado.');
+  if(K41.bloq) return alert(K41.bloq);
+  if(kt_encerrado(j)) return alert('Jogo encerrado: não precisa ligar o scout. Para corrigir, use o Editar.');
+  if(K41.leitura) return alert('👁️ Esta tela está como segunda tela (só leitura). Para ligar ou desligar o scout, use o aparelho que marca.');
+  if(!k41Tok()) return alert('Entre no site (login) neste aparelho para ligar o scout.');
+  const b=document.getElementById('ktOficial'); let r;
+  if(KT_OFICIAL===KT_VER){   // desligar
+    if(!confirm('Desligar o Scout '+KT_VER+' neste jogo?\n\nOs números marcados até agora ficam gravados na planilha. Depois disso este scout para de marcar e de mandar para o Ao Vivo, até alguém ligar um scout de novo.')) return;
+    b.disabled=true; kt_msg('Gravando os últimos números antes de desligar…');
+    if(LOG.some(e=>e.t)||C.fim){ K41.ultimo=''; while(K41.enviando) await new Promise(r=>setTimeout(r,200)); await k41Envia();
+      if(K41.ultimo!==k41Chave()){ b.disabled=false; kt_msg(''); return alert('Não consegui gravar os últimos números na planilha (sem conexão?). Tente desligar de novo daqui a pouco.'); } }
+    r=await kt_ofApi(KT_VER,false); b.disabled=false;
+    if(!r.ok){ if(r.oficial!==undefined) KT_OFICIAL=r.oficial; kt_ofPintar(); return alert('Não foi possível desligar: '+(r.erro||'tente de novo')); }
+    KT_OFICIAL=''; if(C.anda) pausa(); kt_ofPintar(); scrollTo({top:0,behavior:'smooth'}); kt_msg('⭐ Scout '+KT_VER+' desligado. Agora dá para ligar outro scout neste jogo.'); return; }
+  if(KT_OFICIAL){   // outro scout ligado: troca
+    if(!confirm('O Scout '+KT_OFICIAL+' está ligado neste jogo.\n\nDesligar o '+KT_OFICIAL+' e ligar o Scout '+KT_VER+' aqui?\n\nAtenção: o 4.1 só continua jogo que ainda não tem números do 4.0.')) return;
+    b.disabled=true; r=await kt_ofApi(KT_OFICIAL,false);
+    if(!r.ok){ b.disabled=false; if(r.oficial!==undefined) KT_OFICIAL=r.oficial; kt_ofPintar(); return alert('Não foi possível desligar o Scout '+KT_OFICIAL+': '+(r.erro||'tente de novo')); } KT_OFICIAL=''; }
+  b.disabled=true; kt_msg('Ligando o Scout '+KT_VER+'…'); r=await kt_ofApi(KT_VER,true); b.disabled=false;
+  if(!r.ok){ KT_OFICIAL=r.oficial||''; kt_ofPintar(); return alert('Não foi possível ligar: '+(r.erro||'tente de novo')); }
+  KT_OFICIAL=KT_VER; K41.donoTs=Date.now(); K41.ultimo=''; kt_ofPintar();
+  if(typeof FB!=='undefined'){ FB.enviado={}; if(!FB.pronto) fbCarrega(); else if(!FB.user) fbAbreEnt(); }
+  kt_msg('⭐ Scout '+KT_VER+' LIGADO: é ele que marca e o Ao Vivo transmite. Bom jogo!'); aviso('⭐ Scout '+KT_VER+' ligado · bom jogo!',1); setTimeout(kt_irScout,400); }
+// confere a cada 8 s quem está ligado (outro aparelho pode ter trocado o scout)
+setInterval(async()=>{ if(!K41.id||!KT_JREF||document.hidden) return; if(kt_encerrado(KT_JREF)){ kt_ofPintar(); return; }
+  const r=await k41Api({acao:'aoVivoJogo',id:K41.id,leve:true}); if(!r.ok||!r.jogo) return; const of=r.jogo.oficial||''; KT_JREF.status=r.jogo.status;
+  if(of!==KT_OFICIAL){ const era=KT_OFICIAL; KT_OFICIAL=of; if(era===KT_VER&&C.anda) pausa(); kt_ofPintar(); if(era===KT_VER){ kt_msg('⭐ O Scout '+KT_VER+' foi desligado'+(of?' e o Scout '+of+' foi ligado':'')+' em outro aparelho. Este scout parou de marcar.'); aviso('⭐ Este scout foi desligado em outro aparelho'); } } },8000);
+kt_listarMontados();
+k41Lista(); k41Abre().then(()=>{ kt_ofPintar(); kt_pintarTrava(); kt_listarAnteriores(KT_MONTADOS.find(j=>j.id===K41.id));
+  if(K41.id&&!K41.bloq&&!kt_desligado()) fbCarrega();
+  if(K41.id&&KT_OFICIAL===KT_VER&&KT_JREF&&!kt_encerrado(KT_JREF)) setTimeout(kt_irScout,600);   // jogo ligado aqui: vai direto para o scout
+  if(new URLSearchParams(location.search).get('editar')==='1'&&C.fim&&!C.edit){ history.replaceState(null,'','?jogo='+encodeURIComponent(K41.id)); kt_editarAnterior(); } });
 </script>
 </body>
 </html>

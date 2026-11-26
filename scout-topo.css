@@ -1,0 +1,40 @@
+/* ===== PARTE DE CIMA DOS SCOUTS (Magno, 25/11/2026) =====
+   Jogo montado · ⭐ scout oficial · Salvar/Finalizar · Jogos anteriores · Editar · ✏️ Marcando.
+   Tem que ser IGUAL em todas as versões do Scout (4.0, 4.1 e as que vierem): o desenho é o mesmo do Scout 4.0.
+   Tudo aqui fica preso dentro do .ktJM, para não mexer no resto da página de cada versão. */
+.ktJM{position:relative;box-sizing:border-box;width:auto;margin:14px 12px 10px;padding:12px 14px;border:2px solid #ffd54f;border-radius:12px;background:#101826;
+  display:grid;grid-template-columns:auto minmax(0,1fr) 230px;align-items:center;gap:10px;font-family:Arial,sans-serif;text-align:center;color:#fff;letter-spacing:0}
+.ktJM *{box-sizing:border-box}
+.ktJM label{color:#ffd54f;font-weight:700;font-size:15px;min-width:170px;text-align:right;font-family:Arial,sans-serif}
+.ktJM select{width:100%;min-width:0;padding:9px;border-radius:8px;border:none;font-size:14px;font-family:Arial,sans-serif;background:#fff;color:#000}
+.ktJM button{width:230px;margin:3px;padding:9px 10px;border:none;border-radius:8px;background:#1e90ff;color:#fff;cursor:pointer;font-weight:bold;font-size:13px;font-family:Arial,sans-serif}
+.ktJM button:hover{background:#0f6fd1}
+.ktJM .ktJogoVer{display:flex;align-items:center;gap:10px;min-width:0}
+.ktJM .ktJogoVer #ktSelJogo{flex:1}
+.ktJM .ktJogoVer .ktVerLb{min-width:0;text-align:right;white-space:nowrap}
+.ktJM .ktJogoVer #ktOficial{flex:0 0 150px;width:150px;margin:0;padding:9px 6px;font-size:14px;border-radius:8px;background:#5d6b7c;color:#fff;border:2px solid transparent;white-space:nowrap}
+.ktJM .ktJogoVer #ktOficial.lig{background:linear-gradient(180deg,#ffd54f,#f0a500);color:#1b1300;border-color:#fff3c4;box-shadow:0 0 10px rgba(255,213,79,.55)}
+.ktJM .ktJogoVer #ktOficial.outro{background:#7a3b00;color:#ffd08a;border-color:#ffb74d}
+.ktJM .ktJogoVer #ktOficial:disabled{opacity:.45;cursor:default}
+.ktJM .ktBtPar{display:flex;gap:6px;width:230px}
+.ktJM .ktBtPar button{width:auto;flex:1 1 0;padding:9px 4px;font-size:13px}
+.ktJM .ktBtSalvar{background:#27ae60}
+.ktJM .ktBtFim{background:#8e44ad}
+.ktJM .ktAntSel{display:flex;gap:6px;min-width:0}
+.ktJM .ktAntSel #ktSelAntCat{flex:0 0 110px}
+.ktJM .ktAntSel #ktSelAnt{flex:1}
+.ktJM .ktModo{position:absolute;top:-13px;right:14px;width:auto;margin:0;padding:3px 10px;font-size:11px;border-radius:20px;background:#1f9a55;border:1px solid #43c97b;z-index:2}
+html.ktLeitura .ktJM .ktModo{background:#c77700;border-color:#ffb74d}
+.ktJM #ktFaixaTrava,.ktJM #ktFaixaOficial,.ktJM #ktFaixaLeitura{display:none;grid-column:1/-1;text-align:center;border-radius:8px;padding:6px;font-weight:800;font-size:13px}
+.ktJM #ktFaixaTrava.on{display:block;background:#2b1010;border:1px solid #e57373;color:#ffcdd2}
+.ktJM #ktFaixaTrava.ed{display:block;background:#10261a;border:1px solid #66bb6a;color:#c8e6c9}
+.ktJM #ktFaixaOficial{background:#2b1d00;border:1px solid #ffb74d;color:#ffd08a}
+html.ktDesligado .ktJM #ktFaixaOficial{display:block}
+.ktJM #ktFaixaLeitura{background:#3a2600;border:1px solid #ffb74d;color:#ffd08a;letter-spacing:.5px}
+html.ktLeitura .ktJM #ktFaixaLeitura{display:block}
+.ktJM #ktFaixaTrava button,.ktJM #ktFaixaOficial button{width:auto;margin-left:10px;padding:4px 12px;font-size:13px}
+.ktJM #ktFaixaOficial button{background:#f0a500;color:#1b1300}
+.ktJM .ktJMmsg{grid-column:1/-1;text-align:center;font-size:12.5px;color:#9fb3c8}
+.ktJM .ktJMmsg:empty{display:none}
+html.ktDesligado .ktJM .ktBtSalvar,html.ktDesligado .ktJM .ktBtFim,html.ktLeitura .ktJM .ktBtSalvar,html.ktLeitura .ktJM #ktSelJogo{opacity:.35;pointer-events:none;filter:grayscale(.6)}
+@media(max-width:800px){.ktJM{grid-template-columns:1fr}.ktJM label{text-align:left}.ktJM button,.ktJM .ktBtPar{width:100%}}

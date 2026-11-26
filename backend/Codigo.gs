@@ -49,6 +49,7 @@ function doPost(e) {
       case 'placarDefinir': return responder(placarDefinir(p.token, p.id));
       case 'salvarStats': return responder(salvarStats(p.token, p.id, p.stats, p.status, p.dataHora));
       case 'salvarStats41': return responder(salvarStats41(p.token, p.id, p.stats, p.status, p.lances));
+      case 'scoutOficial': return responder(scoutOficial(p.token, p.id, p.versao, p.ligar));
       case 'lances41': return responder(lances41(p.id));
       case 'salvarData': return responder(salvarData(p.token, p.id, p.dataHora));
       case 'salvarFoto': return responder(salvarFoto(p.token, p.chave, p.imagem));
@@ -251,11 +252,59 @@ function excluirJogo(token, id) {
 function salvarStats(token, id, stats, status, dataHora) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
   const j = lerJogos().find(x => x.id === id); if (!j) return { ok: false, erro: 'Jogo não encontrado.' };
+  const trv = travaOficial(j, '4.0'); if (trv) return trv;
   const pl = placarDe(stats); const sh = abaJogos();
   sh.getRange(j.linha, 9, 1, 5).setValues([[JSON.stringify(stats || {}), status || j.status || '', pl[0], pl[1], new Date()]]);
   if (dataHora && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(String(dataHora))) { const c = sh.getRange(j.linha, 3); c.setNumberFormat('@'); c.setValue(String(dataHora).slice(0, 16)); }
   const c = CacheService.getScriptCache(); c.remove('j_' + id); c.remove('lista');
   return { ok: true, placar: pl };
+}
+/* ---------- ⭐ SCOUT OFICIAL DO JOGO (Magno, 25/11/2026) ----------
+   Cada jogo em andamento tem no máximo UM scout ligado (4.0 ou 4.1). Só o scout ligado grava os números,
+   e o Ao Vivo transmite o que ele manda. Para trocar: desliga um e liga o outro.
+   Jogo encerrado (finalizado ou 3 h depois do horário) não precisa de scout ligado: as correções seguem livres.
+   A marca fica nas Propriedades do script (of_ID), com cópia no cache para o Ao Vivo não gastar cota. */
+function tem40(ant) {   // jogo com números feitos no 4.0 (os zeros que o 4.0 grava ao abrir não contam)
+  return !!ant && ant.versao !== '4.1' && ['A', 'B'].some(t => Object.values(ant[t] || {}).some(x => x && ['pts', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'twoMiss', 'threeMiss', 'ftMiss'].some(k => Number(x[k] || 0))));
+}
+function jogoEncerrado(j) {
+  if (j.status === 'FINAL') return true;
+  const d = j.dataHora instanceof Date ? j.dataHora : new Date(String(j.dataHora || '').replace(' ', 'T'));
+  return !isNaN(d) && Date.now() > d.getTime() + 3 * 3600e3;
+}
+function oficialDe(id) {
+  const c = CacheService.getScriptCache(); const k = 'of_' + id; const hit = c.get(k);
+  if (hit !== null) return hit === '-' ? '' : hit;
+  const v = PropertiesService.getScriptProperties().getProperty(k) || '';
+  c.put(k, v || '-', 21600); return v;
+}
+function gravarOficial(id, v) {
+  const pr = PropertiesService.getScriptProperties(); const k = 'of_' + id;
+  if (v) pr.setProperty(k, v); else pr.deleteProperty(k);
+  const c = CacheService.getScriptCache(); c.put(k, v || '-', 21600); c.remove('j_' + id); c.remove('lista');
+}
+function travaOficial(j, versao) {   // null = pode gravar
+  if (jogoEncerrado(j)) return null;
+  const of = oficialDe(j.id); if (of === versao) return null;
+  return { ok: false, desligado: true, oficial: of, erro: of ? 'O Scout ' + of + ' está ligado neste jogo · este scout não grava.' : 'Ligue o ⭐ Scout ' + versao + ' neste jogo para gravar e transmitir.' };
+}
+function scoutOficial(token, id, versao, ligar) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  if (['4.0', '4.1'].indexOf(versao) < 0) return { ok: false, erro: 'Versão do scout inválida.' };
+  const j = lerJogos().find(x => x.id === id); if (!j) return { ok: false, erro: 'Jogo não encontrado.' };
+  const atual = oficialDe(id);
+  if (ligar) {
+    if (atual === versao) return { ok: true, oficial: atual };
+    if (atual) return { ok: false, oficial: atual, erro: 'O Scout ' + atual + ' está ligado neste jogo. Desligue ele primeiro.' };
+    if (jogoEncerrado(j)) return { ok: false, oficial: '', erro: 'Jogo encerrado: não precisa ligar o scout (use o Editar).' };
+    if (versao === '4.1' && tem40(jsonOu(j.stats, {}))) return { ok: false, oficial: '', erro: 'Este jogo já tem números feitos no Scout 4.0 · o 4.1 não continua um jogo do 4.0.' };
+    gravarOficial(id, versao);
+    CacheService.getScriptCache().put('placar_id', id, 21600); PropertiesService.getScriptProperties().setProperty('placarJogo', id);   // placar do OBS passa a mostrar este jogo
+    return { ok: true, oficial: versao };
+  }
+  if (atual && atual !== versao) return { ok: false, oficial: atual, erro: 'Quem está ligado neste jogo é o Scout ' + atual + '.' };
+  gravarOficial(id, '');
+  return { ok: true, oficial: '' };
 }
 /* ---------- Scout PRO 4.1 (Magno, 25/11/2026) ----------
    Função própria do 4.1 (o salvarStats do 4.0 fica intocado).
@@ -275,8 +324,8 @@ function salvarStats41(token, id, stats, status, lances) {
   const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
   const j = lerJogos().find(x => x.id === id); if (!j) return { ok: false, erro: 'Jogo não encontrado.' };
   const ant = jsonOu(j.stats, {});
-  const tem40 = ant && ant.versao !== '4.1' && ['A', 'B'].some(t => Object.values(ant[t] || {}).some(x => x && ['pts', 'reb', 'ast', 'stl', 'blk', 'to', 'foul', 'twoMiss', 'threeMiss', 'ftMiss'].some(k => Number(x[k] || 0))));   // zeros que o 4.0 grava ao abrir não contam
-  if (tem40) return { ok: false, erro: 'Este jogo já tem números feitos no Scout 4.0. Continue nele no 4.0.' };
+  const trv = travaOficial(j, '4.1'); if (trv) return trv;
+  if (tem40(ant)) return { ok: false, erro: 'Este jogo já tem números feitos no Scout 4.0. Continue nele no 4.0.' };
   stats = stats || {}; stats.versao = '4.1';
   ['A', 'B'].forEach(t => { const o = stats[t] || {}; Object.keys(o).forEach(reg => { const s = o[reg] || {};
     s.oreb = Number(s.oreb || 0); s.dreb = Number(s.dreb || 0); s.reb = s.oreb + s.dreb; }); });
@@ -325,6 +374,7 @@ function aoVivoLista(categoria) {
 // leve = só os números do jogo, sem a lista de fotos e apelidos (o Ao vivo pede assim nas atualizações de 5 em 5 s, para gastar menos internet)
 function aoVivoJogo(id, leve) {
   const r = aoVivoJogoCompleto(id);
+  if (r && r.ok && r.jogo) r.jogo.oficial = oficialDe(id);   // ⭐ scout ligado neste jogo ('4.0', '4.1' ou '')
   if (leve && r && r.ok) return { ok: true, leve: true, jogo: r.jogo, agora: r.agora };
   return r;
 }
