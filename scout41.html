@@ -1067,15 +1067,15 @@ function fbCarrega(){ if(FB.pronto||!K41.id) return; FB.pronto=true;
   const um=(u)=>new Promise((ok,er)=>{ const sc=document.createElement('script'); sc.src=u; sc.onload=ok; sc.onerror=er; document.head.appendChild(sc); });
   um('firebase-config.js').then(()=>js.reduce((p,u)=>p.then(()=>um(u)),Promise.resolve())).then(()=>{
     FB.app=firebase.initializeApp(window.KT_FIREBASE); FB.db=firebase.database();
-    firebase.auth().onAuthStateChanged(u=>{ FB.user=u; fbPinta(); if(u){ fbFechaEnt(); FB.enviado={}; fbEnvia(); } else if(!K41.leitura) fbAbreEnt(); });
+    firebase.auth().onAuthStateChanged(u=>{ FB.user=u; fbPinta(); if(u){ fbFechaEnt(); FB.enviado={}; fbEnvia(); } else if(!K41.leitura&&!(typeof kt_desligado==='function'&&kt_desligado())) fbAbreEnt(); });   // desligado: pede a senha só quando ligar o ⭐
   }).catch(()=>{ FB.pronto=false; fbPinta('sem internet'); }); }
 function fbPinta(x){ const b=document.getElementById('fbSt'); if(!b) return; const on=!!FB.user&&!x;
   b.className=on?'on':'off'; b.textContent=on?'AO VIVO: ligado':('AO VIVO: '+(x||'desligado'));
   b.title=on?'Cada lance vai na hora para o Ao Vivo (Firebase)':'Toque para entrar no scout e ligar o Ao Vivo'; }
-function fbAbreEnt(){ if(K41.leitura||FB.user) return; document.getElementById('fbEr').textContent=''; document.getElementById('fbEnt').classList.add('on'); setTimeout(()=>document.getElementById('fbSe').focus(),50); }
+function fbAbreEnt(){ if(K41.leitura||FB.user) return; if(!FB.pronto) fbCarrega(); document.getElementById('fbEr').textContent=''; document.getElementById('fbEnt').classList.add('on'); setTimeout(()=>document.getElementById('fbSe').focus(),50); }
 function fbFechaEnt(){ document.getElementById('fbEnt').classList.remove('on'); document.getElementById('fbSe').value=''; }
 async function fbEntra(){ const em=document.getElementById('fbEm').value.trim(), se=document.getElementById('fbSe').value, er=document.getElementById('fbEr');
-  if(!window.firebase){ er.textContent='Sem conexão com o Firebase · tente de novo'; return; }
+  if(!window.firebase||!FB.app){ if(!FB.pronto) fbCarrega(); er.textContent='Carregando o Firebase… toque em Entrar de novo em alguns segundos'; return; }
   er.textContent='Entrando…';
   try{ await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); await firebase.auth().signInWithEmailAndPassword(em,se); aviso('✅ Scout liberado neste aparelho · Ao Vivo ligado',1); }
   catch(e){ er.textContent=/password|credential|user/i.test(e.code||'')?'Usuário ou senha não conferem':'Não deu para entrar ('+(e.code||'erro')+')'; } }
@@ -1264,7 +1264,7 @@ async function kt_testeClique(){ const j=(K41.id?KT_JREF:null); if(!j) return al
 const kt_apiTeste=ligar=>k41Api({acao:'modoTeste',token:k41Tok(),id:K41.id,ligar});
 kt_listarMontados();
 k41Lista(); k41Abre().then(()=>{ kt_ofPintar(); kt_pintarTrava(); kt_listarAnteriores(KT_MONTADOS.find(j=>j.id===K41.id));
-  if(K41.id&&!K41.bloq&&!kt_desligado()) fbCarrega();
+  if(K41.id&&!K41.bloq) fbCarrega();   // o Firebase carrega sempre; só manda lance com o ⭐ ligado
   if(K41.id&&KT_OFICIAL===KT_VER&&KT_JREF&&!kt_encerrado(KT_JREF)) setTimeout(kt_irScout,600);   // jogo ligado aqui: vai direto para o scout
   if(new URLSearchParams(location.search).get('editar')==='1'&&C.fim&&!C.edit){ history.replaceState(null,'','?jogo='+encodeURIComponent(K41.id)); kt_editarAnterior(); } });
 </script>
