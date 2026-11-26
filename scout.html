@@ -226,7 +226,8 @@ hr{
 .ktJM .ktJogoVer #ktOficial.outro{background:#7a3b00;color:#ffd08a;border-color:#ffb74d}
 .ktJM .ktJogoVer #ktOficial:disabled{opacity:.45;cursor:default}
 #ktFaixaOficial{display:none;grid-column:1/-1;text-align:center;border-radius:8px;padding:6px;font-weight:800;font-size:13px;background:#2b1d00;border:1px solid #ffb74d;color:#ffd08a}
-html.ktDesligado #ktFaixaOficial{display:block}
+html.ktAviso #ktFaixaOficial{display:block}
+#ktFaixaOficial.teste{border:2px dashed #ffd54f;background:#3a3000;color:#ffe58a}
 .ktJM .ktJogoVer #ktTeste{flex:0 0 112px;width:112px;margin:0;padding:9px 6px;font-size:14px;border-radius:8px;background:#3d4654;color:#fff;border:2px solid transparent;white-space:nowrap}
 .ktJM .ktJogoVer #ktTeste.on{background:repeating-linear-gradient(135deg,#ffd54f 0 10px,#1b1300 10px 20px);color:#fff;border-color:#ffd54f;text-shadow:0 0 3px #000,0 0 3px #000}
 .ktJM .ktJogoVer #ktTeste:disabled{opacity:.45;cursor:default}
@@ -439,7 +440,6 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktJogoTravado .ktQck,html.ktJog
 <button type="button" onclick="kt_editarAnterior()">✏️ Editar</button>
 <div id="ktFaixaTrava"></div>
 <div id="ktFaixaOficial"></div>
-<div id="ktFaixaTeste"></div>
 <div id="ktFaixaLeitura">👁️ SEGUNDA TELA — só leitura · acompanhando o que o outro computador marca</div>
 <div id="ktJMmsg" class="ktJMmsg"></div>
 </div><!--/ktJogoMontado-->
@@ -1883,7 +1883,7 @@ function kt_ofPintar(){ const b=document.getElementById('ktOficial'), f=document
   else if(KT_OFICIAL){ b.textContent='⭐ '+KT_OFICIAL+' ligado'; b.classList.add('outro'); b.title='O Scout '+KT_OFICIAL+' está ligado neste jogo. Toque para trocar para o '+KT_VER+'.'; }
   else { b.textContent='⭐ Ligar '+KT_VER; b.title='Ligar o Scout '+KT_VER+' como scout oficial deste jogo'; }
   const off=kt_desligado(); document.documentElement.classList.toggle('ktDesligado',off);
-  if(f) f.innerHTML=!off?'':(KT_OFICIAL?'⭐ O SCOUT '+KT_OFICIAL+' ESTÁ LIGADO NESTE JOGO — o Ao Vivo transmite ele; aqui só dá para olhar <button type="button" onclick="kt_ofClique()">Trocar para o '+KT_VER+'</button>':'⭐ SCOUT DESLIGADO — carregue o jogo, confira os jogadores e ligue para começar a marcar <button type="button" onclick="kt_ofClique()">⭐ Ligar '+KT_VER+'</button>'); kt_testePintar(); }
+  kt_testePintar(); }
 async function kt_ofApi(versao,ligar){ return kt_apiSc({acao:'scoutOficial',id:KT_JOGO_ID,versao,ligar}); }
 async function kt_ofClique(){ const j=kt_jogoAtual(); if(!j) return alert('Escolha primeiro o jogo montado.');
   if(kt_encerrado(j)) return alert('Jogo encerrado: não precisa ligar o scout. Para corrigir, use o Editar.');
@@ -1923,7 +1923,13 @@ function kt_testePintar(){ const b=document.getElementById('ktTeste'), f=documen
   b.textContent=j&&KT_TESTE?'🧪 TESTE':'🧪 Teste';
   b.title=!j?'Escolha primeiro o jogo montado':(KT_TESTE?'Modo teste ligado. Toque para desligar: este jogo volta zerado, como recém-montado.':(kt_encerrado(j)?'Jogo encerrado: o modo teste é só para jogo que ainda vai acontecer':'Ligar o modo teste: tudo funciona normal; ao desligar, este jogo volta zerado'));
   document.documentElement.classList.toggle('ktTeste',!!(j&&KT_TESTE));
-  if(f) f.innerHTML='🧪 MODO TESTE — tudo funciona normal (Scout, Ao Vivo, aplicativo). Ao desligar a chave 🧪, este jogo volta zerado, como recém-montado.'; }
+  kt_faixaStatus(); }
+// um retângulo só de aviso (sem botão): ⭐ situação do scout · 🧪 modo teste (Magno, 25/11/2026)
+function kt_faixaStatus(){ const f=document.getElementById('ktFaixaOficial'); if(!f) return; const p=[];
+  if(kt_desligado()) p.push(KT_OFICIAL?'⭐ SCOUT '+KT_OFICIAL+' LIGADO NESTE JOGO · aqui só dá para olhar':'⭐ SCOUT DESLIGADO');
+  if(document.documentElement.classList.contains('ktTeste')) p.push('🧪 MODO TESTE · ao desligar o teste, o jogo volta zerado');
+  f.textContent=p.join('   ·   '); f.classList.toggle('teste',document.documentElement.classList.contains('ktTeste')); document.documentElement.classList.toggle('ktAviso',p.length>0); }
+
 async function kt_testeClique(){ const j=kt_jogoAtual(); if(!j) return alert('Escolha primeiro o jogo montado.');
   if(KT_LEITURA) return alert('👁️ Esta tela está como segunda tela (só leitura). Use o aparelho que marca.');
   const b=document.getElementById('ktTeste'); let r;

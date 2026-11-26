@@ -34,7 +34,8 @@ html.ktLeitura .ktJM .ktModo{background:#c77700;border-color:#ffb74d}
 .ktJM #ktFaixaTrava.on{display:block;background:#2b1010;border:1px solid #e57373;color:#ffcdd2}
 .ktJM #ktFaixaTrava.ed{display:block;background:#10261a;border:1px solid #66bb6a;color:#c8e6c9}
 .ktJM #ktFaixaOficial{background:#2b1d00;border:1px solid #ffb74d;color:#ffd08a}
-html.ktDesligado .ktJM #ktFaixaOficial{display:block}
+html.ktAviso .ktJM #ktFaixaOficial{display:block}
+.ktJM #ktFaixaOficial.teste{border:2px dashed #ffd54f;background:#3a3000;color:#ffe58a}
 .ktJM #ktFaixaLeitura{background:#3a2600;border:1px solid #ffb74d;color:#ffd08a;letter-spacing:.5px}
 html.ktLeitura .ktJM #ktFaixaLeitura{display:block}
 .ktJM #ktFaixaTrava button,.ktJM #ktFaixaOficial button{width:auto;margin-left:10px;padding:4px 12px;font-size:13px}
