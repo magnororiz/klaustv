@@ -396,7 +396,7 @@ function kt41_filtro(k){ KT41.filtro.ver=k; if(KT_ULT) kt_render(KT_ULT); }
 // Filtro: Acertos · Erros · Ambos. As duas metades são a mesma meia quadra do Scout 4.1, uma virada para cada lado.
 function kt_arrHTML(j){ const m=j.meta||{}, tA=m.timeA||{}, tB=m.timeB||{}, nm=l=>{ const t=m['time'+l]||{}; return m.avulso?(t.nome||t.sigla||'Time '+l):(D.curto[t.sigla]||t.nome||t.sigla||'Time '+l); };
   const ver=KT41.filtro.ver||'amb', M=kt41_marcas(j);
-  const S=40,W=15*S,Mm=14*S,cx=W/2,K=1.28,y=v=>v*S*K,cy=y(1.575),r3=6.75*S,yq=y(1.575+Math.sqrt(6.75**2-6.6**2)),x1=.9*S,x2=W-.9*S,ry3=r3*K,gw=4.9*S,gh=y(5.8),rl=1.8*S,rlY=rl*K,L='#e8e8e8';
+  const S=40,W=15*S,Mm=14*S,cx=W/2,K=1.28,y=v=>v*S*K,cy=y(1.575),r3=6.75*S,yq=y(1.575+Math.sqrt(6.75**2-6.6**2)),x1=.9*S,x2=W-.9*S,ry3=r3*K,gw=4.9*S,gh=y(5.8),rl=1.7*S,rlY=rl,L='#e8e8e8';
   const meia=`<path d="M${x1} 0V${yq}A${r3} ${ry3} 0 0 0 ${x2} ${yq}V0Z" fill="#fff" fill-opacity=".03"/><rect x="${cx-gw/2}" y="0" width="${gw}" height="${gh}" fill="#173f86"/>
     <g fill="none" stroke="${L}" stroke-width="3"><rect x="${cx-gw/2}" y="0" width="${gw}" height="${gh}"/><path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 0 ${cx+rl} ${gh}"/><path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 1 ${cx+rl} ${gh}" stroke-dasharray="14 12"/>
     <path d="M${x1} 0V${yq}A${r3} ${ry3} 0 0 0 ${x2} ${yq}V0"/><path d="M${cx-1.25*S} ${cy}A${1.25*S} ${1.25*S*K} 0 0 0 ${cx+1.25*S} ${cy}"/>
