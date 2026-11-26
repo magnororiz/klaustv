@@ -401,8 +401,11 @@ function kt_arrHTML(j){ const m=j.meta||{}, tA=m.timeA||{}, tB=m.timeB||{}, nm=l
     <g fill="none" stroke="${L}" stroke-width="3"><rect x="${cx-gw/2}" y="0" width="${gw}" height="${gh}"/><path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 0 ${cx+rl} ${gh}"/><path d="M${cx-rl} ${gh}A${rl} ${rlY} 0 0 1 ${cx+rl} ${gh}" stroke-dasharray="14 12"/>
     <path d="M${x1} 0V${yq}A${r3} ${ry3} 0 0 0 ${x2} ${yq}V0"/><path d="M${cx-1.25*S} ${cy}A${1.25*S} ${1.25*S*K} 0 0 0 ${cx+1.25*S} ${cy}"/>
     <line x1="${cx-.9*S}" y1="${y(1.2)}" x2="${cx+.9*S}" y2="${y(1.2)}" stroke-width="5"/><circle cx="${cx}" cy="${cy}" r="${.225*S}" stroke="#ff8a1a"/></g>`;
-  const pts=l=>M.filter(x=>(x.t||'a').toUpperCase()===l&&(ver==='amb'||(ver==='ok')===!!x.ok)).map(x=>{ const c=x.ok?'#2ee66b':'#ff3b3b';
-    return `<circle cx="${x.x}" cy="${Math.min(x.y,Mm-6)}" r="10" fill="${c}" stroke="#000" stroke-opacity=".5" stroke-width="1.5"><title>${esc(nm(l))} · ${x.ok?'acerto':'erro'}${x.n?' · camisa '+esc(x.n):''}${x.z?' · '+esc(x.z):''}${x.q?' · '+(x.q<=4?x.q+'º Q':(x.q-4)+'ª PR'):''}</title></circle>`; }).join('');
+  // arremessos no mesmo lugar (ex.: errou, pegou o rebote e acertou): ficam lado a lado, encostados, em vez de um tampar o outro (Magno, 26/11/2026)
+  const espalha=L=>{ const g=[]; L.forEach(x=>{ const y=Math.min(x.y,Mm-6), gr=g.find(c=>Math.hypot(c.x-x.x,c.y-y)<20); if(gr){ gr.m.push(x); } else g.push({x:x.x,y,m:[x]}); });
+    const out=[]; g.forEach(c=>{ c.m.sort((p,q)=>(q.ok?1:0)-(p.ok?1:0)); const n=c.m.length; c.m.forEach((x,i)=>out.push(Object.assign({},x,{px:c.x+(i-(n-1)/2)*21,py:c.y}))); }); return out; };
+  const pts=l=>espalha(M.filter(x=>(x.t||'a').toUpperCase()===l&&(ver==='amb'||(ver==='ok')===!!x.ok))).map(x=>{ const c=x.ok?'#2ee66b':'#ff3b3b';
+    return `<circle cx="${x.px}" cy="${x.py}" r="10" fill="${c}" stroke="#000" stroke-opacity=".5" stroke-width="1.5"><title>${esc(nm(l))} · ${x.ok?'acerto':'erro'}${x.n?' · camisa '+esc(x.n):''}${x.z?' · '+esc(x.z):''}${x.q?' · '+(x.q<=4?x.q+'º Q':(x.q-4)+'ª PR'):''}</title></circle>`; }).join('');
   // escudos pequenos no alto da quadra, um de cada lado da linha do meio (Magno, 25/11/2026)
   const escImg=(t,x)=>`<image href="${esc(escudo(t.sigla))}" x="${x}" y="14" width="64" height="64" preserveAspectRatio="xMidYMid meet" style="pointer-events:none"/>`;
   const conta=l=>{ const s=M.filter(x=>(x.t||'a').toUpperCase()===l), a=s.length, c=s.filter(x=>x.ok).length; return `<span>${esc(nm(l))}: <b>${c} de ${a}</b> (${a?Math.round(c*100/a):0}%)</span>`; };
