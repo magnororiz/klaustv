@@ -16,6 +16,11 @@
 .ktJM .ktJogoVer #ktOficial.lig{background:linear-gradient(180deg,#ffd54f,#f0a500);color:#1b1300;border-color:#fff3c4;box-shadow:0 0 10px rgba(255,213,79,.55)}
 .ktJM .ktJogoVer #ktOficial.outro{background:#7a3b00;color:#ffd08a;border-color:#ffb74d}
 .ktJM .ktJogoVer #ktOficial:disabled{opacity:.45;cursor:default}
+.ktJM .ktJogoVer #ktTeste{flex:0 0 112px;width:112px;margin:0;padding:9px 6px;font-size:14px;border-radius:8px;background:#3d4654;color:#fff;border:2px solid transparent;white-space:nowrap}
+.ktJM .ktJogoVer #ktTeste.on{background:repeating-linear-gradient(135deg,#ffd54f 0 10px,#1b1300 10px 20px);color:#fff;border-color:#ffd54f;text-shadow:0 0 3px #000,0 0 3px #000}
+.ktJM .ktJogoVer #ktTeste:disabled{opacity:.45;cursor:default}
+.ktJM #ktFaixaTeste{display:none;grid-column:1/-1;text-align:center;border-radius:8px;padding:6px;font-weight:800;font-size:13px;background:#3a3000;border:2px dashed #ffd54f;color:#ffe58a}
+html.ktTeste .ktJM #ktFaixaTeste{display:block}
 .ktJM .ktBtPar{display:flex;gap:6px;width:230px}
 .ktJM .ktBtPar button{width:auto;flex:1 1 0;padding:9px 4px;font-size:13px}
 .ktJM .ktBtSalvar{background:#27ae60}

@@ -279,7 +279,7 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
 
 <!--ktJogoMontado: IGUAL em todas as versões do Scout (desenho em scout-topo.css)--><div class="ktJM"><button type="button" id="ktModo" class="ktModo" onclick="kt_trocarModoTela()" title="Trocar entre marcar o jogo e só acompanhar (segunda tela)">✏️ Marcando</button>
 <label for="ktSelJogo">🏀 Jogo montado</label>
-<div class="ktJogoVer"><select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select><label for="ktOficial" class="ktVerLb">Versão</label><button type="button" id="ktOficial" class="ktOficial" data-v="4.1" onclick="kt_ofClique()" title="⭐ Scout oficial deste jogo: liga e desliga">⭐ 4.1</button></div>
+<div class="ktJogoVer"><select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select><label for="ktOficial" class="ktVerLb">Versão</label><button type="button" id="ktOficial" class="ktOficial" data-v="4.1" onclick="kt_ofClique()" title="⭐ Scout oficial deste jogo: liga e desliga">⭐ 4.1</button><button type="button" id="ktTeste" class="ktTeste" onclick="kt_testeClique()" title="🧪 Modo teste: liga para testar; ao desligar, este jogo volta zerado">🧪 Teste</button></div>
 <div class="ktBtPar"><button type="button" class="ktBtSalvar" onclick="kt_salvarAndamento()" title="Grava o jogo na planilha agora">Salvar jogo</button><button type="button" class="ktBtFim" onclick="kt_finalizar(this)" title="Encerra o jogo: o Ao vivo para de atualizar e mostra JOGO FINALIZADO">Finalizar jogo</button></div>
 <input type="hidden" id="ktDataJogo">
 <label for="ktSelAnt">📚 Jogos anteriores</label>
@@ -287,6 +287,7 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
 <button type="button" onclick="kt_editarAnterior()">✏️ Editar</button>
 <div id="ktFaixaTrava"></div>
 <div id="ktFaixaOficial"></div>
+<div id="ktFaixaTeste"></div>
 <div id="ktFaixaLeitura">👁️ SEGUNDA TELA — só leitura · acompanhando o que o outro computador marca</div>
 <div id="ktJMmsg" class="ktJMmsg"></div>
 </div><!--/ktJogoMontado-->
@@ -969,7 +970,7 @@ async function k41Abre(){ if(!K41.id) return;
   aviso('Abrindo o jogo…',1);
   const r=await k41Api({acao:'aoVivoJogo',id:K41.id});
   if(!r.ok||!r.jogo){ K41.bloq='Jogo não encontrado na planilha'; aviso('⚠️ '+K41.bloq+' · ficou o jogo de teste'); K41.id=''; return; }
-  const j=r.jogo, m=j.meta||{}, st=j.stats||{}, ap=r.apelidos||{}; KT_OFICIAL=j.oficial||''; KT_JREF=j;
+  const j=r.jogo, m=j.meta||{}, st=j.stats||{}, ap=r.apelidos||{}; KT_OFICIAL=j.oficial||''; KT_JREF=j; KT_TESTE=!!j.teste; KT_ZERADO=+j.zerado||0;
   if((st.A&&Object.keys(st.A).length||st.B&&Object.keys(st.B).length)&&st.versao!=='4.1'&&Object.values(st.A||{}).concat(Object.values(st.B||{})).some(s=>s&&(+s.pts||+s.reb||+s.ast||+s.foul||+s.twoMiss||+s.threeMiss||+s.ftMiss)))
     K41.bloq='Este jogo já tem números feitos no Scout 4.0 · continue nele no 4.0 (o 4.1 não grava por cima)';
   for(const t of ['a','b']){ const tm=m['time'+t.toUpperCase()]||{}, sg=tm.sigla||'';
@@ -987,6 +988,7 @@ async function k41Abre(){ if(!K41.id) return;
   // volta do ponto em que estava: o mais novo entre este aparelho e a planilha
   let loc=null; try{ loc=JSON.parse(localStorage.getItem('kt41_'+K41.id)||'null'); }catch(e){}
   if(loc&&st.versao!=='4.1'&&Date.now()-(loc.ts||0)>2*3600e3){ loc=null; try{ localStorage.removeItem('kt41_'+K41.id); }catch(e){} }   // teste antigo que nunca foi para a planilha: descarta
+  if(loc&&(loc.ts||0)<=KT_ZERADO){ loc=null; try{ localStorage.removeItem('kt41_'+K41.id); }catch(e){} }   // 🧪 guardado antes do jogo ser zerado: não vale
   const rl=st.versao==='4.1'?await k41Api({acao:'lances41',id:K41.id}):null; const rem=rl&&rl.ok&&rl.lances&&rl.lances.foto?rl.lances:null;
   const o=[loc,rem].filter(Boolean).sort((x,y)=>(y.ts||0)-(x.ts||0))[0];
   const ed=st.editor; K41.donoTs=(ed&&ed.dev===K41_DEV)?(+ed.ts||Date.now()):Date.now();
@@ -1200,7 +1202,7 @@ function kt_ofPintar(){ const b=document.getElementById('ktOficial'), f=document
   else if(KT_OFICIAL===KT_VER){ b.textContent='⭐ '+KT_VER+' LIGADO'; b.classList.add('lig'); b.title='Este é o scout oficial do jogo: ele marca e o Ao Vivo transmite. Toque para desligar.'; }
   else if(KT_OFICIAL){ b.textContent='⭐ '+KT_OFICIAL+' ligado'; b.classList.add('outro'); b.title='O Scout '+KT_OFICIAL+' está ligado neste jogo. Toque para trocar para o '+KT_VER+'.'; }
   else { b.textContent='⭐ Ligar '+KT_VER; b.title='Ligar o Scout '+KT_VER+' como scout oficial deste jogo'; }
-  const off=kt_desligado(); document.documentElement.classList.toggle('ktDesligado',off);
+  kt_testePintar(); const off=kt_desligado(); document.documentElement.classList.toggle('ktDesligado',off);
   if(f) f.innerHTML=!off?'':(KT_OFICIAL?'⭐ O SCOUT '+KT_OFICIAL+' ESTÁ LIGADO NESTE JOGO — o Ao Vivo transmite ele; aqui só dá para olhar <button type="button" onclick="kt_ofClique()">Trocar para o '+KT_VER+'</button>':'⭐ SCOUT DESLIGADO — carregue o jogo, confira os jogadores e ligue para começar a marcar <button type="button" onclick="kt_ofClique()">⭐ Ligar '+KT_VER+'</button>'); }
 const kt_ofApi=(versao,ligar)=>k41Api({acao:'scoutOficial',token:k41Tok(),id:K41.id,versao,ligar});
 const kt_irScout=()=>{ const h=document.querySelector('header.top'); if(h) scrollTo({top:h.getBoundingClientRect().top+scrollY,behavior:'smooth'}); };
@@ -1228,9 +1230,38 @@ async function kt_ofClique(){ const j=KT_JREF; if(!K41.id||!j) return alert('Esc
   if(typeof FB!=='undefined'){ FB.enviado={}; if(!FB.pronto) fbCarrega(); else if(!FB.user) fbAbreEnt(); }
   kt_msg('⭐ Scout '+KT_VER+' LIGADO: é ele que marca e o Ao Vivo transmite. Bom jogo!'); aviso('⭐ Scout '+KT_VER+' ligado · bom jogo!',1); setTimeout(kt_irScout,400); }
 // confere a cada 8 s quem está ligado (outro aparelho pode ter trocado o scout)
-setInterval(async()=>{ if(!K41.id||!KT_JREF||document.hidden) return; if(kt_encerrado(KT_JREF)){ kt_ofPintar(); return; }
-  const r=await k41Api({acao:'aoVivoJogo',id:K41.id,leve:true}); if(!r.ok||!r.jogo) return; const of=r.jogo.oficial||''; KT_JREF.status=r.jogo.status;
+setInterval(async()=>{ if(!K41.id||!KT_JREF||document.hidden) return; if(kt_encerrado(KT_JREF)&&!KT_TESTE){ kt_ofPintar(); return; }
+  const r=await k41Api({acao:'aoVivoJogo',id:K41.id,leve:true}); if(!r.ok||!r.jogo) return; const of=r.jogo.oficial||''; KT_JREF.status=r.jogo.status; if(!!r.jogo.teste!==KT_TESTE){ KT_TESTE=!!r.jogo.teste; kt_testePintar(); }
   if(of!==KT_OFICIAL){ const era=KT_OFICIAL; KT_OFICIAL=of; if(era===KT_VER&&C.anda) pausa(); kt_ofPintar(); if(era===KT_VER){ kt_msg('⭐ O Scout '+KT_VER+' foi desligado'+(of?' e o Scout '+of+' foi ligado':'')+' em outro aparelho. Este scout parou de marcar.'); aviso('⭐ Este scout foi desligado em outro aparelho'); } } },8000);
+
+/* ===== 🧪 MODO TESTE DO JOGO (Magno, 25/11/2026) · igual em todas as versões do Scout =====
+   Chave ligada: tudo funciona normal (Scout, planilha, Ao Vivo, aplicativo, placar) para conferir.
+   Chave desligada: o jogo montado volta ao original (números, placar, status e lance a lance zerados; ⭐ desligado),
+   e no dia dá para escolher o 4.0 ou o 4.1. Só zera jogo que estava em modo teste. */
+var KT_TESTE=false, KT_ZERADO=0;
+function kt_testePintar(){ const b=document.getElementById('ktTeste'), f=document.getElementById('ktFaixaTeste'); if(!b) return; const j=(K41.id?KT_JREF:null);
+  b.classList.toggle('on',!!(j&&KT_TESTE)); b.disabled=!j||(!KT_TESTE&&kt_encerrado(j));
+  b.textContent=j&&KT_TESTE?'🧪 TESTE':'🧪 Teste';
+  b.title=!j?'Escolha primeiro o jogo montado':(KT_TESTE?'Modo teste ligado. Toque para desligar: este jogo volta zerado, como recém-montado.':(kt_encerrado(j)?'Jogo encerrado: o modo teste é só para jogo que ainda vai acontecer':'Ligar o modo teste: tudo funciona normal; ao desligar, este jogo volta zerado'));
+  document.documentElement.classList.toggle('ktTeste',!!(j&&KT_TESTE));
+  if(f) f.innerHTML='🧪 MODO TESTE — tudo funciona normal (Scout, Ao Vivo, aplicativo). Ao desligar a chave 🧪, este jogo volta zerado, como recém-montado.'; }
+async function kt_testeClique(){ const j=(K41.id?KT_JREF:null); if(!j) return alert('Escolha primeiro o jogo montado.');
+  if(K41.leitura) return alert('👁️ Esta tela está como segunda tela (só leitura). Use o aparelho que marca.');
+  const b=document.getElementById('ktTeste'); let r;
+  if(!KT_TESTE){
+    if(!confirm('Ligar o MODO TESTE neste jogo?\n\nTudo funciona normal para testar: Scout, Ao Vivo, aplicativo e placar.\n\nQuando você desligar a chave 🧪, TUDO deste jogo é zerado (números, placar e lance a lance), inclusive o que já estiver marcado agora.')) return;
+    b.disabled=true; r=await kt_apiTeste(true); b.disabled=false;
+    if(!r.ok) return alert('Não foi possível ligar o teste: '+(r.erro||'tente de novo'));
+    KT_TESTE=true; kt_testePintar(); kt_msg('🧪 Modo teste ligado. Pode marcar e conferir tudo; ao desligar a chave, o jogo volta zerado.'); return; }
+  if(!confirm('Desligar o teste e ZERAR este jogo?\n\nNúmeros, placar e lance a lance deste jogo são apagados e o ⭐ scout é desligado. O jogo volta como recém-montado.')) return;
+  const h=new Date(String(j.dataHora||'').replace(' ','T')); if(!isNaN(h)&&Date.now()>=h.getTime()&&!confirm('ATENÇÃO: o horário deste jogo já chegou.\n\nSe o jogo de verdade já começou, os números dele também vão ser apagados.\n\nZerar mesmo assim?')) return;
+  b.disabled=true; kt_msg('Zerando o jogo…'); const bq=K41.bloq; K41.bloq='zerando o teste';
+  r=await kt_apiTeste(false);
+  if(!r.ok){ K41.bloq=bq; b.disabled=false; kt_msg(''); return alert('Não foi possível zerar: '+(r.erro||'tente de novo')); }
+  try{ localStorage.removeItem('kt41_'+K41.id); }catch(e){}
+  try{ if(typeof FB!=='undefined'&&FB.user&&FB.db) await FB.db.ref('aovivo/'+K41.id).remove(); }catch(e){}
+  kt_msg('✅ Jogo zerado. Recarregando…'); setTimeout(()=>location.reload(),600); }
+const kt_apiTeste=ligar=>k41Api({acao:'modoTeste',token:k41Tok(),id:K41.id,ligar});
 kt_listarMontados();
 k41Lista(); k41Abre().then(()=>{ kt_ofPintar(); kt_pintarTrava(); kt_listarAnteriores(KT_MONTADOS.find(j=>j.id===K41.id));
   if(K41.id&&!K41.bloq&&!kt_desligado()) fbCarrega();

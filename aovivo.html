@@ -375,7 +375,9 @@ function kt41_stats(d,base){ if(!d||!d.quadra) return null; const out=Object.ass
   const e=d.estado||{}; if(e.pq){ const q=+e.q||1; out.periodos={}; for(const [t,T2] of [['a','A'],['b','B']]){ const pq=(e.pq[t]||[]).concat([0,0,0,0,0]).slice(0,5);
     out.periodos[T2]=q<=4?pq.slice(0,4).map((x,i)=>i<q?(+x||0):null).concat([null]):pq.map(x=>+x||0); } out.qFech=Math.min(5,e.em?q-1:q); }
   return out; }
-function kt41_aplica(j){ const d=KT41.dado; if(!d||KT41.id!==j.id) return j; const fb=kt41_stats(d,j.stats); if(fb) j.stats=fb; return j; }
+// 🧪 jogo zerado depois do teste: o que sobrou no Firebase de antes do zerar não vale (Magno, 25/11/2026)
+const kt41_valido=(d,j)=>!!d&&!(j&&j.zerado&&!(((d.estado||{}).ts||0)>j.zerado));
+function kt41_aplica(j){ const d=KT41.dado; if(!d||KT41.id!==j.id||!kt41_valido(d,j)) return j; const fb=kt41_stats(d,j.stats); if(fb) j.stats=fb; return j; }
 // ⭐ quem transmite é o scout ligado no jogo (Magno, 25/11/2026); jogo sem scout ligado segue a marca gravada nos números
 function kt_eh41(j){ const of=(j&&j.oficial)||''; return of?of==='4.1':((j&&j.stats)||{}).versao==='4.1'; }
 function kt41_planilha(j){ const v41=kt_eh41(j);
@@ -387,7 +389,7 @@ function kt41_planilha(j){ const v41=kt_eh41(j);
 // arremessos: do Firebase (na hora) ou, sem ele, do lance a lance guardado na planilha (aba Lances41)
 async function kt41_marcasPlanilha(id){ if(KT41.marcasPlT&&Date.now()-KT41.marcasPlT<15000&&KT41.marcasPl&&KT41.marcasPl.id===id) return; KT41.marcasPlT=Date.now();
   const r=await api({acao:'lances41',id}); const L=r.ok&&r.lances&&r.lances.foto&&r.lances.foto.MARCAS; KT41.marcasPl={id,m:L||[]}; if(KT_ABA==='arr'&&KT_ULT&&KT_ULT.id===id) kt_render(KT_ULT); }
-function kt41_marcas(j){ const d=KT41.id===j.id&&KT41.dado; if(d&&d.marcas) return Object.values(d.marcas).filter(Boolean);
+function kt41_marcas(j){ const d=KT41.id===j.id&&kt41_valido(KT41.dado,j)&&KT41.dado; if(d&&d.marcas) return Object.values(d.marcas).filter(Boolean);
   if(!KT41.marcasPl||KT41.marcasPl.id!==j.id||status(j)==='vivo') kt41_marcasPlanilha(j.id); return (KT41.marcasPl&&KT41.marcasPl.id===j.id)?KT41.marcasPl.m:[]; }
 function kt41_filtro(k){ KT41.filtro.ver=k; if(KT_ULT) kt_render(KT_ULT); }
 // quadra inteira (Magno, 25/11/2026): metade esquerda = time A (escudo dele), metade direita = time B; cada time com seus acertos e erros.

@@ -50,6 +50,7 @@ function doPost(e) {
       case 'salvarStats': return responder(salvarStats(p.token, p.id, p.stats, p.status, p.dataHora));
       case 'salvarStats41': return responder(salvarStats41(p.token, p.id, p.stats, p.status, p.lances));
       case 'scoutOficial': return responder(scoutOficial(p.token, p.id, p.versao, p.ligar));
+      case 'modoTeste': return responder(modoTeste(p.token, p.id, p.ligar));
       case 'lances41': return responder(lances41(p.id));
       case 'salvarData': return responder(salvarData(p.token, p.id, p.dataHora));
       case 'salvarFoto': return responder(salvarFoto(p.token, p.chave, p.imagem));
@@ -306,6 +307,38 @@ function scoutOficial(token, id, versao, ligar) {
   gravarOficial(id, '');
   return { ok: true, oficial: '' };
 }
+/* ---------- 🧪 MODO TESTE DO JOGO (Magno, 25/11/2026) ----------
+   Chave ligada: tudo funciona normal (Scout, planilha, Ao Vivo, aplicativo, placar) para conferir.
+   Chave desligada: o jogo montado volta ao original · números, status, placar e lance a lance do 4.1 apagados,
+   ⭐ desligado. Assim, no dia, dá para escolher o 4.0 ou o 4.1. Só zera jogo que estava em modo teste.
+   ze_ID guarda quando foi zerado: os aparelhos jogam fora o rascunho guardado antes disso. */
+function propJogo(pref, id) {
+  const c = CacheService.getScriptCache(); const k = pref + id; const hit = c.get(k);
+  if (hit !== null) return hit === '-' ? '' : hit;
+  const v = PropertiesService.getScriptProperties().getProperty(k) || '';
+  c.put(k, v || '-', 21600); return v;
+}
+function gravarPropJogo(pref, id, v) {
+  const pr = PropertiesService.getScriptProperties(); const k = pref + id;
+  if (v) pr.setProperty(k, String(v)); else pr.deleteProperty(k);
+  const c = CacheService.getScriptCache(); c.put(k, v ? String(v) : '-', 21600); c.remove('j_' + id); c.remove('lista');
+}
+function modoTeste(token, id, ligar) {
+  const u = daSessao(token); if (!u) return { ok: false, erro: 'Sessão expirada. Entre de novo.' };
+  const j = lerJogos().find(x => x.id === id); if (!j) return { ok: false, erro: 'Jogo não encontrado.' };
+  const em = propJogo('te_', id) === '1';
+  if (ligar) {
+    if (em) return { ok: true, teste: true };
+    if (jogoEncerrado(j)) return { ok: false, teste: false, erro: 'Jogo encerrado: o modo teste é só para jogo que ainda vai acontecer.' };
+    gravarPropJogo('te_', id, '1'); return { ok: true, teste: true };
+  }
+  if (!em) return { ok: false, teste: false, erro: 'Este jogo não está em modo teste · nada foi zerado.' };
+  abaJogos().getRange(j.linha, 9, 1, 5).setValues([['', '', 0, 0, new Date()]]);   // números, status e placar voltam ao original
+  const la = abaLances41(); if (la.getLastRow() > 1) { const ids = la.getRange(2, 1, la.getLastRow() - 1, 1).getValues().map(r => r[0]); const i = ids.indexOf(id); if (i >= 0) la.deleteRow(i + 2); }
+  gravarOficial(id, ''); gravarPropJogo('te_', id, ''); gravarPropJogo('ze_', id, Date.now());
+  CacheService.getScriptCache().remove('l41_' + id);
+  return { ok: true, teste: false, zerado: true };
+}
 /* ---------- Scout PRO 4.1 (Magno, 25/11/2026) ----------
    Função própria do 4.1 (o salvarStats do 4.0 fica intocado).
    Os números vão para a MESMA linha do jogo na aba JogosKT, no formato que o resto do site já lê
@@ -374,7 +407,7 @@ function aoVivoLista(categoria) {
 // leve = só os números do jogo, sem a lista de fotos e apelidos (o Ao vivo pede assim nas atualizações de 5 em 5 s, para gastar menos internet)
 function aoVivoJogo(id, leve) {
   const r = aoVivoJogoCompleto(id);
-  if (r && r.ok && r.jogo) r.jogo.oficial = oficialDe(id);   // ⭐ scout ligado neste jogo ('4.0', '4.1' ou '')
+  if (r && r.ok && r.jogo) { r.jogo.oficial = oficialDe(id); r.jogo.teste = propJogo('te_', id) === '1'; r.jogo.zerado = Number(propJogo('ze_', id) || 0); }   // ⭐ scout ligado · 🧪 modo teste · quando foi zerado
   if (leve && r && r.ok) return { ok: true, leve: true, jogo: r.jogo, agora: r.agora };
   return r;
 }
