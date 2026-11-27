@@ -493,7 +493,7 @@ html.lay40-3 #ktTeclas2 .kt2Tit{text-align:left}
 
 <!-- ===== LAYOUT 1: teclas de cada time num retângulo próprio, embaixo do box score do time, na mesma altura dos layouts 2 e 3 · Magno, 27/11/2026 ===== -->
 <div class="container ktTeclas1" id="ktTeclas1">
-<div class="team kt1"><div class="kt2Tit">Teclas do Time A</div>
+<div class="team kt1"><div class="kt2Tit" id="kt1TitA">Teclas do Time A</div>
 <div class="buttons">
 <div class="laySeg40" title="Layout da tela do Scout"><small>LAYOUT</small><div class="lsB"><b class="on" onclick="kt_layout40(1)" title="Layout 1">1</b><b onclick="kt_layout40(2)" title="Layout 2">2</b><b onclick="kt_layout40(3)" title="Layout 3">3</b></div></div>
 
@@ -541,7 +541,7 @@ html.lay40-3 #ktTeclas2 .kt2Tit{text-align:left}
 
 </div>
 </div>
-<div class="team kt1"><div class="kt2Tit">Teclas do Time B</div>
+<div class="team kt1"><div class="kt2Tit" id="kt1TitB">Teclas do Time B</div>
 <div class="buttons">
 
 <button onclick="addMade('B','2')">+2 ✔</button>
@@ -2042,6 +2042,9 @@ function kt2Seg(){ const g=document.querySelector('#ktTeclas2 .laySeg40'), tA=do
   const L3=document.documentElement.classList.contains('lay40-3')&&innerWidth>640, pad=L3?(2*ml+g.offsetWidth)+'px':'';   // layout 3: teclas encostam na mesma distância do botão de layout que ele tem da margem
   bx.style.paddingLeft=pad; const ti=document.querySelector('#ktTeclas2 .kt2Tit'); if(ti) ti.style.paddingLeft=pad; }
 addEventListener('resize',kt2Seg);
+// layout 1: o título de cada retângulo de teclas acompanha o nome do time do jogo aberto (Flamengo, Botafogo…)
+function kt1Tit(){ for(const L of ['A','B']){ const n=(document.getElementById('title'+L)||{}).innerText||''; const t=document.getElementById('kt1Tit'+L); if(t) t.textContent='Teclas do '+(n.trim()||'Time '+L); } }
+['titleA','titleB'].forEach(id=>{ const e=document.getElementById(id); if(e) new MutationObserver(kt1Tit).observe(e,{childList:true,characterData:true,subtree:true}); }); kt1Tit();
 function kt_layout40(n){ const h=document.documentElement; h.classList.toggle('lay40-2',n===2); h.classList.toggle('lay40-3',n===3); kt2Seg();
   document.querySelectorAll('.laySeg40').forEach(g=>g.querySelectorAll('b').forEach((b,i)=>b.classList.toggle('on',i===n-1))); try{ localStorage.setItem('kt_layout40',String(n)); }catch(e){} }
 try{ const L=localStorage.getItem('kt_layout40'); if(L==='2'||L==='3') kt_layout40(+L); }catch(e){}
