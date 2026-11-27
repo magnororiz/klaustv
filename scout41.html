@@ -1063,7 +1063,8 @@ async function k41Lista(){ const r=await k41Api({acao:'aoVivoLista'}); K41.lista
 function k41CorLog(lis){ const c=lis[0]; return c.length===1?`background:${c[0]};box-shadow:0 0 0 2px #fff`:`background:repeating-linear-gradient(180deg,${c.map((x,i)=>`${x} ${i*3}px ${i*3+3}px`).join(',')})`; }
 // foto completa do jogo (o mesmo que o ↶ usa) + relógio + pontos por quarto
 function k41Foto(){ const c=Object.assign({},C,{raw:rawAgora(),anda:false,trava:true}); delete c.t0; return {v:'4.1',ts:Date.now(),foto:JSON.parse(histFoto()),C:c,PQ:K41.PQ,OT,anda:!!C.anda}; }
-function k41Guarda(){ if(!K41.id) return; try{ localStorage.setItem('kt41_'+K41.id,JSON.stringify(k41Foto())); }catch(e){} }
+function k41Guarda(){ if(!K41.id||K41.zerando) return;   // 🧪 zerando: não guarda mais nada neste aparelho (senão o jogo de teste volta ao recarregar · Magno, 26/11/2026)
+  try{ localStorage.setItem('kt41_'+K41.id,JSON.stringify(k41Foto())); }catch(e){} }
 function k41Volta(o){ const f=o.foto; histVolta(JSON.stringify(f)); HI.h=[JSON.stringify(f)]; HI.i=0; desenhaUR();
   Object.assign(C,o.C,{t0:performance.now(),anda:false,trava:true}); K41.PQ=o.PQ||K41.PQ;
   if(o.OT) perguntaOT(); if(C.fim) aplicaTrava(); desenhaFT(); relDesenha(); cxJogo(); }
@@ -1362,9 +1363,10 @@ async function kt_testeClique(){ const j=(K41.id?KT_JREF:null); if(!j) return al
     KT_TESTE=true; kt_testePintar(); kt_msg('🧪 Modo teste ligado. Pode marcar e conferir tudo; ao desligar a chave, o jogo volta zerado.'); return; }
   if(!confirm('Desligar o teste e ZERAR este jogo?\n\nNúmeros, placar e lance a lance deste jogo são apagados e o ⭐ scout é desligado. O jogo volta como recém-montado.')) return;
   const h=new Date(String(j.dataHora||'').replace(' ','T')); if(!isNaN(h)&&Date.now()>=h.getTime()&&!confirm('ATENÇÃO: o horário deste jogo já chegou.\n\nSe o jogo de verdade já começou, os números dele também vão ser apagados.\n\nZerar mesmo assim?')) return;
-  b.disabled=true; kt_msg('Zerando o jogo…'); const bq=K41.bloq; K41.bloq='zerando o teste';
+  b.disabled=true; kt_msg('Zerando o jogo…'); const bq=K41.bloq; K41.bloq='zerando o teste'; K41.zerando=true; if(C.anda) pausa();
+  for(let i=0;i<50&&K41.enviando;i++) await new Promise(ok=>setTimeout(ok,200));   // espera terminar a gravação que já estava a caminho (para ela não gravar o teste por cima do zerado)
   r=await kt_apiTeste(false);
-  if(!r.ok){ K41.bloq=bq; b.disabled=false; kt_msg(''); return alert('Não foi possível zerar: '+(r.erro||'tente de novo')); }
+  if(!r.ok){ K41.bloq=bq; K41.zerando=false; b.disabled=false; kt_msg(''); return alert('Não foi possível zerar: '+(r.erro||'tente de novo')); }
   try{ localStorage.removeItem('kt41_'+K41.id); }catch(e){}
   try{ if(typeof FB!=='undefined'&&FB.user&&FB.db) await FB.db.ref('aovivo/'+K41.id).remove(); }catch(e){}
   kt_msg('✅ Jogo zerado. Recarregando…'); setTimeout(()=>location.reload(),600); }

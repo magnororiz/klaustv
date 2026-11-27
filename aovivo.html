@@ -385,7 +385,9 @@ function kt41_planilha(j){ const v41=kt_eh41(j);
   if(!v41||!j||!['vivo','breve'].includes(status(j))){ if(KT41.id) kt41_desliga(); return; }   // jogo encerrado: vale a planilha (inclui edições depois do fim)
   if(KT41.id!==j.id){ kt41_desliga(); KT41.id=j.id;
     kt41_sdk().then(()=>{ if(KT41.id!==j.id||!window.firebase) return; KT41.ref=firebase.database().ref('aovivo/'+j.id);
-      KT41.ref.on('value',sn=>{ const d=sn.val(); if(!d||d.v!=='4.1'||KT41.id!==j.id) return; KT41.dado=d; if(KT_ULT&&KT_ULT.id===j.id){ kt41_aplica(KT_ULT); kt_render(KT_ULT); } },()=>{}); }); }
+      KT41.ref.on('value',sn=>{ const d=sn.val(); if(KT41.id!==j.id) return;
+        if(!d||d.v!=='4.1'){ if(KT41.dado){ KT41.dado=null; KT41.marcasPl=null; kt_carregar(); } return; }   // 🧪 teste desligado (o Scout apagou o Firebase): volta na hora para a planilha, já zerada (Magno, 26/11/2026)
+        KT41.dado=d; if(KT_ULT&&KT_ULT.id===j.id){ kt41_aplica(KT_ULT); kt_render(KT_ULT); } },()=>{}); }); }
   kt41_aplica(j); }
 // arremessos: do Firebase (na hora) ou, sem ele, do lance a lance guardado na planilha (aba Lances41)
 async function kt41_marcasPlanilha(id){ if(KT41.marcasPlT&&Date.now()-KT41.marcasPlT<15000&&KT41.marcasPl&&KT41.marcasPl.id===id) return; KT41.marcasPlT=Date.now();
