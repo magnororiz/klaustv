@@ -396,7 +396,9 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktJogoTravado .ktQck,html.ktJog
 .kt2Tit{text-align:center;color:#8fb8ff;font-weight:800;font-size:13px;margin:2px 0 -6px}
 html.lay40-2 .team.kt2{display:block}
 html.lay40-2 .container .team .buttons{display:none}
-@media(max-width:1100px){.team.kt2{width:100%}}
+/* botões 1 · 2 no mesmo lugar do layout 1 (cantinho do Time A): o Time A ocupa 49% da largura quando os times estão lado a lado */
+#ktTeclas2 .laySeg40{margin-left:max(2px,calc(12.25% - 133.5px))}
+@media(max-width:1100px){.team.kt2{width:100%}#ktTeclas2 .laySeg40{margin-left:max(2px,calc((50% - 2 * 108px - 9px) / 2 - 18px))}}
 </style>
 </head>
 
@@ -2020,7 +2022,12 @@ kt_testePintar();
 <script>
 /* Layout 1 · 2 do Scout 4.0 (Magno, 27/11/2026): por enquanto só os botões; o layout 2 vai ser definido pelo Magno. Lembra a escolha neste aparelho. */
 function kt2T(){ return selectedTeam||'nenhum'; }   // tecla do layout 2: vai para o time do jogador selecionado
-function kt_layout40(n){ document.documentElement.classList.toggle('lay40-2',n===2);
+// layout 2: os botões 1 · 2 ficam exatamente no mesmo lugar do layout 1 (cantinho do Time A)
+function kt2Seg(){ const g=document.querySelector('#ktTeclas2 .laySeg40'), tA=document.querySelector('.container .team'), bx=document.querySelector('#ktTeclas2 .buttons'); if(!g||!tA||!bx) return;
+  const cs=getComputedStyle(tA), inA=tA.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight), esqA=tA.getBoundingClientRect().left+tA.clientLeft+parseFloat(cs.paddingLeft);
+  const alvo=esqA+Math.max(2,(inA/2-2*108-9)/2-18); g.style.marginLeft=Math.round(alvo-bx.getBoundingClientRect().left)+'px'; }
+addEventListener('resize',kt2Seg);
+function kt_layout40(n){ document.documentElement.classList.toggle('lay40-2',n===2); kt2Seg();
   document.querySelectorAll('.laySeg40').forEach(g=>g.querySelectorAll('b').forEach((b,i)=>b.classList.toggle('on',i===n-1))); try{ localStorage.setItem('kt_layout40',String(n)); }catch(e){} }
 try{ if(localStorage.getItem('kt_layout40')==='2') kt_layout40(2); }catch(e){}
 </script>
