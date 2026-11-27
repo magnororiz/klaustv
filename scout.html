@@ -386,10 +386,17 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktJogoTravado .ktQck,html.ktJog
 <style>/*ktHamb: menu ☰ para quem está logado; Classificação, Blog e Calendários vão para ele (Magno, 23/11/2026)*/.ktFaixa .ktHamb{display:none;align-items:center;padding:0 12px;color:#ffd54f;font-size:20px;font-weight:700;cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;}html.ktLog .ktFaixa .ktHamb{display:flex;}html.ktLog .ktFaixa a.naHamb{display:none!important;}.ktFaixa .ktHamb:hover,.ktFaixa .ktHamb.on{background:rgba(255,255,255,.12);}.ktFaixa .ktHamb.ativo{color:#ffd54f;box-shadow:inset 0 -3px 0 #ffd54f;background:rgba(255,255,255,.16);}#ktHambM{position:fixed;z-index:9999;min-width:210px;background:#0e1f3d;border:1px solid #2c4a80;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.55);padding:6px;display:none;}#ktHambM.on{display:block;}#ktHambM a{display:block;padding:10px 14px;color:#fff;text-decoration:none;font:600 14px Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;border-radius:8px;}#ktHambM a:hover{background:rgba(255,255,255,.1);}#ktHambM a.ativo{color:#ffd54f;background:rgba(255,213,79,.12);}</style>
 <style>/* botões de layout 1 · 2 no cantinho do Time A, igual ao Scout 4.1 (Magno, 27/11/2026) */
 .team .buttons{position:relative}
-#laySeg40{position:absolute;left:0;top:50%;transform:translateY(-50%);width:36px;display:flex;flex-direction:column;border:1px solid #4fc3f7;border-radius:6px;overflow:hidden;margin-left:max(2px,calc((50% - 2 * 108px - 9px) / 2 - 18px))}
-#laySeg40 b{height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 15px Arial;background:#1a2233;color:#8a97b0;border-bottom:1px solid #2c3a55;user-select:none}
-#laySeg40 b:last-child{border-bottom:none}#laySeg40 b.on{background:#4fc3f7;color:#000}
-@media(max-width:640px){#laySeg40{position:static;transform:none;margin:0 auto 4px;grid-column:1/-1;flex-direction:row;width:120px;height:30px}#laySeg40 b{flex:1;height:auto;border-bottom:none;border-right:1px solid #2c3a55}#laySeg40 b:last-child{border-right:none}}
+.laySeg40{position:absolute;left:0;top:50%;transform:translateY(-50%);width:36px;display:flex;flex-direction:column;border:1px solid #4fc3f7;border-radius:6px;overflow:hidden;margin-left:max(2px,calc((50% - 2 * 108px - 9px) / 2 - 18px))}
+.laySeg40 b{height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 15px Arial;background:#1a2233;color:#8a97b0;border-bottom:1px solid #2c3a55;user-select:none}
+.laySeg40 b:last-child{border-bottom:none}.laySeg40 b.on{background:#4fc3f7;color:#000}
+@media(max-width:640px){.laySeg40{position:static;transform:none;margin:0 auto 4px;grid-column:1/-1;flex-direction:row;width:120px;height:30px}.laySeg40 b{flex:1;height:auto;border-bottom:none;border-right:1px solid #2c3a55}.laySeg40 b:last-child{border-right:none}}
+</style>
+<style>/* layout 2 do Scout 4.0 (Magno, 27/11/2026) */
+.team.kt2{display:none;width:49%;margin:14px auto 0;box-sizing:border-box}
+.kt2Tit{text-align:center;color:#8fb8ff;font-weight:800;font-size:13px;margin:2px 0 -6px}
+html.lay40-2 .team.kt2{display:block}
+html.lay40-2 .container .team .buttons{display:none}
+@media(max-width:1100px){.team.kt2{width:100%}}
 </style>
 </head>
 
@@ -462,7 +469,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktJogoTravado .ktQck,html.ktJog
 <table class="table" id="tableA"></table>
 
 <div class="buttons">
-<div id="laySeg40" title="Layout da tela do Scout"><b class="on" onclick="kt_layout40(1)" title="Layout 1">1</b><b onclick="kt_layout40(2)" title="Layout 2">2</b></div>
+<div class="laySeg40" title="Layout da tela do Scout"><b class="on" onclick="kt_layout40(1)" title="Layout 1">1</b><b onclick="kt_layout40(2)" title="Layout 2">2</b></div>
 
 <button onclick="addMade('A','2')">+2 ✔</button>
 <button onclick="removeMade('A','2')">-2 ✔</button>
@@ -566,6 +573,57 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktJogoTravado .ktQck,html.ktJog
 </div>
 
 </div>
+
+<!-- ===== LAYOUT 2: um conjunto só de teclas no meio, vale para o jogador selecionado (Time A ou Time B) · Magno, 27/11/2026 ===== -->
+<div class="team kt2" id="ktTeclas2"><div class="kt2Tit">Teclas dos dois times · clique primeiro no jogador (Time A ou Time B)</div>
+<div class="buttons">
+<div class="laySeg40" title="Layout da tela do Scout"><b class="on" onclick="kt_layout40(1)" title="Layout 1">1</b><b onclick="kt_layout40(2)" title="Layout 2">2</b></div>
+
+<button onclick="addMade(kt2T(),'2')">+2 ✔</button>
+<button onclick="removeMade(kt2T(),'2')">-2 ✔</button>
+
+<button onclick="addMiss(kt2T(),'2')">2 ✖</button>
+<button onclick="removeMiss(kt2T(),'2')">-2 ✖</button>
+
+<br>
+
+<button onclick="addMade(kt2T(),'3')">+3 ✔</button>
+<button onclick="removeMade(kt2T(),'3')">-3 ✔</button>
+
+<button onclick="addMiss(kt2T(),'3')">3 ✖</button>
+<button onclick="removeMiss(kt2T(),'3')">-3 ✖</button>
+
+<br>
+
+<button onclick="addMade(kt2T(),'1')">LL ✔</button>
+<button onclick="removeMade(kt2T(),'1')">-LL ✔</button>
+
+<button onclick="addMiss(kt2T(),'1')">LL ✖</button>
+<button onclick="removeMiss(kt2T(),'1')">-LL ✖</button>
+
+<hr>
+
+<button onclick="addOther(kt2T(),'reb',1)">REB+</button>
+<button onclick="addOther(kt2T(),'reb',-1)">REB-</button>
+
+<button onclick="addOther(kt2T(),'ast',1)">AST+</button>
+<button onclick="addOther(kt2T(),'ast',-1)">AST-</button>
+
+<button onclick="addOther(kt2T(),'stl',1)">STL+</button>
+<button onclick="addOther(kt2T(),'stl',-1)">STL-</button>
+
+<button onclick="addOther(kt2T(),'blk',1)">BLK+</button>
+<button onclick="addOther(kt2T(),'blk',-1)">BLK-</button>
+
+<button onclick="addOther(kt2T(),'to',1)">TO+</button>
+<button onclick="addOther(kt2T(),'to',-1)">TO-</button>
+
+<button onclick="addOther(kt2T(),'foul',1)">F+</button>
+<button onclick="addOther(kt2T(),'foul',-1)">F-</button>
+
+</div>
+</div>
+
 
 <script>
 
@@ -1961,8 +2019,9 @@ kt_testePintar();
 </script>
 <script>
 /* Layout 1 · 2 do Scout 4.0 (Magno, 27/11/2026): por enquanto só os botões; o layout 2 vai ser definido pelo Magno. Lembra a escolha neste aparelho. */
+function kt2T(){ return selectedTeam||'nenhum'; }   // tecla do layout 2: vai para o time do jogador selecionado
 function kt_layout40(n){ document.documentElement.classList.toggle('lay40-2',n===2);
-  document.querySelectorAll('#laySeg40 b').forEach((b,i)=>b.classList.toggle('on',i===n-1)); try{ localStorage.setItem('kt_layout40',String(n)); }catch(e){} }
+  document.querySelectorAll('.laySeg40').forEach(g=>g.querySelectorAll('b').forEach((b,i)=>b.classList.toggle('on',i===n-1))); try{ localStorage.setItem('kt_layout40',String(n)); }catch(e){} }
 try{ if(localStorage.getItem('kt_layout40')==='2') kt_layout40(2); }catch(e){}
 </script>
 </body>
