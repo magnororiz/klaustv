@@ -341,6 +341,9 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
 .top .play{width:44px;height:44px;border-radius:6px;border:2px solid #fff;color:#fff;font-size:20px;margin-left:6px;background:rgba(255,255,255,.06)}
 /* times sem cor própria: sem fundo, letra e borda brancas */
 .col.a .cab,.col.b .cab{background:transparent;color:#fff;border:2px solid #fff}
+/* sem jogo montado (Magno, 27/11/2026): tudo apagado e travado; só ESTATÍSTICAS, layouts e o lance a lance (para olhar) funcionam; a quadra acende os setores mas não marca */
+html.k41sem header.top .seta,html.k41sem header.top .play,html.k41sem header.top .ed,html.k41sem header.top .tmp,html.k41sem header.top #relB,
+html.k41sem main.corpo .bt:not(#btStat),html.k41sem main.corpo .jg,html.k41sem #stPainel .edt,html.k41sem #stPainel i.qi{opacity:.35;filter:grayscale(.7);cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -803,6 +806,14 @@ function bloqueio(e){ if(e.target.closest&&e.target.closest('.ktJM,#fbEnt')) ret
   if(e.target.closest(ot?'#otMenu':LIVRE)) return; e.stopImmediatePropagation(); e.preventDefault();
   if(e.type==='click') aviso(ot?'Responda primeiro: vai ter tempo extra?':'Partida encerrada e travada · em ESTATÍSTICAS, escolha ✏️ Editar'); }
 window.addEventListener('click',bloqueio,true); window.addEventListener('pointerdown',bloqueio,true);
+// sem jogo montado: só ESTATÍSTICAS, layouts, olhar o lance a lance e a parte de cima (escolher o jogo) · Magno, 27/11/2026
+function semJogo(){ return typeof K41!=='undefined'&&!K41.id; }
+function bloqueioSemJogo(e){ if(!semJogo()) return; const t=e.target; if(!t.closest) return;
+  if(!t.closest('header.top, main.corpo')) return;                                   // menu do site, parte de cima e rodapé funcionam
+  if(t.closest('#btStat,#laySeg,.lal')) return;                                      // ESTATÍSTICAS, layouts, rolar o lance a lance
+  if(t.closest('#stPainel')&&!t.closest('.edt,i.qi')) return;                        // olhar as estatísticas (sem editar)
+  e.stopImmediatePropagation(); e.preventDefault(); if(e.type==='click') aviso('Escolha primeiro o jogo montado lá em cima · sem jogo, o Scout fica travado'); }
+window.addEventListener('click',bloqueioSemJogo,true); window.addEventListener('pointerdown',bloqueioSemJogo,true);
 function pedeTempo(t){ if(!C.em) return aviso('Quarto encerrado · toque ▶ para iniciar o próximo');
   if(C.tmAb===t) return fechaTempo();
   if(C.tmAb) return aviso(`Feche antes o pedido de tempo do ${T[C.tmAb].nome}`);
@@ -1054,13 +1065,14 @@ const K41_CURTO={"BSA":"Basquete S.A.","BFR":"Botafogo","CRF":"Flamengo","CFCSN"
 const K41_CAMISA={CRF:FLA,TTC:TIJ,BFR:[['#000000','#FFFFFF'],'#000000','#E8B923'],FFC:[['#7A1E2C','#00613C','#FFFFFF'],'#FFFFFF','#FFFFFF']};
 const K41_PADRAO={a:[['#1E5BD8'],'#FFFFFF','#FFFFFF'],b:[['#E8590C'],'#FFFFFF','#FFFFFF']};
 const K41={id:new URLSearchParams(location.search).get('jogo')||'',lista:null,reg:{a:{},b:{}},bloq:'',ultimo:'',enviando:false,PQ:{a:[0,0,0,0,0],b:[0,0,0,0,0]},msg:''};
+document.documentElement.classList.toggle('k41sem',!K41.id);   // sem jogo montado: Scout apagado e travado (Magno, 27/11/2026)
 const k41Tok=()=>{ try{ return localStorage.getItem('klaustv_token_v1')||''; }catch(e){ return ''; } };
 async function k41Api(d){ try{ const r=await fetch(K41_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(d)}); return await r.json(); }catch(e){ return {ok:false,erro:'Sem conexão com a planilha.'}; } }
 const k41E=x=>String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const k41Nome=(sg,avulso,nome)=>avulso?(nome||sg):(K41_CURTO[sg]||nome||sg);
 function k41Rotulo(j){ const d=String(j.dataHora||'').replace(' ','T'); return d.slice(8,10)+'/'+d.slice(5,7)+' '+d.slice(11,16)+' · '+(j.categoria||'')+' · '+k41Nome(j.timeA,j.avulso)+' x '+k41Nome(j.timeB,j.avulso)+(j.status==='FINAL'?' · finalizado':''); }
 function k41Opcoes(){ const L=K41.lista;
-  let h=`<option value=""${K41.id?'':' selected'}>Jogo de treino · Time A x Time B (não grava)</option>`;
+  let h=`<option value=""${K41.id?'':' selected'}>Nenhum jogo escolhido · escolha o jogo montado</option>`;
   if(!L) return h+'<option disabled>Carregando os jogos montados…</option>';
   const hoje=new Date(Date.now()-12*3600e3).toISOString().slice(0,10);
   const vis=L.filter(j=>j.id===K41.id||(j.status!=='FINAL'&&String(j.dataHora).slice(0,10)>=hoje)).sort((x,y)=>String(x.dataHora).localeCompare(String(y.dataHora)));
