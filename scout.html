@@ -397,7 +397,8 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktJogoTravado .ktQck,html.ktJog
 .team.kt2{display:none;width:100%;margin:14px 0 0;box-sizing:border-box}
 .kt2Tit{text-align:center;color:#8fb8ff;font-weight:800;font-size:13px;margin:2px 0 -6px}
 html.lay40-2 .team.kt2,html.lay40-3 .team.kt2{display:block}
-html.lay40-2 .container .team .buttons,html.lay40-3 .container .team .buttons{display:none}
+.ktTeclas1{margin-top:14px}
+html.lay40-2 #ktTeclas1,html.lay40-3 #ktTeclas1{display:none}
 /* layout 3: teclas à esquerda, ao lado dos botões de layout; o lado direito fica livre para o futuro (quadra, lance a lance…) */
 html.lay40-3 #ktTeclas2 .buttons{justify-content:start}
 html.lay40-3 #ktTeclas2 .kt2Tit{text-align:left}
@@ -475,6 +476,24 @@ html.lay40-3 #ktTeclas2 .kt2Tit{text-align:left}
 
 <table class="table" id="tableA"></table>
 
+
+</div>
+
+<!-- ================= TIME B ================= -->
+<div class="team">
+
+<div class="ktTopo"><div class="ktCab"><img id="ktEscB" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleB">Time B</h2><div class="score" id="scoreB">0</div></div></div><div class="ktQ"><span>Placar<br>parcial</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQB1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQB2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQB3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQB4" oninput="kt_qMudou()"></label><label title="Prorrogação (overtime)">OT<input type="number" min="0" inputmode="numeric" id="ktQB5" oninput="kt_qMudou()"></label></div></div>
+
+<table class="table" id="tableB"></table>
+
+
+</div>
+
+</div>
+
+<!-- ===== LAYOUT 1: teclas de cada time num retângulo próprio, embaixo do box score do time, na mesma altura dos layouts 2 e 3 · Magno, 27/11/2026 ===== -->
+<div class="container ktTeclas1" id="ktTeclas1">
+<div class="team kt1"><div class="kt2Tit">Teclas do Time A</div>
 <div class="buttons">
 <div class="laySeg40" title="Layout da tela do Scout"><small>LAYOUT</small><div class="lsB"><b class="on" onclick="kt_layout40(1)" title="Layout 1">1</b><b onclick="kt_layout40(2)" title="Layout 2">2</b><b onclick="kt_layout40(3)" title="Layout 3">3</b></div></div>
 
@@ -521,16 +540,8 @@ html.lay40-3 #ktTeclas2 .kt2Tit{text-align:left}
 <button onclick="addOther('A','foul',-1)">F-</button>
 
 </div>
-
 </div>
-
-<!-- ================= TIME B ================= -->
-<div class="team">
-
-<div class="ktTopo"><div class="ktCab"><img id="ktEscB" class="ktEsc" alt="" style="display:none" onerror="this.style.display='none'"><div class="ktCabTx"><h2 class="teamTitle" id="titleB">Time B</h2><div class="score" id="scoreB">0</div></div></div><div class="ktQ"><span>Placar<br>parcial</span><label>1º Q<input type="number" min="0" inputmode="numeric" id="ktQB1" oninput="kt_qMudou()"></label><label>2º Q<input type="number" min="0" inputmode="numeric" id="ktQB2" oninput="kt_qMudou()"></label><label>3º Q<input type="number" min="0" inputmode="numeric" id="ktQB3" oninput="kt_qMudou()"></label><label>4º Q<input type="number" min="0" inputmode="numeric" id="ktQB4" oninput="kt_qMudou()"></label><label title="Prorrogação (overtime)">OT<input type="number" min="0" inputmode="numeric" id="ktQB5" oninput="kt_qMudou()"></label></div></div>
-
-<table class="table" id="tableB"></table>
-
+<div class="team kt1"><div class="kt2Tit">Teclas do Time B</div>
 <div class="buttons">
 
 <button onclick="addMade('B','2')">+2 ✔</button>
@@ -576,11 +587,8 @@ html.lay40-3 #ktTeclas2 .kt2Tit{text-align:left}
 <button onclick="addOther('B','foul',-1)">F-</button>
 
 </div>
-
 </div>
-
 </div>
-
 <!-- ===== LAYOUT 2: um conjunto só de teclas no meio, vale para o jogador selecionado (Time A ou Time B) · Magno, 27/11/2026 ===== -->
 <div class="team kt2" id="ktTeclas2"><div class="kt2Tit">Teclas dos dois times · clique primeiro no jogador (Time A ou Time B)</div>
 <div class="buttons">
