@@ -216,8 +216,16 @@ function abaJogos() {
   return sh;
 }
 function lerJogos() {
-  const v = abaJogos().getDataRange().getValues();
-  return v.slice(1).map((r, i) => { const o = { linha: i + 2 }; COLS.forEach((c, j) => o[c] = r[j]); return o; }).filter(o => o.id);
+  const sh = abaJogos(), tz = sh.getParent().getSpreadsheetTimeZone(), v = sh.getDataRange().getValues();
+  return v.slice(1).map((r, i) => { const o = { linha: i + 2 }; COLS.forEach((c, j) => o[c] = r[j]); o.dataHora = dhTxt_(o.dataHora, tz); return o; }).filter(o => o.id);
+}
+/* TRAVA DO HORÁRIO (26/11/2026): o horário do jogo é sempre texto "aaaa-mm-ddThh:mm" no horário de Brasília.
+   Defeito antigo: a planilha transformava o texto em data; na leitura virava horário mundial (UTC, +3 h) e,
+   a cada salvamento do Montar Jogo ou do Scout, o horário andava 2 ou 3 horas para a frente.
+   Agora: na leitura, data da planilha volta ao horário digitado; o horário só muda pelo botão "💾 Salvar data". */
+function dhTxt_(v, tz) {
+  if (v instanceof Date) return isNaN(v) ? '' : Utilities.formatDate(v, tz || 'America/Sao_Paulo', "yyyy-MM-dd'T'HH:mm");
+  return String(v || '').replace(' ', 'T').slice(0, 16);
 }
 function jsonOu(s, d) { try { return s ? JSON.parse(s) : d; } catch (e) { return d; } }
 function placarDe(stats) {
@@ -231,9 +239,11 @@ function salvarJogo(token, j) {
   const id = j.id || ('KT-' + Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'yyyyMMddHHmmss') + '-' + Math.floor(Math.random() * 1000));
   const atual = todos.find(x => x.id === id);
   const meta = { timeA: j.timeA, timeB: j.timeB, oficiais: j.oficiais || {}, ginasio: j.ginasio || '', mandante: j.mandante || '', jogoFed: j.jogoFed || '', dataFed: j.dataFed || '', avulso: !!j.avulso, timesFed: !!j.timesFed, catFed: j.catFed || '', atualizadoEm: new Date().toISOString() };
-  const linha = [id, j.categoria, j.dataHora || '', j.timeA.sigla || '', j.timeB.sigla || '', j.ginasio || '', j.jogoFed || '', JSON.stringify(meta),
+  const dh = atual && atual.dataHora ? atual.dataHora : dhTxt_(j.dataHora); // trava: jogo já montado mantém o horário (só o "💾 Salvar data" muda)
+  const linha = [id, j.categoria, dh, j.timeA.sigla || '', j.timeB.sigla || '', j.ginasio || '', j.jogoFed || '', JSON.stringify(meta),
     atual ? atual.stats : '', atual ? atual.status : '', atual ? atual.placarA : 0, atual ? atual.placarB : 0, new Date(), u.usuario];
-  if (atual) sh.getRange(atual.linha, 1, 1, COLS.length).setValues([linha]); else sh.appendRow(linha);
+  if (atual) { sh.getRange(atual.linha, 3).setNumberFormat('@'); sh.getRange(atual.linha, 1, 1, COLS.length).setValues([linha]); }
+  else { sh.appendRow(linha); const c = sh.getRange(sh.getLastRow(), 3); c.setNumberFormat('@'); c.setValue(dh); }
   if (j.avulso) gravarAvulso(id, j, meta, u.usuario);
   CacheService.getScriptCache().remove('j_' + id); CacheService.getScriptCache().remove('lista');
   return { ok: true, id: id };
@@ -256,7 +266,7 @@ function salvarStats(token, id, stats, status, dataHora) {
   const trv = travaOficial(j, '4.0'); if (trv) return trv;
   const pl = placarDe(stats); const sh = abaJogos();
   sh.getRange(j.linha, 9, 1, 5).setValues([[JSON.stringify(stats || {}), status || j.status || '', pl[0], pl[1], new Date()]]);
-  if (dataHora && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(String(dataHora))) { const c = sh.getRange(j.linha, 3); c.setNumberFormat('@'); c.setValue(String(dataHora).slice(0, 16)); }
+  // trava do horário (26/11/2026): o Scout não grava mais o horário; só o "💾 Salvar data" do Montar Jogo muda
   const c = CacheService.getScriptCache(); c.remove('j_' + id); c.remove('lista');
   return { ok: true, placar: pl };
 }
@@ -1176,4 +1186,13 @@ function placarAtual() {
   const j = r.jogo, m = j.meta || {}, st = j.stats || {}, pl = placarDe(st), eq = placarNomes();
   const a = (m.timeA || {}).sigla || j.timeA || '', b = (m.timeB || {}).sigla || j.timeB || '';
   return { ok: true, id: j.id, cat: j.categoria, a: a, b: b, nA: eq[a] || '', nB: eq[b] || '', pa: pl[0], pb: pl[1], qf: Number(st.qFech || 0), ot: ['A', 'B'].some(l => { const v = ((st.periodos || {})[l] || [])[4]; return v !== null && v !== undefined && v !== '' && Number(v) > 0; }), status: j.status || '', agora: r.agora };
+}
+
+/* Uso único (26/11/2026): converte para texto, no horário de Brasília, os horários que a planilha tinha transformado em data. */
+function corrigirHorariosKT() {
+  const sh = abaJogos(), tz = sh.getParent().getSpreadsheetTimeZone(), n = sh.getLastRow() - 1; if (n < 1) return;
+  const r = sh.getRange(2, 3, n, 1), v = r.getValues(); let k = 0;
+  const novo = v.map(l => { if (l[0] instanceof Date) { k++; return [dhTxt_(l[0], tz)]; } return [String(l[0] || '').replace(' ', 'T').slice(0, 16)]; });
+  r.setNumberFormat('@'); r.setValues(novo); CacheService.getScriptCache().remove('lista');
+  console.log('Fuso da planilha: ' + tz + ' | datas convertidas para texto: ' + k + ' de ' + n);
 }
