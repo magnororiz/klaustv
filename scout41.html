@@ -344,6 +344,10 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
 /* sem jogo montado (Magno, 27/11/2026): tudo apagado e travado; só ESTATÍSTICAS, layouts e o lance a lance (para olhar) funcionam; a quadra acende os setores mas não marca */
 html.k41sem header.top .seta,html.k41sem header.top .play,html.k41sem header.top .ed,html.k41sem header.top .tmp,html.k41sem header.top #relB,
 html.k41sem main.corpo .bt:not(#btStat),html.k41sem main.corpo .jg,html.k41sem #stPainel .edt,html.k41sem #stPainel i.qi{opacity:.35;filter:grayscale(.7);cursor:not-allowed}
+/* aviso de "sem jogo" no espaço das camisas, à esquerda; aparece e esmaece (Magno, 27/11/2026) */
+.times{position:relative}
+#avSem{position:absolute;left:8px;right:8px;top:45%;transform:translateY(-50%);z-index:5;padding:16px 14px;border-radius:10px;background:rgba(211,47,47,.92);color:#fff;text-align:center;font:700 16px/1.35 Arial;box-shadow:0 6px 18px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .35s}
+#avSem.on{opacity:1}
 </style>
 </head>
 <body>
@@ -418,7 +422,7 @@ html.k41sem main.corpo .bt:not(#btStat),html.k41sem main.corpo .jg,html.k41sem #
 
 <main class="corpo">
   <section id="stPainel"></section>
-  <section class="times">
+  <section class="times"><div id="avSem"></div>
     <div class="col a" id="colA"><div class="cab"><img alt="" style="visibility:hidden">TIME A</div></div>
     <div class="col b" id="colB"><div class="cab"><img alt="" style="visibility:hidden">TIME B</div></div>
   </section>
@@ -813,7 +817,8 @@ function bloqueioSemJogo(e){ if(!semJogo()) return; const t=e.target; if(!t.clos
   if(!t.closest('header.top, main.corpo')) return;                                   // menu do site, parte de cima e rodapé funcionam
   if(t.closest('#btStat,#laySeg,.lal')) return;                                      // ESTATÍSTICAS, layouts, rolar o lance a lance
   if(t.closest('#stPainel')&&!t.closest('.edt,i.qi')) return;                        // olhar as estatísticas (sem editar)
-  e.stopImmediatePropagation(); e.preventDefault(); if(e.type==='click') aviso('Escolha primeiro o jogo montado lá em cima · sem jogo, o Scout fica travado'); }
+  e.stopImmediatePropagation(); e.preventDefault(); if(e.type==='click') avisoSem(); }
+function avisoSem(){ const a=document.getElementById('avSem'); if(!a) return; a.innerHTML='Escolha primeiro o jogo montado lá em cima<br><small style="font-weight:400;opacity:.9">sem jogo, o Scout fica travado</small>'; a.classList.add('on'); clearTimeout(a._t); a._t=setTimeout(()=>a.classList.remove('on'),3200); }
 window.addEventListener('click',bloqueioSemJogo,true); window.addEventListener('pointerdown',bloqueioSemJogo,true);
 function pedeTempo(t){ if(!C.em) return aviso('Quarto encerrado · toque ▶ para iniciar o próximo');
   if(C.tmAb===t) return fechaTempo();
