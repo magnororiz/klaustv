@@ -1091,6 +1091,7 @@ async function k41Abre(){ if(!K41.id) return;
   let loc=null; try{ loc=JSON.parse(localStorage.getItem('kt41_'+K41.id)||'null'); }catch(e){}
   if(loc&&st.versao!=='4.1'&&Date.now()-(loc.ts||0)>2*3600e3){ loc=null; try{ localStorage.removeItem('kt41_'+K41.id); }catch(e){} }   // teste antigo que nunca foi para a planilha: descarta
   if(loc&&(loc.ts||0)<=KT_ZERADO){ loc=null; try{ localStorage.removeItem('kt41_'+K41.id); }catch(e){} }   // 🧪 guardado antes do jogo ser zerado: não vale
+  if(loc&&KT_ZERADO&&st.versao!=='4.1'&&!KT_TESTE&&(loc.ts||0)-KT_ZERADO<120e3){ loc=null; try{ localStorage.removeItem('kt41_'+K41.id); }catch(e){} }   // cópia gravada logo depois do zerar (página antiga regravou ao recarregar): não vale (Magno, 26/11/2026)
   if(loc&&loc.te&&!KT_TESTE){ loc=null; try{ localStorage.removeItem('kt41_'+K41.id); }catch(e){} }   // 🧪 cópia feita durante o teste e o teste já foi desligado (em qualquer aparelho): não vale · números, placar, lance a lance e quinteto voltam zerados (Magno, 26/11/2026)
   const rl=st.versao==='4.1'?await k41Api({acao:'lances41',id:K41.id}):null; const rem=rl&&rl.ok&&rl.lances&&rl.lances.foto?rl.lances:null;
   const o=[loc,rem].filter(Boolean).sort((x,y)=>(y.ts||0)-(x.ts||0))[0];
