@@ -391,24 +391,24 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
 </div><!--/ktJogoMontado-->
 
 <header class="top">
-  <div class="tm a"><img src="escudos/CRF.png" alt=""><span class="nm">FLAMENGO</span></div>
+  <div class="tm a"><img alt="" style="visibility:hidden"><span class="nm">TIME A</span></div>
   <div class="cx" id="fA" title="Faltas do time no quarto">F<b>0</b></div><div class="sep"></div>
-  <div class="cx tmp" id="tmA" onclick="pedeTempo('a')" title="Pedido de tempo do Flamengo: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div>
+  <div class="cx tmp" id="tmA" onclick="pedeTempo('a')" title="Pedido de tempo do Time A: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div>
   <div class="pl" id="plA">0</div>
   <div class="seta sPl" id="btPlay" onclick="clicaPlay()" title="Liberar o relógio">▶</div>
   <div class="rel"><i id="relQ">1º Q</i><div class="rl"><b id="relB" onclick="clicaRel()" title="Relógio parado: toque para voltar a correr">10:00</b><span class="ed" onclick="acerto()" title="Acertar pelo placar do ginásio">✎</span><div class="play" id="btQ" onclick="clicaQuarto()" title="Encerrar o quarto">Q</div></div><span class="net" id="relSt">● correndo</span></div>
   <div class="seta sPa" id="btPaus" onclick="clicaPausa()" title="Pausar o relógio (não volta sozinho)">⏸</div>
   <div class="pl" id="plB">0</div>
-  <div class="cx tmp" id="tmB" onclick="pedeTempo('b')" title="Pedido de tempo do Tijuca: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div><div class="sep"></div>
+  <div class="cx tmp" id="tmB" onclick="pedeTempo('b')" title="Pedido de tempo do Time B: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div><div class="sep"></div>
   <div class="cx" id="fB" title="Faltas do time no quarto">F<b>0</b></div>
-  <div class="tm b"><span class="nm">TIJUCA</span><img src="escudos/TTC.png" alt=""></div>
+  <div class="tm b"><span class="nm">TIME B</span><img alt="" style="visibility:hidden"></div>
 </header>
 
 <main class="corpo">
   <section id="stPainel"></section>
   <section class="times">
-    <div class="col a" id="colA"><div class="cab"><img src="escudos/CRF.png" alt="">A · FLA</div></div>
-    <div class="col b" id="colB"><div class="cab"><img src="escudos/TTC.png" alt="">B · TIJ</div></div>
+    <div class="col a" id="colA"><div class="cab"><img alt="" style="visibility:hidden">A · TIME A</div></div>
+    <div class="col b" id="colB"><div class="cab"><img alt="" style="visibility:hidden">B · TIME B</div></div>
   </section>
 
   <section class="meio"><div class="quadra" id="quadra"></div><div id="llMenu"><div class="cx"><h4><b id="llTit">LANCE LIVRE</b><span onclick="cancelaLL()">✕</span></h4><div id="llOp"></div></div></div>
@@ -416,8 +416,8 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
 
   <section class="baixo">
     <div class="banco">
-      <div class="bnc a"><h4>BANCO DE RESERVAS · FLAMENGO</h4><button class="rol" onclick="rola('bnA',-1)">▲</button><div class="lis" id="bnA"></div><button class="rol" onclick="rola('bnA',1)">▼</button></div>
-      <div class="bnc b"><h4>BANCO DE RESERVAS · TIJUCA</h4><button class="rol" onclick="rola('bnB',-1)">▲</button><div class="lis" id="bnB"></div><button class="rol" onclick="rola('bnB',1)">▼</button></div>
+      <div class="bnc a"><h4>BANCO DE RESERVAS · TIME A</h4><button class="rol" onclick="rola('bnA',-1)">▲</button><div class="lis" id="bnA"></div><button class="rol" onclick="rola('bnA',1)">▼</button></div>
+      <div class="bnc b"><h4>BANCO DE RESERVAS · TIME B</h4><button class="rol" onclick="rola('bnB',-1)">▲</button><div class="lis" id="bnB"></div><button class="rol" onclick="rola('bnB',1)">▼</button></div>
     </div>
     <div class="lal">
       <h3>LANCE A LANCE <em class="tag41">SCOUT PRO 4.1 · em construção</em><b id="fbSt" class="off" onclick="fbAbreEnt()" title="Ao Vivo pelo Firebase">AO VIVO: desligado</b><b id="btModo" onclick="k41Modo()" title="Este aparelho está marcando. Toque para virar segunda tela (só leitura).">✏️ Marcando</b><span>4 últimos · role para ver os anteriores</span></h3>
@@ -454,7 +454,7 @@ const FE={
 // Sub-12 do Rio (Magno, 24/11/2026, confirmado com o técnico Bruno Gonzalez): falta do TIME, não do jogador · não conta falta do jogador nem do time · o outro time escolhe quem bate, sempre 1 lance livre, e bola na lateral · fluxo: FALTA ESPECIAL › Técnica Sub-12 › camisa de quem bate › ✓/✗ (sem escolher time)
  s12:{ll:0,nm:'Técnica',d:'categoria 0 · pressão: roubo de bola no campo do adversário · não conta falta',tx:'Falta técnica (categoria 0)',quem:'tec',s12:1}};
 const TC={a:{C:0,B:0,dq:0},b:{C:0,B:0,dq:0}};
-// camiseta regata (mesmo desenho da Escalação); listrada para o Flamengo, lisa para o Tijuca
+// camiseta regata (mesmo desenho da Escalação); listrada ou lisa conforme o time
 const CORPO='M9 1.5h5Q19 10.5 24 1.5h5v5.4q1.4 7.6 7.5 8.6V42.5H1.5V15.5Q7.6 14.5 9 6.9z';
 function regata(id,n,lis){
   // lis: lista de cores das listras horizontais (1 cor = lisa); borda e número
@@ -470,11 +470,12 @@ function regata(id,n,lis){
 const FLA=[['#C8102E','#000000'],'#FFFFFF','#FFFFFF'];   // listras vermelho e preto, número branco
 const TIJ=[['#E2231A'],'#FFFFFF','#FFFFFF'];             // vermelha lisa, número branco
 
-// elenco de teste (nome ou apelido) · faltas (começam zeradas e acompanham o jogador no banco) · em quadra (q=1)
-const T={a:{nome:'Flamengo',lis:FLA,js:[[4,'Tozo',0,1],[5,'Pedro',0,1],[7,'Davi',0,1],[8,'Gabriel',0,1],[10,'Lucas',0,1],
- [6,'Caio',0,0],[9,'Miguel',0,0],[11,'Arthur',0,0],[12,'Bento',0,0],[13,'Enzo',0,0],[14,'Rafa',0,0],[15,'João',0,0]]},
- b:{nome:'Tijuca',lis:TIJ,js:[[3,'Matheus',0,1],[5,'Kaique',0,1],[6,'Bruno',0,1],[9,'Igor',0,1],[12,'Léo',0,1],
- [4,'Vitor',0,0],[7,'Samuel',0,0],[8,'Thiago',0,0],[10,'Felipe',0,0],[11,'Nico',0,0],[13,'Heitor',0,0],[14,'Danilo',0,0]]}};
+// jogo de treino sem jogo montado (Magno, 27/11/2026): TIME A x TIME B, camisas lisas nas cores padrão (A azul, B laranja), jogadores só com o número
+// faltas (começam zeradas e acompanham o jogador no banco) · em quadra (q=1)
+const TREINO_A=[['#1E5BD8'],'#FFFFFF','#FFFFFF'], TREINO_B=[['#E8590C'],'#FFFFFF','#FFFFFF'];
+const jTreino=ns=>ns.map((n,i)=>[n,'Jogador '+n,0,i<5?1:0]);
+const T={a:{nome:'Time A',lis:TREINO_A,js:jTreino([4,5,6,7,8,9,10,11,12,13,14,15])},
+ b:{nome:'Time B',lis:TREINO_B,js:jTreino([4,5,6,7,8,9,10,11,12,13,14,15])}};
 const SEL={t:null,n:null}, EST={k:null,rb:null};   // jogador escolhido para o arremesso
 const ENTRA={a:new Set(),b:new Set()}, SAI={a:new Set(),b:new Set()};
 function tile(t,[n,nm,f,,,,dq],onde){ const k=t+n, cls=[dq?'dsq':f>=5?'exc':'',f==4?'f4':'',ENTRA[t].has(n)?'pend':'',SAI[t].has(n)?'sai':'',onde==='q'&&FA.fez&&FA.fez.t===t&&FA.fez.n===n?'fez':'',onde==='q'&&FA.sof&&FA.sof.t===t&&FA.sof.n===n?'sof':'',onde==='q'&&SEL.t===t&&SEL.n===n?'sel':'',onde==='q'&&EST.rb?(EST.rb.t===t?(EST.rb.n===n?'rou':'apaga'):'alvo'):''].join(' ');
@@ -976,7 +977,7 @@ function desenhaStat(){ const on=document.body.classList.contains('stat'), b=doc
       const ed=ED.k===t+':'+j[0], I=(f,v)=>`<input id="ed_${f}" type="number" min="0" value="${v}">`, A=(m,x)=>ed?`${I(m,s[m])} / ${I(m+'T',s[m]+s[x])}`:pc(s[m],s[m]+s[x]), V=f=>ed?I(f,f==='f'?j[2]:s[f]):(f==='f'?j[2]:s[f]);
       lin+=`<tr class="${ed?'edOn':''}"><td>${j[0]}</td><td class="nm"><i class="${j[3]?'':'bc'}${qiPre()?' qi':''}" title="${qiPre()?'Toque para marcar ou desmarcar no quinteto inicial':(j[3]?'em quadra':'no banco')}"${qiPre()?` onclick="quinteto('${t}',${j[0]})"`:''}></i>${j[1]}</td><td>${s.pts}</td><td>${A('twoMade','twoMiss')}</td><td>${A('threeMade','threeMiss')}</td><td>${A('ftMade','ftMiss')}</td><td>${V('oreb')}</td><td>${V('dreb')}</td><td>${V('ast')}</td><td>${V('stl')}</td><td>${V('blk')}</td><td>${V('tov')}</td><td>${V('f')}</td><td class="ef">${s.eff}</td><td class="edt"><b onclick="edLinha('${t}',${j[0]})" title="${ed?'Gravar e travar a linha':'Editar a linha'}">✏️</b></td></tr>`; }
     const esc=document.querySelector(`#col${t.toUpperCase()} .cab img`);
-    h+=`<h3>${esc?`<img src="${esc.getAttribute('src')}" alt="">`:''}${T[t].nome.toUpperCase()}${t==='a'?cxHTML():''}</h3><table><tr><th>Camisa</th><th>Nome</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th title="Rebote ofensivo">OREB</th><th title="Rebote defensivo">DREB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>F</th><th>EFF</th><th title="Editar a linha">✏️</th></tr>${lin}
+    h+=`<h3>${esc&&esc.getAttribute('src')?`<img src="${esc.getAttribute('src')}" alt="">`:''}${T[t].nome.toUpperCase()}${t==='a'?cxHTML():''}</h3><table><tr><th>Camisa</th><th>Nome</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th title="Rebote ofensivo">OREB</th><th title="Rebote defensivo">DREB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>F</th><th>EFF</th><th title="Editar a linha">✏️</th></tr>${lin}
      <tr class="tot"><td colspan="2">TOTAL</td><td>${tt.pts}</td><td>${pc(tt.twoMade,tt.twoMade+tt.twoMiss)}</td><td>${pc(tt.threeMade,tt.threeMade+tt.threeMiss)}</td><td>${pc(tt.ftMade,tt.ftMade+tt.ftMiss)}</td><td>${tt.oreb}</td><td>${tt.dreb}</td><td>${tt.ast}</td><td>${tt.stl}</td><td>${tt.blk}</td><td>${tt.tov}</td><td>${tt.f}</td><td class="ef">${tt.eff}</td><td></td></tr></table>`; }
   if(qiPre()) h=`<span class="qiAv">🏀 Quinteto inicial: toque na bolinha dos 5 titulares de cada time (${T.a.nome} ${qiConta('a')}/${qiMax('a')} · ${T.b.nome} ${qiConta('b')}/${qiMax('b')}). Depois do ▶, só por SUBST.</span>`+h;
   document.getElementById('stPainel').innerHTML=h; }
@@ -1024,7 +1025,7 @@ function layout(n){ document.body.classList.remove('lay2','lay3'); if(n>1) docum
 function desenhaUR(){ const u=document.getElementById('btUn'), r=document.getElementById('btRe'); if(!u) return;
   if(AR.z&&AR.multi){ u.classList.toggle('off',!AR.seq.length); r.classList.toggle('off',!AR.refaz.length); return; }   // retângulo aberto: ↶ ↷ valem só para os toques dele
   u.classList.toggle('off',HI.i<=0); r.classList.toggle('off',HI.i>=HI.h.length-1); }
-const COR={a:'background:repeating-linear-gradient(180deg,#C8102E 0 3px,#000 3px 6px)',b:'background:#E2231A;box-shadow:0 0 0 2px #fff'};
+const COR={a:'background:#1E5BD8;box-shadow:0 0 0 2px #fff',b:'background:#E8590C;box-shadow:0 0 0 2px #fff'};   // treino: A azul, B laranja (o jogo montado troca)
 function logDesenha(){ const ul=document.getElementById('lal');
   if(!LOG.length){ ul.innerHTML='<li class="vz">Nenhum lance registrado ainda · cada botão que você usar aparece aqui</li>'; return; }
   ul.innerHTML=LOG.map((e,i)=>{ const ant=LOG[i+1], dt=ant?'+'+mmss((e.real-ant.real)/1000).replace(/^0/,''):'';
@@ -1049,7 +1050,7 @@ const k41E=x=>String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const k41Nome=(sg,avulso,nome)=>avulso?(nome||sg):(K41_CURTO[sg]||nome||sg);
 function k41Rotulo(j){ const d=String(j.dataHora||'').replace(' ','T'); return d.slice(8,10)+'/'+d.slice(5,7)+' '+d.slice(11,16)+' · '+(j.categoria||'')+' · '+k41Nome(j.timeA,j.avulso)+' x '+k41Nome(j.timeB,j.avulso)+(j.status==='FINAL'?' · finalizado':''); }
 function k41Opcoes(){ const L=K41.lista;
-  let h=`<option value=""${K41.id?'':' selected'}>Jogo de teste · Flamengo x Tijuca (não grava)</option>`;
+  let h=`<option value=""${K41.id?'':' selected'}>Jogo de treino · Time A x Time B (não grava)</option>`;
   if(!L) return h+'<option disabled>Carregando os jogos montados…</option>';
   const hoje=new Date(Date.now()-12*3600e3).toISOString().slice(0,10);
   const vis=L.filter(j=>j.id===K41.id||(j.status!=='FINAL'&&String(j.dataHora).slice(0,10)>=hoje)).sort((x,y)=>String(x.dataHora).localeCompare(String(y.dataHora)));
@@ -1082,7 +1083,7 @@ async function k41Abre(){ if(!K41.id) return;
     T[t].js=atl.map((a,i)=>{ const n=parseInt(a.numero,10); const w=String(a.nome||'').trim().split(/\s+/); const curto=w.length>1?w[0]+' '+w[w.length-1]:(w[0]||'');
       K41.reg[t][n]=a.reg; return [n,ap[a.reg]||a.apelido||curto,0,0]; }).filter(x=>!isNaN(x[0]));
     const esc=m.avulso?(tm.escudo||''):('escudos/'+encodeURIComponent(sg)+'.png');
-    document.querySelectorAll(`.top .tm.${t} img, #col${t.toUpperCase()} .cab img`).forEach(im=>{ if(esc) im.src=esc; else im.style.visibility='hidden'; });
+    document.querySelectorAll(`.top .tm.${t} img, #col${t.toUpperCase()} .cab img`).forEach(im=>{ if(esc){ im.src=esc; im.style.visibility=''; } else im.style.visibility='hidden'; });
     document.querySelector(`.top .tm.${t} .nm`).textContent=nm.toUpperCase();
     const cab=document.querySelector(`#col${t.toUpperCase()} .cab`); cab.lastChild.textContent=`${t.toUpperCase()} · ${String(sg||nm).slice(0,4).toUpperCase()}`;
     document.getElementById('tm'+t.toUpperCase()).title=`Pedido de tempo do ${nm}: 1º toque inicia, 2º toque encerra`; }
