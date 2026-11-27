@@ -1062,7 +1062,7 @@ function k41Escolhe(id){ if(id===K41.id) return;
 async function k41Lista(){ const r=await k41Api({acao:'aoVivoLista'}); K41.lista=r.ok?(r.jogos||[]):[]; if(document.body.classList.contains('stat')) desenhaStat(); }
 function k41CorLog(lis){ const c=lis[0]; return c.length===1?`background:${c[0]};box-shadow:0 0 0 2px #fff`:`background:repeating-linear-gradient(180deg,${c.map((x,i)=>`${x} ${i*3}px ${i*3+3}px`).join(',')})`; }
 // foto completa do jogo (o mesmo que o ↶ usa) + relógio + pontos por quarto
-function k41Foto(){ const c=Object.assign({},C,{raw:rawAgora(),anda:false,trava:true}); delete c.t0; return {v:'4.1',ts:Date.now(),foto:JSON.parse(histFoto()),C:c,PQ:K41.PQ,OT,anda:!!C.anda}; }
+function k41Foto(){ const c=Object.assign({},C,{raw:rawAgora(),anda:false,trava:true}); delete c.t0; return {v:'4.1',ts:Date.now(),te:!!KT_TESTE,foto:JSON.parse(histFoto()),C:c,PQ:K41.PQ,OT,anda:!!C.anda}; }
 function k41Guarda(){ if(!K41.id||K41.zerando) return;   // 🧪 zerando: não guarda mais nada neste aparelho (senão o jogo de teste volta ao recarregar · Magno, 26/11/2026)
   try{ localStorage.setItem('kt41_'+K41.id,JSON.stringify(k41Foto())); }catch(e){} }
 function k41Volta(o){ const f=o.foto; histVolta(JSON.stringify(f)); HI.h=[JSON.stringify(f)]; HI.i=0; desenhaUR();
@@ -1091,6 +1091,7 @@ async function k41Abre(){ if(!K41.id) return;
   let loc=null; try{ loc=JSON.parse(localStorage.getItem('kt41_'+K41.id)||'null'); }catch(e){}
   if(loc&&st.versao!=='4.1'&&Date.now()-(loc.ts||0)>2*3600e3){ loc=null; try{ localStorage.removeItem('kt41_'+K41.id); }catch(e){} }   // teste antigo que nunca foi para a planilha: descarta
   if(loc&&(loc.ts||0)<=KT_ZERADO){ loc=null; try{ localStorage.removeItem('kt41_'+K41.id); }catch(e){} }   // 🧪 guardado antes do jogo ser zerado: não vale
+  if(loc&&loc.te&&!KT_TESTE){ loc=null; try{ localStorage.removeItem('kt41_'+K41.id); }catch(e){} }   // 🧪 cópia feita durante o teste e o teste já foi desligado (em qualquer aparelho): não vale · números, placar, lance a lance e quinteto voltam zerados (Magno, 26/11/2026)
   const rl=st.versao==='4.1'?await k41Api({acao:'lances41',id:K41.id}):null; const rem=rl&&rl.ok&&rl.lances&&rl.lances.foto?rl.lances:null;
   const o=[loc,rem].filter(Boolean).sort((x,y)=>(y.ts||0)-(x.ts||0))[0];
   const ed=st.editor; K41.donoTs=(ed&&ed.dev===K41_DEV)?(+ed.ts||Date.now()):Date.now();
