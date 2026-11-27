@@ -578,6 +578,9 @@ const vZ=z=>z&&z[0]==='t'?3:2;   // quanto vale o arremesso do setor   // nomes 
 var ST={}; const AR={x:0,y:0,z:null,lado:'',res:null}, MARCAS=[];
 const stJ=(t,n)=>ST[t+n]||(ST[t+n]={pts:0,twoMade:0,twoMiss:0,threeMade:0,threeMiss:0,ftMade:0,ftMiss:0,reb:0,ast:0,tov:0,stl:0,blk:0,eff:0});
 // EF (fórmula brasileira): PTS + REB + ASS + TOCO + ROUBO − (2P err. + 3P err. + LL err. + TURNOVER) · falta não entra
+// +/- (Magno, 26/11/2026): cada ponto soma para os 5 em quadra do time que pontuou e tira o mesmo dos 5 em quadra do adversário.
+// O ↶ desfaz junto (o +/- fica no ST, que vai na foto do jogo). O ✏️ Editar linha não mexe no +/- (não dá para saber quem estava em quadra).
+function pmPts(t,p){ if(!p) return; const o=t==='a'?'b':'a'; for(const j of T[t].js) if(j[3]){ const s=stJ(t,j[0]); s.pm=(s.pm||0)+p; } for(const j of T[o].js) if(j[3]){ const s=stJ(o,j[0]); s.pm=(s.pm||0)-p; } }
 function efJ(s){ s.eff=s.pts+s.reb+s.ast+s.blk+s.stl-(s.twoMiss+s.threeMiss+s.ftMiss+s.tov); return s.eff; }
 function zM(x,y){ return {mx:(x-ZG.cx)/ZG.S, my:y/(ZG.S*ZG.K)-ZG.cyM}; }          // svg → metros (cesta = 0,0)
 function zS(mx,my){ return [ZG.cx+mx*ZG.S,(my+ZG.cyM)*ZG.S*ZG.K]; }              // metros → svg
@@ -668,7 +671,7 @@ function fechaAr(){ if(!AR.z) return; const {t,n,ok,err,reb}=AR;
   for(const c of AR.seq){   // erros e rebotes no lance a lance na ordem em que foram tocados (Magno, 25/11/2026)
     if(c==='e'){ s[k+'Miss']++; MARCAS.push({q:C.q,x:AR.x,y:AR.y,ok:0,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos perdido ${j[1]} - ${n}`,onde+' · EF −1','ou'); }
     else { s.reb++; s.oreb=(s.oreb||0)+1; reg(t,'',`Rebote ofensivo ${j[1]} - ${n}`,'EF +1','ok'); } }   // REB do retângulo = ofensivo (Magno, 25/11/2026)
-  if(ok){ s.pts+=p; s[k+'Made']++; PL[t]+=p; desenhaPL(); MARCAS.push({q:C.q,x:AR.x,y:AR.y,ok:1,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos convertido ${j[1]} - ${n}`,onde+` · EF +${p}`,'ok'); }
+  if(ok){ s.pts+=p; s[k+'Made']++; PL[t]+=p; pmPts(t,p); desenhaPL(); MARCAS.push({q:C.q,x:AR.x,y:AR.y,ok:1,t,n,z:AR.z,lado:AR.lado}); reg(t,'',`${p} pontos convertido ${j[1]} - ${n}`,onde+` · EF +${p}`,'ok'); }
   efJ(s); SEL.t=null; SEL.n=null; selMarca(); cancelaAr(); desenha(); bolaViva();
   aviso((ok?`+${p} para ${j[1]} - ${n}`:`${p} pontos perdido · ${j[1]} - ${n}`)+(err>1?` · ${err} erros`:'')+(reb?` · ${reb} rebote${reb>1?'s':''}`:''),1);
   if(ok) perguntaAs(t,n); }
@@ -914,16 +917,16 @@ function telaLL(){ const m=document.getElementById('llMenu'), op=document.getEle
    <div class="rod"><span>${LL.s12?'falta técnica (categoria 0) · 1 lance livre':'trocar: '+[1,2,3].map(q=>`<a onclick="qtdLL(${q})">${q}</a>`).join(' · ')}</span><span><a onclick="trocaLL()">outro jogador</a>${vez?' · <a onclick="voltaLL()">↶ corrigir o último</a>':''}</span></div>`; }
 function qtdLL(q){ paraLL(); LL.q=q; LL.r=LL.r.slice(0,q); telaLL(); }
 function trocaLL(){ LL.n=null; telaLL(); }
-function voltaLL(){ const x=LL.r.pop(); if(x!==undefined) llSt(x,-1); if(x===1){ PL[LL.t]--; desenhaPL(); } telaLL(); }
+function voltaLL(){ const x=LL.r.pop(); if(x!==undefined) llSt(x,-1); if(x===1){ PL[LL.t]--; pmPts(LL.t,-1); desenhaPL(); } telaLL(); }
 function llSt(v,d){ if(LL.s12||!LL.n) return; const s=stJ(LL.t,LL.n); if(v){ s.pts+=d; s.ftMade+=d; } else s.ftMiss+=d; efJ(s); desenha(); }   // lance livre no jogador e na EF
-function resLL(v){ LL.r.push(v); llSt(v,1); if(v){ PL[LL.t]++; desenhaPL(); }
+function resLL(v){ LL.r.push(v); llSt(v,1); if(v){ PL[LL.t]++; pmPts(LL.t,1); desenhaPL(); }
   if(LL.r.length<LL.q) return telaLL();
   const j=jog(LL.t,LL.n), ok=LL.r.filter(x=>x).length;
   reg(LL.t,'',`Lance livre ${j[1]} - ${j[0]}`,`${ok} de ${LL.q} convertido${ok>1?'s':''}`,ok?'ok':'ou');
   fimLL();
   if(C.trava==='ll'){ solta(true); aviso('Lance livre registrado · relógio liberado',1); }
   else aviso('Lance livre registrado · relógio pausado pelo Raoni · toque ▶ para liberar',1); }
-function cancelaLL(){ if(!LL.q){ fimLL(); return; } for(const x of LL.r){ llSt(x,-1); if(x===1) PL[LL.t]--; } desenhaPL(); fimLL(); aviso('Lance livre cancelado · relógio parado, toque ▶ para liberar'); }
+function cancelaLL(){ if(!LL.q){ fimLL(); return; } for(const x of LL.r){ llSt(x,-1); if(x===1){ PL[LL.t]--; pmPts(LL.t,-1); } } desenhaPL(); fimLL(); aviso('Lance livre cancelado · relógio parado, toque ▶ para liberar'); }
 function fimLL(){ LL.on=false; LL.s12=0; LL.t=null; LL.n=null; LL.q=0; LL.r=[]; document.getElementById('llMenu').classList.remove('on'); desenhaLL(); }
 function desenhaLL(){ const b=document.getElementById('btLL'); if(!b) return; b.classList.toggle('subOn',LL.on&&!LL.n);
   b.innerHTML=LL.on&&!LL.n?'LANCE LIVRE<small>marque o jogador que vai bater · toque aqui p/ fechar</small>':'LANCE<br>LIVRE'; }
@@ -1104,7 +1107,7 @@ function k41Corpo(){ const out={A:{},B:{},periodos:{A:[],B:[]}};
   for(const t of ['a','b']){ const T2=t.toUpperCase(); let soma=0;
     for(const j of T[t].js){ const reg=K41.reg[t][j[0]]; if(!reg) continue; const s=ST[t+j[0]]||{}, v=k=>+s[k]||0;
       out[T2][reg]={pts:v('pts'),twoMade:v('twoMade'),twoMiss:v('twoMiss'),threeMade:v('threeMade'),threeMiss:v('threeMiss'),ftMade:v('ftMade'),ftMiss:v('ftMiss'),
-        oreb:v('oreb'),dreb:v('dreb'),reb:v('oreb')+v('dreb'),ast:v('ast'),stl:v('stl'),blk:v('blk'),to:v('tov'),foul:+j[2]||0,eff:v('eff')}; }
+        oreb:v('oreb'),dreb:v('dreb'),reb:v('oreb')+v('dreb'),ast:v('ast'),stl:v('stl'),blk:v('blk'),to:v('tov'),foul:+j[2]||0,eff:v('eff'),pm:v('pm')}; }
     const pq=K41.PQ[t]; for(let i=0;i<5;i++) soma+=pq[i]||0; const d=PL[t]-soma; if(d) pq[Math.min(C.q,5)-1]+=d;   // pontos novos entram no período atual (prorrogações somadas no 5º)
     out.periodos[T2]=C.q<=4?pq.slice(0,4).map((x,i)=>i<C.q?x:null).concat([null]):pq.slice(); }
   out.qFech=Math.min(5,C.em?C.q-1:C.q); out.editor={dev:K41_DEV,ts:K41.donoTs||Date.now()}; return out; }
@@ -1180,7 +1183,7 @@ async function fbEntra(){ const em=document.getElementById('fbEm').value.trim(),
 // o que vai para o Ao Vivo, quebrado em pedaços (só o pedaço que mudou é enviado)
 function fbPedacos(){ const P={}, L=x=>JSON.parse(JSON.stringify(x));
   P['v']='4.1';
-  P['estado']=L({ts:Date.now(),q:C.q,em:C.em,fim:!!C.fim,ot:!!OT,raw:rawAgora(),anda:!!C.anda,tm:C.tm,tmAb:C.tmAb||'',pl:PL,ft:FT,pq:K41.PQ,
+  P['estado']=L({ts:Date.now(),q:C.q,em:C.em,fim:!!C.fim,ot:!!OT,raw:rawAgora(),anda:!!C.anda,tm:C.tm,tmAb:C.tmAb||'',pl:PL,ft:FT,pq:K41.PQ,anc:C.anc,
     nomes:{a:T.a.nome,b:T.b.nome}});
   for(const t of ['a','b']){ P['quadra/'+t]=L(T[t].js.map(j=>({n:j[0],nm:j[1],f:j[2]||0,q:j[3]?1:0,reg:K41.reg[t][j[0]]||''})));
     for(const j of T[t].js){ const s=ST[t+j[0]]; if(s) P['stats/'+t+'/'+j[0]]=L(Object.assign({},s,{f:j[2]||0})); } }

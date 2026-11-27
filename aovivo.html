@@ -197,6 +197,7 @@ table.jog td.c-2p,table.jog td.c-3p,table.jog td.c-ll{font-weight:600;color:#444
 .clLeg{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;margin-top:12px;font-size:11.5px;color:#e3e8f5;text-shadow:0 1px 3px #000;}.clLegJ{display:inline-block;width:14px;height:10px;border:2px solid #ffd54f;border-radius:3px;margin-right:5px;vertical-align:-1px;}
 @media(max-width:560px){#abaC .clPalco{padding:16px 6px 14px;}.clTitulo{font-size:32px;}.clSel{font-size:13px;}.clTab{min-width:0;}/* celular: nome e PTS na 1ª linha, as outras colunas embaixo */.clCab,.clLin{grid-template-columns:36px repeat(8,1fr);row-gap:2px;}.clPos{grid-row:1/3;}.clEq{grid-column:2/9;grid-row:1;}.clPts{grid-column:9;grid-row:1;}.clN:not(.clPts){grid-row:2;font-size:13px;}.clCab .clN:not(.clPts){font-size:10.5px;}.clLin{font-size:15px;padding:6px 6px;}.clEq{font-size:16px;gap:8px;}.clEq img{width:34px;height:34px;}.clPos span{width:28px;height:28px;font-size:16px;}.clLin .clPts{font-size:22px;}}
 
+/*ktLal41*/.lal{list-style:none;margin:0;padding:4px 8px 8px;}.lal li{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid #eef0f3;font-size:14px;}.lalH{min-width:82px;color:#667;font-size:12px;font-variant-numeric:tabular-nums;}.lalD{width:12px;height:12px;border-radius:50%;flex:0 0 12px;background:transparent;box-shadow:inset 0 0 0 1px #ccd;}.lalT{display:flex;flex-direction:column;line-height:1.25;}.lalT small{color:#667;font-size:12px;}.lal li.lal-qt,.lal li.lal-cr,.lal li.lal-tm{background:#f6f7f9;}.pmBox{flex:1;min-width:0;border:1px solid #e4e7ec;border-radius:10px;overflow:hidden;margin:8px;}.pmCab{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#0b0b0b;color:#fff;font-weight:800;}.pmCab img{width:28px;height:28px;object-fit:contain;}.pmCab span{flex:1;}.pmCab b{font-size:20px;}.pmT{width:100%;border-collapse:collapse;}.pmT td{padding:6px 8px;border-bottom:1px solid #eef0f3;}.pmT td.c-num{width:44px;}.pmT td.nm{text-align:left;width:100%;}.pmT .num{display:inline-block;min-width:32px;text-align:center;border-radius:6px;padding:4px 0;font-weight:800;}.pmT .ap{display:block;font-size:12px;color:#667;}.pmV{text-align:right;font:700 22px 'Oswald','Arial Narrow',Arial;}.pos{color:#1b9e3e;}.neg{color:#d63031;}.pmCab .pos{color:#5fe08a;}.pmCab .neg{color:#ff7b7b;}.pmQ{color:#1b9e3e;font-style:normal;font-size:11px;}
 /*ktLidAba*/.lpTudo{padding:6px 10px 10px;}.lpBloco{margin:10px 0 16px;border:1px solid #e4e7ec;border-radius:10px;overflow:hidden;}.lpTit{background:#0b0b0b;color:#fff;text-align:center;font:700 18px 'Oswald','Arial Narrow',Arial;letter-spacing:1.5px;text-transform:uppercase;padding:7px;}.lpPrem{margin:18px 0 4px;padding:9px;text-align:center;background:#0b0b0b;color:#ffd54f;font:700 18px 'Oswald','Arial Narrow',Arial;letter-spacing:1.5px;border-radius:10px;}
 .lpDuas{display:grid;grid-template-columns:1fr 1fr;}.lpCol+.lpCol{border-left:1px solid #e4e7ec;}.lpTime{display:flex;align-items:center;gap:8px;padding:5px 10px;font:700 14px 'Oswald','Arial Narrow',Arial;letter-spacing:1px;text-transform:uppercase;}.lpTime img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(0,0,0,.85)) drop-shadow(0 3px 5px rgba(0,0,0,.7));}
 .lpJ{display:flex;gap:10px;padding:9px 10px;border-bottom:1px solid #eef0f3;align-items:flex-start;}.lpJ:last-child{border-bottom:none;}.lpPos{font:700 20px 'Oswald','Arial Narrow',Arial;min-width:28px;color:#555;padding-top:2px;}.lp1 .lpPos{color:#c99700;}
@@ -371,7 +372,7 @@ function kt41_desliga(){ if(KT41.ref){ try{ KT41.ref.off(); }catch(e){} } KT41.r
 function kt41_stats(d,base){ if(!d||!d.quadra) return null; const out=Object.assign({},base||{},{A:{},B:{},versao:'4.1'});
   for(const t of ['a','b']){ const T2=t.toUpperCase(); (d.quadra[t]||[]).forEach(p=>{ if(!p||!p.reg) return; const s=((d.stats||{})[t]||{})[p.n]||{}, v=k=>+s[k]||0;
     out[T2][p.reg]={pts:v('pts'),twoMade:v('twoMade'),twoMiss:v('twoMiss'),threeMade:v('threeMade'),threeMiss:v('threeMiss'),ftMade:v('ftMade'),ftMiss:v('ftMiss'),
-      oreb:v('oreb'),dreb:v('dreb'),reb:v('oreb')+v('dreb'),ast:v('ast'),stl:v('stl'),blk:v('blk'),to:v('tov'),foul:+p.f||0,eff:v('eff')}; }); }
+      oreb:v('oreb'),dreb:v('dreb'),reb:v('oreb')+v('dreb'),ast:v('ast'),stl:v('stl'),blk:v('blk'),to:v('tov'),foul:+p.f||0,eff:v('eff'),pm:v('pm')}; }); }
   const e=d.estado||{}; if(e.pq){ const q=+e.q||1; out.periodos={}; for(const [t,T2] of [['a','A'],['b','B']]){ const pq=(e.pq[t]||[]).concat([0,0,0,0,0]).slice(0,5);
     out.periodos[T2]=q<=4?pq.slice(0,4).map((x,i)=>i<q?(+x||0):null).concat([null]):pq.map(x=>+x||0); } out.qFech=Math.min(5,e.em?q-1:q); }
   return out; }
@@ -388,7 +389,7 @@ function kt41_planilha(j){ const v41=kt_eh41(j);
   kt41_aplica(j); }
 // arremessos: do Firebase (na hora) ou, sem ele, do lance a lance guardado na planilha (aba Lances41)
 async function kt41_marcasPlanilha(id){ if(KT41.marcasPlT&&Date.now()-KT41.marcasPlT<15000&&KT41.marcasPl&&KT41.marcasPl.id===id) return; KT41.marcasPlT=Date.now();
-  const r=await api({acao:'lances41',id}); const L=r.ok&&r.lances&&r.lances.foto&&r.lances.foto.MARCAS; KT41.marcasPl={id,m:L||[]}; if(KT_ABA==='arr'&&KT_ULT&&KT_ULT.id===id) kt_render(KT_ULT); }
+  const r=await api({acao:'lances41',id}); const F=r.ok&&r.lances&&r.lances.foto, L=F&&F.MARCAS; KT41.marcasPl={id,m:L||[],log:(F&&F.LOG)||[],anc:(r.lances&&r.lances.C&&r.lances.C.anc)||null}; if(['arr','lal'].includes(KT_ABA)&&KT_ULT&&KT_ULT.id===id) kt_render(KT_ULT); }
 function kt41_marcas(j){ const d=KT41.id===j.id&&kt41_valido(KT41.dado,j)&&KT41.dado; if(d&&d.marcas) return Object.values(d.marcas).filter(Boolean);
   if(!KT41.marcasPl||KT41.marcasPl.id!==j.id||status(j)==='vivo') kt41_marcasPlanilha(j.id); return (KT41.marcasPl&&KT41.marcasPl.id===j.id)?KT41.marcasPl.m:[]; }
 function kt41_filtro(k){ KT41.filtro.ver=k; if(KT_ULT) kt_render(KT_ULT); }
@@ -615,8 +616,8 @@ function kt_render(j){ KT_ULT_ST=status(j);
   const fotoTec=s=>{ const k='TEC-'+s+'-'+String(cat).replace(/[^A-Za-z0-9]/g,''); return KT_FOTOS[k]?`<img class="tecFoto" src="${KT_FOTOS[k]}" alt="" onclick="kt_zoom(this.src,'Técnico')">`:''; };
   // líderes por coluna (medalhas)
   const cols=['pts','reb','ast','blk','stl','eff'];
-  const V41=kt_eh41(j);   // jogo feito no Scout PRO 4.1: mostra também OREB e DREB (Magno, 25/11/2026)
-  const COLS=V41?['pts','2p','3p','ll','reb','oreb','dreb','ast','stl','blk','to','foul','eff']:['pts','2p','3p','ll','reb','ast','stl','blk','to','foul','eff'];
+  const V41=kt_eh41(j);   // jogo feito no Scout PRO 4.1: REBO, REBD e TREB, nesta ordem (Magno, 26/11/2026)
+  const COLS=V41?['pts','2p','3p','ll','oreb','dreb','reb','ast','stl','blk','to','foul','eff']:['pts','2p','3p','ll','reb','ast','stl','blk','to','foul','eff'];
   const fr=(p,f)=>{ const m=+p[f+'Made']||0, e=+p[f+'Miss']||0; return m+'/'+(m+e); };
   const frP=(p,f)=>{ const m=+p[f+'Made']||0, a=m+(+p[f+'Miss']||0); return m+'/'+a+'<small class="pc"> ('+(a?Math.round(m*100/a):0)+'%)</small>'; };
   const valH=(p,k)=>k==='2p'?frP(p,'two'):k==='3p'?frP(p,'three'):k==='ll'?frP(p,'ft'):(+p[k]||0);
@@ -631,7 +632,7 @@ function kt_render(j){ KT_ULT_ST=status(j);
   // pontos do time no canto direito do cabeçalho de cada tabela, sincronizado com o placar (Magno, 20/11)
   const ptsCab=js=>`<div class="cabPts"><b>${soma(js,'pts')}</b><small>PONTOS</small></div>`;
   const tabela=(t,js,sel)=>`<div class="box"><div class="cab"><img src="${escudo(t.sigla)}" alt=""><div>${esc(D.curto[t.sigla]||t.sigla)} <small>· ${esc(cat)}</small>${tecN(t)?`<div class="tec">${fotoTec(t.sigla)}Técnico: <b>${esc(tecN(t))}</b>${(t.tecnico&&t.tecnico.apelido)?' ('+esc(t.tecnico.apelido)+')':''}</div>`:''}</div>${sel?`<label class="ord" title="Muda a ordem dos jogadores dos dois times">Ordenar por <select onchange="kt_ordMudou(this.value)">${KT_ORDS.map(([v,n])=>`<option value="${v}"${v===KT_ORD?' selected':''}>${n}</option>`).join('')}</select></label>`:''}${ptsCab(js)}</div>
-    <table class="jog"><tr><th class="c-num">CAMISA</th><th class="hm"></th><th class="l">JOGADOR</th><th class="c-pts" title="Pontos">PTS</th><th class="c-2p" title="Cestas de 2 pontos: certas/tentadas">2P</th><th class="c-3p" title="Cestas de 3 pontos: certas/tentadas">3P</th><th class="c-ll" title="Lances livres: certos/tentados">LL</th><th class="c-reb" title="Rebotes">REB</th>${V41?'<th class="c-oreb" title="Rebotes ofensivos">OREB</th><th class="c-dreb" title="Rebotes defensivos">DREB</th>':''}<th class="c-ast" title="Assistências">AST</th><th class="c-stl" title="Roubos de bola">ROU</th><th class="c-blk" title="Tocos">TOC</th><th class="c-to" title="Erros (perdas de bola)">ERR</th><th class="c-foul" title="Faltas pessoais">FP</th><th class="c-eff" title="Eficiência">EF</th></tr>
+    <table class="jog"><tr><th class="c-num">CAMISA</th><th class="hm"></th><th class="l">JOGADOR</th><th class="c-pts" title="Pontos">PTS</th><th class="c-2p" title="Cestas de 2 pontos: certas/tentadas">2P</th><th class="c-3p" title="Cestas de 3 pontos: certas/tentadas">3P</th><th class="c-ll" title="Lances livres: certos/tentados">LL</th>${V41?'<th class="c-oreb" title="Rebotes ofensivos">REBO</th><th class="c-dreb" title="Rebotes defensivos">REBD</th><th class="c-reb" title="Total de rebotes">TREB</th>':'<th class="c-reb" title="Rebotes">REB</th>'}<th class="c-ast" title="Assistências">AST</th><th class="c-stl" title="Roubos de bola">ROU</th><th class="c-blk" title="Tocos">TOC</th><th class="c-to" title="Erros (perdas de bola)">ERR</th><th class="c-foul" title="Faltas pessoais">FP</th><th class="c-eff" title="Eficiência">EF</th></tr>
     ${js.map(linha).join('')||'<tr><td colspan="15">Sem atletas.</td></tr>'}</table></div>`;
   // comparação
   const tot=js=>{ const o={}; ['pts','twoMade','twoMiss','threeMade','threeMiss','ftMade','ftMiss','reb','oreb','dreb','ast','stl','blk','to','foul','eff'].forEach(k=>o[k]=soma(js,k)); return o; };
@@ -641,7 +642,7 @@ function kt_render(j){ KT_ULT_ST=status(j);
   const num=(o,k)=>({txt:String(o[k]),v:o[k],tem:true});
   const linhas=[['PTS','Pontos',num(ta,'pts'),num(tb,'pts'),1],['AQ','Arremessos de quadra',aq(ta),aq(tb),1],['2P','Cestas de 2 pontos',arr('twoMade','twoMiss',ta),arr('twoMade','twoMiss',tb),1],
     ['3P','Cestas de 3 pontos',arr('threeMade','threeMiss',ta),arr('threeMade','threeMiss',tb),1],['LL','Lances livres',arr('ftMade','ftMiss',ta),arr('ftMade','ftMiss',tb),1],
-    ['REB','Rebotes',num(ta,'reb'),num(tb,'reb'),1],...(V41?[['OREB','Rebotes ofensivos',num(ta,'oreb'),num(tb,'oreb'),1],['DREB','Rebotes defensivos',num(ta,'dreb'),num(tb,'dreb'),1]]:[]),['AST','Assistências',num(ta,'ast'),num(tb,'ast'),1],['ROU','Roubos de bola',num(ta,'stl'),num(tb,'stl'),1],
+    ...(V41?[['REBO','Rebotes ofensivos',num(ta,'oreb'),num(tb,'oreb'),1],['REBD','Rebotes defensivos',num(ta,'dreb'),num(tb,'dreb'),1],['TREB','Total de rebotes',num(ta,'reb'),num(tb,'reb'),1]]:[['REB','Rebotes',num(ta,'reb'),num(tb,'reb'),1]]),['AST','Assistências',num(ta,'ast'),num(tb,'ast'),1],['ROU','Roubos de bola',num(ta,'stl'),num(tb,'stl'),1],
     ['TOC','Tocos',num(ta,'blk'),num(tb,'blk'),1],['ERR','Erros',num(ta,'to'),num(tb,'to'),-1],['FP','Faltas',num(ta,'foul'),num(tb,'foul'),-1],['EF','Eficiência',num(ta,'eff'),num(tb,'eff'),1]];
   const ca=cor(sa), cb=cor(sb);
   const kt_dist=(x,y)=>{ const h=c=>{const n=parseInt(String(c).slice(1),16);return[n>>16,(n>>8)&255,n&255];}; const p=h(x),q=h(y); return Math.abs(p[0]-q[0])+Math.abs(p[1]-q[1])+Math.abs(p[2]-q[2]); };
@@ -746,7 +747,8 @@ let KT_TMODO='jogo'; // aba Times: começa sempre em 'jogo' (Este jogo); o Klaus
 // depois do Resumo, Líderes e Times, uma aba para cada time do jogo (o da casa, à esquerda, primeiro); o nome troca sozinho em cada jogo
 function kt_abasDe(j){ const m=(j&&j.meta)||{}; const nm=l=>{ const t=m['time'+l]||{}; return m.avulso?(t.nome||t.sigla||'Time '+l):(D.curto[t.sigla]||t.nome||t.sigla||'Time '+l); };
   const v41=kt_eh41(j); // jogo do Scout 4.1 ganha a aba Arremessos depois de Líderes (Magno, 25/11/2026)
-  return KT_ABAS.slice(0,2).concat(v41?[['arr','Arremessos']]:[],KT_ABAS.slice(2,3),[['tA',nm('A')],['tB',nm('B')]],KT_ABAS.slice(3)); } // Resumo · Líderes · Times · times do jogo (Magno, 20/11)
+  // 4.1 (Magno, 26/11/2026): + Lance a lance e +/- depois de Arremessos; sem a aba Medalhas
+  return KT_ABAS.slice(0,2).concat(v41?[['arr','Arremessos'],['lal','Lance a lance'],['pm','+/-']]:[],KT_ABAS.slice(2,3),[['tA',nm('A')],['tB',nm('B')]],KT_ABAS.slice(3).filter(([k])=>!(v41&&k==='med'))); } // Resumo · Líderes · Times · times do jogo (Magno, 20/11)
 let KT_CONF='todos', KT_ORDMED='G', KT_ABA='res', KT_CES=null, KT_HIS=null, KT_HIS_T=0, KT_CLA=null, KT_ORDCES='4', KT_CARREG={};
 function kt_aba(k){ KT_ABA=k; if(KT_ULT) kt_render(KT_ULT); }
 // Abas guardadas no aparelho (localStorage): aparecem na hora e são atualizadas em segundo plano. Sem mensagem nem permissão.
@@ -947,8 +949,40 @@ function kt_lidHTML(j,ja,jb){
   return `<div class="abaTopo">🏀 Líderes da partida · ${esc(D.curto[sa]||sa)} x ${esc(D.curto[sb]||sb)} · ${esc(cat)}</div><div class="lpTudo">${h}</div>
     <div class="abaNota">1º, 2º e 3º de cada time em cada fundamento. Os números grandes são deste jogo; a linha "Temporada" soma os jogos narrados pelo Klaus TV no ${esc(cat)} (EF = média por jogo). Clique na foto ou no nome para abrir o cartão do jogador.</div>`;
 }
+/* ---------- Aba Lance a lance (Scout PRO 4.1 · Magno, 26/11/2026) ----------
+   Só leitura: o mesmo lance a lance do Scout, o mais novo em cima. Ao vivo vem do Firebase; depois do jogo, da planilha (aba Lances41). */
+function kt41_lances(j){ const d=KT41.id===j.id&&kt41_valido(KT41.dado,j)&&KT41.dado;
+  if(d&&d.lances) return {log:Object.keys(d.lances).sort().reverse().map(k=>d.lances[k]).filter(Boolean),anc:(d.estado||{}).anc||null};
+  if(!KT41.marcasPl||KT41.marcasPl.id!==j.id||status(j)==='vivo') kt41_marcasPlanilha(j.id);
+  const P=KT41.marcasPl&&KT41.marcasPl.id===j.id?KT41.marcasPl:null; return {log:(P&&P.log)||[],anc:P&&P.anc}; }
+function kt41_rest(q,raw,anc){ const dur=q<=4?600:300, A=(anc&&anc[q])||[[0,0]]; let i=A.length-1; while(i>0&&A[i][0]>raw) i--;
+  const [r0,j0]=A[i], nx=A[i+1], jg=nx&&nx[0]>r0?j0+(raw-r0)*(nx[1]-j0)/(nx[0]-r0):j0+(raw-r0); const x=Math.max(0,Math.round(dur-jg));
+  return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0'); }
+function kt_lalHTML(j){ const m=j.meta||{}, sa=(m.timeA||{}).sigla, sb=(m.timeB||{}).sigla, [ca,cb]=kt_coresTimes(sa,sb), {log,anc}=kt41_lances(j);
+  const NQ=q=>q<=4?q+'º Q':(q-4)+'ª PR';
+  const li=log.map(e=>{ const c=e.t==='a'?ca:e.t==='b'?cb:'';
+    return `<li class="lal-${esc(e.k||'')}"><span class="lalH">${e.q?esc(NQ(+e.q))+' · '+kt41_rest(+e.q,+e.raw||0,anc):''}</span><span class="lalD"${c?` style="background:${c}"`:''}></span><span class="lalT"><b>${esc(e.nm||'')}</b>${e.a?`<small>${esc(e.a)}</small>`:''}</span></li>`; }).join('');
+  return `<div class="abaTopo">📋 Lance a lance · ${esc(D.curto[sa]||sa)} x ${esc(D.curto[sb]||sb)}</div>
+    ${li?`<ul class="lal">${li}</ul>`:'<div class="vazio" style="padding:24px">Nenhum lance registrado ainda.</div>'}
+    <div class="abaNota">O mais novo em cima. O horário é o tempo que faltava no quarto (aproximado, pelo relógio do Scout).</div>`; }
+/* ---------- Aba +/- (Scout PRO 4.1 · Magno, 26/11/2026) ----------
+   Saldo do placar enquanto o jogador estava em quadra (calculado no Scout pelo quinteto inicial e pelas substituições). */
+function kt_pmHTML(j,ja,jb){ const m=j.meta||{}, sa=(m.timeA||{}).sigla, sb=(m.timeB||{}).sigla, d=KT41.id===j.id&&kt41_valido(KT41.dado,j)&&KT41.dado;
+  const emQ={}; if(d&&d.quadra) ['a','b'].forEach(t=>(d.quadra[t]||[]).forEach(p=>{ if(p&&p.q&&p.reg) emQ[p.reg]=1; }));
+  const sg=v=>v>0?'+'+v:String(v), cl=v=>v>0?'pos':v<0?'neg':'';
+  const bloco=(js,s)=>{ const c=cor(s), pl=soma(js,'pts'), op=soma(js===ja?jb:ja,'pts');
+    const ord=js.slice().sort((x,y)=>(+y.pm||0)-(+x.pm||0)||(parseInt(x.numero,10)||999)-(parseInt(y.numero,10)||999));
+    return `<div class="pmBox"><div class="pmCab"><img src="${escudo(s)}" alt=""><span>${esc(D.curto[s]||s)}</span><b class="${cl(pl-op)}">${sg(pl-op)}</b></div>
+      <table class="pmT">${ord.map(p=>`<tr><td class="c-num"><span class="num" style="background:${c};color:${txt(c)}">${esc(p.numero||'-')}</span></td>
+      <td class="l nm">${esc(kt_nome2(p.nome))}${emQ[p.reg]?' <i class="pmQ" title="Em quadra agora">●</i>':''}${p.apelido?'<span class="ap">'+esc(p.apelido)+'</span>':''}</td>
+      <td class="pmV ${cl(+p.pm||0)}">${sg(+p.pm||0)}</td></tr>`).join('')||'<tr><td>Sem atletas.</td></tr>'}</table></div>`; };
+  return `<div class="abaTopo">± Plus/minus (+/-) · ${esc(D.curto[sa]||sa)} x ${esc(D.curto[sb]||sb)}</div>
+    <div class="duas">${bloco(ja,sa)}${bloco(jb,sb)}</div>
+    <div class="abaNota">+/- é o saldo do placar (pontos do time menos pontos do adversário) enquanto o jogador estava em quadra. Ao lado do nome do time, o saldo do jogo. ${d&&d.quadra?'● = em quadra agora. ':''}Só em jogos marcados no Scout 4.1.</div>`; }
 function kt_abaHTML(j,ja,jb){
   if(KT_ABA==='arr'){ if(kt_eh41(j)) return kt_arrHTML(j); KT_ABA='res'; }
+  if(KT_ABA==='lal'||KT_ABA==='pm'){ if(kt_eh41(j)) return KT_ABA==='lal'?kt_lalHTML(j):kt_pmHTML(j,ja,jb); KT_ABA='res'; }
+  if(KT_ABA==='med'&&kt_eh41(j)) KT_ABA='res';   // 4.1 não tem Medalhas
   if(KT_ABA==='lid') return kt_lidHTML(j,ja,jb);
   if(KT_ABA==='tA'||KT_ABA==='tB') return kt_timeHTML(j,KT_ABA==='tA'?'A':'B');
   const cat=j.categoria, m=j.meta||{}, sa=(m.timeA||{}).sigla, sb=(m.timeB||{}).sigla, todos=ja.concat(jb);
