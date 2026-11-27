@@ -221,7 +221,7 @@ hr{
 /*ktJMcss*/
 .ktJM{box-sizing:border-box;width:100%;max-width:none;margin:6px 0 16px;padding:12px 14px;border:2px solid #ffd54f;border-radius:12px;background:#101826;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:center;}
 .ktJM label{color:#ffd54f;font-weight:700;font-size:15px;}
-.ktJogoVer{display:flex;align-items:center;gap:10px;min-width:0}.ktJogoVer #ktSelJogo{flex:1}.ktJM .ktJogoVer .ktVerLb{min-width:0;text-align:right;white-space:nowrap}.ktJM .ktJogoVer #ktOficial{flex:0 0 150px;width:150px !important;margin:0;padding:9px 6px;font-size:14px;border-radius:8px;background:#5d6b7c;color:#fff;border:2px solid transparent;white-space:nowrap}
+.ktJogoVer{display:flex;align-items:center;gap:10px;min-width:0}.ktJogoVer #ktSelJogo{flex:1}.ktJM .ktJogoVer #ktOficial{flex:0 0 150px;width:150px !important;margin:0;padding:9px 6px;font-size:14px;border-radius:8px;background:#5d6b7c;color:#fff;border:2px solid transparent;white-space:nowrap}
 .ktJM .ktJogoVer #ktOficial.lig{background:linear-gradient(180deg,#ffd54f,#f0a500);color:#1b1300;border-color:#fff3c4;box-shadow:0 0 10px rgba(255,213,79,.55)}
 .ktJM .ktJogoVer #ktOficial.outro{background:#7a3b00;color:#ffd08a;border-color:#ffb74d}
 .ktJM .ktJogoVer #ktOficial:disabled{opacity:.45;cursor:default}
@@ -432,7 +432,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktJogoTravado .ktQck,html.ktJog
 
 <!--ktJogoMontado--><div class="ktJM"><button type="button" id="ktModo" class="ktModo" onclick="kt_trocarModoTela()" title="Trocar entre marcar o jogo e só acompanhar (segunda tela)">✏️ Marcando</button>
 <label for="ktSelJogo">🏀 Jogo montado</label>
-<div class="ktJogoVer"><select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select><label for="ktOficial" class="ktVerLb">Versão</label><button type="button" id="ktOficial" class="ktOficial" data-v="4.0" onclick="kt_ofClique()" title="⭐ Scout oficial deste jogo: liga e desliga">⭐ 4.0</button><button type="button" id="ktTeste" class="ktTeste" onclick="kt_testeClique()" title="🧪 Modo teste: liga para testar; ao desligar, este jogo volta zerado">🧪 Teste</button></div>
+<div class="ktJogoVer"><select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select><button type="button" id="ktOficial" class="ktOficial" data-v="4.0" onclick="kt_ofClique()" title="⭐ Scout oficial deste jogo: liga e desliga">⭐ 4.0</button><button type="button" id="ktTeste" class="ktTeste" onclick="kt_testeClique()" title="🧪 Modo teste: liga para testar; ao desligar, este jogo volta zerado">🧪 Teste</button></div>
 <div class="ktBtPar"><button type="button" class="ktBtSalvar" onclick="kt_salvarAndamento()" title="Grava o jogo na planilha agora">Salvar jogo</button><button type="button" class="ktBtFim" onclick="kt_finalizar(this)" title="Encerra o jogo: o Ao vivo para de atualizar e mostra JOGO FINALIZADO">Finalizar jogo</button></div>
 <input type="hidden" id="ktDataJogo">
 <label for="ktSelAnt">📚 Jogos anteriores</label>
