@@ -432,7 +432,7 @@ html.ktLeitura .ktQck,html.ktLeitura .ktQed,html.ktJogoTravado .ktQck,html.ktJog
 
 <!--ktJogoMontado--><div class="ktJM"><button type="button" id="ktModo" class="ktModo" onclick="kt_trocarModoTela()" title="Trocar entre marcar o jogo e só acompanhar (segunda tela)">✏️ Marcando</button>
 <label for="ktSelJogo">🏀 Jogo montado</label>
-<div class="ktJogoVer"><select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select><button type="button" id="ktOficial" class="ktOficial" data-v="4.0" onclick="kt_ofClique()" title="⭐ Scout oficial deste jogo: liga e desliga">⭐ 4.0</button><button type="button" id="ktTeste" class="ktTeste" onclick="kt_testeClique()" title="🧪 Modo teste: liga para testar; ao desligar, este jogo volta zerado">🧪 Teste</button></div>
+<div class="ktJogoVer"><select id="ktSelJogo" onchange="kt_abrirMontado(this.value)"><option value="">Carregando jogos montados…</option></select><button type="button" id="ktOficial" class="ktOficial" data-v="4.0" onclick="kt_ofClique()" title="⭐ Scout oficial deste jogo: liga e desliga">⭐ Liga / Desliga</button><button type="button" id="ktTeste" class="ktTeste" onclick="kt_testeClique()" title="🧪 Modo teste: liga para testar; ao desligar, este jogo volta zerado">🧪 Teste</button></div>
 <div class="ktBtPar"><button type="button" class="ktBtSalvar" onclick="kt_salvarAndamento()" title="Grava o jogo na planilha agora">Salvar jogo</button><button type="button" class="ktBtFim" onclick="kt_finalizar(this)" title="Encerra o jogo: o Ao vivo para de atualizar e mostra JOGO FINALIZADO">Finalizar jogo</button></div>
 <input type="hidden" id="ktDataJogo">
 <label for="ktSelAnt">📚 Jogos anteriores</label>
@@ -1874,14 +1874,14 @@ function kt_mapaFooter(nome){
 const KT_VER='4.0'; var KT_OFICIAL='', KT_ZERANDO=false;
 function kt_jogoAtual(){ return KT_JOGO_ID?KT_MONTADOS.find(x=>x.id===KT_JOGO_ID):null; }
 function kt_desligado(){ const j=kt_jogoAtual(); return !!(j && !kt_encerrado(j) && KT_OFICIAL!==KT_VER); }
-function kt_ofAviso(alerta){ const t=KT_OFICIAL?'⭐ O Scout '+KT_OFICIAL+' está ligado neste jogo. Para marcar aqui, ligue o Scout '+KT_VER+' (botão ⭐ lá em cima).':'⭐ Scout desligado: toque em "⭐ Ligar '+KT_VER+'" lá em cima para começar a marcar.'; kt_msg(t); if(alerta) alert(t); }
+function kt_ofAviso(alerta){ const t=KT_OFICIAL?'⭐ O Scout '+KT_OFICIAL+' está ligado neste jogo. Para marcar aqui, ligue o Scout '+KT_VER+' (botão ⭐ lá em cima).':'⭐ Scout desligado: toque em "⭐ Ligar" lá em cima para começar a marcar.'; kt_msg(t); if(alerta) alert(t); }
 function kt_ofPintar(){ const b=document.getElementById('ktOficial'), f=document.getElementById('ktFaixaOficial'); if(!b) return; const j=kt_jogoAtual();
   b.className='ktOficial'; b.disabled=false;
-  if(!j){ b.textContent='⭐ '+KT_VER; b.disabled=true; b.title='Escolha primeiro o jogo montado'; }
-  else if(kt_encerrado(j)){ b.textContent='⭐ '+KT_VER; b.disabled=true; b.title='Jogo encerrado: não precisa ligar o scout (correções pelo Editar)'; }
-  else if(KT_OFICIAL===KT_VER){ b.textContent='⭐ '+KT_VER+' LIGADO'; b.classList.add('lig'); b.title='Este é o scout oficial do jogo: ele marca e o Ao Vivo transmite. Toque para desligar.'; }
+  if(!j){ b.textContent='⭐ Liga / Desliga'; b.disabled=true; b.title='Escolha primeiro o jogo montado'; }
+  else if(kt_encerrado(j)){ b.textContent='⭐ Liga / Desliga'; b.disabled=true; b.title='Jogo encerrado: não precisa ligar o scout (correções pelo Editar)'; }
+  else if(KT_OFICIAL===KT_VER){ b.textContent='⭐ Desligar'; b.classList.add('lig'); b.title='Este é o scout oficial do jogo: ele marca e o Ao Vivo transmite. Toque para desligar.'; }
   else if(KT_OFICIAL){ b.textContent='⭐ '+KT_OFICIAL+' ligado'; b.classList.add('outro'); b.title='O Scout '+KT_OFICIAL+' está ligado neste jogo. Toque para trocar para o '+KT_VER+'.'; }
-  else { b.textContent='⭐ Ligar '+KT_VER; b.title='Ligar o Scout '+KT_VER+' como scout oficial deste jogo'; }
+  else { b.textContent='⭐ Ligar'; b.title='Ligar o Scout '+KT_VER+' como scout oficial deste jogo'; }
   const off=kt_desligado(); document.documentElement.classList.toggle('ktDesligado',off);
   kt_testePintar(); }
 async function kt_ofApi(versao,ligar){ return kt_apiSc({acao:'scoutOficial',id:KT_JOGO_ID,versao,ligar}); }
