@@ -331,6 +331,16 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
 .btTm .esc span.off{opacity:.25;cursor:default;filter:grayscale(1);transform:none}
 .bt.btTm.on{background:linear-gradient(180deg,#ff9d3a,#e06a00);color:#000;border-color:#ff9d3a}
 .k41marca{position:fixed;right:12px;bottom:8px;font:600 11px Arial;color:#ffd54f;background:rgba(0,0,0,.7);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
+/* Magno, 27/11/2026: ▶ e ⏸ num botão só (verde = liberar; vermelho = pausar) · 1º Q e "parado" entre o tempo e o ✎ · Q quadrado branco */
+.top .rel{flex-direction:row;padding-top:0}
+.top .relInfo{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;margin:0 2px 0 6px;min-width:62px}
+.top .relInfo i{font-style:normal;font-size:13px;color:#ffd54f;letter-spacing:1px;line-height:1}
+.top .relInfo .net{margin-top:0;white-space:nowrap;line-height:1}
+.top .seta.sPl.livre{color:#fff;background:#2fae4a;box-shadow:inset 0 0 0 2px #3ddc84}
+.top .seta.sPl.pausa{color:#ff5a5a;background:rgba(255,90,90,.16);box-shadow:inset 0 0 0 2px #ff5a5a}
+.top .play{width:44px;height:44px;border-radius:6px;border:2px solid #fff;color:#fff;font-size:20px;margin-left:6px;background:rgba(255,255,255,.06)}
+/* times sem cor própria: sem fundo, letra e borda brancas */
+.col.a .cab,.col.b .cab{background:transparent;color:#fff;border:2px solid #fff}
 </style>
 </head>
 <body>
@@ -395,9 +405,8 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
   <div class="cx" id="fA" title="Faltas do time no quarto">F<b>0</b></div><div class="sep"></div>
   <div class="cx tmp" id="tmA" onclick="pedeTempo('a')" title="Pedido de tempo do Time A: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div>
   <div class="pl" id="plA">0</div>
-  <div class="seta sPl" id="btPlay" onclick="clicaPlay()" title="Liberar o relógio">▶</div>
-  <div class="rel"><i id="relQ">1º Q</i><div class="rl"><b id="relB" onclick="clicaRel()" title="Relógio parado: toque para voltar a correr">10:00</b><span class="ed" onclick="acerto()" title="Acertar pelo placar do ginásio">✎</span><div class="play" id="btQ" onclick="clicaQuarto()" title="Encerrar o quarto">Q</div></div><span class="net" id="relSt">● correndo</span></div>
-  <div class="seta sPa" id="btPaus" onclick="clicaPausa()" title="Pausar o relógio (não volta sozinho)">⏸</div>
+  <div class="seta sPl" id="btPlay" onclick="clicaPlayPausa()" title="Liberar o relógio">▶</div>
+  <div class="rel"><div class="rl"><b id="relB" onclick="clicaRel()" title="Relógio parado: toque para voltar a correr">10:00</b><div class="relInfo"><i id="relQ">1º Q</i><span class="net" id="relSt">● correndo</span></div><span class="ed" onclick="acerto()" title="Acertar pelo placar do ginásio">✎</span><div class="play" id="btQ" onclick="clicaQuarto()" title="Encerrar o quarto">Q</div></div></div>
   <div class="pl" id="plB">0</div>
   <div class="cx tmp" id="tmB" onclick="pedeTempo('b')" title="Pedido de tempo do Time B: 1º toque inicia, 2º toque encerra">TEMPO<b>0/2</b></div><div class="sep"></div>
   <div class="cx" id="fB" title="Faltas do time no quarto">F<b>0</b></div>
@@ -407,8 +416,8 @@ body.lay3.sub .baixo{grid-template-columns:1fr 460px}body.lay3 .banco{order:2}  
 <main class="corpo">
   <section id="stPainel"></section>
   <section class="times">
-    <div class="col a" id="colA"><div class="cab"><img alt="" style="visibility:hidden">A · TIME A</div></div>
-    <div class="col b" id="colB"><div class="cab"><img alt="" style="visibility:hidden">B · TIME B</div></div>
+    <div class="col a" id="colA"><div class="cab"><img alt="" style="visibility:hidden">TIME A</div></div>
+    <div class="col b" id="colB"><div class="cab"><img alt="" style="visibility:hidden">TIME B</div></div>
   </section>
 
   <section class="meio"><div class="quadra" id="quadra"></div><div id="llMenu"><div class="cx"><h4><b id="llTit">LANCE LIVRE</b><span onclick="cancelaLL()">✕</span></h4><div id="llOp"></div></div></div>
@@ -743,13 +752,14 @@ function relDesenha(){ const b=document.getElementById('relB'); if(!b||b.querySe
   const bT=document.getElementById('btTm'); if(bT){ bT.classList.toggle('on',!!C.tmAb); document.getElementById('btTmT').textContent=C.tmAb?'TEMPO – '+T[C.tmAb].nome.toUpperCase():'PEDIDO DE TEMPO'; }
   const bq=document.getElementById('btQ'); bq.className='play'+(C.conf?' conf':!C.em?' ini':''); bq.textContent=C.em?'Q':'▶';   // Q = encerrar o quarto (Magno, 24/11/2026)
   bq.title=C.fim?'Partida encerrada':C.em?'Encerrar o quarto (toque 2 vezes)':'Iniciar o próximo período'; bq.style.visibility=C.fim?'hidden':'';
-  document.getElementById('btPlay').classList.toggle('on',C.em&&C.anda);
-  document.getElementById('btPaus').classList.toggle('on',C.em&&C.trava===true);
+  const bp=document.getElementById('btPlay'), corre=C.em&&C.anda; bp.classList.remove('on'); bp.classList.toggle('pausa',corre); bp.classList.toggle('livre',!corre&&C.em&&!C.fim);
+  bp.textContent=corre?'⏸':'▶'; bp.title=corre?'Pausar o relógio (não volta sozinho)':'Liberar o relógio';
   document.getElementById('tarja').classList.toggle('on',!!C.tarja&&C.em); }
 // ▶ / ⏸ (Magno, 24/11/2026): o relógio segue automático, mas o Raoni pode segurar (discussão, atendimento, pedido de tempo
 // atrasado). ⏸ para e cancela a volta automática (substituição 4 s, falta 8 s); só volta no ▶.
 function clicaPausa(){ if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
   C.trava=true; clearTimeout(tSub); tSub=null; pausa(); aviso('Relógio pausado · toque ▶ para liberar'); }
+function clicaPlayPausa(){ if(C.em&&C.anda) return clicaPausa(); clicaPlay(); }   // ▶/⏸ num botão só (Magno, 27/11/2026)
 function clicaPlay(){ if(qiPre()&&!qiOk()) return aviso('Marque antes o quinteto inicial dos dois times · ESTATÍSTICAS › bolinha de cada titular'); if(!C.em) return aviso('O quarto está encerrado · toque ▶ para iniciar o próximo');
   if(C.tmAb) return aviso('Pedido de tempo aberto · toque de novo no escudo do time para encerrar');
   solta(1); aviso('Relógio correndo',1); }
